@@ -17,6 +17,7 @@
     letter-spacing: -0.01em;
   }
 
+  /* 다크모드 스타일 비활성화
   .dark body {
     @apply bg-surface-950 text-surface-100;
   }
@@ -24,14 +25,17 @@
   .dark * {
     @apply border-surface-800;
   }
+  */
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight text-surface-900;
   }
 
+  /*
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
     @apply text-surface-50;
   }
+  */
 }
 
 ::-webkit-scrollbar {
@@ -50,6 +54,7 @@
   @apply bg-surface-400;
 }
 
+/*
 .dark ::-webkit-scrollbar-thumb {
   @apply bg-surface-700/70;
 }
@@ -57,22 +62,23 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   @apply bg-surface-600;
 }
+*/
 
 *:focus-visible {
   @apply outline-none ring-2 ring-primary-500/40 ring-offset-2 ring-offset-surface-50;
 }
 
+/*
 .dark *:focus-visible {
   @apply ring-primary-400/40 ring-offset-surface-950;
 }
+*/
 
-::selection {
-  @apply bg-primary-100 text-primary-900;
-}
-
+/*
 .dark ::selection {
   @apply bg-primary-900/50 text-primary-100;
 }
+*/
 
 @layer utilities {
   .scrollbar-hide {

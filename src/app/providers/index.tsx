@@ -25,22 +25,27 @@ export function Providers({ children }: ProvidersProps) {
   const { theme } = useUIStore();
 
   /**
-   * 사용자 설정 테마 초기화 및 적용
+   * 사용자 설정 테마 초기화 및 적용 (다크모드 비활성화)
    */
   useEffect(() => {
     const root = document.documentElement;
+    // 다크모드 기능을 동작하지 않도록 강제로 light 모드로 고정
+    root.classList.remove("dark");
+    /* 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       root.classList.toggle("dark", systemTheme === "dark");
     } else {
       root.classList.toggle("dark", theme === "dark");
     }
+    */
   }, [theme]);
 
   /**
-   * 시스템 테마 변경 실시간 감지 (다크 모드 자동 전환)
+   * 시스템 테마 변경 실시간 감지 (비활성화)
    */
   useEffect(() => {
+    /*
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
       const { theme } = useUIStore.getState();
@@ -50,6 +55,7 @@ export function Providers({ children }: ProvidersProps) {
     };
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
+    */
   }, []);
 
   /**
