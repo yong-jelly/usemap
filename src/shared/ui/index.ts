@@ -6,6 +6,7 @@ export * from "./Button";
 export * from "./Card";
 export * from "./Logo";
 export * from "./BottomSheet";
+export * from "./Drawer";
 export * from "./Tabs";
 export * from "./Dialog";
 export * from "./Skeleton";

@@ -10,16 +10,19 @@
     "sql-sync": "bun tools/sql-sync.ts"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
     "@react-hookz/web": "^25.2.0",
     "@supabase/supabase-js": "^2.47.10",
     "@tanstack/react-query": "^5.62.7",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.468.0",
+    "lucide-react": "^0.562.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.0.2",
-    "tailwind-merge": "^2.5.5",
+    "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
     "zustand": "^5.0.2"
   },
   "devDependencies": {

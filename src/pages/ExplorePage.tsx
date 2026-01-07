@@ -11,7 +11,7 @@ import {
   TvMinimalPlay
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
-import { PlaceCard } from "@/widgets";
+import { PlaceCard, ExploreFilterSheet } from "@/widgets";
 import { Button, Input, Skeleton } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
@@ -26,9 +26,10 @@ interface ExplorerFilterState {
   group3: string | null;
   categories: string[] | null;
   features: string[] | null;
-  themes: string | null;
+  theme_code: string | null;
   rating: number | null;
   exclude_franchises: boolean;
+  price_max?: number;
 }
 
 /**
@@ -38,6 +39,7 @@ interface ExplorerFilterState {
  */
 export function ExplorePage() {
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
   const showPopup = usePlacePopup((state) => state.show);
@@ -45,10 +47,10 @@ export function ExplorePage() {
   const defaultFilters: ExplorerFilterState = {
     group1: "서울",
     group2: "중구",
-    group3: "태평로1가",
+    group3: null,
     categories: [],
     features: [],
-    themes: null,
+    theme_code: null,
     rating: null,
     exclude_franchises: true,
   };
@@ -113,6 +115,7 @@ export function ExplorePage() {
                 variant="ghost" 
                 size="icon" 
                 className="rounded-xl hover:bg-surface-50 border-2 border-transparent active:border-[#2B4562]/20"
+                onClick={() => setIsFilterOpen(true)}
               >
                 <Filter className="size-6 text-[#2B4562] dark:text-white" />
               </Button>
@@ -143,6 +146,30 @@ export function ExplorePage() {
               );
             })}
           </div>
+
+          {/* 활성 필터 태그 영역 (Svelte ExploreHeader 참고) */}
+          {(filters.group2 && filters.group2 !== '전체' || (filters.categories && filters.categories.length > 0) || filters.theme_code) && (
+            <div className="flex flex-wrap gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
+              {filters.group2 && filters.group2 !== '전체' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black border-2 border-blue-100 dark:border-blue-800">
+                  {filters.group2}
+                  <X className="size-3 cursor-pointer" onClick={() => setFilters(prev => ({ ...prev, group2: '전체' }))} />
+                </span>
+              )}
+              {filters.categories?.map(cat => (
+                <span key={cat} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-black border-2 border-green-100 dark:border-green-800">
+                  {cat}
+                  <X className="size-3 cursor-pointer" onClick={() => handleCategoryToggle(cat)} />
+                </span>
+              ))}
+              {filters.theme_code && (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-black border-2 border-purple-100 dark:border-purple-800">
+                  {filters.theme_code}
+                  <X className="size-3 cursor-pointer" onClick={() => setFilters(prev => ({ ...prev, theme_code: null }))} />
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -311,6 +338,19 @@ export function ExplorePage() {
           </div>
         </div>
       )}
+
+      {/* 필터 바텀 시트 */}
+      <ExploreFilterSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters(prev => ({ ...prev, ...newFilters }));
+          setIsFilterOpen(false);
+        }}
+        onReset={resetFilters}
+        totalCount={places.length}
+      />
     </div>
   );
 }
