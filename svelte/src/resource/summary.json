@@ -1,0 +1,518 @@
+[
+  {
+    "text": "음식이 맛있어요",
+    "code": "face_savoring_food"
+  },
+  {
+    "text": "친절해요",
+    "code": "beating_heart"
+  },
+  {
+    "text": "재료가 신선해요",
+    "code": "leaf"
+  },
+  {
+    "text": "매장이 청결해요",
+    "code": "sparkles"
+  },
+  {
+    "text": "특별한 메뉴가 있어요",
+    "code": "cook"
+  },
+  {
+    "text": "뷰가 좋아요",
+    "code": "framed_picture"
+  },
+  {
+    "text": "가성비가 좋아요",
+    "code": "coin"
+  },
+  {
+    "text": "인테리어가 멋져요",
+    "code": "couch_and_lamp"
+  },
+  {
+    "text": "주차하기 편해요",
+    "code": "park_sign"
+  },
+  {
+    "text": "양이 많아요",
+    "code": "steamed_rice"
+  },
+  {
+    "text": "커피가 맛있어요",
+    "code": "coffee"
+  },
+  {
+    "text": "매장이 넓어요",
+    "code": "eyes"
+  },
+  {
+    "text": "디저트가 맛있어요",
+    "code": "cake"
+  },
+  {
+    "text": "음료가 맛있어요",
+    "code": "juice"
+  },
+  {
+    "text": "사진이 잘 나와요",
+    "code": "camera_with_flash"
+  },
+  {
+    "text": "혼밥하기 좋아요",
+    "code": "rice_ball"
+  },
+  {
+    "text": "화장실이 깨끗해요",
+    "code": "restroom"
+  },
+  {
+    "text": "단체모임 하기 좋아요",
+    "code": "busts_in_silhouette"
+  },
+  {
+    "text": "특별한 날 가기 좋아요",
+    "code": "bouquet"
+  },
+  {
+    "text": "빵이 맛있어요",
+    "code": "bread"
+  },
+  {
+    "text": "대화하기 좋아요",
+    "code": "speaking_head"
+  },
+  {
+    "text": "고기 질이 좋아요",
+    "code": "meat_cut"
+  },
+  {
+    "text": "좌석이 편해요",
+    "code": "couch"
+  },
+  {
+    "text": "직접 잘 구워줘요",
+    "code": "fire"
+  },
+  {
+    "text": "집중하기 좋아요",
+    "code": "laptop"
+  },
+  {
+    "text": "메뉴 구성이 알차요",
+    "code": "green_heart"
+  },
+  {
+    "text": "반찬이 잘 나와요",
+    "code": "bento_box"
+  },
+  {
+    "text": "음악이 좋아요",
+    "code": "musical_note"
+  },
+  {
+    "text": "야외 공간이 멋져요",
+    "code": "sun"
+  },
+  {
+    "text": "술이 다양해요",
+    "code": "cocktail"
+  },
+  {
+    "text": "건강한 맛이에요",
+    "code": "leaf"
+  },
+  {
+    "text": "차분한 분위기에요",
+    "code": "face_relieved"
+  },
+  {
+    "text": "음식이 빨리 나와요",
+    "code": "stopwatch"
+  },
+  {
+    "text": "혼술하기 좋아요",
+    "code": "whisky"
+  },
+  {
+    "text": "아이와 가기 좋아요",
+    "code": "baby_face"
+  },
+  {
+    "text": "오래 머무르기 좋아요",
+    "code": "face_relieved"
+  },
+  {
+    "text": "아늑해요",
+    "code": "face_smiling"
+  },
+  {
+    "text": "기본 안주가 좋아요",
+    "code": "corn_cheese"
+  },
+  {
+    "text": "디저트가 맛있어요",
+    "code": "icecream"
+  },
+  {
+    "text": "컨셉이 독특해요",
+    "code": "light_bulb"
+  },
+  {
+    "text": "비싼 만큼 가치있어요",
+    "code": "gem_stone"
+  },
+  {
+    "text": "차가 맛있어요",
+    "code": "tea"
+  },
+  {
+    "text": "선물하기 좋아요",
+    "code": "wrapped_gift"
+  },
+  {
+    "text": "현지 맛에 가까워요",
+    "code": "face_with_thumbsup"
+  },
+  {
+    "text": "반려동물과 가기 좋아요",
+    "code": "dog_face"
+  },
+  {
+    "text": "포장이 깔끔해요",
+    "code": "wrapped_gift"
+  },
+  {
+    "text": "코스요리가 알차요",
+    "code": "artist_palette"
+  },
+  {
+    "text": "잡내가 적어요",
+    "code": "nose"
+  },
+  {
+    "text": "종류가 다양해요",
+    "code": "green_heart"
+  },
+  {
+    "text": "읽을만한 책이 많아요",
+    "code": "books"
+  },
+  {
+    "text": "디저트가 맛있어요",
+    "code": "bingsu"
+  },
+  {
+    "text": "깨끗해요",
+    "code": "sparkles"
+  },
+  {
+    "text": "조용히 쉬기 좋아요",
+    "code": "face_smiling"
+  },
+  {
+    "text": "조리하기 쉬워요",
+    "code": "cook"
+  },
+  {
+    "text": "룸이 잘 되어있어요",
+    "code": "room"
+  },
+  {
+    "text": "신선해요",
+    "code": "meat_cut"
+  },
+  {
+    "text": "환기가 잘 돼요",
+    "code": "wind"
+  },
+  {
+    "text": "동물을 배려한 환경이에요",
+    "code": "dog_face"
+  },
+  {
+    "text": "시설이 깔끔해요",
+    "code": "sparkles"
+  },
+  {
+    "text": "향신료가 강하지 않아요",
+    "code": "nose"
+  },
+  {
+    "text": "가격이 합리적이에요",
+    "code": "coin"
+  },
+  {
+    "text": "냉난방이 잘돼요",
+    "code": "cool_and_warm"
+  },
+  {
+    "text": "주문제작을 잘해줘요",
+    "code": "clipboard"
+  },
+  {
+    "text": "침구가 좋아요",
+    "code": "bed"
+  },
+  {
+    "text": "샐러드바가 잘 되어있어요",
+    "code": "salad"
+  },
+  {
+    "text": "물놀이하기 좋아요",
+    "code": "pool_tube"
+  },
+  {
+    "text": "조리법 설명이 자세해요",
+    "code": "clipboard"
+  },
+  {
+    "text": "공간이 넓어요",
+    "code": "left_right_arrow"
+  },
+  {
+    "text": "화장실이 잘 되어있어요",
+    "code": "restroom"
+  },
+  {
+    "text": "부위가 다양해요",
+    "code": "green_heart"
+  },
+  {
+    "text": "원산지 표시가 명확해요",
+    "code": "check_mark"
+  },
+  {
+    "text": "파티하기 좋아요",
+    "code": "party_popper"
+  },
+  {
+    "text": "바비큐 해먹기 좋아요 ",
+    "code": "barbecue"
+  },
+  {
+    "text": "품질이 좋아요",
+    "code": "face_with_thumbsup"
+  },
+  {
+    "text": "양이 많아요",
+    "code": "index_pointing_up"
+  },
+  {
+    "text": "볼거리가 많아요",
+    "code": "eyes"
+  },
+  {
+    "text": "특색 있는 제품이 많아요",
+    "code": "light_bulb"
+  },
+  {
+    "text": "취사시설이 잘 되어있어요",
+    "code": "pot"
+  },
+  {
+    "text": "분위기가 편안해요",
+    "code": "face_smiling"
+  },
+  {
+    "text": "방음이 잘돼요",
+    "code": "face_shushing"
+  },
+  {
+    "text": "라이브공연이 훌륭해요",
+    "code": "microphone"
+  },
+  {
+    "text": "즐길 거리가 많아요",
+    "code": "face_star_struck"
+  },
+  {
+    "text": "체험 프로그램이 다양해요",
+    "code": "green_heart"
+  },
+  {
+    "text": "근처에 갈 곳이 많아요",
+    "code": "map_pin_mark"
+  },
+  {
+    "text": "세트 구성이 알차요",
+    "code": "green_heart"
+  },
+  {
+    "text": "과일이 맛있어요",
+    "code": "apple_and_face"
+  },
+  {
+    "text": "상담이 자세해요",
+    "code": "speech_balloon"
+  },
+  {
+    "text": "신선해요",
+    "code": "sweat_droplets"
+  },
+  {
+    "text": "먹거리가 풍부해요",
+    "code": "spoon_and_fork"
+  },
+  {
+    "text": "맛있어요",
+    "code": "face_savoring_food"
+  },
+  {
+    "text": "상품이 다양해요",
+    "code": "green_heart"
+  },
+  {
+    "text": "신선해요",
+    "code": "leaf"
+  },
+  {
+    "text": "재료가 신선해요",
+    "code": "ricecake"
+  },
+  {
+    "text": "대중교통이 편해요",
+    "code": "bus_stop"
+  },
+  {
+    "text": "맞춤 지도를 잘해줘요",
+    "code": "check_mark"
+  },
+  {
+    "text": "손질이 깔끔해요",
+    "code": "fish_dish"
+  },
+  {
+    "text": "상품이 다양해요",
+    "code": "fruit_bowl"
+  },
+  {
+    "text": "야시장이 잘 되어있어요",
+    "code": "night_city"
+  },
+  {
+    "text": "놀이기구가 다양해요",
+    "code": "face_star_struck"
+  },
+  {
+    "text": "식사하기 좋아요",
+    "code": "spoon_and_fork"
+  },
+  {
+    "text": "비주얼이 좋아요",
+    "code": "eyes"
+  },
+  {
+    "text": "학생과 소통을 잘해요",
+    "code": "speaking_head"
+  },
+  {
+    "text": "포장이 정성스러워요",
+    "code": "wrapped_gift"
+  },
+  {
+    "text": "종류가 다양해요",
+    "code": "tropical_fish"
+  },
+  {
+    "text": "설명이 자세해요",
+    "code": "speech_balloon"
+  },
+  {
+    "text": "선생님이 열정적이에요",
+    "code": "fire"
+  },
+  {
+    "text": "종류가 다양해요",
+    "code": "whisky"
+  },
+  {
+    "text": "수업이 체계적이에요",
+    "code": "chart_increasing"
+  },
+  {
+    "text": "제철 과일이 빨리 나와요",
+    "code": "orange"
+  },
+  {
+    "text": "규모가 커요",
+    "code": "left_right_arrow"
+  },
+  {
+    "text": "트렌디해요",
+    "code": "face_with_sunglasses"
+  },
+  {
+    "text": "대기시간이 짧아요",
+    "code": "stopwatch"
+  },
+  {
+    "text": "고급스러워요",
+    "code": "rose"
+  },
+  {
+    "text": "안전하게 관리해요",
+    "code": "check_mark"
+  },
+  {
+    "text": "아기자기해요",
+    "code": "green_heart"
+  },
+  {
+    "text": "추천을 잘해줘요",
+    "code": "index_pointing_up"
+  },
+  {
+    "text": "수영장이 잘 되어있어요",
+    "code": "pool"
+  },
+  {
+    "text": "매장이 넓어요",
+    "code": "left_right_arrow"
+  },
+  {
+    "text": "즉석조리 식품이 맛있어요",
+    "code": "face_savoring_food"
+  },
+  {
+    "text": "과채가 신선해요",
+    "code": "leaf"
+  },
+  {
+    "text": "온수가 잘 나와요",
+    "code": "shower_head"
+  },
+  {
+    "text": "유익해요",
+    "code": "face_with_glasses"
+  },
+  {
+    "text": "조식이 맛있어요",
+    "code": "face_savoring_food"
+  },
+  {
+    "text": "방문객이 많아요",
+    "code": "busts_in_silhouette"
+  },
+  {
+    "text": "신상품이 많아요",
+    "code": "new_mark"
+  },
+  {
+    "text": "예쁜 소품이 많아요",
+    "code": "face_with_sunglasses"
+  },
+  {
+    "text": "트렌디한 상품이 많아요",
+    "code": "face_with_sunglasses"
+  },
+  {
+    "text": "분위기 관리가 철저해요",
+    "code": "index_pointing_up"
+  },
+  {
+    "text": "행사 상품이 다양해요",
+    "code": "party_popper"
+  }
+]

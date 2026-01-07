@@ -1,0 +1,636 @@
+{
+    "x": "129.0801081",
+    "y": "35.2049389",
+    "id": "1891994086",
+    "name": "파이널나인 부산홀덤펍 동래점",
+    "road": "지하철 1호선 동래역 2번출구 나와서 300m 직진, 사거리 오른쪽편 역전할머니맥주 2층.\n\n네비이용시\n옛주소: 명륜동 532-28\n도로명: 부산 동래구 충렬대로181번길 28 2층 파이널나인동래점\n\n동래구 술집!!\n'파이널나인 홀덤펍 부산 동래점'\n\n*전화문의*\n010-2203-4856\n\n*영업시간*\n매일 19:00 - 05:00",
+    "menus": [{
+            "id": "1891994086_0",
+            "name": "칵테일",
+            "index": 0,
+            "price": "10000",
+            "images": [
+                "https://ldb-phinf.pstatic.net/20240321_273/1711000739652k7j9A_JPEG/%C5%D7%C0%CF.jpg"
+            ],
+            "recommend": false,
+            "description": "미도리샤워부터 잭콕, 마티니, 데킬라선라이즈처럼 기분따라 즐기기 좋은 예쁜 칵테일"
+        },
+        {
+            "id": "1891994086_1",
+            "name": "몬스터게임",
+            "index": 1,
+            "price": "30000",
+            "images": [
+                "https://ldb-phinf.pstatic.net/20221124_120/1669276562776zQH11_PNG/%B8%F3%BD%BA%C5%CD%C4%A8.png"
+            ],
+            "recommend": false,
+            "description": "3만시드로 바인 가능한 몬스터게임은 맥주, 칵테일, 음료 중 택1하여 즐길 수 있습니다"
+        },
+        {
+            "id": "1891994086_2",
+            "name": "데일리게임",
+            "index": 2,
+            "price": "10000",
+            "images": [
+                "https://ldb-phinf.pstatic.net/20221124_288/1669276548350hEF5J_PNG/%B5%A5%C0%CF%B8%AE%C4%A8.png"
+            ],
+            "recommend": false,
+            "description": "1만 시드로 라이트하게 게임을 하고 싶은 초보자분들에게 추천 음료 1종이 포함되었습니다"
+        },
+        {
+            "id": "1891994086_3",
+            "name": "세계맥주",
+            "index": 3,
+            "price": "10000",
+            "images": [
+                "https://ldb-phinf.pstatic.net/20210118_299/1610953533892e7cPa_JPEG/ZZ28CtYRvsbq2aSBu0OVeDRX.jpg"
+            ],
+            "recommend": false,
+            "description": "호가든, 스텔라, 블루문, 기네스, 블랑, 에델바이스 등등 인기 세계맥주를 시원하게즐기세요"
+        }
+    ],
+    "phone": null,
+    "group1": "부산",
+    "group2": "동래구",
+    "group3": "명륜동",
+    "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMjA3MDlfMTIg/MDAxNjU3MzY5NDUzMzc4.XJhZk7RM2bW7LoS9FlsAkFSy3pROXMbTlJ8-Q76Hml4g.RU3GZ6a-Wgb_l0VyJ3h5QMu3w1xQUzLrfhiC3QuI6YAg.JPEG/upload_126f37bb4a7816a44620843266beb32e.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAzMjBfMTY1/MDAxNjc5MzE3NjU0NjE3.bMAdd5H4EnryV9BdOaSzAFZrZnWRDtIEeEXK1yzZViMg.rIvW2lBrzNVG5xegzqIF8GUsgnJkkH9HDk6L7U0nDIYg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA0MDJfMTU5/MDAxNjgwNDQ1MTA2ODA4.OW9IzISMkvcsILD-QeND6X6bwVH4MWuPIEReJQeOWgwg.JGf0yyRl0RswPN9n32h2FI8ogOC5Fb4n1_mSgU2sltIg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA4MTRfNjYg/MDAxNjYwNDYzMjk4Mjk1.E_kYOKPy5dGX7w4a93dSuTpeYbL7uSDwlr_qC6q_JW8g.1V9g2U2_F1B5W4lNnhJi6riEdhTINoOrJAUYlDRqRcUg.JPEG/upload_588b553ece7518cdba17573a5977dc42.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA4MThfMjIw/MDAxNjkyMzU4NzY0MzQ2.K_261pv3LQS_xB4zJxYsTZuEpIUL_WGnvHyNlVV5SUIg.3DJogm1uAvf7L7vh6KAxy1xS2ffz7QJjK_gxILT-HzMg.JPEG/20230805_230538.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA4MDVfMTg2/MDAxNjkxMjQ0NDI4NTgy.CEVhObpe-8WcHzCK0HsfSVrvgBZ_FplnftSNZmYZCAAg.7aOKQYnn9HBwVfG_4bEM09tQYqf-r0w5XEx2qrIeB88g.JPEG/20230805_230538.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAzMzBfMTkz/MDAxNjgwMTczMTIzNDUw.wdd6_b9We22BLUYOOPwJ_RVccd8XIyQPK3dFocVjEawg.tzG2NoZfe6qi6ONfbNKiMR3-4D9Qy0ieMyUiIZZf51Ug.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAxMjNfNSAg/MDAxNjc0NDY5MzMzOTU4.Y1JlBGLg0UB1dMPj1FCZO9Rx3tPR4MJq9Dh_v4CQBewg.gRQ1_rt8sfqhNgJ2ijuTO8Pf3G49vQyi63Y2DoswJz8g.JPEG/EC1F80E3-AA97-4BA0-AD0B-3FCB4D926D7A.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MTFfMTg3/MDAxNjg2NDEzMzY3OTcw.AnTYbNZgkZP74ZkoL7g4E5SVCUPfspvYw-eijJ0BRMog.lB2XS9BRi-vVe6tSzncuGvfYIDkXYSAU8owPMB2RrJkg.JPEG/16864133512647027875057622624606.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MTBfMjEx/MDAxNjg2MzI1OTgxMTQ3.LPXQqhsgRBCyqRatI8bGZuhSFuiMfZnovtljj-I1yhQg.3TBtIOiew3Bl02A_o8UyrmAs9kI4c8n_Z_EGvSuV74wg.JPEG/16863259725728171598881869181567.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTVfMTk2/MDAxNjg0MTUxMjIwNTYz.L1mD9mzcUH94eVpOhZkAc9KDyo-4LaAO5skUbbQfBsEg.NFbt5Ddr5_N4tW_8GFfd82UvehYII8wdbMxsRWPvecsg.JPEG/16841512002276301206763154915866.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjlfNDkg/MDAxNjg1MzYwMjE1ODg3.fmIfpqnVQDJrsF6cdIKykZykVZDeeBzxbNCipAhUchEg.gAwZr3PoYre9fQ0vHRd2HnNSAhZs_2RBDfhvrhD7rvcg.JPEG/20230529_203447.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMThfMjI1/MDAxNjk3NTg0NDYzNjY5.Gy99Qe4B1EdTUaBlrwE0w9nlv3JmDoHqTmdpfUVS1F4g.mamVVl0J-BZuNLSiAZ8-9tESuHpiWx_CAYxM8WzXPX4g.JPEG/upload_44fc5ec74fe4c92d90d184e9a983df2e.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTZfMjky/MDAxNjg0MjM1NTMyNDkz.eMCyOAmbZjXiLvruoGYTXwZuD7CyRIoWhPM6EeD8dWMg.iM4tzYOy5zQBj0sxsQT8WBJVi8mXwYQxgsNIqwEWvbMg.JPEG/1684235504533.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA5MjVfMjcz/MDAxNjY0MTEyOTMyNDMx.x5WG-2BASAm0NOO_ufR9oLNvWv5gB3lUqnyS5Ux7VOMg.eQYSoZWA0T6OKSFA07QKYx7IXfKTusV81dKvR_eZFzIg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEyMTRfMTI5/MDAxNzAyNTU1NzM2NDkx.HEdpG9-D28xF9INftMAIwAzM5LegPxl5bFb7wMkSeSgg.z1iqc1qwJ0E5KFDcinJ2LHoVMaCG5A6CkqOEyjE3ctsg.JPEG/1702555728777929596160238878999.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTZfMTkx/MDAxNjg0MjM1NTU3OTgy.PPQdzpWHX3Kh-dj6oTVP3rKBC03oK0KSpKZVTtWegzEg.e6Q26J2QpiU-T9U3efvzeiPiK-Pk65ztLb7KQoEdHsAg.JPEG/1684235517112.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MDZfMTgx/MDAxNjgzMzA3NTM4MTk5.wV3x8CtX7UnpefM9f4diLLv2S3XSj8XJI1bskuHF6PYg.RCBR5wHsjpImqaZXVDSVYfyWPjE_8NVS9DHWmTAl9bUg.JPEG/IMG_0703.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNDAxMjhfMzQg/MDAxNzA2NDQ5MTg1Nzgx.0HEZ6DCVIUkcXJd1gk1juPV8oMYZiqYPuWZqdi-adOQg.XCD9AKs23GBtXVRBH8uQblpL_K6QOBaDqVUJxidifK4g.JPEG/20240128_223753.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAyMTFfMjE1/MDAxNjc2MTE1MzM3NDA5.dI7RV0qZ5qhIZpR_DTGfMy3GwaZps4w-P0OY82dUEM0g.LmFV2tenm0pCFqRtBxfhf5IVXzi-CsPxAqnugur68PEg.JPEG/1676115328636.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MDVfMjU0/MDAxNjgzMjE5MDk2MjI0.YOsy5mFPvFoqXE0xMd6f3Bb54KH-Ng2J0x8a1IhZIQ8g.MRjiB9PD7yjAIxCLF8WtNYQJyDvlL_O1ojZ8bN76R44g.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MDRfNTUg/MDAxNjg1ODgwMDM5MDQ4.MmwejLp7vCB-HJ3XVkzkDZi9YSbJsIFPrDKoPNqkOasg.SRkRQrulQJ2a8fHfKcCWwDjEct9korcwRcC3b47O6wsg.JPEG/1685880031302752834340146242153.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjJfMzkg/MDAxNjg0NzUxNjQ0ODUy.x-5faz8M3jCe2i2YhPAYjTtUO8rcjqls4Xd6SPom2Cwg.gGRK15ScCC8nNHa2YgjvzoUYwFY3mPOAQsaLMeK4m8Ag.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MTBfMjQx/MDAxNjg2MzI1NTk3Mjgx.gg-wIS92tLdBGZPaj-EqZa_G1ioAS7JLlyMpQcLLk4sg.A4Rlh3i0e_a5COPzdzHfn--IURSPoOqwlgE44k1vdskg.JPEG/1686325576478.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA3MDhfMjc3/MDAxNjU3MjgyMTA1OTU2.wTGJkHTHM1WeKPE58U4GGZ5XgQ8ccUI_Jc35XPfl9VIg.pzcqQkCCe2ZZfohFObd9qzU73FLD7ljTsnyecssPoZsg.JPEG/upload_9480b39cc29ca0ee8ae33b1f264cc7ed.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTlfNCAg/MDAxNjg0NTA3NDY2MDM1.gGvUH1tf4XwRdrk4B9AGvqFZeeWtzHpEAV5Ufyrk2tAg.8OLwh8ADh07MxynYytU_7cj99YLT9c12mHTnuvC2bCkg.JPEG/20230519_234127.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjEwMTRfMjE2/MDAxNjY1NzU0MTI4MTM1.wp6O0aYtXIJm8iQVV1h6t1-uR1pDtSIdCkjQ1Ehsy6wg.14eR3crRpdvnt8tbSgBE4NF2HfvBaVOYj9F4rUncxQ8g.JPEG/1665754115390.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA5MjFfMjI1/MDAxNjYzNzY0NzY2MTEz._ETsi3cKk2z08KT-SA_7e48lL86SfhUtpas8KzdGRjgg.rxWqQ4z3LX0L8v9u7l4SGVJ-jYj5_QafmPLMVK70e9Mg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAzMTJfMTcw/MDAxNjc4NjIzNTEwOTE3.CnYPKsqRuMEo34iMz7GE-UWrmIlawPwMA6nV6Tvdb2Ig.OA-45t-KVgn1h7FZvkPlWMfW3fmR4vUGVcazN9R6b3Yg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNDAxMTlfMTk3/MDAxNzA1NjYwMjg0NzEy.CLGNyiK7mXqk_l3HLGmgD11-JU59QZ_lTzHhGEjfXwMg.lXXPHIMnmJmmI0ZX7941aEZ1nLthI9DPsaHpy9mELA8g.JPEG/D619CA26-7A0E-4E63-B47B-C3A38BA024FB.jpeg"
+    ],
+    "themes": [
+        "데이트하기 좋은",
+        "모임하기 좋은",
+        "젊고 캐쥬얼한"
+    ],
+    "address": "부산 동래구 명륜동 532-28",
+    "category": "맥주,호프",
+    "homepage": [
+        "https://www.finalnine.co.kr/"
+    ],
+    "created_at": "2025-04-22T11:59:26.050547",
+    "updated_at": "2025-04-22T11:59:26.050547",
+    "interaction": {
+        "tags": [],
+        "comments": [],
+        "is_liked": false,
+        "is_saved": false,
+        "is_commented": false,
+        "is_place_tagged": false,
+        "place_tag_count": 0,
+        "place_liked_count": 0,
+        "place_saved_count": 0,
+        "place_comment_count": 0,
+        "place_review_liked_count": 0,
+        "place_review_saved_count": 0
+    },
+    "conveniences": [
+        "단체 이용 가능",
+        "예약",
+        "반려동물 동반",
+        "남/녀 화장실 구분",
+        "무선 인터넷",
+        "주차"
+    ],
+    "keyword_list": [
+        "부산홀덤펍",
+        "동래홀덤펍",
+        "칵테일",
+        "데일리게임",
+        "홀덤펍"
+    ],
+    "payment_info": [
+        "제로페이"
+    ],
+    "place_images": [
+        "https://ldb-phinf.pstatic.net/20210118_232/16109534571079s5eI_JPEG/vQmViVsLF6gFLYw-Ru9RSGbK.jpg",
+        "https://ldb-phinf.pstatic.net/20210118_80/1610953461863pQbNu_JPEG/ZG-fw9CuLl8TmNY_gfYrrZ9R.jpg",
+        "https://ldb-phinf.pstatic.net/20210118_38/1610953465019xuDrr_JPEG/RUnMdYR4J47DzQ9NWVlCddZx.jpg",
+        "https://ldb-phinf.pstatic.net/20210118_131/1610953467949xq8Fg_JPEG/SVAHvq0S2yRmBDrAtYJdt9oF.jpg",
+        "https://ldb-phinf.pstatic.net/20210118_161/1610953473062Iq4Mq_JPEG/JVIDqedkd5bqJ7fT58-Tn6Yr.jpg",
+        "https://ldb-phinf.pstatic.net/20210118_210/1610953476170uDESe_JPEG/oTTHVH9iHmbuXa9yrpbMKGwZ.jpg"
+    ],
+    "road_address": "부산 동래구 충렬대로181번길 28 2층 파이널나인동래점",
+    "category_code": "1004958",
+    "static_map_url": "https://simg.pstatic.net/static.map/v2/map/staticmap.bin?center=129.0801081%2C35.2049389&level=16&dataversion=174.14&caller=naver_mstore&markers=pos%3A129.0801081%2035.2049389%7Ctype%3Ac%7Ccolor%3Ablue%7Clabel%3Arestaurant",
+    "street_panorama": {
+        "id": "6zu/XQOizcVLKgXDBkMDOw==",
+        "fov": "120",
+        "lat": "35.2049950",
+        "lon": "129.0799930",
+        "pan": "116.04",
+        "tilt": "10.00"
+    },
+    "category_code_list": [
+        "220036",
+        "220051",
+        "220553",
+        "1004958",
+        "1004760",
+        "1004380",
+        "1002043"
+    ],
+    "visitor_review_stats": {
+        "id": 1891994086,
+        "review": {
+            "avgRating": 5,
+            "totalCount": 6372
+        },
+        "analysis": {
+            "menus": [{
+                    "code": "맥주",
+                    "count": 123,
+                    "label": "맥주"
+                },
+                {
+                    "code": "칵테일",
+                    "count": 44,
+                    "label": "칵테일"
+                },
+                {
+                    "code": "에이드",
+                    "count": 28,
+                    "label": "에이드"
+                },
+                {
+                    "code": "자몽맥주",
+                    "count": 28,
+                    "label": "자몽맥주"
+                },
+                {
+                    "code": "레몬에이드",
+                    "count": 19,
+                    "label": "레몬에이드"
+                },
+                {
+                    "code": "자몽에이드",
+                    "count": 7,
+                    "label": "자몽에이드"
+                },
+                {
+                    "code": "초코라떼",
+                    "count": 7,
+                    "label": "초코라떼"
+                },
+                {
+                    "code": "커피",
+                    "count": 4,
+                    "label": "커피"
+                },
+                {
+                    "code": "모찌",
+                    "count": 3,
+                    "label": "모찌"
+                },
+                {
+                    "code": "아메리카노",
+                    "count": 3,
+                    "label": "아메리카노"
+                },
+                {
+                    "code": "은행",
+                    "count": 3,
+                    "label": "은행"
+                },
+                {
+                    "code": "블랙티",
+                    "count": 2,
+                    "label": "블랙티"
+                },
+                {
+                    "code": "생맥주",
+                    "count": 2,
+                    "label": "생맥주"
+                },
+                {
+                    "code": "아이스티",
+                    "count": 2,
+                    "label": "아이스티"
+                },
+                {
+                    "code": "오렌지주스",
+                    "count": 2,
+                    "label": "오렌지주스"
+                },
+                {
+                    "code": "쥬스",
+                    "count": 2,
+                    "label": "쥬스"
+                },
+                {
+                    "code": "청포도에이드",
+                    "count": 2,
+                    "label": "청포도에이드"
+                },
+                {
+                    "code": "고기",
+                    "count": 1,
+                    "label": "고기"
+                },
+                {
+                    "code": "낫토",
+                    "count": 1,
+                    "label": "낫토"
+                },
+                {
+                    "code": "노가리",
+                    "count": 1,
+                    "label": "노가리"
+                },
+                {
+                    "code": "레몬차",
+                    "count": 1,
+                    "label": "레몬차"
+                },
+                {
+                    "code": "세계맥주",
+                    "count": 1,
+                    "label": "세계맥주"
+                },
+                {
+                    "code": "자몽블랙티",
+                    "count": 1,
+                    "label": "자몽블랙티"
+                },
+                {
+                    "code": "콜라",
+                    "count": 1,
+                    "label": "콜라"
+                }
+            ],
+            "themes": [{
+                    "code": "total",
+                    "count": 2901,
+                    "label": "만족도"
+                },
+                {
+                    "code": "service",
+                    "count": 1704,
+                    "label": "서비스"
+                },
+                {
+                    "code": "mood",
+                    "count": 594,
+                    "label": "분위기"
+                },
+                {
+                    "code": "taste",
+                    "count": 396,
+                    "label": "맛"
+                },
+                {
+                    "code": "menu",
+                    "count": 92,
+                    "label": "메뉴"
+                },
+                {
+                    "code": "purpose",
+                    "count": 81,
+                    "label": "목적"
+                },
+                {
+                    "code": "cleanliness",
+                    "count": 53,
+                    "label": "청결도"
+                },
+                {
+                    "code": "parking",
+                    "count": 18,
+                    "label": "주차"
+                },
+                {
+                    "code": "location",
+                    "count": 17,
+                    "label": "위치"
+                },
+                {
+                    "code": "price",
+                    "count": 9,
+                    "label": "가격"
+                },
+                {
+                    "code": "waitingtime",
+                    "count": 8,
+                    "label": "대기시간"
+                },
+                {
+                    "code": "naver",
+                    "count": 5,
+                    "label": "예약"
+                },
+                {
+                    "code": "amount",
+                    "count": 1,
+                    "label": "음식량"
+                },
+                {
+                    "code": "view",
+                    "count": 1,
+                    "label": "전망"
+                }
+            ],
+            "votedKeyword": {
+                "details": [{
+                        "code": "kind",
+                        "count": 3612,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/beating_heart20220119222223.png",
+                        "iconCode": "beating_heart",
+                        "displayName": "친절해요"
+                    },
+                    {
+                        "code": "talk_good",
+                        "count": 2714,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/speaking_head20220119222227.png",
+                        "iconCode": "speaking_head",
+                        "displayName": "대화하기 좋아요"
+                    },
+                    {
+                        "code": "music_good",
+                        "count": 2598,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/musical_note20220119222233.png",
+                        "iconCode": "musical_note",
+                        "displayName": "음악이 좋아요"
+                    },
+                    {
+                        "code": "store_clean",
+                        "count": 2134,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/sparkles20220119222028.png",
+                        "iconCode": "sparkles",
+                        "displayName": "매장이 청결해요"
+                    },
+                    {
+                        "code": "stay_long",
+                        "count": 2132,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/face_relieved20220119222233.png",
+                        "iconCode": "face_relieved",
+                        "displayName": "오래 머무르기 좋아요"
+                    },
+                    {
+                        "code": "together",
+                        "count": 1663,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/busts_in_silhouette20220119222027.png",
+                        "iconCode": "busts_in_silhouette",
+                        "displayName": "단체모임 하기 좋아요"
+                    },
+                    {
+                        "code": "alcohol_var",
+                        "count": 1518,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/cocktail20220119222232.png",
+                        "iconCode": "cocktail",
+                        "displayName": "술이 다양해요"
+                    },
+                    {
+                        "code": "interior_cool",
+                        "count": 1264,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/couch_and_lamp20220119222025.png",
+                        "iconCode": "couch_and_lamp",
+                        "displayName": "인테리어가 멋져요"
+                    },
+                    {
+                        "code": "drink_alone",
+                        "count": 868,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/whisky20220119222233.png",
+                        "iconCode": "whisky",
+                        "displayName": "혼술하기 좋아요"
+                    },
+                    {
+                        "code": "price_cheap",
+                        "count": 860,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/coin20220119222025.png",
+                        "iconCode": "coin",
+                        "displayName": "가성비가 좋아요"
+                    },
+                    {
+                        "code": "food_good",
+                        "count": 628,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/face_savoring_food20220119222022.png",
+                        "iconCode": "face_savoring_food",
+                        "displayName": "음식이 맛있어요"
+                    },
+                    {
+                        "code": "toilet_clean",
+                        "count": 572,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/restroom20220119222222.png",
+                        "iconCode": "restroom",
+                        "displayName": "화장실이 깨끗해요"
+                    },
+                    {
+                        "code": "snack_good",
+                        "count": 464,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/corn_cheese20220119222231.png",
+                        "iconCode": "corn_cheese",
+                        "displayName": "기본 안주가 좋아요"
+                    },
+                    {
+                        "code": "special_menu",
+                        "count": 414,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/cook20220119222024.png",
+                        "iconCode": "cook",
+                        "displayName": "특별한 메뉴가 있어요"
+                    },
+                    {
+                        "code": "parking_easy",
+                        "count": 295,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/park_sign20220119222222.png",
+                        "iconCode": "park_sign",
+                        "displayName": "주차하기 편해요"
+                    },
+                    {
+                        "code": "spacious",
+                        "count": 86,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/eyes20220119222026.png",
+                        "iconCode": "eyes",
+                        "displayName": "매장이 넓어요"
+                    },
+                    {
+                        "code": "cozy",
+                        "count": 37,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/face_smiling20220119222244.png",
+                        "iconCode": "face_smiling",
+                        "displayName": "아늑해요"
+                    },
+                    {
+                        "code": "drink_good",
+                        "count": 24,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/juice20220119222226.png",
+                        "iconCode": "juice",
+                        "displayName": "음료가 맛있어요"
+                    },
+                    {
+                        "code": "study_good",
+                        "count": 20,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/laptop20220119222228.png",
+                        "iconCode": "laptop",
+                        "displayName": "집중하기 좋아요"
+                    },
+                    {
+                        "code": "comfy",
+                        "count": 9,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/couch20220119222228.png",
+                        "iconCode": "couch",
+                        "displayName": "좌석이 편해요"
+                    },
+                    {
+                        "code": "price_worthy",
+                        "count": 8,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/gem_stone20220119222239.png",
+                        "iconCode": "gem_stone",
+                        "displayName": "비싼 만큼 가치있어요"
+                    },
+                    {
+                        "code": "room_nice",
+                        "count": 8,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/room20220325175453.png",
+                        "iconCode": "room",
+                        "displayName": "룸이 잘 되어있어요"
+                    },
+                    {
+                        "code": "menu_good",
+                        "count": 7,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/green_heart20220119222224.png",
+                        "iconCode": "green_heart",
+                        "displayName": "메뉴 구성이 알차요"
+                    },
+                    {
+                        "code": "taste_healthy",
+                        "count": 7,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/leaf20220119222023.png",
+                        "iconCode": "leaf",
+                        "displayName": "건강한 맛이에요"
+                    },
+                    {
+                        "code": "photo_good",
+                        "count": 6,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/camera_with_flash20220119222227.png",
+                        "iconCode": "camera_with_flash",
+                        "displayName": "사진이 잘 나와요"
+                    },
+                    {
+                        "code": "pet_good",
+                        "count": 5,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/dog_face20220119222302.png",
+                        "iconCode": "dog_face",
+                        "displayName": "반려동물과 가기 좋아요"
+                    },
+                    {
+                        "code": "atmosphere_calm",
+                        "count": 4,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/face_relieved20220119222233.png",
+                        "iconCode": "face_relieved",
+                        "displayName": "차분한 분위기에요"
+                    },
+                    {
+                        "code": "special_day",
+                        "count": 3,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/bouquet20220119222223.png",
+                        "iconCode": "bouquet",
+                        "displayName": "특별한 날 가기 좋아요"
+                    },
+                    {
+                        "code": "view_good",
+                        "count": 3,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/framed_picture20220119222027.png",
+                        "iconCode": "framed_picture",
+                        "displayName": "뷰가 좋아요"
+                    },
+                    {
+                        "code": "coffee_good",
+                        "count": 2,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/coffee20220119222225.png",
+                        "iconCode": "coffee",
+                        "displayName": "커피가 맛있어요"
+                    },
+                    {
+                        "code": "concept_unique",
+                        "count": 2,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/light_bulb20220119222315.png",
+                        "iconCode": "light_bulb",
+                        "displayName": "컨셉이 독특해요"
+                    },
+                    {
+                        "code": "food_fast",
+                        "count": 2,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/stopwatch20220119222225.png",
+                        "iconCode": "stopwatch",
+                        "displayName": "음식이 빨리 나와요"
+                    },
+                    {
+                        "code": "live_show_good",
+                        "count": 2,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/microphone20220119222232.png",
+                        "iconCode": "microphone",
+                        "displayName": "라이브공연이 훌륭해요"
+                    },
+                    {
+                        "code": "dessert_good",
+                        "count": 1,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/cake20220119222226.png",
+                        "iconCode": "cake",
+                        "displayName": "디저트가 맛있어요"
+                    },
+                    {
+                        "code": "eat_alone",
+                        "count": 1,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/rice_ball20220119222026.png",
+                        "iconCode": "rice_ball",
+                        "displayName": "혼밥하기 좋아요"
+                    },
+                    {
+                        "code": "fresh",
+                        "count": 1,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/leaf20220119222023.png",
+                        "iconCode": "leaf",
+                        "displayName": "재료가 신선해요"
+                    },
+                    {
+                        "code": "large",
+                        "count": 1,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/steamed_rice20220119222024.png",
+                        "iconCode": "steamed_rice",
+                        "displayName": "양이 많아요"
+                    },
+                    {
+                        "code": "party_good",
+                        "count": 1,
+                        "iconUrl": "https://ssl.pstatic.net/static/pup/emoji/party_popper20220119222255.png",
+                        "iconCode": "party_popper",
+                        "displayName": "파티하기 좋아요"
+                    }
+                ],
+                "userCount": 394,
+                "totalCount": 21976,
+                "reviewCount": 6279
+            }
+        }
+    },
+    "visitor_reviews_score": 5.00,
+    "visitor_reviews_total": 6372,
+    "visitor_review_medias_total": 1453
+}

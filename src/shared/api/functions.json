@@ -1,0 +1,27 @@
+[
+  {
+    "name": "update_updated_at_column",
+    "signature": "",
+    "file": "001_initial_schema.sql"
+  },
+  {
+    "name": "generate_response",
+    "signature": "p_data ANYELEMENT DEFAULT NULL, p_function TEXT DEFAULT NULL, p_code INT DEFAULT 200, p_message TEXT DEFAULT 'Success', p_params JSON DEFAULT '{}'::json, p_execution_time NUMERIC DEFAULT 0",
+    "file": "004_v1_functions.sql"
+  },
+  {
+    "name": "v1_get_place_details",
+    "signature": "p_place_id text",
+    "file": "004_v1_functions.sql"
+  },
+  {
+    "name": "v1_get_place_analysis",
+    "signature": "p_place_id text",
+    "file": "004_v1_functions.sql"
+  },
+  {
+    "name": "v1_get_place_reviews",
+    "signature": "p_place_id text, p_limit int DEFAULT 20",
+    "file": "004_v1_functions.sql"
+  }
+]

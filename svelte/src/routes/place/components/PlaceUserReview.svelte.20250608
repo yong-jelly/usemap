@@ -1,0 +1,490 @@
+<script lang="ts">
+	import { requestYouTubeMetaService } from '$lib/api/ytube-meta.service';
+	import { supabase } from '$lib/supabase';
+	import { placeService } from '$services/place.service';
+	import type { Place, Feature, YouTubeVideoSnippet } from '$services/types';
+
+	let { place }: { place: Place } = $props();
+
+	let placeFeatures = $state<Feature[]>([]);
+	$effect(() => {
+		placeFeatures = place?.features ?? [];
+	});
+
+	let isLoading = $state(false);
+	let error = $state<string | null>(null);
+
+	// --- UI 상호작용 상태 ---
+	let showYoutubeAddForm = $state(false);
+	let youtubeUrlInput = $state('');
+
+	let showCommunityAddForm = $state(false);
+	let communityUrlInput = $state('');
+
+	let editingFeatureId = $state<string | null>(null);
+	let editingUrl = $state('');
+
+	// --- 사용자 정보 (임시 하드코딩, 실제로는 인증 스토어에서 가져와야 함) ---
+	const currentUser = { id: 'b75408a1-c1cf-43b6-b6f1-3b7288745b62' }; // 샘플 데이터의 user_id로 테스트
+
+	// --- 피처 목록을 위한 파생 상태 ---
+	let youtubeFeatures = $derived(placeFeatures.filter((f: Feature) => f.platform_type === 'youtube'));
+	let communityFeatures = $derived(placeFeatures.filter((f: Feature) => f.platform_type === 'community'));
+
+	// --- 데이터 로딩 ---
+	async function loadPlaceFeatures() {
+		try {
+			isLoading = true;
+			error = null;
+			const features = await placeService.getPlaceFeatures(place.id);
+			placeFeatures = features.map((f: any) => ({
+				...f,
+				metadata: f.metadata as YouTubeVideoSnippet | null
+			}));
+		} catch (err) {
+			error = '관련 정보를 불러오는데 실패했습니다.';
+			console.error('장소 특징 로드 오류:', err);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	// --- 피처 관리 함수 ---
+	async function addFeature(platform: 'youtube' | 'community') {
+		const url = platform === 'youtube' ? youtubeUrlInput : communityUrlInput;
+		if (!url.trim()) return;
+
+		let title: string | null = null;
+		let metadata: YouTubeVideoSnippet | null = null;
+
+		if (platform === 'youtube') {
+			const videoId = url.includes('youtu.be')
+				? url.split('/').pop()?.split('?')[0]
+				: url.match(/[?&]v=([^&]+)/)?.[1];
+
+			if (!videoId) {
+				alert('유효한 YouTube URL이 아닙니다.');
+				return;
+			}
+			const { error: metaError, results } = (await requestYouTubeMetaService(videoId)) as {
+				error: boolean;
+				results: YouTubeVideoSnippet;
+			};
+			if (metaError || !results) {
+				alert('YouTube 영상 정보를 가져올 수 없습니다.');
+				return;
+			}
+			title = results.title;
+			metadata = results;
+		}
+
+		const { error: rpcError } = await supabase.rpc('v1_upsert_place_feature', {
+			p_business_id: place.id,
+			p_platform_type: platform,
+			p_content_url: url,
+			p_title: title,
+			p_metadata: metadata
+		});
+
+		if (rpcError) {
+			alert('정보 추가에 실패했습니다.');
+			console.error(rpcError);
+		} else {
+			await loadPlaceFeatures();
+			if (platform === 'youtube') {
+				youtubeUrlInput = '';
+				showYoutubeAddForm = false;
+			} else {
+				communityUrlInput = '';
+				showCommunityAddForm = false;
+			}
+		}
+	}
+
+	async function removeFeature(featureId: string) {
+		if (!confirm('정말로 삭제하시겠습니까?')) return;
+
+		const { error: rpcError } = await supabase.rpc('v1_delete_place_feature', {
+			p_feature_id: featureId
+		});
+
+		if (rpcError) {
+			alert('삭제에 실패했습니다.');
+			console.error(rpcError);
+		} else {
+			await loadPlaceFeatures();
+		}
+	}
+
+	function startEdit(feature: Feature) {
+		editingFeatureId = feature.id;
+		editingUrl = feature.content_url;
+	}
+
+	function cancelEdit() {
+		editingFeatureId = null;
+		editingUrl = '';
+	}
+
+	async function saveEdit(feature: Feature) {
+		if (!editingUrl.trim() || editingUrl === feature.content_url) {
+			cancelEdit();
+			return;
+		}
+
+		let title = feature.title;
+		let metadata = feature.metadata;
+
+		if (feature.platform_type === 'youtube') {
+			const videoId = editingUrl.includes('youtu.be')
+				? editingUrl.split('/').pop()?.split('?')[0]
+				: editingUrl.match(/[?&]v=([^&]+)/)?.[1];
+
+			if (!videoId) {
+				alert('유효한 YouTube URL이 아닙니다.');
+				return;
+			}
+
+			const { error: metaError, results } = (await requestYouTubeMetaService(videoId)) as {
+				error: boolean;
+				results: YouTubeVideoSnippet;
+			};
+			if (metaError || !results) {
+				alert('YouTube 영상 정보를 가져올 수 없습니다.');
+				return;
+			}
+			title = results.title;
+			metadata = results;
+		}
+
+		const { error: rpcError } = await supabase.rpc('v1_upsert_place_feature', {
+			p_feature_id: feature.id,
+			p_business_id: place.id,
+			p_platform_type: feature.platform_type,
+			p_content_url: editingUrl,
+			p_title: title,
+			p_metadata: metadata
+		});
+
+		if (rpcError) {
+			alert('수정에 실패했습니다.');
+			console.error(rpcError);
+		} else {
+			await loadPlaceFeatures();
+			cancelEdit();
+		}
+	}
+
+	function getHostname(url: string) {
+		if (!url) return '유효하지 않은 URL';
+		try {
+			return new URL(url).hostname;
+		} catch (e) {
+			const match = url.match(/^(?:https?:\/\/)?(?:www\.)?([^:/\n?]+)/);
+			return match?.[1] ?? url;
+		}
+	}
+
+	let rating = $state(0);
+	let comment = $state('');
+	let selectedTags = $state<string[]>([]);
+	const tags = [
+		{ label: '지역 주민 추천', value: 'local' },
+		{ label: '자주 방문', value: 'frequent' },
+		{ label: '또 오고싶음', value: 'again' },
+		{ label: '여자친구랑', value: 'with_gf' },
+		{ label: '가족과', value: 'with_family' },
+		{ label: '혼밥', value: 'alone' },
+		{ label: '분위기 별로', value: 'bad_atmosphere' },
+		{ label: '맛 별로', value: 'bad_taste' },
+		{ label: '서비스 별로', value: 'bad_service' }
+	];
+	function toggleTag(tag: string) {
+		if (selectedTags.includes(tag)) {
+			selectedTags = selectedTags.filter((t: string) => t !== tag);
+		} else {
+			selectedTags = [...selectedTags, tag];
+		}
+	}
+	function setRating(val: number) {
+		rating = val;
+	}
+	function handleSave() {
+		alert('저장되었습니다! (실제 저장 아님)');
+	}
+</script>
+
+<div class="border border-gray-200 rounded-xl p-6 bg-white shadow-sm max-w-xl mx-auto">
+	<h2 class="text-lg font-bold mb-4">음식점 평가</h2>
+
+	<!-- 유튜브 소개 -->
+	<div class="mb-6">
+		<div class="flex items-center justify-between mb-3">
+			<h3 class="font-semibold text-gray-800">YouTube 소개</h3>
+			{#if !showYoutubeAddForm}
+				<button
+					class="text-sm font-medium text-pink-500 hover:text-pink-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+					onclick={() => (showYoutubeAddForm = true)}
+					disabled={youtubeFeatures.length >= 6}
+				>
+					+ 추가하기
+				</button>
+			{/if}
+		</div>
+		
+		{#if showYoutubeAddForm}
+			<div class="mt-3 space-y-3 p-4 border rounded-lg bg-gray-50">
+				<div class="flex gap-2 items-center">
+					<input
+						type="text"
+						class="flex-1 border rounded px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-400"
+						placeholder="유튜브 URL 입력"
+						bind:value={youtubeUrlInput}
+					/>
+					<button
+						class="px-3 py-2 rounded bg-pink-500 text-white text-sm font-medium hover:bg-pink-600"
+						onclick={() => addFeature('youtube')}
+					>
+						추가
+					</button>
+					<button
+						class="px-3 py-2 rounded bg-gray-200 text-gray-700 text-sm font-medium"
+						onclick={() => (showYoutubeAddForm = false)}>취소</button
+					>
+				</div>
+			</div>
+		{/if}
+
+		{#if isLoading}
+			<div class="text-gray-400 text-sm text-center py-4">로딩 중...</div>
+		{:else if youtubeFeatures.length === 0 && !showYoutubeAddForm}
+			<div class="text-gray-400 text-sm text-center py-4">
+				아직 등록된 YouTube 소개가 없습니다.
+			</div>
+		{:else}
+			<ul class="space-y-3 mt-3">
+				{#each youtubeFeatures as feature (feature.id)}
+					<li class="border rounded-lg p-3 bg-gray-50">
+						{#if editingFeatureId === feature.id}
+							<div class="space-y-2">
+								<input
+									type="text"
+									class="w-full border rounded px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-400"
+									bind:value={editingUrl}
+								/>
+								<div class="flex justify-end gap-2">
+									<button
+										class="px-3 py-1 rounded bg-pink-500 text-white text-xs font-medium hover:bg-pink-600"
+										onclick={() => saveEdit(feature)}>저장</button
+									>
+									<button
+										class="px-3 py-1 rounded bg-gray-200 text-gray-700 text-xs font-medium"
+										onclick={cancelEdit}>취소</button
+									>
+								</div>
+							</div>
+						{:else}
+							<div class="flex items-center gap-3">
+								{#if feature.metadata?.thumbnails?.medium?.url}
+									<img
+										src={feature.metadata.thumbnails.medium.url}
+										alt="유튜브 썸네일"
+										class="w-20 h-14 rounded object-cover"
+									/>
+								{/if}
+								<div class="flex-1 min-w-0">
+									<a
+										href={feature.content_url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="block truncate text-sm text-gray-900 hover:text-pink-500"
+										title={feature.title ?? ''}
+										>{feature.title}</a
+									>
+									<div class="text-xs text-gray-500 mt-0.5">
+										{new Date(feature.published_at).toLocaleDateString('ko-KR')} ·
+										{feature.user_profile?.nickname}
+									</div>
+								</div>
+								{#if feature.user_id === currentUser.id}
+									<div class="flex flex-col gap-1 ml-2">
+										<button
+											class="text-xs text-pink-500 hover:underline"
+											onclick={() => startEdit(feature)}>수정</button
+										>
+										<button
+											class="text-xs text-gray-400 hover:text-red-500"
+											onclick={() => removeFeature(feature.id)}>삭제</button
+										>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		{#if youtubeFeatures.length >= 6}
+			<div class="text-xs text-pink-500 text-center mt-2">유튜브 소개는 최대 6개까지 등록할 수 있습니다.</div>
+		{/if}
+	</div>
+
+	<!-- 커뮤니티 소개 -->
+	<div class="mb-6">
+		<div class="flex items-center justify-between mb-3">
+			<h3 class="font-semibold text-gray-800">커뮤니티 추천글</h3>
+			{#if !showCommunityAddForm}
+				<button
+					class="text-sm font-medium text-pink-500 hover:text-pink-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+					onclick={() => (showCommunityAddForm = true)}
+					disabled={communityFeatures.length >= 6}
+				>
+					+ 추가하기
+				</button>
+			{/if}
+		</div>
+
+		{#if showCommunityAddForm}
+		<div class="mt-3 space-y-3 p-4 border rounded-lg bg-gray-50">
+			<div class="flex gap-2 items-center">
+					<input
+						type="text"
+						class="flex-1 border rounded px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-400"
+						placeholder="커뮤니티 글 URL 입력"
+						bind:value={communityUrlInput}
+					/>
+					<button
+						class="px-3 py-2 rounded bg-pink-500 text-white text-sm font-medium hover:bg-pink-600"
+						onclick={() => addFeature('community')}
+					>
+						추가
+					</button>
+					<button
+						class="px-3 py-2 rounded bg-gray-200 text-gray-700 text-sm font-medium"
+						onclick={() => (showCommunityAddForm = false)}>취소</button
+					>
+				</div>
+			</div>
+		{/if}
+
+		{#if isLoading}
+			<div class="text-gray-400 text-sm text-center py-4">로딩 중...</div>
+		{:else if communityFeatures.length === 0 && !showCommunityAddForm}
+			<div class="text-gray-400 text-sm text-center py-4">
+				아직 등록된 커뮤니티 추천글이 없습니다.
+			</div>
+		{:else}
+			<ul class="space-y-3 mt-3">
+				{#each communityFeatures as feature (feature.id)}
+					<li class="border rounded-lg p-3 bg-gray-50">
+						{#if editingFeatureId === feature.id}
+							<div class="space-y-2">
+								<input
+									type="text"
+									class="w-full border rounded px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-400"
+									bind:value={editingUrl}
+								/>
+								<div class="flex justify-end gap-2">
+									<button
+										class="px-3 py-1 rounded bg-pink-500 text-white text-xs font-medium hover:bg-pink-600"
+										onclick={() => saveEdit(feature)}>저장</button
+									>
+									<button
+										class="px-3 py-1 rounded bg-gray-200 text-gray-700 text-xs font-medium"
+										onclick={cancelEdit}>취소</button
+									>
+								</div>
+							</div>
+						{:else}
+							<div class="flex items-center gap-3">
+								<div class="flex-1 min-w-0">
+									<a
+										href={feature.content_url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="block truncate text-sm font-medium text-gray-700 hover:text-pink-500"
+										title={feature.content_url}
+										>{getHostname(feature.content_url)}</a
+									>
+									<div class="mt-0.5 text-xs text-gray-500">
+										{new Date(feature.created_at).toLocaleDateString('ko-KR')} ·
+										{feature.user_profile?.nickname}
+									</div>
+								</div>
+								{#if feature.user_id === currentUser.id}
+									<div class="flex flex-col gap-1 ml-2">
+										<button
+											class="text-xs text-pink-500 hover:underline"
+											onclick={() => startEdit(feature)}>수정</button
+										>
+										<button
+											class="text-xs text-gray-400 hover:text-red-500"
+											onclick={() => removeFeature(feature.id)}>삭제</button
+										>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		{#if communityFeatures.length >= 6}
+			<div class="text-xs text-pink-500 text-center mt-2">커뮤니티 소개는 최대 6개까지 등록할 수 있습니다.</div>
+		{/if}
+	</div>
+
+	<!-- 인상/별점/코멘트 -->
+	<div class="mb-4">
+		<div class="font-medium mb-2">이 음식점에 대한 느낌을 선택해 주세요</div>
+		<div class="flex flex-wrap gap-2">
+			{#each tags as tag}
+				<button
+					type="button"
+					class={`px-3 py-1 rounded-full border text-xs font-medium transition ${selectedTags.includes(tag.value) ? 'bg-pink-500 text-white border-pink-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+					onclick={() => toggleTag(tag.value)}
+				>
+					{tag.label}
+				</button>
+			{/each}
+		</div>
+	</div>
+	<div class="mb-4">
+		<div class="font-medium mb-2">별점</div>
+		<div class="flex items-center space-x-1">
+			{#each Array(5) as _, i}
+				<button type="button" aria-label={`별점 ${i + 1}점`} onclick={() => setRating(i + 1)}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6"
+						fill={i < rating ? 'currentColor' : 'none'}
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+						/>
+					</svg>
+				</button>
+			{/each}
+			<span class="ml-2 text-sm text-gray-600">{rating}점</span>
+		</div>
+	</div>
+	<div class="mb-4">
+		<div class="font-medium mb-2">한줄 코멘트</div>
+		<input
+			type="text"
+			class="w-full border rounded px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-pink-400"
+			maxlength="50"
+			placeholder="이 집은 분위기가 좋아요!"
+			bind:value={comment}
+		/>
+	</div>
+	<button
+		class="w-full py-2 rounded-md bg-pink-500 text-white font-semibold hover:bg-pink-600 transition"
+		onclick={handleSave}>저장</button
+	>
+</div> 

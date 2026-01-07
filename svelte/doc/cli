@@ -1,0 +1,15 @@
+bun --watch run dev
+
+# ncu
+# https://www.perplexity.ai/search/npm-check-updates-sayongbeob-P3e3yRyBRvi6NLuap03UpA
+# 메이저 버전 제외
+ncu --semver minor
+
+# 전체 업데이트
+ncu -u 
+
+
+# svelte-5 마이그레이션
+# https://svelte.dev/docs/cli/sv-migrate
+
+npx sv migrate svelte-5

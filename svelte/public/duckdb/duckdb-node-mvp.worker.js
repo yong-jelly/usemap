@@ -1,0 +1,1 @@
+Couldn't find the requested file /dist/duckdb-node-mvp.worker.js in @duckdb/duckdb-wasm.

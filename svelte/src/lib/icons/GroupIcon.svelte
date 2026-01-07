@@ -1,0 +1,20 @@
+<!-- src/components/icons/SearchIcon.svelte -->
+<script lang="ts">
+	interface Props {
+		className?: string;
+	}
+
+	let { className = '' }: Props = $props();
+</script>
+
+<svg class={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+	<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path
+			d="M16.5177 10.5H20.5334C21.1225 10.5 21.6 10.9776 21.6 11.5667V17.798V18.1C21.6 19.2046 20.7046 20.1 19.6 20.1H4.80002M2.40002 4.96666V18C2.40002 19.1598 3.34023 20.1 4.50002 20.1V20.1C5.65982 20.1 6.60002 19.1598 6.60002 18V11.5667C6.60002 10.9776 7.07759 10.5 7.66669 10.5H19.4667V7.97843C19.4667 7.38932 18.9891 6.91176 18.4 6.91176H11.3726L9.74262 4.38797C9.54615 4.08375 9.20873 3.89999 8.84658 3.89999H3.46669C2.87759 3.89999 2.40002 4.37756 2.40002 4.96666Z"
+			stroke="#2E2E2E"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		/>
+	</svg>
+</svg>

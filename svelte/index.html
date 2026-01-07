@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>:: PLACE CARD ::</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X6K360K3QR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-X6K360K3QR');
+    </script>
+    <!-- <script>
+        if (typeof crypto.randomUUID === 'undefined') {
+            crypto.randomUUID = function() {
+                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                );
+            }
+        }
+    </script> -->
+</head>
+
+<!-- <body class="dark:bg-gray-800 bg-gray-50 dark:bg-neutral-900"> -->
+
+<body class="dark:bg-gray-800 bg-white dark:bg-neutral-900">
+    <!-- <script src="%sveltekit.assets%/preline/preline.js"></script> -->
+    <!-- <script src="/node_modules/preline/index.js" type="module"></script> -->
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

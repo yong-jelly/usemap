@@ -1,0 +1,546 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import apiClient from '../../services/client.fetch';
+	import type { Place, PlaceSearchResponse } from '../../typedefs';
+
+	interface ApiMeta {
+		page: number;
+		size: number;
+		total: number;
+		user_id: string | null;
+	}
+
+	// 장소 상세 정보를 위한 인터페이스
+	interface PlaceDetailResponse {
+		epoch: number;
+		meta: {
+			id: string;
+		};
+		result: {
+			place: PlaceDetail;
+			images: string[];
+			votes: VoteItem[];
+		};
+	}
+
+	interface PlaceDetail {
+		id: string;
+		url: string;
+		liked: boolean;
+		website: string[];
+		category: string;
+		convenience: string[];
+		description: string | null;
+		liked_count: number;
+		road_address: string;
+		normalized_name: string;
+		visitor_review_count: number;
+		visitor_review_score: number;
+		blog_cafe_review_count: number;
+	}
+
+	interface VoteItem {
+		text: string;
+		count: number;
+		icon_code: string;
+	}
+
+	// 로딩 상태 관리
+	let loading = $state(true);
+	// 음식점 목록 데이터
+	let places: Place[] = $state([]);
+	// 현재 페이지와 페이지 크기
+	let currentPage = $state(1);
+	const pageSize = 20;
+	// 총 아이템 수
+	let totalItems = $state(0);
+	
+	// 정렬 방식
+	let sortBy = $state('score');
+	
+	// 카테고리 색상 맵핑
+	const categoryColors: Record<string, string> = {
+		'한식': 'bg-red-500',
+		'중식': 'bg-yellow-600',
+		'일식': 'bg-indigo-500',
+		'양식': 'bg-green-600',
+		'카페': 'bg-brown-500',
+		'분식': 'bg-orange-500',
+		'고기': 'bg-red-600',
+		'돼지고기구이': 'bg-rose-600',
+		'소고기구이': 'bg-red-700',
+		'치킨': 'bg-yellow-500',
+		'피자': 'bg-orange-600',
+		'해산물': 'bg-blue-600',
+		'패스트푸드': 'bg-red-500',
+		'디저트': 'bg-pink-500',
+		'베이커리': 'bg-amber-600',
+		'아시안': 'bg-green-500',
+		'기타': 'bg-gray-500'
+	};
+	
+	// 카테고리에 맞는 배경색 반환
+	function getCategoryColor(category: string): string {
+		for (const key in categoryColors) {
+			if (category.includes(key)) {
+				return categoryColors[key];
+			}
+		}
+		return 'bg-yellow-500'; // 기본값
+	}
+	
+	// 별점에 따른 색상 반환
+	function getRatingColor(score: number): string {
+		if (score >= 4.5) return 'text-red-500';
+		if (score >= 4.0) return 'text-orange-500';
+		if (score >= 3.5) return 'text-yellow-500';
+		if (score >= 3.0) return 'text-green-500';
+		return 'text-gray-500';
+	}
+
+	// 음식점 목록 조회
+	async function fetchPlaces() {
+		try {
+			loading = true;
+			// 직접 API URL로 요청합니다
+			const response = await apiClient.post<PlaceSearchResponse>(
+				`http://43.201.6.117:3003/search/place/${currentPage}?size=${pageSize}`,
+				{ sort: sortBy },
+				{},
+				true // 외부 API URL 사용
+			);
+			
+			// PlaceSearchResponse 타입과 일치하도록 접근 방식 수정
+			if (response && response.result) {
+				places = response.result.rows || [];
+				if (response.meta) {
+					totalItems = response.meta.total || 0;
+				}
+			}
+		} catch (error) {
+			console.error('음식점 목록 조회 실패:', error);
+		} finally {
+			loading = false;
+		}
+	}
+
+	// 페이지 초기 로드 시 데이터 조회
+	onMount(() => {
+		fetchPlaces();
+	});
+
+	// 정렬 변경 시 데이터 다시 조회
+	$effect(() => {
+		if (sortBy) {
+			currentPage = 1;
+			fetchPlaces();
+		}
+	});
+
+	// 스크롤 위치 저장
+	let scrollY = $state(0);
+	function handleScroll() {
+		scrollY = window.scrollY;
+	}
+	
+	// 이미지 오류 처리
+	function handleImageError(event: Event) {
+		const imgElement = event.target as HTMLImageElement;
+		if (imgElement && imgElement.src) {
+			imgElement.src = 'https://via.placeholder.com/800x600?text=맛집+이미지';
+		}
+	}
+	
+	// 내부 상태 관리 (북마크, 조회수, 좋아요, 댓글, 길찾기 폴딩)
+	let bookmarkedPlaces = $state<Record<string, boolean>>({});
+	let viewCounts = $state<Record<string, number>>({});
+	let likeCounts = $state<Record<string, number>>({});
+	let commentCounts = $state<Record<string, number>>({});
+	let expandedDirections = $state<Record<string, boolean>>({});
+	
+	// 북마크 토글 함수
+	function toggleBookmark(placeId: string, event: Event) {
+		event.stopPropagation();
+		bookmarkedPlaces[placeId] = !bookmarkedPlaces[placeId];
+	}
+	
+	// 조회수 증가 함수
+	function increaseViewCount(placeId: string) {
+		if (!viewCounts[placeId]) {
+			viewCounts[placeId] = 0;
+		}
+		viewCounts[placeId] += 1;
+	}
+	
+	// 좋아요 토글 함수
+	function toggleLike(placeId: string, event: Event) {
+		event.stopPropagation();
+		if (!likeCounts[placeId]) {
+			likeCounts[placeId] = 0;
+		}
+		likeCounts[placeId] = likeCounts[placeId] > 0 ? likeCounts[placeId] - 1 : likeCounts[placeId] + 1;
+	}
+	
+	// 댓글 버튼 클릭 함수
+	function commentClick(placeId: string, event: Event) {
+		event.stopPropagation();
+		if (!commentCounts[placeId]) {
+			commentCounts[placeId] = 0;
+		}
+		commentCounts[placeId] += 1;
+	}
+	
+	// 길찾기 정보 토글 함수
+	function toggleDirection(placeId: string, event: Event) {
+		event.stopPropagation();
+		expandedDirections[placeId] = !expandedDirections[placeId];
+	}
+	
+	// 외부 링크 클릭 시 이벤트 전파 중지
+	function stopPropagation(event: Event) {
+		event.stopPropagation();
+	}
+	
+	// 장소 상세 정보 조회
+	async function fetchPlaceDetail(placeId: string, url: string) {
+		try {
+			// 로컬 스토리지에 방문 중인 장소 ID 저장 (상세 페이지에서 사용)
+			localStorage.setItem('viewing_place_id', placeId);
+			
+			const response = await apiClient.get<PlaceDetailResponse>(
+				`http://43.201.6.117:3003/place/${placeId}`,
+				{},
+				true // 외부 API URL 사용
+			);
+			
+			// PlaceDetailResponse 타입과 일치하도록 접근 방식 수정
+			if (response && response.result && 'place' in response.result) {
+				// 상세 데이터 저장
+				localStorage.setItem('place_detail', JSON.stringify(response));
+				
+				// 상세 페이지로 이동 (SvelteKit의 goto 대신 location.href 사용)
+				window.location.href = `/place/${placeId}`;
+			} else {
+				// 데이터가 없는 경우 기본 URL로 이동
+				window.open(url, '_blank');
+			}
+		} catch (error) {
+			console.error('장소 상세 정보 조회 실패:', error);
+			// 오류 발생 시 기존대로 URL 열기
+			window.open(url, '_blank');
+		}
+	}
+	
+	// 장소 상세 페이지로 이동 및 조회수 증가
+	async function goToPlaceDetail(url: string, placeId: string, event: Event) {
+		event.preventDefault();
+		increaseViewCount(placeId);
+		
+		// 로딩 표시
+		loading = true;
+		
+		try {
+			// 장소 상세 데이터 조회 및 상세 페이지로 이동
+			await fetchPlaceDetail(placeId, url);
+		} catch (error) {
+			console.error('상세 페이지 이동 중 오류 발생:', error);
+			// 오류 발생 시 기존 URL로 이동
+			window.open(url, '_blank');
+		} finally {
+			loading = false;
+		}
+	}
+	
+	// 별점 렌더링
+	function renderStars(score: number) {
+		const fullStars = Math.floor(score);
+		const hasHalfStar = score % 1 >= 0.5;
+		const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+		
+		return {
+			full: Array(fullStars).fill(0),
+			half: hasHalfStar ? [0] : [],
+			empty: Array(emptyStars).fill(0)
+		};
+	}
+
+	// 네이버 장소 링크로 이동
+	function goToNaverPlace(id: string): void {
+		window.open(`https://map.naver.com/p/entry/place/${id}`, '_blank');
+		// window.open(`https://pcmap.place.naver.com/restaurant/1490720990/home/${businessId}`, '_blank');
+		// window.open(`https://map.naver.com/p/entry/place/1471070608`, '_blank');
+	}
+</script>
+
+<!-- 상단 고정 헤더 -->
+<header class="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 shadow-sm">
+	<div class="max-w-lg mx-auto px-4 py-3">
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+					<path d="M10 2a6 6 0 00-6 6c0 1.887.772 3.586 2.02 4.816l3.98 3.983 3.979-3.983A6 6 0 0010 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path>
+				</svg>
+				<h1 class="text-lg font-bold text-gray-900">오늘의 맛집</h1>
+			</div>
+			<div class="flex items-center gap-2">
+				<select 
+					bind:value={sortBy}
+					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 p-1.5"
+				>
+					<option value="score">평점순</option>
+					<option value="review">리뷰많은순</option>
+					<option value="recent">최신순</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</header>
+
+<!-- 메인 콘텐츠 영역 - 헤더 아래에 위치하도록 패딩 적용 -->
+<div class="min-h-screen bg-gray-100 pb-20" onscroll={handleScroll}>
+	<div class="mx-auto max-w-lg px-0 py-4 sm:px-4">
+		{#if loading && places.length === 0}
+			<div class="flex justify-center p-12">
+				<div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+			</div>
+		{:else if places.length === 0}
+			<div class="bg-white p-8 rounded-lg shadow-sm text-center">
+				<svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+				</svg>
+				<p class="text-gray-500 text-lg">검색된 음식점이 없습니다.</p>
+			</div>
+		{:else}
+			<!-- 음식점 카드 목록 -->
+			{#each places as place}
+				<article class="bg-white rounded-lg shadow-sm mb-4 overflow-hidden" onclick={(e) => goToPlaceDetail(place.url, place.id, e)}>
+					<!-- 음식점 이미지 (있는 경우) - 이미지를 먼저 배치해서 시각적 임팩트 강화 -->
+					{#if place.original_url}
+						<div class="w-full h-80 relative">
+							<img 
+								src={place.original_url} 
+								alt={place.normalized_name} 
+								class="w-full h-full object-cover"
+								onerror={handleImageError}
+							/>
+							<!-- 그라데이션 오버레이 -->
+							<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+							
+							<!-- 이미지 하단에 이름과 평가 지표 표시 -->
+							<div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+								<div class="flex items-center justify-between mb-1">
+									<h2 class="text-xl font-bold truncate">{place.normalized_name}</h2>
+									
+									<!-- 외부 평가 지표 - 별점으로 변경 -->
+									<div class="flex items-center gap-1.5">
+										<div class="bg-green-600/90 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
+											<span class="text-yellow-300">★</span>
+											<span class="text-xs font-semibold text-white">{place.visitor_review_score}</span>
+										</div>
+										
+										<!-- 리뷰 수 -->
+										<div class="bg-green-600/90 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
+											<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+											</svg>
+											<span class="text-xs font-semibold text-white">{place.visitor_review_count}</span>
+										</div>
+									</div>
+								</div>
+								<div class="flex items-center gap-1 text-sm">
+									<span class="truncate">{place.common_address}</span>
+								</div>
+							</div>
+						</div>
+					{:else}
+						<!-- 이미지가 없는 경우 -->
+						<div class="p-3 border-b border-gray-100">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-3">
+									<div class={`w-14 h-14 rounded-full ${getCategoryColor(place.category)} flex items-center justify-center text-white font-bold text-lg shadow-sm`}>
+										{place.normalized_name.charAt(0)}
+									</div>
+									<div>
+										<h2 class="text-lg font-bold">{place.normalized_name}</h2>
+										<p class="text-sm text-gray-500">{place.common_address}</p>
+									</div>
+								</div>
+								
+								<!-- 별점 표시 -->
+								<div class="flex items-center">
+									{#if true}
+										{@const stars = renderStars(place.visitor_review_score)}
+										<div class="flex">
+											{#each stars.full as _}
+												<span class="text-yellow-500">★</span>
+											{/each}
+											{#each stars.half as _}
+												<span class="text-yellow-500">★</span>
+											{/each}
+											{#each stars.empty as _}
+												<span class="text-gray-300">★</span>
+											{/each}
+										</div>
+									{/if}
+									<span class="ml-1 text-sm font-semibold">{place.visitor_review_score}</span>
+								</div>
+							</div>
+						</div>
+					{/if}
+					
+					<!-- 음식점 정보 영역 -->
+					<div class="px-4 pt-2 pb-3">
+						<!-- 카테고리, 그룹 태그 (해시태그 스타일) -->
+						<div class="flex flex-wrap gap-2 mb-3">
+							<span class={`${getCategoryColor(place.category)} text-white px-2 py-0.5 rounded-md text-xs font-medium`}>
+								{place.category}
+							</span>
+							{#if place.group1}
+								<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md text-xs font-medium">
+									{place.group1}
+								</span>
+							{/if}
+							{#if place.group2}
+								<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md text-xs font-medium">
+									{place.group2}
+								</span>
+							{/if}
+						</div>
+						
+						<!-- 투표 요약 (해시태그 형태로) -->
+						{#if place.voted_summary_text && place.voted_summary_text.length > 0}
+							<div class="flex flex-wrap gap-1.5 mt-2">
+								{#each place.voted_summary_text.slice(0, 3) as tag}
+									<span class="text-blue-600 text-xs font-medium">#{tag.replace(/"/g, '')}</span>
+								{/each}
+								{#if place.voted_summary_text.length > 3}
+									<span class="text-gray-400 text-xs">+{place.voted_summary_text.length - 3}개</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
+					
+					<!-- 방향 정보 (폴딩 형태로 변경) -->
+					{#if place.direction}
+						<div class="border-t border-gray-100">
+							<button 
+								class="w-full py-3 px-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+								onclick={(e) => toggleDirection(place.id, e)}
+							>
+								<div class="flex items-center gap-2">
+									<div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+										<svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+										</svg>
+									</div>
+									<span class="text-sm font-bold text-gray-700">길찾기 정보</span>
+								</div>
+								<svg 
+									class={`w-4 h-4 text-gray-500 transition-transform ${expandedDirections[place.id] ? 'rotate-180' : ''}`} 
+									fill="none" 
+									stroke="currentColor" 
+									viewBox="0 0 24 24"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+								</svg>
+							</button>
+							
+							{#if expandedDirections[place.id]}
+								<div class="px-4 py-3 bg-gray-50">
+									<p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{place.direction}</p>
+								</div>
+							{/if}
+						</div>
+					{/if}
+					
+					<!-- 플랫폼 평가 영역 (좋아요, 댓글, 저장 카운트) -->
+					<div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+						<div class="flex items-center gap-6">
+							<!-- 좋아요 -->
+							<button 
+								class="flex items-center gap-1.5 hover:bg-gray-50 px-2.5 py-1.5 rounded-full transition-colors"
+								onclick={(e) => toggleLike(place.id, e)}
+								aria-label="좋아요"
+							>
+								<svg 
+									class="w-5 h-5 {likeCounts[place.id] > 0 ? 'text-red-500 fill-red-500' : 'text-gray-500'}" 
+									fill={likeCounts[place.id] > 0 ? 'currentColor' : 'none'} 
+									stroke="currentColor" 
+									viewBox="0 0 24 24"
+								>
+									<path 
+										stroke-linecap="round" 
+										stroke-linejoin="round" 
+										stroke-width="2" 
+										d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+									/>
+								</svg>
+								<span class="text-sm font-medium">{likeCounts[place.id] || 0}</span>
+							</button>
+							
+							<!-- 댓글 -->
+							<button 
+								class="flex items-center gap-1.5 hover:bg-gray-50 px-2.5 py-1.5 rounded-full transition-colors"
+								onclick={(e) => commentClick(place.id, e)}
+								aria-label="댓글"
+							>
+								<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path 
+										stroke-linecap="round" 
+										stroke-linejoin="round" 
+										stroke-width="2" 
+										d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+									/>
+								</svg>
+								<span class="text-sm font-medium">{commentCounts[place.id] || 0}</span>
+							</button>
+							
+							<!-- 저장 (북마크) -->
+							<button 
+								class="flex items-center gap-1.5 hover:bg-gray-50 px-2.5 py-1.5 rounded-full transition-colors"
+								onclick={(e) => toggleBookmark(place.id, e)}
+								aria-label="저장"
+							>
+								<svg 
+									class="w-5 h-5 {bookmarkedPlaces[place.id] ? 'text-blue-600 fill-blue-600' : 'text-gray-500'}" 
+									fill={bookmarkedPlaces[place.id] ? 'currentColor' : 'none'} 
+									stroke="currentColor" 
+									viewBox="0 0 24 24"
+								>
+									<path 
+										stroke-linecap="round" 
+										stroke-linejoin="round" 
+										stroke-width="2" 
+										d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+									/>
+								</svg>
+								<span class="text-sm font-medium">저장</span>
+							</button>
+						</div>
+
+						<!-- 방문하기 버튼 -->
+						<a 
+							href={`https://map.naver.com/p/entry/place/${place.id}`} 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="bg-blue-100 text-blue-700 font-medium text-sm flex items-center gap-1 px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors"
+							onclick={stopPropagation}
+						>
+							<span>방문</span>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+							</svg>
+						</a>
+					</div>
+				</article>
+			{/each}
+			
+			<!-- 페이지 로딩 인디케이터 -->
+			{#if loading}
+				<div class="flex justify-center p-6">
+					<div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-red-500"></div>
+				</div>
+			{/if}
+		{/if}
+	</div>
+</div>

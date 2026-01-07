@@ -1,0 +1,1160 @@
+<script lang="ts">
+	import { authStore } from '$services/auth.store';
+	import { supabasePlaceService } from '$services/supabase';
+	import { supabaseCommentService } from '$services/supabase/comment.service';
+	import { NaverStaticMapUrlParserAndBuilder } from '$utils/NaverStaticMapUrlParserAndBuilder';
+	import type {
+		PlaceDetail,
+		SupabaseComment,
+		AuthUser,
+		VoteItem,
+		UpdateCommentData,
+		ReviewItemForDetail,
+		Place as PlaceItem,
+	} from '$services/types';
+	import {
+		structureComments,
+		addCommentToList,
+		addReplyToList,
+		removeCommentFromList,
+		toggleLikeInList,
+		updateCommentInList,
+	} from './comment.logic';
+	import CommentSection from './CommentSection.svelte';
+	import TagSection from './TagSection.svelte';
+	import ReviewCardSimple from './components/ReviewCardSimple.svelte';
+	import Indicator from '$lib/components/Indicator.svelte';
+	import { goto } from '@mateothegreat/svelte5-router';
+	import PlaceHeader from './components/PlaceHeader.svelte';
+	import HeaderNavigation from './components/HeaderNavigation.svelte';
+
+	// --- Props & Basic State ---
+	const props = $props<{
+		placeId?: string;
+		onClose?: () => void;
+		route?: { result: { path: { params: { id: string } } } };
+	}>();
+
+	// ID 결정 로직 (props, route, URL 순서로)
+	const businessId =
+		props.placeId ||
+		props.route?.result?.path?.params?.id ||
+		window.location.pathname.split('/place/')[1] ||
+		'';
+
+	console.log('장소 상세 페이지 로드:', businessId);
+
+	let place: PlaceItem | null = $state(null);
+	let loading = $state(true);
+	let placeImages: string[] = $state([]);
+	let placeVotes: VoteItem[] = $state([]);
+	let isBookmarked = $state(false);
+	let currentImageIndex = $state(0);
+	let activeTab = $state(0);
+	let reviewList: ReviewItemForDetail[] = $state([]);
+	let expandedReviewIds: Record<string, boolean> = $state({});
+	let currentReviewIndex = $state(0);
+	let showShareDialog = $state(false);
+
+	// --- Auth State ---
+	let currentUser = $state<AuthUser | null>(null);
+	$inspect(currentUser);
+
+	// $effect 사용하여 authStore 구독 및 currentUser 업데이트 (개선)
+	$effect(() => {
+		console.log('Auth effect triggered');
+		const unsubscribe = authStore.subscribe((storeState) => {
+			console.log('Auth store updated:', storeState);
+			const nextUser = storeState.isAuthenticated ? storeState : null;
+			// 실제 사용자 상태 변경 시에만 currentUser 업데이트 (ID 비교)
+			if (currentUser?.id !== nextUser?.id) {
+				console.log(`currentUser changing from ${currentUser?.id} to ${nextUser?.id}`);
+				currentUser = nextUser;
+			} else if (
+				currentUser &&
+				nextUser &&
+				JSON.stringify(currentUser) !== JSON.stringify(nextUser)
+			) {
+				// ID는 같지만 다른 메타데이터 등이 변경된 경우 (필요시 더 정교한 비교 추가)
+				console.log('currentUser metadata updated, but ID is the same.');
+				currentUser = nextUser;
+			} else if (!currentUser && !nextUser) {
+				// 둘 다 null이면 변경 없음
+			} else {
+				console.log('currentUser state unchanged.');
+			}
+		});
+		return unsubscribe;
+	});
+
+	// --- Comment State ---
+	let comments = $state<SupabaseComment[]>([]);
+	let commentLoading = $state(true);
+	let commentError = $state<string | null>(null);
+	let totalComments = $state<number>(0);
+	let loadedCommentCount = $state(0);
+	let commentLoadingMore = $state(false);
+	const commentsPerPage = 20;
+	let newCommentContent = $state('');
+	let replyingTo = $state<{ commentId: string; username: string } | null>(null);
+	let replyContent = $state('');
+
+	// --- Comment Editing State ---
+	let editingCommentId = $state<string | null>(null);
+	let editContent = $state('');
+	let staticMapImage = $state('');
+
+	// --- Data Loading ---
+	async function loadPlaceDetail(id: string) {
+		try {
+			loading = true;
+			commentLoading = true;
+			console.log('Place detail load start:', id);
+			const response = await supabasePlaceService.getPlaceDetail(id);
+
+			loading = false;
+			commentLoading = false;
+
+			place = response.result.row as PlaceItem;
+			// console.log(place);
+			const mapUrl = new NaverStaticMapUrlParserAndBuilder(
+				place.static_map_url ?? '',
+			);
+			staticMapImage = mapUrl.build();
+			// console.log('Place detail loaded:', (place as any).normalized_name);
+			// 리뷰 목록
+			reviewList = (place as any).reviews;
+			if (place) {
+				isBookmarked = (place as any).interaction?.is_saved ?? false;
+				placeImages = (place as any).images ?? [];
+				placeVotes = transformVotes(
+					(place as any).voted_summary_text,
+					(place as any).voted_summary_code,
+				);
+				totalComments = (place as any).interaction?.place_comment_count ?? 0;
+
+				// await loadComments(false);
+			} else {
+				console.error('Place data is null after fetch');
+			}
+		} catch (error) {
+			console.error('Failed to load place details:', error);
+			loading = false;
+			commentLoading = false;
+		}
+	}
+
+	function transformVotes(texts: string[] | undefined, codes: string[] | undefined): VoteItem[] {
+		if (!texts || !codes || texts.length !== codes.length) {
+			return [];
+		}
+		return texts.map((text, index) => ({
+			text: text.replace(/"/g, ''),
+			icon_code: codes[index] ?? '',
+			count: 1,
+		}));
+	}
+
+	async function loadComments(loadMore = false) {
+		return 0;
+		if (commentLoadingMore) return;
+		if (!loadMore) {
+			commentLoading = true;
+			commentError = null;
+			loadedCommentCount = 0;
+			const { data: countData, error: countError } =
+				await supabaseCommentService.getCommentCountForPlace(businessId);
+			if (countData !== null && !countError) totalComments = countData;
+			else {
+				totalComments = 0;
+				console.error('Error fetching comment count:', countError);
+			}
+		} else {
+			commentLoadingMore = true;
+		}
+		const currentOffset = loadedCommentCount;
+		const { data: flatCommentList, error: fetchError } =
+			await supabaseCommentService.getCommentsForPlace(businessId, commentsPerPage, currentOffset);
+		if (fetchError) {
+			commentError = '댓글 오류';
+			console.error('Err fetch comments:', fetchError);
+			if (!loadMore) comments = [];
+		} else if (flatCommentList && flatCommentList.length > 0) {
+			loadedCommentCount += flatCommentList.length;
+			comments = structureComments(flatCommentList, loadMore ? comments : []);
+			commentError = null;
+		} else {
+			if (!loadMore && comments.length === 0) {
+				/* no-op */
+			}
+		}
+		if (!loadMore) commentLoading = false;
+		commentLoadingMore = false;
+	}
+
+	// --- Comment Handlers ---
+	async function handleLoadMoreComments() {
+		await loadComments(true);
+	}
+
+	async function handleSubmitComment() {
+		if (!newCommentContent.trim() || !currentUser) return;
+		const commentData = { business_id: businessId, content: newCommentContent.trim() };
+
+		// createCommentForPlace 호출 시 currentUser 전달 제거
+		// 반환값은 생성된 댓글 객체 (newCommentData)
+		const { data: newCommentData, error: createError } =
+			await supabaseCommentService.createCommentForPlace(commentData);
+
+		if (newCommentData && !createError) {
+			// 반환된 객체를 직접 사용
+			comments = addCommentToList(comments, newCommentData);
+			totalComments += 1;
+			loadedCommentCount += 1;
+			newCommentContent = '';
+		} else {
+			console.error('Error creating comment:', createError);
+			alert('댓글 작성 실패');
+		}
+	}
+
+	async function handleEditComment(commentId: string) {
+		// TODO: 댓글 수정 로직 구현
+		console.log('Editing comment:', commentId);
+	}
+
+	async function handleSubmitReply() {
+		if (!replyContent.trim() || !replyingTo || !currentUser) return;
+		const replyData = {
+			business_id: businessId,
+			content: replyContent.trim(),
+			parent_comment_id: replyingTo.commentId,
+		};
+
+		// createCommentForPlace 호출 시 currentUser 전달 제거
+		// 반환값은 생성된 답글 객체 (newReplyData)
+		const { data: newReplyData, error: createError } =
+			await supabaseCommentService.createCommentForPlace(replyData);
+
+		if (newReplyData && !createError) {
+			// 반환된 객체를 직접 사용
+			const updatedList = addReplyToList(comments, newReplyData);
+			if (updatedList) {
+				comments = updatedList;
+				totalComments += 1;
+				loadedCommentCount += 1;
+			} else {
+				await loadComments(false);
+			} // 부모 못 찾으면 새로고침
+			replyContent = '';
+			replyingTo = null;
+		} else {
+			console.error('Error submitting reply:', createError);
+			alert('답글 작성 실패');
+		}
+	}
+
+	async function handleDeleteComment(commentId: string) {
+		if (!confirm('삭제하시겠습니까?')) return;
+		const { data, error } = await supabaseCommentService.deactivateCommentForPlace(commentId);
+		if (data && !error) {
+			const { result, decreaseCount } = removeCommentFromList(comments, commentId);
+			comments = result;
+			totalComments -= decreaseCount;
+			loadedCommentCount -= decreaseCount;
+			if (totalComments < 0) totalComments = 0;
+			if (loadedCommentCount < 0) loadedCommentCount = 0;
+		} else {
+			console.error('Error deactivating comment:', error);
+			alert('댓글 삭제 실패');
+		}
+	}
+
+	async function handleToggleLike(commentId: string) {
+		if (!currentUser) return;
+		const { data: isLikedNow, error } =
+			await supabaseCommentService.toggleCommentLikeForPlace(commentId);
+		if (!error && isLikedNow !== null) {
+			comments = toggleLikeInList(comments, commentId, isLikedNow);
+		} else {
+			console.error('Failed to toggle like:', error);
+		}
+	}
+
+	// --- New Comment Edit Handlers ---
+	function findCommentById(list: SupabaseComment[], id: string): SupabaseComment | null {
+		for (const comment of list) {
+			if (comment.id === id) return comment;
+			if (comment.replies) {
+				const foundInReply = findCommentById(comment.replies, id);
+				if (foundInReply) return foundInReply;
+			}
+		}
+		return null;
+	}
+
+	async function handleStartEdit(commentId: string) {
+		console.log('Starting edit for comment:', commentId);
+		const commentToEdit = findCommentById(comments, commentId);
+		if (commentToEdit && commentToEdit.user_id === currentUser?.id) {
+			editingCommentId = commentId;
+			editContent = commentToEdit.content ?? ''; // 수정할 내용 초기화
+			// Optionally focus the edit input field after a short delay
+			setTimeout(() => {
+				const editInput = document.getElementById(`edit-input-${commentId}`);
+				editInput?.focus();
+			}, 50);
+		} else {
+			// Optional: Show an error message if the user is not the author
+			console.warn('Cannot edit comment: Not the author or comment not found.');
+			alert('자신이 작성한 댓글만 수정할 수 있습니다.');
+		}
+	}
+
+	function handleCancelEdit() {
+		editingCommentId = null;
+		editContent = '';
+	}
+
+	async function handleSubmitEdit() {
+		if (!editingCommentId || !editContent.trim()) return;
+
+		try {
+			// 1. 원본 댓글 찾기
+			const originalComment = findCommentById(comments, editingCommentId);
+			if (!originalComment) {
+				throw new Error('수정할 댓글을 찾을 수 없습니다.');
+			}
+
+			// 2. 수정 데이터 준비
+			const commentData: UpdateCommentData = {
+				content: editContent.trim(),
+			};
+
+			// 3. API 호출
+			const { data, error } = await supabaseCommentService.updateCommentForPlace(
+				editingCommentId,
+				commentData,
+			);
+
+			if (error) {
+				throw new Error(`댓글 수정 실패: ${error.message}`);
+			}
+
+			// 4. 로컬 상태 업데이트
+			// API 응답에 관계없이 성공으로 가정하고 로컬 상태 업데이트
+			const updatedCommentObj: SupabaseComment = {
+				...originalComment,
+				content: editContent.trim(),
+				updated_at: new Date().toISOString(),
+			};
+
+			comments = updateCommentInList(comments, updatedCommentObj);
+			handleCancelEdit(); // 수정 상태 초기화
+		} catch (error) {
+			console.error('댓글 수정 중 오류:', error);
+			alert('댓글 수정에 실패했습니다.');
+		}
+	}
+
+	function handleStartReply(commentId: string, username: string) {
+		replyingTo = { commentId, username };
+		setTimeout(() => {
+			document.getElementById('replyInput')?.focus();
+		}, 50);
+	}
+	function handleCancelReply() {
+		replyingTo = null;
+		replyContent = '';
+	}
+	function handleLoginRequest() {
+		authStore.login();
+	}
+
+	// --- Initial Load & Effects ---
+	$effect(() => {
+		console.log('Mount effect: Place ID:', businessId);
+		if (businessId) {
+			loadPlaceDetail(businessId);
+		} else {
+			loading = false;
+			commentLoading = false;
+		}
+		if (props.onClose && isMobile()) {
+			const handlePopState = () => {
+				if (props.onClose) props.onClose();
+			};
+			window.addEventListener('popstate', handlePopState);
+			return () => {
+				window.removeEventListener('popstate', handlePopState);
+			};
+		}
+	});
+
+	// --- Utility Functions ---
+	const categoryColors: Record<string, string> = {
+		한식: 'bg-red-500',
+		중식: 'bg-yellow-600',
+		일식: 'bg-indigo-500',
+		양식: 'bg-green-600',
+		카페: 'bg-brown-500',
+		분식: 'bg-orange-500',
+		고기: 'bg-red-600',
+		돼지고기구이: 'bg-rose-600',
+		소고기구이: 'bg-red-700',
+		치킨: 'bg-yellow-500',
+		피자: 'bg-orange-600',
+		해산물: 'bg-blue-600',
+		패스트푸드: 'bg-red-500',
+		디저트: 'bg-pink-500',
+		베이커리: 'bg-amber-600',
+		아시안: 'bg-green-500',
+		기타: 'bg-gray-500',
+	};
+	function getCategoryColor(category: string): string {
+		if (!category) return 'bg-yellow-500';
+		for (const key in categoryColors) {
+			if (category.includes(key)) return categoryColors[key];
+		}
+		return 'bg-yellow-500';
+	}
+	function handleImageError(event: Event) {
+		const imgElement = event.target as HTMLImageElement;
+		if (imgElement) imgElement.src = 'https://placehold.co/800x400?text=Image+Not+Found';
+		// if (imgElement) imgElement.src = 'https://via.placeholder.com/800x600?text=맛집+이미지';
+	}
+	function toggleBookmark() {
+		isBookmarked = !isBookmarked; /* TODO: API 연동 */
+	}
+	function previousImage() {
+		if (placeImages.length <= 1) return;
+		currentImageIndex = (currentImageIndex - 1 + placeImages.length) % placeImages.length;
+	}
+	function nextImage() {
+		if (placeImages.length <= 1) return;
+		currentImageIndex = (currentImageIndex + 1) % placeImages.length;
+	}
+	function isMobile() {
+		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+			navigator.userAgent,
+		);
+	}
+	function goBack() {
+		console.log('장소 상세 > 뒤로가기 실행');
+
+		// 뒤로가기 플래그 설정 (로컬 스토리지는 필수적인 경우만 사용)
+		sessionStorage.setItem('wasNavigatingBack', 'true');
+
+		// 현재 보던 컨텐츠 ID 저장 (sessionStorage만 사용)
+		if (place && (place as any).id) {
+			sessionStorage.setItem('currentViewingContentId', (place as any).id);
+		}
+
+		// 홈으로 이동 (최소한의 상태 정보만 포함)
+		goto('/', {
+			state: {
+				isBackNavigation: true,
+				fromPlaceDetail: true,
+				businessId: place ? (place as any).id : undefined,
+				timestamp: new Date().getTime(),
+			},
+		});
+	}
+	function openExternalUrl(url: string) {
+		window.open(url, '_blank');
+	}
+	function getEmojiFromIconCode(iconCode: string): string {
+		const emojiMap: Record<string, string> = {
+			face_savoring_food: '😋',
+			beating_heart: '❤️',
+			meat_cut: '🥩',
+			eyes: '👀',
+			steamed_rice: '🍚',
+			sparkles: '✨',
+			cook: '👨‍🍳',
+			leaf: '🍃',
+			park_sign: '🅿️',
+			fire: '🔥',
+			couch_and_lamp: '🛋️',
+			coin: '💰',
+			bouquet: '💐',
+			restroom: '🚻',
+			framed_picture: '🖼️',
+			rice_ball: '🍙',
+			bento_box: '🍱',
+			green_heart: '💚',
+			nose: '👃',
+			baby_face: '👶',
+			face_smiling: '😊',
+			stopwatch: '⏱️',
+			sun: '☀️',
+			gem_stone: '💎',
+			salad: '🥗',
+			wind: '💨',
+			face_relieved: '😌',
+			busts_in_silhouette: '👥',
+		};
+		return emojiMap[iconCode] || '🍽️';
+	}
+
+	// 리뷰 확장/축소 토글 함수
+	function toggleReviewExpand(reviewId: string) {
+		expandedReviewIds = {
+			...expandedReviewIds,
+			[reviewId]: !expandedReviewIds[reviewId],
+		};
+	}
+
+	// 리뷰 스크롤 이벤트 핸들러
+	function handleReviewScroll(event: Event) {
+		if (!reviewList.length) return;
+
+		const target = event.target as HTMLElement;
+		const scrollLeft = target.scrollLeft;
+		const itemWidth = target.scrollWidth / reviewList.length;
+
+		// 현재 보이는 리뷰 인덱스 계산
+		const index = Math.round(scrollLeft / itemWidth);
+		if (index >= 0 && index < reviewList.length) {
+			currentReviewIndex = index;
+		}
+	}
+
+	// 뒤로가기 스와이프 구현
+	let startX: number;
+	let startTime: number;
+
+	function handleTouchStart(e: TouchEvent): void {
+		startX = e.touches[0].clientX;
+		startTime = new Date().getTime();
+	}
+
+	function handleTouchEnd(e: TouchEvent): void {
+		const endX = e.changedTouches[0].clientX;
+		const endTime = new Date().getTime();
+		const diffX = endX - startX;
+		const diffTime = endTime - startTime;
+
+		// 왼쪽 가장자리에서 시작해서 오른쪽으로 스와이프하는 경우 (뒤로가기)
+		if (startX < 50 && diffX > 100 && diffTime < 300) {
+			console.log('스와이프로 뒤로가기 감지');
+			goBack();
+		}
+	}
+
+	// 스크롤 방향 감지 함수
+	let lastScrollTop = 0;
+	let scrollPosition = $state(0);
+	let scrollDirection = $state('');
+	let showHeader = $state(true);
+
+	function handleScroll() {
+		const st = window.pageYOffset || document.documentElement.scrollTop;
+
+		if (st > lastScrollTop && st > 50) {
+			// 아래로 스크롤
+			scrollDirection = 'down';
+			showHeader = false;
+		} else {
+			// 위로 스크롤
+			scrollDirection = 'up';
+			showHeader = true;
+		}
+
+		lastScrollTop = st <= 0 ? 0 : st;
+		scrollPosition = st;
+	}
+
+	// popstate 이벤트 리스닝 (브라우저 뒤로가기 버튼 눌렀을 때)
+	$effect(() => {
+		const handlePopState = (event: PopStateEvent) => {
+			console.log('장소 상세 > popstate 이벤트 발생');
+
+			// 브라우저 기본 뒤로가기 동작을 방해하지 않음
+			// preventDefault()를 호출하지 않음
+
+			// 중요: 기본 뒤로가기 동작이 자연스럽게 처리되도록 함
+			// 추가 작업은 필요한 경우에만 최소한으로 수행
+
+			// 세션에 간단한 플래그만 설정 (localStorage 사용 최소화)
+			try {
+				sessionStorage.setItem('wasNavigatingBack', 'true');
+				if (place && (place as any).id) {
+					sessionStorage.setItem('currentViewingContentId', (place as any).id);
+				}
+			} catch (e) {
+				console.error('세션 스토리지 접근 오류:', e);
+			}
+
+			// 이 함수는 브라우저의 기본 뒤로가기를 방해하지 않고 필요한 플래그만 설정
+		};
+
+		window.addEventListener('popstate', handlePopState);
+
+		return () => {
+			window.removeEventListener('popstate', handlePopState);
+		};
+	});
+
+	// 언로드 이벤트 리스닝 (페이지를 떠날 때)
+	$effect(() => {
+		const handleBeforeUnload = () => {
+			console.log('페이지 언로드 중');
+			// 페이지 이탈 시 뒤로가기 플래그 설정
+			// localStorage는 꼭 필요한 경우만 사용
+			try {
+				sessionStorage.setItem('wasNavigatingBack', 'true');
+			} catch (e) {
+				console.error('언로드 중 플래그 설정 오류:', e);
+			}
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
+	$effect(() => {
+		console.log('상세 페이지 이펙트 실행');
+
+		// 데이터 로드
+		loadPlaceDetail(businessId);
+
+		// 터치 이벤트 리스너 등록
+		document.addEventListener('touchstart', handleTouchStart);
+		document.addEventListener('touchend', handleTouchEnd);
+
+		// 스크롤 이벤트 리스너 등록
+		window.addEventListener('scroll', handleScroll);
+
+		// History API를 사용하여 상태 저장 - 필요한 데이터만 최소화
+		try {
+			// URL 변경 없이 히스토리 상태만 업데이트
+			const state = {
+				fromPlaceDetail: true,
+				businessId: businessId,
+				savedAt: new Date().getTime(),
+			};
+
+			history.replaceState(state, '', window.location.href);
+			console.log('상세 페이지 상태 저장 완료');
+		} catch (e) {
+			console.error('히스토리 상태 저장 오류:', e);
+		}
+
+		return () => {
+			document.removeEventListener('touchstart', handleTouchStart);
+			document.removeEventListener('touchend', handleTouchEnd);
+			window.removeEventListener('scroll', handleScroll);
+		};
+	});
+</script>
+
+<!-- Template -->
+<div
+	class="fixed inset-0 z-50 overflow-auto bg-white"
+	ontouchstart={handleTouchStart}
+	ontouchend={handleTouchEnd} style="padding-top: env(safe-area-inset-top);"
+>
+	<!-- HeaderNavigation: 이제 여기에 배치 -->
+	<div class="sticky 
+	flex items-center top-0 left-0 right-0  h-16 mx-auto max-w-2xl p-0 
+	top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200" >
+		<HeaderNavigation 
+			onBack={goBack} 
+			onShare={() => { showShareDialog = true; }} 
+			onSearch={() => { alert('검색 기능 구현 필요'); }}
+		/>
+	</div>
+
+	<!-- 새로운 PlaceHeader 컴포넌트 (네비게이션 없음) -->
+	{#if place}
+		{@const placeData = place as any}
+		{@const bgImage = placeImages && placeImages.length > 0 ? placeImages[0] : undefined}
+		{@const posterImage = placeData?.thum_url || bgImage}
+		{@const conveniencesList = placeData?.conveniences || [
+			'단체 이용 가능', '포장', '반려동물 동반', '남/녀 화장실 구분', 
+			'유아의자', '간편결제', '주차'
+		]}
+		{@const websiteUrl = placeData?.homepage || []}
+		{@const galleryImages = placeImages?.slice(1) ?? []}
+		{@const url = placeData?.id ? `https://map.naver.com/p/entry/place/${placeData.id}` : undefined}
+
+		<PlaceHeader
+			title={placeData?.name ?? '장소 정보'}
+			subtitle={placeData?.category ?? '카테고리'}
+			visitorReviewCount={placeData?.visitor_reviews_total ?? 3487}
+			rating={placeData?.visitor_reviews_score ?? 4.4}
+			commonAddress={placeData?.address}
+			roadAddress={placeData?.road_address}
+			naverPlaceId={placeData?.naver_place_id}
+			website={websiteUrl}
+			conveniences={conveniencesList}
+			posterImageUrl={posterImage}
+			galleryImageUrls={galleryImages}
+			url={url}
+			onBack={goBack} 
+			onShare={() => { showShareDialog = true; }} 
+			onSearch={() => { console.log('검색 기능 구현 필요'); }}
+			onShowGallery={() => { console.log('갤러리 보기 기능 구현 필요'); }}
+		/>
+	{/if}
+
+	
+
+	<!-- 기존 컨텐츠 (헤더 아래에 표시될 수 있도록 상단 여백 추가) -->
+
+	<!-- <div class="mx-auto max-w-lg"> -->
+	<div class="relative w-full mx-auto max-w-2xl text-gray-800 bg-white mb-4" style="padding-top: env(safe-area-inset-top);">	
+		{#if loading}
+			<!-- <div class="flex justify-center p-16">
+						<div class="h-16 w-16 animate-spin rounded-full border-t-4 border-b-4 border-blue-500"></div>
+					</div> -->
+			<Indicator text="음식점 정보를 불러오는 중..." />
+		{:else if !place}
+			<div class="p-8 text-center">
+				<svg
+					class="mx-auto mb-4 h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					></path>
+				</svg>
+				<p class="text-lg text-gray-500">정보를 찾을 수 없습니다.</p>
+				<button
+					class="mt-4 rounded-full bg-blue-500 px-6 py-2 text-white shadow-sm transition-colors hover:bg-blue-600"
+					onclick={goBack}
+				>
+					돌아가기
+				</button>
+			</div>
+		{:else}
+			<!-- {#if placeImages && placeImages.length > 0}
+				<div class="relative h-80 w-full overflow-hidden">
+					<img
+						src={placeImages[currentImageIndex]}
+						alt={place ? ((place as any).normalized_name ?? '장소 이미지') : '장소 이미지'}
+						class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+						onerror={handleImageError}
+					/>
+					{#if placeImages.length > 1}
+						<div
+							class="absolute right-4 bottom-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm"
+						>
+							{currentImageIndex + 1} / {placeImages.length}
+						</div>
+						<button
+							class="absolute top-1/2 left-2 flex h-10 w-10 -translate-y-1/2 transform items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60"
+							onclick={previousImage}
+							aria-label="이전 이미지"
+						>
+							<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 19l-7-7 7-7"
+								></path>
+							</svg>
+						</button>
+						<button
+							class="absolute top-1/2 right-2 flex h-10 w-10 -translate-y-1/2 transform items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60"
+							onclick={nextImage}
+							aria-label="다음 이미지"
+						>
+							<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 5l7 7-7 7"
+								></path>
+							</svg>
+						</button>
+					{/if}
+				</div>
+			{/if} -->
+			<!-- 기본 정보 -->
+			<div class="p-6">
+				<!-- <div class="mb-3 flex items-start justify-between">
+					<div>
+						<h1 class="text-2xl font-bold text-gray-900">{(place as any)?.normalized_name}</h1>
+					</div>
+					{#if (place as any)?.url}<a
+							href={(place as any).url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-gray-600 transition-colors hover:bg-gray-100"
+							aria-label="네이버 장소 보기"
+						>
+							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+								></path>
+							</svg>
+							<span class="text-sm font-medium">네이버 지도</span>
+						</a>{/if}
+				</div> -->
+				<!-- 카테고리 태그 추가 -->
+				<!-- {#if place.category}
+							<div class="mb-3">
+								<span class="inline-block rounded-full {getCategoryColor(place.category)} px-3 py-1 text-xs font-medium text-white">
+									{place.category}
+								</span>
+							</div>
+						{/if} -->
+				<!-- {#if (place as any)?.road_address}<div class="mb-4 flex items-start gap-3">
+						<svg
+							class="mt-0.5 h-5 w-5 shrink-0 text-gray-500"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+							/>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
+						</svg>
+						<div>
+							<p class="text-sm text-gray-700">{(place as any)?.common_address}</p>
+							<p class="text-xs text-gray-500">{(place as any)?.road_address}</p>
+							<button
+								class="mt-1 flex items-center gap-1 text-xs text-blue-600 transition-colors hover:text-blue-800"
+								onclick={() => {
+									if (navigator.clipboard && place) {
+										navigator.clipboard.writeText((place as any).road_address);
+										alert('주소가 복사되었습니다.');
+									}
+								}}
+							>
+								<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+									></path>
+								</svg>
+								주소 복사
+							</button>
+						</div>
+					</div>{/if} -->
+			</div>
+
+			<!-- 탭 네비게이션 -->
+			<div class="sticky top-0 z-10 border-t border-gray-50">
+				<div class="flex">
+					<button
+						class="flex-1 px-4 py-3 text-center font-medium transition-colors {activeTab === 0
+							? 'border-b-2 border-blue-600 text-blue-600'
+							: 'text-gray-600 hover:bg-gray-50'}"
+						onclick={() => (activeTab = 0)}
+					>
+						정보
+					</button>
+					<button
+						class="flex-1 px-4 py-3 text-center font-medium transition-colors {activeTab === 1
+							? 'border-b-2 border-blue-600 text-blue-600'
+							: 'text-gray-600 hover:bg-gray-50'}"
+						onclick={() => (activeTab = 1)}
+					>
+						방문자 평가
+					</button>
+					<button
+						class="flex-1 px-4 py-3 text-center font-medium transition-colors {activeTab === 2
+							? 'border-b-2 border-blue-600 text-blue-600'
+							: 'text-gray-600 hover:bg-gray-50'}"
+						onclick={() => (activeTab = 2)}
+					>
+						태그
+					</button>
+					<button
+						class="flex-1 px-4 py-3 text-center font-medium transition-colors {activeTab === 3
+							? 'border-b-2 border-blue-600 text-blue-600'
+							: 'text-gray-600 hover:bg-gray-50'}"
+						onclick={() => (activeTab = 3)}
+					>
+						댓글 <span
+							class="ml-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-600"
+						>
+							{totalComments}
+						</span>
+					</button>
+				</div>
+			</div>
+			<!-- 탭 콘텐츠 -->
+			{#if activeTab === 0}
+				<div class="p-6">
+					<div class="mb-6">
+						<div class="grid grid-cols-3 gap-3 rounded-xl bg-blue-50/60 p-5 shadow-sm">
+							<!-- <div class="flex flex-col items-center">
+										<span class="text-xs text-gray-500 mb-1">카테고리</span>
+										<span class="text-base font-bold text-gray-800">
+											{place.category || '-'}
+										</span>
+									</div> -->
+							<div class="flex flex-col items-center">
+								<span class="mb-1 text-xs text-gray-500">방문자 리뷰</span>
+								<span class="text-base font-bold text-gray-800">
+									{(place as any)?.visitor_review_count?.toLocaleString() ?? '-'}
+								</span>
+							</div>
+							<div class="flex flex-col items-center">
+								<span class="mb-1 text-xs text-gray-500">블로그 리뷰</span>
+								<span class="text-base font-bold text-gray-800">
+									{(place as any)?.blog_cafe_review_count?.toLocaleString() ?? '-'}
+								</span>
+							</div>
+							<div class="flex flex-col items-center">
+								<span class="mb-1 text-xs text-gray-500">평점</span>
+								<div class="flex items-center">
+									<span class="text-base font-bold text-gray-800">
+										{(place as any)?.visitor_review_score?.toFixed(1) ?? '-'}
+									</span>
+									<span class="ml-1 text-yellow-500">★</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- 리뷰 슬라이더 섹션 개선 -->
+					{#if reviewList && reviewList.length > 0}
+						<div class="mb-6">
+							<h2 class="mb-3 flex items-center gap-2 text-lg font-bold">
+								방문자 리뷰
+								<span
+									class="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+								>
+									네이버 리뷰
+								</span>
+							</h2>
+							<div
+								class="scrollbar-none -mx-6 touch-pan-x overflow-x-auto"
+								style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scroll-behavior: smooth;"
+								onscroll={handleReviewScroll}
+							>
+								<div class="flex px-3 pt-1 pb-2">
+									{#each reviewList as review, index}
+										<div
+											style="scroll-snap-align: center; width: 92vw; max-width: 450px;"
+											class="shrink-0 px-1.5 py-0.5"
+										>
+											<ReviewCardSimple
+												{review}
+												isExpanded={expandedReviewIds[review.id] || false}
+												onToggleExpand={() => toggleReviewExpand(review.id)}
+												formatDate={(dateString) => {
+													if (!dateString || dateString.length !== 8) return '';
+													const year = dateString.substring(0, 4);
+													const month = dateString.substring(4, 6);
+													const day = dateString.substring(6, 8);
+													return `${year}.${month}.${day}`;
+												}}
+											/>
+										</div>
+									{/each}
+								</div>
+							</div>
+
+							<!-- 페이지 인디케이터 추가 -->
+							<!-- {#if reviewList.length > 1}
+										<div class="mt-3 flex justify-center items-center space-x-2">
+											{#each reviewList as _, i}
+												<button 
+													class="h-2 w-6 rounded-full {i === currentReviewIndex ? 'bg-blue-500' : 'bg-gray-200'} transition-all duration-300"
+													aria-label={`리뷰 ${i + 1}`}
+													onclick={() => {
+														const scrollContainer = document.querySelector('.overflow-x-auto') as HTMLElement;
+														if (scrollContainer) {
+															const itemWidth = scrollContainer.scrollWidth / reviewList.length;
+															scrollContainer.scrollTo({
+																left: i * itemWidth,
+																behavior: 'smooth'
+															});
+															currentReviewIndex = i;
+														}
+													}}
+												></button>
+											{/each}
+										</div>
+									{/if} -->
+						</div>
+					{/if}
+
+					{#if (place as any)?.description}<div class="mb-6">
+							<h2 class="mb-3 text-lg font-bold">설명</h2>
+							<p
+								class="rounded-lg bg-gray-50 p-4 text-sm leading-relaxed whitespace-pre-line text-gray-700"
+							>
+								{(place as any).description}
+							</p>
+						</div>{/if}
+					{#if (place as any)?.website && (place as any)?.website.length > 0}<div class="mb-6">
+							<h2 class="mb-3 text-lg font-bold">웹사이트</h2>
+							<div class="flex flex-wrap gap-2">
+								{#each (place as any).website as site}<a
+										href={site}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3.5 py-1.5 text-sm text-gray-800 transition-colors hover:bg-gray-200"
+									>
+										<svg
+											class="h-4 w-4 text-blue-600"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+											></path>
+										</svg>
+										<span class="max-w-[200px] truncate">{new URL(site).hostname}</span>
+									</a>{/each}
+							</div>
+						</div>{/if}
+					{#if (place as any)?.convenience && (place as any)?.convenience.length > 0}<div
+							class="mb-6"
+						>
+							<h2 class="mb-3 text-lg font-bold">편의 시설</h2>
+							<div class="grid grid-cols-2 gap-3">
+								{#each (place as any).convenience as item}<div
+										class="flex items-center gap-2.5 rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+									>
+										<svg
+											class="h-5 w-5 text-green-500"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											></path>
+										</svg>
+										<span class="text-sm font-medium text-gray-800">{item}</span>
+									</div>{/each}
+							</div>
+						</div>{/if}
+
+					<!-- 네이버 지도 연결 버튼 추가 -->
+					{#if (place as any)?.id}
+						<div class="mt-8">
+							<a
+								href={`https://map.naver.com/p/entry/place/${(place as any).id}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-center text-white shadow-sm transition-colors hover:bg-green-700"
+							>
+								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+									></path>
+								</svg>
+								네이버 지도에서 자세히 보기
+							</a>
+						</div>
+					{/if}
+				</div>
+			{:else if activeTab === 1}
+				{#if placeVotes && placeVotes.length > 0}
+					<div class="p-6">
+						<div class="grid grid-cols-2 gap-3">
+							{#each placeVotes.slice(0, 10) as vote}<div
+									class="flex items-center gap-3 rounded-lg border border-transparent bg-gray-50 p-3.5 transition-all hover:border-gray-200 hover:bg-white hover:shadow-sm"
+								>
+									<div class="shrink-0 rounded-full bg-blue-100 p-2.5 shadow-sm">
+										<span class="text-xl">{getEmojiFromIconCode(vote.icon_code)}</span>
+									</div>
+									<div>
+										<p class="text-sm font-medium">{vote.text}</p>
+										<p class="text-xs text-gray-500">{vote.count.toLocaleString()}명</p>
+									</div>
+								</div>{/each}
+						</div>
+						{#if placeVotes.length > 10}<div class="mt-5 text-center">
+								<span
+									class="inline-block rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-500"
+								>
+									외 {placeVotes.length - 10}개 평가
+								</span>
+							</div>{/if}
+					</div>
+				{:else}
+					<div class="p-12 text-center">
+						<svg
+							class="mx-auto mb-3 h-12 w-12 text-gray-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>
+						<p class="text-gray-500">등록된 방문자 평가가 없습니다.</p>
+						<p class="mt-1 text-sm text-gray-400">첫 방문자 평가를 남겨보세요!</p>
+					</div>
+				{/if}
+			{:else if activeTab === 2}
+				<TagSection placeId={businessId} />
+			{:else if activeTab === 3}
+				{#key businessId}
+					<CommentSection
+						bind:comments
+						{currentUser}
+						{totalComments}
+						loading={commentLoading}
+						error={commentError}
+						loadingMore={commentLoadingMore}
+						bind:replyingTo
+						bind:newCommentContent
+						bind:replyContent
+						onLoadMore={handleLoadMoreComments}
+						onSubmitComment={handleSubmitComment}
+						onSubmitReply={handleSubmitReply}
+						onDeleteComment={handleDeleteComment}
+						onToggleLike={handleToggleLike}
+						onStartReply={handleStartReply}
+						onCancelReply={handleCancelReply}
+						onLoginRequest={handleLoginRequest}
+						{editingCommentId}
+						bind:editContent
+						onStartEdit={handleStartEdit}
+						onCancelEdit={handleCancelEdit}
+						onSubmitEdit={handleSubmitEdit}
+					/>
+				{/key}
+			{/if}
+		{/if}
+	</div>
+</div>
