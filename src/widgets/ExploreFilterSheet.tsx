@@ -78,7 +78,7 @@ export function ExploreFilterSheet({
   const handleApply = () => {
     onApply({ 
       group1: selectedGroup1,
-      group2: selectedGroup2,
+      group2: selectedGroup2 === "전체" ? null : selectedGroup2,
       group3: null, // 상세 지역(dong)은 현재 지원하지 않으므로 null로 초기화
       categories: selectedCategories.length > 0 ? selectedCategories : null,
       theme_code: selectedThemes.length > 0 ? selectedThemes[0] : null,

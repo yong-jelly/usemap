@@ -65,16 +65,18 @@ export function PlaceCard({ place }: PlaceCardProps) {
                 />
               )}
             </div>
-            <span className="text-[12px] font-bold text-[#F48E54] bg-[#F48E54]/5 px-2 py-0.5 rounded-full border border-[#F48E54]/10">
-              {place.category}
-            </span>
+            {folders.length > 0 && (
+              <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-[#1E8449] text-white text-[10px] font-black rounded -mt-3 animate-in zoom-in duration-300">
+                {folders.length}
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-2 text-[13px] text-[#2B4562]/40 font-medium">
             <span>{place.group2} {place.group3}</span>
             <span className="text-[10px]">•</span>
             <div className="flex items-center gap-1">
-              <Star className="size-3 fill-current" />
+              <Star strokeWidth={1.2} className="size-3 fill-current" />
               <span>{place.visitor_reviews_score}</span>
             </div>
           </div>
@@ -84,7 +86,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
         <div className="flex items-center gap-1">
           {place.experience?.is_visited && (
             <div className="size-7 bg-[#F48E54]/10 rounded-full flex items-center justify-center border border-[#F48E54]/20" title="방문">
-              <CheckCircle className="size-3.5 text-[#F48E54]" />
+              <CheckCircle strokeWidth={1.2} className="size-3.5 text-[#F48E54]" />
             </div>
           )}
           {/* {place.features && place.features.length > 0 && (
@@ -94,7 +96,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
             </div>
           )} */}
           <Button variant="ghost" size="icon" className="size-7 text-[#2B4562]/20 hover:text-[#2B4562] ml-1">
-            <MoreHorizontal className="size-4" />
+            <MoreHorizontal strokeWidth={1.2} className="size-4" />
           </Button>
         </div>
       </header>
@@ -140,7 +142,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
         ) : (
           <div className="px-5 py-1">
             <div className="h-40 flex flex-col items-center justify-center text-[#2B4562]/10 bg-[#2B4562]/5 rounded-[24px]">
-              <TvMinimalPlay className="size-8 mb-2 opacity-30" />
+              <TvMinimalPlay strokeWidth={1.2} className="size-8 mb-2 opacity-30" />
             </div>
           </div>
         )}
@@ -152,22 +154,25 @@ export function PlaceCard({ place }: PlaceCardProps) {
         <div className="flex items-center justify-between">
           {place.voted_summary_text ? (
             <div className="flex items-center gap-1.5 text-[#F48E54] font-black text-[14px]">
-              <Flag className="size-3.5 fill-current" />
+              <Flag strokeWidth={1.2} className="size-3.5 fill-current" />
               <span>{place.voted_summary_text}</span>
             </div>
           ) : <div />}
         </div>
 
         {/* 미니멀 태그 (최대 3개) */}
-        {(place.keyword_list?.length > 0) && (
-          <div className="flex flex-wrap gap-x-3 gap-y-1">
-            {place.keyword_list.slice(0, 3).map((tag: string, i: number) => (
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <span className="text-[13px] text-[#F48E54] font-black hover:underline underline-offset-4 cursor-pointer">
+            #{place.category}
+          </span>
+          {(place.keyword_list?.length > 0) && (
+            place.keyword_list.slice(0, 3).map((tag: string, i: number) => (
               <span key={i} className="text-[13px] text-blue-500/80 font-bold hover:underline underline-offset-4 cursor-pointer">
                 #{tag}
               </span>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
 
         {/* 폴더 태그 - 태그 영역 바로 아래 배치 */}
         {folders.length > 0 && (
@@ -209,16 +214,16 @@ export function PlaceCard({ place }: PlaceCardProps) {
               (isLiked || place.interaction?.is_liked) ? "text-[#E05C5C]" : "text-[#2B4562]/40"
             )}
           >
-            <Heart className={cn("size-6 transition-transform group-active:scale-125", (isLiked || place.interaction?.is_liked) && "fill-current")} />
-            <span className="text-[14px] font-black">{place.interaction?.place_liked_count || 0}</span>
+            <Heart strokeWidth={1.2} className={cn("size-6 transition-transform group-active:scale-125", (isLiked || place.interaction?.is_liked) && "fill-current")} />
+            <span className="text-[14px] font-bold">{place.interaction?.place_liked_count || 0}</span>
           </button>
 
           <button 
             onClick={() => showPopup(place.id)}
             className="flex items-center gap-1.5 text-[#2B4562]/40 group"
           >
-            <MessageCircle className="size-6 transition-transform group-active:scale-125" />
-            <span className="text-[14px] font-black">{place.interaction?.place_comment_count || 0}</span>
+            <MessageCircle strokeWidth={1.2} className="size-6 transition-transform group-active:scale-125" />
+            <span className="text-[14px] font-bold">{place.interaction?.place_comment_count || 0}</span>
           </button>
 
           <button 
@@ -228,8 +233,8 @@ export function PlaceCard({ place }: PlaceCardProps) {
               (isSaved || place.interaction?.is_saved) ? "text-[#2B4562]" : "text-[#2B4562]/40"
             )}
           >
-            <Bookmark className={cn("size-6 transition-transform group-active:scale-125", (isSaved || place.interaction?.is_saved) && "fill-current")} />
-            <span className="text-[14px] font-black">저장</span>
+            <Bookmark strokeWidth={1.2} className={cn("size-6 transition-transform group-active:scale-125", (isSaved || place.interaction?.is_saved) && "fill-current")} />
+            <span className="text-[14px] font-bold">저장</span>
           </button>
         </div>
 
@@ -240,7 +245,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
           className="flex items-center justify-center size-10 rounded-full bg-[#2B4562]/5 text-[#2B4562] hover:bg-[#2B4562] hover:text-white transition-all active:scale-95"
           onClick={(e) => e.stopPropagation()}
         >
-          <MapPinned className="size-5" />
+          <MapPinned strokeWidth={1.2} className="size-5" />
         </a>
       </div>
     </div>

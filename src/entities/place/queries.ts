@@ -45,14 +45,14 @@ export function usePlacesByTab(tabName: string, group1: string | null = null) {
       placeApi.listByTab({ 
         tabName, 
         offset: pageParam, 
-        limit: 20, 
+        limit: 21, 
         group1 
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       // 마지막 페이지의 데이터 개수가 limit보다 적으면 다음 페이지가 없는 것으로 간주
-      if (lastPage.length < 20) return undefined;
-      return allPages.length * 20;
+      if (lastPage.length < 21) return undefined;
+      return allPages.length * 21;
     },
   });
 }
@@ -67,12 +67,12 @@ export function usePlacesByFilters(filters: any) {
       placeApi.listByFilters({ 
         ...filters,
         offset: pageParam, 
-        limit: 20 
+        limit: 21 
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < 20) return undefined;
-      return allPages.length * 20;
+      if (lastPage.length < 21) return undefined;
+      return allPages.length * 21;
     },
   });
 }

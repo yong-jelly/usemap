@@ -63,11 +63,12 @@ function PageViewTracker() {
 function RootLayout() {
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
-      <ScrollToTop />
-      <PageViewTracker />
-      <Header />
+      {/* <ScrollToTop />
+      <PageViewTracker /> */}
+      {/* <Header /> */}
       {/* 메인 모바일 뷰 컨테이너 (최대 너비 512px) */}
-      <main className="pt-14 pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800">
+      {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
+      <main className="pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800">
         <Outlet />
       </main>
       <BottomNav />
@@ -87,7 +88,8 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        // element: <HomePage />,
+        element: <MapPage />,
       },
       {
         path: "home",

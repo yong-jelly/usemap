@@ -29,7 +29,7 @@ export const placeApi = {
   /**
    * 장소에 대한 외부 수집 리뷰 목록을 조회합니다.
    */
-  getReviews: async (placeId: string, limit: number = 20) => {
+  getReviews: async (placeId: string, limit: number = 21) => {
     const response = await apiClient.rpc<any>("v1_get_place_reviews", {
       p_place_id: placeId,
       p_limit: limit,
@@ -57,7 +57,7 @@ export const placeApi = {
       p_group3: params.group3 || null,
       p_category: params.categories && params.categories.length > 0 ? params.categories : null,
       p_convenience: params.features && params.features.length > 0 ? params.features : null,
-      p_limit: params.limit || 20,
+      p_limit: params.limit || 21,
       p_offset: params.offset || 0,
       p_theme_code: params.theme_code || null,
       p_exclude_franchises: params.exclude_franchises ?? true,

@@ -79,7 +79,7 @@ export function RegionTab({
           ) : (
             <div className="grid grid-cols-2 gap-3 pb-4">
               {currentGroup2List.map((group2) => {
-                const isSelected = selectedGroup2 === group2;
+                const isSelected = selectedGroup2 === group2 || (group2 === "전체" && !selectedGroup2);
                 return (
                   <button
                     key={group2}

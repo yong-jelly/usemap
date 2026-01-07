@@ -2,13 +2,11 @@ import { useState, useMemo } from "react";
 import { 
   Search, 
   Filter, 
-  MapPin, 
   ChevronDown, 
   X, 
-  RefreshCcw,
   LayoutGrid,
   List as ListIcon,
-  TvMinimalPlay
+  SquareX
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
@@ -34,8 +32,6 @@ interface ExplorerFilterState {
 
 /**
  * 탐색 페이지 컴포넌트
- * 마스코트 아이콘의 컬러 팔레트(네이비, 오렌지, 레드)를 반영한 현대적인 피드 구성
- * 피그마 스타일의 플랫 벡터 UI (그림자 제거, 테두리 강조)
  */
 export function ExplorePage() {
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -47,7 +43,7 @@ export function ExplorePage() {
   const defaultFilters: ExplorerFilterState = {
     group1: "서울",
     group2: "중구",
-    group3: null,
+    group3: "태평로1가",
     categories: [],
     features: [],
     theme_code: null,
@@ -68,105 +64,127 @@ export function ExplorePage() {
 
   const places = useMemo(() => (data?.pages.flatMap((page) => page) || []) as any[], [data]);
 
-  const handleCategoryToggle = (category: string) => {
-    setFilters(prev => {
-      const current = prev.categories || [];
-      const next = current.includes(category)
-        ? current.filter(c => c !== category)
-        : [...current, category];
-      return { ...prev, categories: next.length > 0 ? next : null };
-    });
-  };
-
   const resetFilters = () => setFilters(defaultFilters);
   const isInitialLoading = isLoading && places.length === 0;
 
+  const FALLBACK_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+    <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="600" fill="#F1F5F9"/>
+      <rect x="175" y="275" width="50" height="50" rx="8" stroke="#CBD5E1" stroke-width="3"/>
+      <path d="M185 285L215 315M215 285L185 315" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  `.trim())}`;
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = FALLBACK_IMAGE;
+  };
+
+  // 활성화된 필터 개수 계산 (위치와 기본 카테고리 제외)
+  const activeExtraFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.theme_code) count++;
+    if (!filters.exclude_franchises) count++;
+    if (filters.categories && filters.categories.length > 0) count++;
+    return count;
+  }, [filters]);
+
+  const handleLayoutChange = (newLayout: 'feed' | 'grid') => {
+    setLayout(newLayout);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#FFF9F5] dark:bg-surface-950">
-      {/* 1. 상단 현대적 헤더 - Flat Vector Style */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl dark:bg-surface-900/95 border-b-2 border-[#2B4562]/10 transition-all">
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* 1. 고정 통합 헤더 (SNS 스타일) */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-surface-100 transition-all">
         <div className="max-w-lg mx-auto">
-          {/* 상단 라인: 로고 및 액션 */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <div className="size-9 rounded-xl bg-[#2B4562] flex items-center justify-center rotate-3 border-2 border-[#2B4562]">
-                <MapPin className="size-5 text-white" />
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-1 p-0 h-auto hover:bg-transparent font-black text-[#2B4562] dark:text-white text-xl tracking-tight"
+          {/* 타이틀 및 메인 액션 바 */}
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-black text-surface-950 tracking-tight">탐색</h1>
+              <button 
+                onClick={() => setIsFilterOpen(true)}
+                className="flex items-center gap-1 mt-0.5 group active:opacity-60 transition-opacity"
               >
-                {filters.group2}
-                <ChevronDown className="size-5 text-[#2B4562]/40" />
-              </Button>
+                <span className="text-[13px] font-bold text-surface-400 group-hover:text-surface-900 transition-colors">
+                  {filters.group2 || filters.group1} {filters.group3 && `· ${filters.group3}`}
+                </span>
+                <ChevronDown className="size-3.5 text-surface-300" />
+              </button>
             </div>
             
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-xl hover:bg-surface-50 border-2 border-transparent active:border-[#2B4562]/20"
-                onClick={() => setIsSearchMode(true)}
-              >
-                <Search className="size-6 text-[#2B4562] dark:text-white" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-xl hover:bg-surface-50 border-2 border-transparent active:border-[#2B4562]/20"
-                onClick={() => setIsFilterOpen(true)}
-              >
-                <Filter className="size-6 text-[#2B4562] dark:text-white" />
-              </Button>
+              <div className="flex items-center bg-surface-50 p-1 rounded-xl">
+                <button 
+                  onClick={() => handleLayoutChange('feed')}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-all", 
+                    layout === 'feed' ? "bg-white shadow-sm text-surface-900" : "text-surface-300"
+                  )}
+                >
+                  <ListIcon className="size-4.5" />
+                </button>
+                <button 
+                  onClick={() => handleLayoutChange('grid')}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-all", 
+                    layout === 'grid' ? "bg-white shadow-sm text-surface-900" : "text-surface-300"
+                  )}
+                >
+                  <LayoutGrid className="size-4.5" />
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-1 border-l border-surface-100 ml-1 pl-3">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="size-10 rounded-full hover:bg-surface-50 active:scale-90 transition-transform"
+                  onClick={() => setIsSearchMode(true)}
+                >
+                  <Search className="size-5.5 text-surface-900" />
+                </Button>
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-10 rounded-full hover:bg-surface-50 active:scale-90 transition-transform"
+                    onClick={() => setIsFilterOpen(true)}
+                  >
+                    <Filter className="size-5.5 text-surface-900" />
+                  </Button>
+                  {activeExtraFilterCount > 0 && (
+                    <span className="absolute top-1 right-1 size-2 bg-[#6366F1] rounded-full ring-2 ring-white animate-in zoom-in" />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* 하단 라인: 카테고리 칩 (Kawaii Flat Style) */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide px-4 pb-4">
-            {["전체", "음식점", "카페", "주점", "베이커리", "일식", "한식", "양식"].map((cat) => {
-              const isAll = cat === "전체";
-              const isActive = isAll 
-                ? (!filters.categories || filters.categories.length === 0)
-                : filters.categories?.includes(cat);
-              
-              return (
-                <button
-                  key={cat}
-                  onClick={() => isAll ? setFilters(prev => ({ ...prev, categories: null })) : handleCategoryToggle(cat)}
-                  className={cn(
-                    "px-5 py-2 rounded-full text-[14px] font-black whitespace-nowrap transition-all border-2",
-                    isActive 
-                      ? "bg-[#F48E54] border-[#2B4562] text-white translate-y-[-1px]" 
-                      : "bg-white dark:bg-surface-800 border-[#2B4562]/10 text-[#2B4562]/60 dark:text-surface-400 hover:border-[#2B4562]/30"
-                  )}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 활성 필터 태그 영역 (Svelte ExploreHeader 참고) */}
-          {(filters.group2 && filters.group2 !== '전체' || (filters.categories && filters.categories.length > 0) || filters.theme_code) && (
-            <div className="flex flex-wrap gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
-              {filters.group2 && filters.group2 !== '전체' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black border-2 border-blue-100 dark:border-blue-800">
-                  {filters.group2}
-                  <X className="size-3 cursor-pointer" onClick={() => setFilters(prev => ({ ...prev, group2: '전체' }))} />
-                </span>
+          {/* 활성 필터 태그 (조건이 있을 때만 미세하게 노출) */}
+          {(filters.group2 || filters.categories && filters.categories.length > 0 || filters.theme_code) && (
+            <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto scrollbar-hide">
+              {filters.group2 && (
+                <div key={filters.group2} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold border border-blue-100">
+                  <span>{filters.group2}</span>
+                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                    setFilters(prev => ({ ...prev, group2: null }));
+                  }} />
+                </div>
               )}
               {filters.categories?.map(cat => (
-                <span key={cat} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-black border-2 border-green-100 dark:border-green-800">
-                  {cat}
-                  <X className="size-3 cursor-pointer" onClick={() => handleCategoryToggle(cat)} />
-                </span>
+                <div key={cat} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-50 text-surface-900 text-[11px] font-bold border border-surface-100">
+                  <span>{cat}</span>
+                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                    setFilters(prev => ({ ...prev, categories: prev.categories?.filter(c => c !== cat) || [] }));
+                  }} />
+                </div>
               ))}
               {filters.theme_code && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-black border-2 border-purple-100 dark:border-purple-800">
-                  {filters.theme_code}
-                  <X className="size-3 cursor-pointer" onClick={() => setFilters(prev => ({ ...prev, theme_code: null }))} />
-                </span>
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold border border-indigo-100">
+                  <span>✨ {filters.theme_code}</span>
+                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => setFilters(prev => ({ ...prev, theme_code: null }))} />
+                </div>
               )}
             </div>
           )}
@@ -174,166 +192,140 @@ export function ExplorePage() {
       </header>
 
       {/* 2. 메인 피드 영역 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen border-x-2 border-[#2B4562]/5">
-        {/* 리스트 헤더: 레이아웃 전환 및 개수 */}
-        <div className="flex items-center justify-between px-4 py-5 border-b-2 border-[#2B4562]/5">
-          <h2 className="text-[16px] font-black text-[#2B4562] dark:text-white flex items-center gap-2">
-            탐색 결과 <span className="bg-[#F48E54]/10 text-[#F48E54] px-2 py-0.5 rounded-lg text-sm">{places.length}</span>
-          </h2>
-          <div className="flex items-center bg-[#2B4562]/5 dark:bg-surface-800 rounded-xl p-1 gap-1 border-2 border-transparent">
-            <button 
-              onClick={() => setLayout('feed')}
-              className={cn("p-2 rounded-lg transition-all border-2", layout === 'feed' ? "bg-white dark:bg-surface-700 border-[#2B4562] text-[#2B4562]" : "border-transparent text-surface-400")}
-            >
-              <ListIcon className="size-4.5" />
-            </button>
-            <button 
-              onClick={() => setLayout('grid')}
-              className={cn("p-2 rounded-lg transition-all border-2", layout === 'grid' ? "bg-white dark:bg-surface-700 border-[#2B4562] text-[#2B4562]" : "border-transparent text-surface-400")}
-            >
-              <LayoutGrid className="size-4.5" />
-            </button>
-          </div>
-        </div>
-
+      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white min-h-screen">
         {isInitialLoading ? (
-          // 로딩 스켈레톤
-          <div className="space-y-8 mt-6 px-4">
+          <div className="space-y-8 mt-10 px-5">
             {[...Array(2)].map((_, i) => (
               <div key={i} className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Skeleton className="size-12 rounded-full" />
+                  <Skeleton className="size-10 rounded-full" />
                   <div className="space-y-2">
-                    <Skeleton className="h-5 w-28" />
-                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-3 w-40" />
                   </div>
                 </div>
-                <Skeleton className="aspect-square w-full rounded-3xl" />
+                <Skeleton className="aspect-square w-full rounded-2xl" />
               </div>
             ))}
           </div>
         ) : isError || places.length === 0 ? (
-          // 에러/결과 없음 (Mascot Theme)
-          <div className="flex flex-col items-center justify-center py-32 text-center px-8">
-            <div className="size-24 bg-[#FFF9F5] dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-8 border-4 border-[#F48E54]">
-              <Search className="size-12 text-[#F48E54]" />
+          <div className="flex flex-col items-center justify-center py-40 text-center px-10">
+            <div className="size-20 bg-surface-50 rounded-full flex items-center justify-center mb-6">
+              <Search className="size-10 text-surface-200" />
             </div>
-            <h3 className="text-2xl font-black text-[#2B4562] dark:text-white mb-3">
-              앗! 찾으시는 장소가 없어요
+            <h3 className="text-xl font-bold text-surface-900 mb-2 tracking-tight">
+              찾으시는 장소가 없네요
             </h3>
-            <p className="text-[#2B4562]/50 text-[15px] mb-10 leading-relaxed font-medium">
-              다른 지역을 선택하거나 필터를 초기화해서<br />새로운 맛집을 찾아보세요!
+            <p className="text-surface-400 text-[14px] mb-10 leading-relaxed font-medium">
+              필터나 검색 조건을 변경하여<br />새로운 장소를 발견해보세요.
             </p>
             <Button 
               onClick={resetFilters} 
-              variant="primary" 
-              className="rounded-2xl px-10 h-14 bg-[#2B4562] hover:bg-[#1e3247] text-white font-black text-lg border-b-4 border-[#1e3247] active:border-b-0 active:translate-y-[2px] transition-all"
+              variant="outline" 
+              className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 active:bg-surface-50"
             >
-              필터 초기화하기
+              조건 초기화
             </Button>
           </div>
         ) : (
-          // 장소 목록
           <div className={cn(
-            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3"
+            layout === 'feed' ? "flex flex-col pt-4" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
             {places.map((place) => {
               const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+              const hasImage = place.images && place.images.length > 0;
               
               return layout === 'feed' ? (
                 <PlaceCard key={place.id} place={place} />
               ) : (
                 <div 
                   key={place.id} 
-                  className="relative aspect-[3/4] bg-white dark:bg-surface-900 overflow-hidden group cursor-pointer border border-gray-100 dark:border-neutral-800"
+                  className="relative aspect-[3/4] bg-surface-100 overflow-hidden active:opacity-80 transition-opacity cursor-pointer group flex items-center justify-center"
                   onClick={() => showPopup(place.id)}
                 >
-                  <img 
-                    src={convertToNaverResizeImageUrl(place.images?.[0])} 
-                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                    alt={place.name}
-                    loading="lazy"
-                  />
-                  {/* 정보 오버레이 - Svelte RecentViewPlaceCard 스타일과 동일하게 적용 */}
-                  <div className="absolute bottom-0 left-0 right-0 backdrop-blur-[2px] px-2 py-1 md:px-3 md:py-2">
-                    <div className="text-white text-xs font-semibold truncate" style={{ maxWidth: "100%" }}>
-                      {place.address}
+                  {hasImage ? (
+                    <img 
+                      src={convertToNaverResizeImageUrl(place.images?.[0])} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt={place.name}
+                      loading="lazy"
+                      onError={handleImageError}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-surface-300">
+                      <SquareX className="size-10 stroke-[1.5]" />
                     </div>
-                    <div className="relative inline-block max-w-full">
-                      <div className="text-white text-xs md:text-sm font-bold truncate leading-tight line-clamp-2 relative z-10" style={{ maxWidth: "100%" }}>
+                  )}
+                  
+                  {/* 상단 우측 폴더 갯수 표시 */}
+                  {folders.length > 0 && (
+                    <div className="absolute top-1.5 right-1.5 z-10">
+                      <span className="flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449]/90 text-white text-[9px] font-black rounded-sm backdrop-blur-sm shadow-sm">
+                        {folders.length}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 하단 정보 오버레이 (blur 처리) */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-[2px] p-2 flex flex-col gap-0.5">
+                    <span className="text-[10px] text-white/80 font-bold truncate block">
+                      {place.group2} {place.group3}
+                    </span>
+                    <div className="relative inline-block w-fit max-w-full">
+                      <span className="text-[13px] text-white font-black truncate block leading-tight">
                         {place.name}
-                      </div>
+                      </span>
+                      {/* 폴더 갯수에 따른 녹색선 */}
                       {folders.length > 0 && (
                         <div 
                           className={cn(
-                            "absolute bottom-0 left-0 w-full rounded-full transition-all",
-                            folders.length >= 15 ? "h-[4px] bg-[#1E8449]" :
-                            folders.length >= 12 ? "h-[3.5px] bg-[#229954]" :
-                            folders.length >= 9 ? "h-[3px] bg-[#27AE60]" :
-                            folders.length >= 6 ? "h-[2.5px] bg-[#2ECC71]" :
-                            folders.length >= 3 ? "h-[2px] bg-[#52BE80]" :
-                            "h-[1.5px] bg-[#ABEBC6]"
+                            "absolute -bottom-0.5 left-0 w-full rounded-full",
+                            folders.length >= 15 ? "h-[2.5px] bg-[#1E8449]" :
+                            folders.length >= 12 ? "h-[2.2px] bg-[#229954]" :
+                            folders.length >= 9 ? "h-[2px] bg-[#27AE60]" :
+                            folders.length >= 6 ? "h-[1.8px] bg-[#2ECC71]" :
+                            folders.length >= 3 ? "h-[1.5px] bg-[#52BE80]" :
+                            "h-[1.2px] bg-[#ABEBC6]"
                           )} 
                         />
                       )}
                     </div>
                   </div>
-
-                  {place.features && place.features.length > 0 && (
-                    <div className="absolute top-2 right-2 z-10">
-                      <TvMinimalPlay className="size-4 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]" />
-                    </div>
-                  )}
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* 더 보기 버튼 */}
         {hasNextPage && !isInitialLoading && (
-          <div className="p-10 flex justify-center">
-            <Button
+          <div className="p-12 flex justify-center">
+            <button
               onClick={() => fetchNextPage()}
-              isLoading={isFetchingNextPage}
-              className="bg-white dark:bg-surface-800 border-2 border-[#2B4562] text-[#2B4562] dark:text-white font-black rounded-2xl px-10 h-14 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all text-lg"
+              className="text-surface-300 font-bold hover:text-surface-900 transition-colors text-sm flex items-center gap-1.5"
             >
-              더 많은 장소 보기
-              <ChevronDown className="size-5 ml-2" />
-            </Button>
+              더 보기
+              <ChevronDown className="size-4" />
+            </button>
           </div>
         )}
       </main>
 
       {/* 검색 오버레이 */}
       {isSearchMode && (
-        <div className="fixed inset-0 z-[100] bg-[#FFF9F5] dark:bg-surface-950 flex flex-col">
-          <div className="flex items-center gap-3 p-4 border-b-2 border-[#2B4562]/10">
-            <Button variant="ghost" size="icon" onClick={() => setIsSearchMode(false)} className="rounded-xl border-2 border-transparent active:border-[#2B4562]/20">
-              <X className="size-7 text-[#2B4562] dark:text-white" />
+        <div className="fixed inset-0 z-[100] bg-white flex flex-col">
+          <div className="flex items-center gap-3 p-4 border-b border-surface-100">
+            <Button variant="ghost" size="icon" onClick={() => setIsSearchMode(false)}>
+              <X className="size-6 text-surface-900" />
             </Button>
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-[#2B4562]/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-surface-300" />
               <Input 
                 autoFocus
-                placeholder="장소명, 메뉴, 지역 검색..."
+                placeholder="장소, 메뉴, 지역 검색"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-surface-900 border-2 border-[#2B4562]/10 h-13 pl-12 rounded-2xl font-bold text-lg focus-visible:ring-0 focus-visible:border-[#F48E54]"
+                className="w-full bg-surface-50 border-none h-11 pl-10 rounded-xl font-bold focus-visible:ring-1 focus-visible:ring-surface-200"
               />
-            </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="mb-8">
-              <h4 className="text-sm font-black text-[#2B4562]/40 uppercase tracking-widest mb-5">최근 검색어</h4>
-              <div className="flex flex-wrap gap-2.5">
-                {["성수동 카페", "강남역 맛집", "주차 가능한 일식"].map(tag => (
-                  <span key={tag} className="px-5 py-2.5 bg-white dark:bg-surface-800 border-2 border-[#2B4562]/10 rounded-2xl text-[15px] font-bold text-[#2B4562] dark:text-surface-300 active:border-[#F48E54] cursor-pointer">
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </div>
