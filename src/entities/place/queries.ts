@@ -69,7 +69,6 @@ export function usePlacesByFilters(filters: any) {
         offset: pageParam, 
         limit: 21,
         image_limit: 5,
-        theme_codes: filters.theme_code ? [filters.theme_code] : null
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

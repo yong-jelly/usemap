@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
+import { THEMES } from "@/widgets/ExploreFilterSheet/ThemeTab";
 import { Button, Input, Skeleton } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
@@ -215,14 +216,17 @@ export function ExplorePage() {
                   }} />
                 </div>
               ))}
-              {filters.theme_codes?.map(themeCode => (
-                <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold border border-indigo-100">
-                  <span>✨ {themeCode}</span>
-                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                    setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
-                  }} />
-                </div>
-              ))}
+              {filters.theme_codes?.map(themeCode => {
+                const theme = THEMES.find(t => t.code === themeCode);
+                return (
+                  <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold border border-indigo-100">
+                    <span>✨ {theme?.theme_name || themeCode}</span>
+                    <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                      setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
+                    }} />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
