@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { 
   Search, 
   Filter, 
@@ -6,7 +6,8 @@ import {
   X, 
   LayoutGrid,
   List as ListIcon,
-  SquareX
+  SquareX,
+  Loader2
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
@@ -24,7 +25,7 @@ interface ExplorerFilterState {
   group3: string | null;
   categories: string[] | null;
   features: string[] | null;
-  theme_code: string | null;
+  theme_codes: string[] | null;
   rating: number | null;
   exclude_franchises: boolean;
   price_max?: number;
@@ -46,12 +47,17 @@ export function ExplorePage() {
     group3: "태평로1가",
     categories: [],
     features: [],
-    theme_code: null,
+    theme_codes: [],
     rating: null,
     exclude_franchises: true,
   };
 
   const [filters, setFilters] = useState<ExplorerFilterState>(defaultFilters);
+
+  // 필터가 변경될 때마다 스크롤을 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [filters]);
 
   const {
     data,
@@ -61,6 +67,35 @@ export function ExplorePage() {
     fetchNextPage,
     isError,
   } = usePlacesByFilters(filters);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { 
+        threshold: 0,
+        rootMargin: '200px' // 화면 하단 도착 200px 전에 로드 시작
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const places = useMemo(() => (data?.pages.flatMap((page) => page) || []) as any[], [data]);
 
@@ -82,9 +117,9 @@ export function ExplorePage() {
   // 활성화된 필터 개수 계산 (위치와 기본 카테고리 제외)
   const activeExtraFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.theme_code) count++;
+    if (filters.theme_codes && filters.theme_codes.length > 0) count += filters.theme_codes.length;
     if (!filters.exclude_franchises) count++;
-    if (filters.categories && filters.categories.length > 0) count++;
+    if (filters.categories && filters.categories.length > 0) count += filters.categories.length;
     return count;
   }, [filters]);
 
@@ -162,7 +197,7 @@ export function ExplorePage() {
           </div>
 
           {/* 활성 필터 태그 (조건이 있을 때만 미세하게 노출) */}
-          {(filters.group2 || filters.categories && filters.categories.length > 0 || filters.theme_code) && (
+          {(filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0)) && (
             <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto scrollbar-hide">
               {filters.group2 && (
                 <div key={filters.group2} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold border border-blue-100">
@@ -180,12 +215,14 @@ export function ExplorePage() {
                   }} />
                 </div>
               ))}
-              {filters.theme_code && (
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold border border-indigo-100">
-                  <span>✨ {filters.theme_code}</span>
-                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => setFilters(prev => ({ ...prev, theme_code: null }))} />
+              {filters.theme_codes?.map(themeCode => (
+                <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold border border-indigo-100">
+                  <span>✨ {themeCode}</span>
+                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                    setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
+                  }} />
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>
@@ -298,14 +335,8 @@ export function ExplorePage() {
         )}
 
         {hasNextPage && !isInitialLoading && (
-          <div className="p-12 flex justify-center">
-            <button
-              onClick={() => fetchNextPage()}
-              className="text-surface-300 font-bold hover:text-surface-900 transition-colors text-sm flex items-center gap-1.5"
-            >
-              더 보기
-              <ChevronDown className="size-4" />
-            </button>
+          <div ref={observerTarget} className="p-12 flex justify-center">
+            <Loader2 className="size-6 text-surface-300 animate-spin" />
           </div>
         )}
       </main>

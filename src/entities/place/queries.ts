@@ -67,7 +67,9 @@ export function usePlacesByFilters(filters: any) {
       placeApi.listByFilters({ 
         ...filters,
         offset: pageParam, 
-        limit: 21 
+        limit: 21,
+        image_limit: 5,
+        theme_codes: filters.theme_code ? [filters.theme_code] : null
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

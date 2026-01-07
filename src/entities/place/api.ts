@@ -48,10 +48,11 @@ export const placeApi = {
     features?: string[] | null;
     limit?: number;
     offset?: number;
-    theme_code?: string | null;
+    theme_codes?: string[] | null;
     exclude_franchises?: boolean;
+    image_limit?: number;
   }) => {
-    const response = await apiClient.rpc<any>("v1_list_places_by_filters", {
+    const response = await apiClient.rpc<any>("v2_list_places_by_filters", {
       p_group1: params.group1 || null,
       p_group2: params.group2 || null,
       p_group3: params.group3 || null,
@@ -59,8 +60,9 @@ export const placeApi = {
       p_convenience: params.features && params.features.length > 0 ? params.features : null,
       p_limit: params.limit || 21,
       p_offset: params.offset || 0,
-      p_theme_code: params.theme_code || null,
+      p_theme_codes: params.theme_codes && params.theme_codes.length > 0 ? params.theme_codes : null,
       p_exclude_franchises: params.exclude_franchises ?? true,
+      p_image_limit: params.image_limit || 3,
     });
     
     return response.data.map((item: any) => item.place_data as Place);

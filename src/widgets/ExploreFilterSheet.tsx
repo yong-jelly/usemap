@@ -34,13 +34,18 @@ export function ExploreFilterSheet({
   const [selectedGroup1, setSelectedGroup1] = useState<string | null>(filters.group1);
   const [selectedGroup2, setSelectedGroup2] = useState<string | null>(filters.group2);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(filters.categories || []);
-  const [selectedThemes, setSelectedThemes] = useState<string[]>(filters.theme_code ? [filters.theme_code] : []);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>(filters.theme_codes || []);
 
   const tabs = [
-    { id: "region", label: "지역" },
-    { id: "category", label: "카테고리" },
-    { id: "theme", label: "테마" },
+    { id: "region", label: "지역", count: (selectedGroup1 || selectedGroup2) ? 1 : 0 },
+    { id: "category", label: "카테고리", count: selectedCategories.length },
+    { id: "theme", label: "테마", count: selectedThemes.length },
   ];
+
+  const isResetEnabled = selectedGroup1 !== null || 
+    (selectedGroup2 !== null && selectedGroup2 !== "전체") || 
+    selectedCategories.length > 0 || 
+    selectedThemes.length > 0;
 
   const handleGroup1Select = (group1: string) => {
     setSelectedGroup1(group1);
@@ -60,11 +65,15 @@ export function ExploreFilterSheet({
   };
 
   const handleThemeToggle = (themeCode: string) => {
-    setSelectedThemes(prev =>
-      prev.includes(themeCode)
-        ? [] // 단일 선택으로 변경 (API 제약 및 Svelte 레퍼런스 준수)
-        : [themeCode]
-    );
+    setSelectedThemes(prev => {
+      if (prev.includes(themeCode)) {
+        return prev.filter(t => t !== themeCode);
+      }
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, themeCode];
+    });
   };
 
   const handleReset = () => {
@@ -81,7 +90,7 @@ export function ExploreFilterSheet({
       group2: selectedGroup2 === "전체" ? null : selectedGroup2,
       group3: null, // 상세 지역(dong)은 현재 지원하지 않으므로 null로 초기화
       categories: selectedCategories.length > 0 ? selectedCategories : null,
-      theme_code: selectedThemes.length > 0 ? selectedThemes[0] : null,
+      theme_codes: selectedThemes.length > 0 ? selectedThemes : null,
       exclude_franchises: filters.exclude_franchises ?? true
     });
   };
@@ -101,13 +110,21 @@ export function ExploreFilterSheet({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex-1 py-4 text-lg font-black transition-colors relative",
+                    "flex-1 py-4 text-lg font-black transition-colors relative flex items-center justify-center gap-1.5",
                     isActive 
                       ? "text-[#6366F1]" 
                       : "text-surface-400 hover:text-surface-600"
                   )}
                 >
                   {tab.label}
+                  {tab.count > 0 && (
+                    <span className={cn(
+                      "flex items-center justify-center size-5 rounded-full text-[11px] font-bold transition-colors",
+                      isActive ? "bg-[#6366F1] text-white" : "bg-surface-100 text-surface-400"
+                    )}>
+                      {tab.count}
+                    </span>
+                  )}
                   {isActive && (
                     <div className="absolute bottom-[-2px] inset-x-0 h-[3px] bg-[#6366F1] rounded-t-full mx-8" />
                   )}
@@ -145,9 +162,16 @@ export function ExploreFilterSheet({
         <DrawerFooter className="p-6 border-t-2 border-surface-50 dark:border-surface-800 flex flex-row items-center gap-6 bg-white dark:bg-surface-900">
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 text-surface-400 font-black hover:text-[#2B4562] transition-colors group"
+            disabled={!isResetEnabled}
+            className={cn(
+              "flex items-center gap-2 font-black transition-colors group",
+              isResetEnabled ? "text-surface-400 hover:text-[#2B4562]" : "text-surface-200 cursor-not-allowed"
+            )}
           >
-            <RotateCcw className="size-5 transition-transform group-active:rotate-[-45deg]" />
+            <RotateCcw className={cn(
+              "size-5 transition-transform",
+              isResetEnabled && "group-active:rotate-[-45deg]"
+            )} />
             <span className="text-lg">초기화</span>
           </button>
           <Button

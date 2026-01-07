@@ -25,3 +25,5 @@
 18. `017_v1_utility_functions.sql`: 공통 응답 처리
 19. `018_v1_more_aggregation_functions.sql`: 추가 집계 함수
 20. `019_v1_search_and_list_functions.sql`: 검색 및 개인화 목록
+21. `021_v1_list_places_by_filters.sql`: 필터 기반 장소 목록 조회
+22. `022_v2_list_places_by_filters.sql`: 필터 기반 장소 목록 조회 (V2)
