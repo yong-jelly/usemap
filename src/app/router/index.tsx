@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-router";
 import { Header, BottomNav } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
+import { AuthModal } from "@/features/auth/ui/AuthModal";
 
 // Page Imports
 import { HomePage } from "@/pages/HomePage";
@@ -72,6 +73,7 @@ function RootLayout() {
         <Outlet />
       </main>
       <BottomNav />
+      <AuthModal />
     </div>
   );
 }

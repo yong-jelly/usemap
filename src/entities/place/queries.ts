@@ -13,6 +13,11 @@ export const placeKeys = {
   filters: (filters: any) => [...placeKeys.all, "filters", filters] as const,
   naverFolders: () => [...placeKeys.all, "naverFolders"] as const,
   youtubeChannels: () => [...placeKeys.all, "youtubeChannels"] as const,
+  mySaved: () => [...placeKeys.all, "mySaved"] as const,
+  myRecent: () => [...placeKeys.all, "myRecent"] as const,
+  myLiked: () => [...placeKeys.all, "myLiked"] as const,
+  myVisited: () => [...placeKeys.all, "myVisited"] as const,
+  communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
 };
 
 /**
@@ -106,6 +111,85 @@ export function usePlacesByFilters(filters: any) {
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.length < 21) return undefined;
       return allPages.length * 21;
+    },
+  });
+}
+
+/**
+ * 내가 저장한 장소 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useMySavedPlaces() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.mySaved(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getMyBookmarkedPlaces(21, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 21) return undefined;
+      return allPages.length * 21;
+    },
+  });
+}
+
+/**
+ * 내가 최근 본 장소 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useMyRecentPlaces() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.myRecent(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getMyRecentViewPlaces(21, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 21) return undefined;
+      return allPages.length * 21;
+    },
+  });
+}
+
+/**
+ * 내가 좋아요 누른 장소 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useMyLikedPlaces() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.myLiked(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getMyLikedPlaces(21, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 21) return undefined;
+      return allPages.length * 21;
+    },
+  });
+}
+
+/**
+ * 내가 방문한 장소 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useMyVisitedPlaces() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.myVisited(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getMyVisitedPlaces(21, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 21) return undefined;
+      return allPages.length * 21;
+    },
+  });
+}
+
+/**
+ * 커뮤니티 게시글 목록을 지역별로 무한 스크롤 조회하는 Hook
+ */
+export function useCommunityContents(filters: { domain?: string | null }) {
+  return useInfiniteQuery({
+    queryKey: placeKeys.communityContents(filters),
+    queryFn: ({ pageParam = 0 }) => placeApi.getCommunityContents({
+      domain: filters.domain,
+      limit: 20,
+      offset: pageParam,
+    }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
     },
   });
 }

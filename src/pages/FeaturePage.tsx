@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNaverFolders, useYoutubeChannels } from "@/entities/place/queries";
+import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
 import { cn } from "@/shared/lib/utils";
-import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { Bookmark, Plus, Star, SquareX, ChevronRight } from "lucide-react";
-import { Button } from "@/shared/ui";
+import { Plus } from "lucide-react";
+import { Button, PlaceSlider } from "@/shared/ui";
 
 /**
  * 피쳐 페이지 컴포넌트
@@ -13,8 +12,8 @@ export function FeaturePage() {
   const [activeTab, setActiveTab] = useState("folder");
 
   const tabs = [
-    { id: "folder", label: "저장" },
-    { id: "youtube", label: "추천" },
+    { id: "folder", label: "플레이스" },
+    { id: "youtube", label: "유튜브" },
   ];
 
   return (
@@ -56,11 +55,7 @@ export function FeaturePage() {
       <div className="flex-1 overflow-y-auto">
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
-        {activeTab === "community" && (
-          <div className="flex flex-col items-center justify-center py-20 text-surface-400">
-            <p className="text-lg font-medium">준비 중입니다</p>
-          </div>
-        )}
+        {activeTab === "community" && <CommunityList />}
       </div>
     </div>
   );
@@ -104,64 +99,14 @@ function NaverFolderList() {
           )}
 
           {/* 장소 슬라이더 */}
-          <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 -mx-4 px-4 snap-x">
-            {folder.preview_places?.map((place: any) => (
-              <div 
-                key={place.id} 
-                className="flex-shrink-0 w-36 snap-start cursor-pointer"
-                onClick={() => showPopup(place.id)}
-              >
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2 shadow-sm bg-surface-100 dark:bg-surface-800">
-                  {place.thumbnail ? (
-                    <img 
-                      src={convertToNaverResizeImageUrl(place.thumbnail)} 
-                      alt={place.name} 
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-surface-300 dark:text-surface-600">
-                      <SquareX className="size-8 stroke-[1.5]" />
-                    </div>
-                  )}
-                  {/* 오버레이 정보 */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-8 flex flex-col gap-0.5">
-                    <span className="text-white text-[13px] font-bold line-clamp-1">{place.name}</span>
-                    <div className="flex items-center gap-1 text-white/80 text-[10px] font-medium">
-                      <span>{place.group2}</span>
-                      <span className="opacity-50">•</span>
-                      <span>{place.category}</span>
-                    </div>
-                  </div>
-                  {/* 저장 버튼 오버레이 (우측 하단) */}
-                  <button className="absolute bottom-2 right-2 p-1 text-white/90 hover:text-white transition-colors">
-                    <Bookmark className="size-4" />
-                  </button>
-                </div>
-                {/* 하단 점수/리뷰 정보 (이미지 밖) */}
-                <div className="flex items-center gap-1.5 mt-1">
-                   <div className="flex items-center gap-0.5">
-                      <Star className="size-3 text-yellow-400 fill-yellow-400" />
-                      <span className="text-[11px] font-black">{place.score || 0}</span>
-                   </div>
-                   <span className="text-[11px] text-surface-400">({place.review_count || 0})</span>
-                </div>
-              </div>
-            ))}
-            
-            {/* 더보기 버튼 (가로 스크롤 끝) */}
-            {folder.place_count > 10 && (
-              <div className="flex-shrink-0 w-36 snap-start flex flex-col">
-                <div className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center gap-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors cursor-pointer bg-surface-50 dark:bg-surface-900/50">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-surface-800 shadow-sm flex items-center justify-center">
-                    <ChevronRight className="size-5" />
-                  </div>
-                  <span className="text-[13px] font-bold">더보기</span>
-                </div>
-                <div className="mt-auto h-6" /> {/* 정렬용 여백 */}
-              </div>
-            )}
+          <div className="-mx-4">
+            <PlaceSlider
+              title=""
+              items={folder.preview_places || []}
+              onItemClick={showPopup}
+              onMoreClick={() => {}}
+              showMoreThreshold={10}
+            />
           </div>
         </section>
       ))}
@@ -224,65 +169,84 @@ function YoutubeChannelList() {
           </div>
 
           {/* 장소 슬라이더 */}
-          <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 -mx-4 px-4 snap-x">
-            {channel.preview_places?.map((place: any) => (
-              <div 
-                key={place.id} 
-                className="flex-shrink-0 w-36 snap-start cursor-pointer group"
-                onClick={() => showPopup(place.id)}
-              >
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2 shadow-sm bg-surface-100 dark:bg-surface-800">
-                  {place.thumbnail ? (
-                    <img 
-                      src={convertToNaverResizeImageUrl(place.thumbnail)} 
-                      alt={place.name} 
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-surface-300 dark:text-surface-600">
-                      <SquareX className="size-8 stroke-[1.5]" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-8 flex flex-col gap-0.5">
-                    <span className="text-white text-[13px] font-bold line-clamp-1">{place.name}</span>
-                    <div className="flex items-center gap-1 text-white/80 text-[10px] font-medium">
-                      <span>{place.group2}</span>
-                      <span className="opacity-50">•</span>
-                      <span>{place.category}</span>
-                    </div>
-                  </div>
-                  {/* 저장 버튼 오버레이 (우측 하단) */}
-                  <button className="absolute bottom-2 right-2 p-1 text-white/90 hover:text-white transition-colors">
-                    <Bookmark className="size-4" />
-                  </button>
-                </div>
-                {/* 하단 점수/리뷰 정보 */}
-                <div className="flex items-center gap-1.5 mt-1">
-                   <div className="flex items-center gap-0.5">
-                      <Star className="size-3 text-yellow-400 fill-yellow-400" />
-                      <span className="text-[11px] font-black">{place.score || 0}</span>
-                   </div>
-                   <span className="text-[11px] text-surface-400">({place.review_count || 0})</span>
-                </div>
-              </div>
-            ))}
-
-            {/* 더보기 버튼 (가로 스크롤 끝) */}
-            {channel.place_count > 10 && (
-              <div className="flex-shrink-0 w-36 snap-start flex flex-col">
-                <div className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center gap-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors cursor-pointer bg-surface-50 dark:bg-surface-900/50">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-surface-800 shadow-sm flex items-center justify-center">
-                    <ChevronRight className="size-5" />
-                  </div>
-                  <span className="text-[13px] font-bold">더보기</span>
-                </div>
-                <div className="mt-auto h-6" />
-              </div>
-            )}
+          <div className="-mx-4">
+            <PlaceSlider
+              title=""
+              items={channel.preview_places || []}
+              onItemClick={showPopup}
+              onMoreClick={() => {}}
+              showMoreThreshold={10}
+            />
           </div>
         </section>
+      ))}
+
+      {hasNextPage && (
+        <div className="px-4 py-4">
+          <Button 
+            variant="ghost" 
+            className="w-full text-surface-400" 
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "로딩 중..." : "더 보기"}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 커뮤니티 목록 렌더링 컴포넌트
+ */
+function CommunityList() {
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
+    domain: selectedDomain,
+  });
+  const showPopup = usePlacePopup((state) => state.show);
+
+  const domains = [
+    { id: null, label: "전체" },
+    { id: "damoang.net", label: "다모앙" },
+    { id: "clien.net", label: "클리앙" },
+    { id: "bobaedream.co.kr", label: "보배드림" },
+  ];
+
+  if (isLoading) return <LoadingSkeleton />;
+
+  const regions = data?.pages.flatMap((page) => page) || [];
+
+  return (
+    <div className="py-6">
+      {/* 도메인 필터 */}
+      <div className="flex items-center gap-2 px-4 mb-8 overflow-x-auto scrollbar-hide">
+        {domains.map((domain) => (
+          <button
+            key={domain.id || 'all'}
+            onClick={() => setSelectedDomain(domain.id)}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-sm font-bold transition-all border shrink-0",
+              selectedDomain === domain.id
+                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
+                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800"
+            )}
+          >
+            {domain.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 지역별 섹션 */}
+      {regions.map(region => (
+        <PlaceSlider
+          key={region.region_name}
+          title={`${region.region_name}지역`}
+          countLabel={`${region.place_count}개 매장`}
+          items={region.preview_contents}
+          onItemClick={showPopup}
+        />
       ))}
 
       {hasNextPage && (

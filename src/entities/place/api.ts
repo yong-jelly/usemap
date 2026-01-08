@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/api/client";
-import type { Place, PlaceDetails, NaverFolder, YoutubeChannel } from "./types";
+import type { Place, PlaceDetails, NaverFolder, YoutubeChannel, CommunityContent, CommunityRegion } from "./types";
 
 /**
  * 장소 관련 API 호출을 관리하는 객체
@@ -84,6 +84,66 @@ export const placeApi = {
    */
   getYoutubeChannels: async (limit: number = 20, offset: number = 0) => {
     const response = await apiClient.rpc<YoutubeChannel>("v2_get_youtube_channels", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 커뮤니티 게시글 목록을 지역별로 조회합니다 (v2).
+   */
+  getCommunityContents: async (params: {
+    domain?: string | null;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await apiClient.rpc<CommunityRegion>("v2_get_community_contents", {
+      p_domain: params.domain || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
+   * 내가 저장(북마크)한 장소 목록을 조회합니다.
+   */
+  getMyBookmarkedPlaces: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<any>("v1_get_my_bookmarked_places", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 내가 최근 본 장소 목록을 조회합니다.
+   */
+  getMyRecentViewPlaces: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<any>("v1_get_my_recent_view_places", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 내가 좋아요 누른 장소 목록을 조회합니다.
+   */
+  getMyLikedPlaces: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<any>("v1_get_my_liked_places", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 내가 방문한 장소 목록을 조회합니다.
+   */
+  getMyVisitedPlaces: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<any>("v1_list_visited_place", {
       p_limit: limit,
       p_offset: offset,
     });

@@ -12,3 +12,7 @@ export * from "./Dialog";
 export * from "./Skeleton";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";
+
+// Place 관련 UI
+export * from "./place/PlaceSlider";
+export * from "./place/PlaceSliderCard";

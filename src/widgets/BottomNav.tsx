@@ -1,6 +1,8 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { House, Copy, TvMinimalPlay, User } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { useUserStore } from "@/entities/user";
+import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 
 /**
  * 하단 네비게이션 바 컴포넌트
@@ -8,7 +10,10 @@ import { cn } from "@/shared/lib/utils";
  */
 export function BottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
+  const { isAuthenticated } = useUserStore();
+  const { openLogin } = useAuthModalStore();
 
   /**
    * 네비게이션 아이템 정의
@@ -34,11 +39,20 @@ export function BottomNav() {
           // 현재 경로와 아이템의 경로가 일치하는지 확인
           const isActive = currentPath === item.href || (item.href === "/" && currentPath === "/home");
           
+          const handleClick = (e: React.MouseEvent) => {
+            if (item.href === "/profile" && !isAuthenticated) {
+              e.preventDefault();
+              openLogin();
+            } else {
+              scrollToTop();
+            }
+          };
+
           return (
             <Link
               key={item.href}
               to={item.href}
-              onClick={scrollToTop}
+              onClick={handleClick}
               className={cn(
                 "flex h-full flex-1 flex-col items-center justify-center transition-colors",
                 isActive

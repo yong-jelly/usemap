@@ -82,3 +82,25 @@ export interface YoutubeChannel {
   place_count: number;
   preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
 }
+
+export interface CommunityContent {
+  id: string;
+  place_id: string;
+  place_name: string;
+  category: string;
+  thumbnail: string;
+  score: number;
+  review_count: number;
+  group1: string;
+  group2: string;
+  title: string;
+  content_url: string;
+  domain: string;
+  published_at: string;
+}
+
+export interface CommunityRegion {
+  region_name: string;
+  place_count: number;
+  preview_contents: CommunityContent[];
+}
