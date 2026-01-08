@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { House, Copy, TvMinimalPlay, User } from "lucide-react";
 import { cn } from "@/shared/lib/utils";

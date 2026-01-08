@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
 import { cn } from "@/shared/lib/utils";
-import { usePlacePopup } from "@/shared/lib/place-popup";
 import { Plus } from "lucide-react";
 import { Button, PlaceSlider } from "@/shared/ui";
 
@@ -65,8 +65,9 @@ export function FeaturePage() {
  * 네이버 폴더 목록 렌더링 컴포넌트
  */
 function NaverFolderList() {
+  const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNaverFolders();
-  const showPopup = usePlacePopup((state) => state.show);
+  const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
   if (isLoading) return <LoadingSkeleton />;
 
@@ -131,8 +132,9 @@ function NaverFolderList() {
  * 유튜브 채널 목록 렌더링 컴포넌트
  */
 function YoutubeChannelList() {
+  const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useYoutubeChannels();
-  const showPopup = usePlacePopup((state) => state.show);
+  const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
   if (isLoading) return <LoadingSkeleton />;
 
@@ -201,11 +203,12 @@ function YoutubeChannelList() {
  * 커뮤니티 목록 렌더링 컴포넌트
  */
 function CommunityList() {
+  const navigate = useNavigate();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
     domain: selectedDomain,
   });
-  const showPopup = usePlacePopup((state) => state.show);
+  const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
   const domains = [
     { id: null, label: "전체" },

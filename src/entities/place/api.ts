@@ -1,5 +1,14 @@
 import { apiClient } from "@/shared/api/client";
-import type { Place, PlaceDetails, NaverFolder, YoutubeChannel, CommunityContent, CommunityRegion } from "./types";
+import type { 
+  Place, 
+  PlaceDetails, 
+  NaverFolder, 
+  YoutubeChannel, 
+  CommunityContent, 
+  CommunityRegion,
+  PlaceUserReview,
+  Feature
+} from "./types";
 
 /**
  * 장소 관련 API 호출을 관리하는 객체
@@ -8,12 +17,154 @@ import type { Place, PlaceDetails, NaverFolder, YoutubeChannel, CommunityContent
 export const placeApi = {
   /**
    * 장소의 상세 정보(좋아요, 저장, 댓글 등)를 조회합니다.
+   * @deprecated v1_get_place_by_id_with_set_recent_view 사용 권장
    */
   getDetails: async (placeId: string) => {
     const response = await apiClient.rpc<PlaceDetails>("v1_get_place_details", {
       p_place_id: placeId,
     });
     return response.data[0];
+  },
+
+  /**
+   * ID 기반 장소 상세 데이터 조회 및 최근 본 장소 기록
+   */
+  getPlaceByIdWithRecentView: async (placeId: string) => {
+    const response = await apiClient.rpc<Place>("v1_get_place_by_id_with_set_recent_view", {
+      p_business_id: placeId,
+    });
+    return response.data[0];
+  },
+
+  /**
+   * 장소의 사용자 리뷰 목록을 조회합니다.
+   */
+  getUserReviews: async (placeId: string, limit: number = 100) => {
+    const response = await apiClient.rpc<PlaceUserReview>("v1_list_place_user_review", {
+      p_place_id: placeId,
+      p_limit: limit,
+    });
+    return response.data;
+  },
+
+  /**
+   * 장소의 특징(유튜브, 커뮤니티 등) 목록을 조회합니다.
+   */
+  getPlaceFeatures: async (placeId: string) => {
+    const response = await apiClient.rpc<Feature>("v1_get_place_features", {
+      p_business_id: placeId,
+    });
+    return response.data;
+  },
+
+  /**
+   * 사용자 리뷰를 저장하거나 수정합니다.
+   */
+  upsertUserReview: async (params: {
+    p_review_id?: string;
+    p_place_id: string;
+    p_review_content: string;
+    p_score: number;
+    p_is_private: boolean;
+    p_gender_code?: string | null;
+    p_age_group_code?: string | null;
+    p_tag_codes?: string[];
+    p_profile_gender_and_age_by_pass?: boolean;
+  }) => {
+    const response = await apiClient.rpc<any>("v1_upsert_place_user_review", params);
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 사용자 리뷰를 삭제합니다.
+   */
+  deleteUserReview: async (reviewId: string) => {
+    const response = await apiClient.rpc<any>("v1_delete_place_user_review", {
+      p_review_id: reviewId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 장소 특징(유튜브, 커뮤니티 등)을 추가하거나 수정합니다.
+   */
+  upsertPlaceFeature: async (params: {
+    p_feature_id?: string;
+    p_business_id: string;
+    p_platform_type: string;
+    p_content_url: string;
+    p_title: string | null;
+    p_metadata: any;
+  }) => {
+    const response = await apiClient.rpc<any>("v1_upsert_place_feature", params);
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 장소 특징을 삭제합니다.
+   */
+  deletePlaceFeature: async (featureId: string) => {
+    const response = await apiClient.rpc<any>("v1_delete_place_feature", {
+      p_feature_id: featureId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 좋아요 상태를 토글합니다.
+   */
+  toggleLike: async (params: { likedId: string; likedType: string; refId: string }) => {
+    const response = await apiClient.rpc<any>("v1_toggle_like", {
+      p_liked_id: params.likedId,
+      p_liked_type: params.likedType,
+      p_ref_liked_id: params.refId,
+    });
+    return response.data[0].liked as boolean;
+  },
+
+  /**
+   * 저장 상태를 토글합니다.
+   */
+  toggleSave: async (params: { savedId: string; savedType: string; refId: string }) => {
+    const response = await apiClient.rpc<any>("v1_toggle_save", {
+      p_saved_id: params.savedId,
+      p_saved_type: params.savedType,
+      p_ref_saved_id: params.refId,
+    });
+    return response.data[0].saved as boolean;
+  },
+
+  /**
+   * 방문 기록을 저장하거나 취소합니다.
+   */
+  toggleVisited: async (params: { placeId: string; cancel?: boolean }) => {
+    const response = await apiClient.rpc<any>("v1_save_or_update_visited_place", {
+      p_place_id: params.placeId,
+      p_cancel: params.cancel ?? false,
+    });
+    return response.data;
+  },
+
+  /**
+   * 탭별 장소 목록을 조회합니다.
+   */
+  listByTab: async (params: {
+    tabName: string;
+    limit?: number;
+    offset?: number;
+    group1?: string | null;
+  }) => {
+    const response = await apiClient.rpc<any>("v1_list_places_by_tab", {
+      p_tab_name: params.tabName,
+      p_limit: params.limit || 21,
+      p_offset: params.offset || 0,
+      p_group1: params.group1 || null,
+    });
+    return response.data.map((item: any) => item.place_data as Place);
   },
   
   /**

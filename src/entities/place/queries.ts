@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { placeApi } from "./api";
 
 /**
@@ -9,6 +9,8 @@ export const placeKeys = {
   details: (id: string) => [...placeKeys.all, "details", id] as const,
   reviews: (id: string) => [...placeKeys.all, "reviews", id] as const,
   analysis: (id: string) => [...placeKeys.all, "analysis", id] as const,
+  userReviews: (id: string) => [...placeKeys.all, "userReviews", id] as const,
+  features: (id: string) => [...placeKeys.all, "features", id] as const,
   list: (tab: string, group1?: string | null) => [...placeKeys.all, "list", tab, group1] as const,
   filters: (filters: any) => [...placeKeys.all, "filters", filters] as const,
   naverFolders: () => [...placeKeys.all, "naverFolders"] as const,
@@ -22,11 +24,23 @@ export const placeKeys = {
 
 /**
  * 특정 장소의 상세 정보를 조회하는 Hook
+ * @deprecated usePlaceByIdWithRecentView 사용 권장
  */
 export function usePlaceDetails(id: string) {
   return useQuery({
     queryKey: placeKeys.details(id),
     queryFn: () => placeApi.getDetails(id),
+    enabled: !!id,
+  });
+}
+
+/**
+ * ID 기반 장소 상세 데이터 조회 및 최근 본 장소 기록 Hook
+ */
+export function usePlaceByIdWithRecentView(id: string) {
+  return useQuery({
+    queryKey: placeKeys.details(id),
+    queryFn: () => placeApi.getPlaceByIdWithRecentView(id),
     enabled: !!id,
   });
 }
@@ -39,6 +53,121 @@ export function usePlaceReviews(id: string, limit?: number) {
     queryKey: placeKeys.reviews(id),
     queryFn: () => placeApi.getReviews(id, limit),
     enabled: !!id,
+  });
+}
+
+/**
+ * 특정 장소의 사용자 리뷰 목록을 조회하는 Hook
+ */
+export function usePlaceUserReviews(id: string, limit?: number) {
+  return useQuery({
+    queryKey: placeKeys.userReviews(id),
+    queryFn: () => placeApi.getUserReviews(id, limit),
+    enabled: !!id,
+  });
+}
+
+/**
+ * 특정 장소의 특징(유튜브, 커뮤니티 등) 목록을 조회하는 Hook
+ */
+export function usePlaceFeatures(id: string) {
+  return useQuery({
+    queryKey: placeKeys.features(id),
+    queryFn: () => placeApi.getPlaceFeatures(id),
+    enabled: !!id,
+  });
+}
+
+/**
+ * 사용자 리뷰 저장 Mutation Hook
+ */
+export function useUpsertUserReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.upsertUserReview,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.userReviews(variables.p_place_id) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(variables.p_place_id) });
+    },
+  });
+}
+
+/**
+ * 사용자 리뷰 삭제 Mutation Hook
+ */
+export function useDeleteUserReview(placeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.deleteUserReview,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.userReviews(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(placeId) });
+    },
+  });
+}
+
+/**
+ * 장소 특징 저장 Mutation Hook
+ */
+export function useUpsertPlaceFeature() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.upsertPlaceFeature,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.features(variables.p_business_id) });
+    },
+  });
+}
+
+/**
+ * 장소 특징 삭제 Mutation Hook
+ */
+export function useDeletePlaceFeature(placeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.deletePlaceFeature,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.features(placeId) });
+    },
+  });
+}
+
+/**
+ * 좋아요 상태 토글 Mutation Hook
+ */
+export function useToggleLike() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.toggleLike,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(variables.likedId) });
+    },
+  });
+}
+
+/**
+ * 저장 상태 토글 Mutation Hook
+ */
+export function useToggleSave() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.toggleSave,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(variables.savedId) });
+    },
+  });
+}
+
+/**
+ * 방문 기록 토글 Mutation Hook
+ */
+export function useToggleVisited() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.toggleVisited,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(variables.placeId) });
+    },
   });
 }
 

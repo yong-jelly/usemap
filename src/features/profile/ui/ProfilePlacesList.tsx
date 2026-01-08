@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { PlaceCard } from "@/widgets/PlaceCard";
 

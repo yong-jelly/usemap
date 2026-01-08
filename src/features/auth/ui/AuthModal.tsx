@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, X } from "lucide-react";
 import { useAuthModalStore } from "../model/useAuthModalStore";
-import { LoginPage } from "@/pages/auth/LoginPage";
+import { LoginModal } from "@/pages/auth/Login.modal";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { cn } from "@/shared/lib/utils";
 
@@ -82,7 +82,7 @@ export function AuthModal() {
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           <div className="p-6 md:p-8">
             {view === "login" ? (
-              <LoginPage isModal />
+              <LoginModal isModal />
             ) : (
               <SignupPage isModal />
             )}

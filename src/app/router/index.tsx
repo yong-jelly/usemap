@@ -15,7 +15,7 @@ import { WelcomePage } from "@/pages/WelcomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
 // Auth Pages
-import { LoginPage } from "@/pages/auth/LoginPage";
+import { LoginModal } from "@/pages/auth/Login.modal";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { AuthCallbackPage } from "@/pages/auth/AuthCallbackPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
@@ -30,6 +30,7 @@ import { ProfileEditPage } from "@/pages/profile/ProfileEditPage";
 
 // Place Pages
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
+import { PlaceDetailModal } from "@/features/place/ui/PlaceDetail.modal";
 
 /**
  * 페이지 이동 시 스크롤 위치를 최상단으로 복구하는 컴포넌트
@@ -125,7 +126,7 @@ const router = createBrowserRouter([
       {
         path: "auth",
         children: [
-          { path: "login", element: <LoginPage /> },
+          { path: "login", element: <LoginModal /> },
           { path: "signup", element: <SignupPage /> },
           { path: "callback", element: <AuthCallbackPage /> },
           { path: "reset-password", element: <ResetPasswordPage /> },
@@ -151,6 +152,10 @@ const router = createBrowserRouter([
       {
         path: "place/:id",
         element: <PlaceDetailPage />,
+      },
+      {
+        path: "p/status/:id",
+        element: <PlaceDetailModal />,
       },
       // 정의되지 않은 모든 경로에 대한 404 처리
       {

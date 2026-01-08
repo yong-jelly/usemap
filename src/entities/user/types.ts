@@ -4,6 +4,8 @@ export interface UserProfile {
   nickname: string;
   bio?: string;
   profile_image_url?: string;
+  gender_code?: 'M' | 'F' | null;
+  age_group_code?: string | null;
   created_at: string;
   updated_at: string;
 }

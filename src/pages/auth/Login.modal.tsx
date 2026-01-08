@@ -5,11 +5,11 @@ import { supabase } from "@/shared/lib/supabase";
 import { cn } from "@/shared/lib/utils";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 
-interface LoginPageProps {
+interface LoginModalProps {
   isModal?: boolean;
 }
 
-export function LoginPage({ isModal }: LoginPageProps) {
+export function LoginModal({ isModal }: LoginModalProps) {
   const { openSignup } = useAuthModalStore();
 
   const handleGoogleLogin = async () => {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Camera, X, Loader2, RefreshCw } from "lucide-react";
 import { useUserProfile, useUpsertProfile } from "@/entities/user/queries";

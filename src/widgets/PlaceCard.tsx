@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import { 
   MapPinned, 
   Star, 
@@ -14,7 +15,6 @@ import {
 import { Button } from "@/shared/ui";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
-import { usePlacePopup } from "@/shared/lib/place-popup";
 
 interface PlaceCardProps {
   place: any;
@@ -25,10 +25,12 @@ interface PlaceCardProps {
  * 마스코트 테마(Navy, Orange, Cream)를 활용한 소프트 벡터 스타일
  */
 export function PlaceCard({ place }: PlaceCardProps) {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(place.interaction?.is_liked || false);
   const [isSaved, setIsSaved] = useState(place.interaction?.is_saved || false);
   const [showAllFolders, setShowAllFolders] = useState(false);
-  const showPopup = usePlacePopup((state) => state.show);
+  
+  const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
 

@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router";
 import { 
   Search, 
   Filter, 
@@ -15,7 +16,6 @@ import { THEMES } from "@/widgets/ExploreFilterSheet/ThemeTab";
 import { Button, Input, Skeleton } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
-import { usePlacePopup } from "@/shared/lib/place-popup";
 
 /**
  * 탐색 페이지 필터 상태 인터페이스
@@ -36,11 +36,13 @@ interface ExplorerFilterState {
  * 탐색 페이지 컴포넌트
  */
 export function ExplorePage() {
+  const navigate = useNavigate();
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
-  const showPopup = usePlacePopup((state) => state.show);
+  
+  const showPopup = (id: string) => navigate(`/p/status/${id}`);
   
   const defaultFilters: ExplorerFilterState = {
     group1: "서울",

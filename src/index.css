@@ -4,17 +4,21 @@
 
 @layer base {
   * {
-    @apply border-surface-200;
+    @apply border-surface-200 scrollbar-hide;
   }
 
   html {
-    @apply scroll-smooth overflow-y-scroll;
+    @apply overflow-y-scroll scrollbar-hide;
   }
 
   body {
-    @apply min-h-screen bg-white text-surface-900 antialiased;
+    @apply min-h-screen bg-white text-surface-900 antialiased scrollbar-hide;
     font-family: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
     letter-spacing: -0.01em;
+  }
+
+  * {
+    @apply scrollbar-hide;
   }
 
   /* 다크모드 스타일 비활성화
@@ -91,21 +95,8 @@
   }
 }
 
-::-webkit-scrollbar {
-  @apply w-1.5;
-}
+/* 전역 스크롤바 숨김 처리됨 */
 
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-surface-300/70;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-400;
-}
 
 /*
 .dark ::-webkit-scrollbar-thumb {
