@@ -1,5 +1,6 @@
 import { Star, SquareX, Bookmark } from "lucide-react";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
+import { cn } from "@/shared/lib/utils";
 
 interface PlaceSliderCardProps {
   placeId: string;
@@ -10,6 +11,8 @@ interface PlaceSliderCardProps {
   score?: number;
   reviewCount?: number;
   onClick?: (id: string) => void;
+  showRating?: boolean;
+  snap?: boolean;
 }
 
 export function PlaceSliderCard({
@@ -21,10 +24,15 @@ export function PlaceSliderCard({
   score = 0,
   reviewCount = 0,
   onClick,
+  showRating = false,
+  snap = false,
 }: PlaceSliderCardProps) {
   return (
     <div 
-      className="flex-shrink-0 w-36 snap-start cursor-pointer group"
+      className={cn(
+        "flex-shrink-0 w-36 cursor-pointer group",
+        snap && "snap-start"
+      )}
       onClick={() => onClick?.(placeId)}
     >
       <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2 shadow-sm bg-surface-100 dark:bg-surface-800">
@@ -53,13 +61,15 @@ export function PlaceSliderCard({
           <Bookmark className="size-4" />
         </button>
       </div>
-      <div className="flex items-center gap-1.5 mt-1">
-         <div className="flex items-center gap-0.5">
-            <Star className="size-3 text-yellow-400 fill-yellow-400" />
-            <span className="text-[11px] font-black">{score}</span>
-         </div>
-         <span className="text-[11px] text-surface-400">({reviewCount})</span>
-      </div>
+      {showRating && (
+        <div className="flex items-center gap-1.5 mt-1">
+           <div className="flex items-center gap-0.5">
+              <Star className="size-3 text-yellow-400 fill-yellow-400" />
+              <span className="text-[11px] font-black">{score}</span>
+           </div>
+           <span className="text-[11px] text-surface-400">({reviewCount})</span>
+        </div>
+      )}
     </div>
   );
 }

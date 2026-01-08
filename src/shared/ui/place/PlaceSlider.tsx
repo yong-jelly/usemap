@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronRight } from "lucide-react";
 import { PlaceSliderCard } from "./PlaceSliderCard";
+import { cn } from "@/shared/lib/utils";
 
 interface PlaceSliderProps {
   title: string;
@@ -9,6 +10,8 @@ interface PlaceSliderProps {
   onItemClick?: (id: string) => void;
   onMoreClick?: () => void;
   showMoreThreshold?: number;
+  showRating?: boolean;
+  snap?: boolean;
 }
 
 export function PlaceSlider({
@@ -18,9 +21,11 @@ export function PlaceSlider({
   onItemClick,
   onMoreClick,
   showMoreThreshold = 10,
+  showRating = false,
+  snap = false,
 }: PlaceSliderProps) {
   return (
-    <div className="flex flex-col gap-4 mb-10">
+    <div className="flex flex-col gap-3.5 mb-6">
       {(title || countLabel) && (
         <div className="flex items-end justify-between gap-2 px-4">
           <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight">
@@ -31,7 +36,10 @@ export function PlaceSlider({
           )}
         </div>
       )}
-      <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-4 snap-x">
+      <div className={cn(
+        "flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-4",
+        snap && "snap-x"
+      )}>
         {items.map((item) => (
           <PlaceSliderCard
             key={item.id || item.place_id}
@@ -43,12 +51,17 @@ export function PlaceSlider({
             score={item.score}
             reviewCount={item.review_count}
             onClick={onItemClick}
+            showRating={showRating}
+            snap={snap}
           />
         ))}
         
         {onMoreClick && items.length >= showMoreThreshold && (
           <div 
-            className="flex-shrink-0 w-36 snap-start flex flex-col"
+            className={cn(
+              "flex-shrink-0 w-36 flex flex-col",
+              snap && "snap-start"
+            )}
             onClick={onMoreClick}
           >
             <div className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center gap-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors cursor-pointer bg-surface-50 dark:bg-surface-900/50">

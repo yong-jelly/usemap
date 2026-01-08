@@ -30,7 +30,7 @@ export function BottomNav() {
    * 링크 클릭 시 화면 최상단으로 스크롤합니다.
    */
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   return (

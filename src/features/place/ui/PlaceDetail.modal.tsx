@@ -395,9 +395,6 @@ export function PlaceDetailModal() {
               <div className="flex items-end justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-wider uppercase">
-                      {details?.category || "장소"}
-                    </span>
                   </div>
                   <h1 className="text-3xl font-black tracking-tight mb-2 truncate drop-shadow-lg text-white">
                     {details?.name || "장소 정보"}
@@ -534,7 +531,7 @@ export function PlaceDetailModal() {
               <div className="mb-12">
                 <div className="flex items-center justify-between mb-6 px-1">
                   <h3 className="text-xl font-black tracking-tight text-surface-900 dark:text-white">메뉴</h3>
-                  <span className="text-xs font-bold text-surface-400">총 {details.menus.length}개</span>
+                  <span className="text-xs font-bold text-surface-400">{details.menus.length}개</span>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-3">
@@ -549,8 +546,8 @@ export function PlaceDetailModal() {
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-surface-200">
-                            <CookingPot className="size-8 opacity-20" />
+                          <div className="w-full h-full flex items-center justify-center bg-surface-100/50 dark:bg-surface-800/50">
+                            <CookingPot className="size-9 text-surface-300 dark:text-surface-600" />
                           </div>
                         )}
                         {menu.recommend && (

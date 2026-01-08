@@ -1,30 +1,33 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
 import { cn } from "@/shared/lib/utils";
-import { Plus } from "lucide-react";
 import { Button, PlaceSlider } from "@/shared/ui";
+import { Loader2 } from "lucide-react";
 
 /**
  * 피쳐 페이지 컴포넌트
  */
 export function FeaturePage() {
-  const [activeTab, setActiveTab] = useState("folder");
+  const navigate = useNavigate();
+  const { tab } = useParams();
+  const activeTab = tab || "folder";
 
   const tabs = [
     { id: "folder", label: "플레이스" },
     { id: "youtube", label: "유튜브" },
+    { id: "community", label: "커뮤니티" },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950 pb-20">
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md dark:bg-surface-950/80 px-5 pt-8 pb-4">
+      <div className="bg-white/80 backdrop-blur-md dark:bg-surface-950/80 px-5 pt-8 pb-4 z-10 flex-shrink-0">
         <div className="flex items-center gap-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => navigate(`/feature/${tab.id}`)}
               className={cn(
                 "text-2xl font-black transition-colors relative",
                 activeTab === tab.id 
@@ -38,24 +41,20 @@ export function FeaturePage() {
               )}
             </button>
           ))}
-          <button
-            onClick={() => setActiveTab("community")}
-            className={cn(
-              "text-2xl font-black transition-colors relative",
-              activeTab === "community" 
-                ? "text-surface-900 dark:text-white" 
-                : "text-surface-300 dark:text-surface-700"
-            )}
-          >
-            커뮤니티
-          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {activeTab === "folder" && <NaverFolderList />}
-        {activeTab === "youtube" && <YoutubeChannelList />}
-        {activeTab === "community" && <CommunityList />}
+      {/* 컨텐츠 영역: 각 탭이 독립적인 스크롤 컨테이너를 가짐 */}
+      <div className="flex-1 relative overflow-hidden">
+        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "folder" && "hidden")}>
+          <NaverFolderList />
+        </div>
+        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "youtube" && "hidden")}>
+          <YoutubeChannelList />
+        </div>
+        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "community" && "hidden")}>
+          <CommunityList />
+        </div>
       </div>
     </div>
   );
@@ -69,35 +68,45 @@ function NaverFolderList() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNaverFolders();
   const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0, rootMargin: '200px' }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   if (isLoading) return <LoadingSkeleton />;
 
   const folders = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className="flex flex-col gap-10 py-6">
+    <div className="flex flex-col gap-4 py-4">
       {folders.map((folder) => (
-        <section key={folder.folder_id} className="flex flex-col gap-4 px-4">
-          {/* 제목 영역: 타이틀 + 개수 + 구독버튼 */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-1 flex-1">
-              <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep">
-                {folder.name}
-              </h3>
-              <div className="flex items-center gap-1.5 text-sm font-medium text-surface-400">
-                <span>{folder.place_count}개 매장</span>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" className="h-9 px-4 rounded-full border-surface-200 text-xs font-bold gap-1 flex-shrink-0">
-              <Plus className="size-3.5" />
-              구독
-            </Button>
+        <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
+          {/* 제목 영역: 타이틀 + 개수 */}
+          <div className="flex items-end justify-between gap-2">
+            <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep">
+              {folder.name}
+            </h3>
+            <span className="text-sm font-medium text-surface-400 mb-0.5 whitespace-nowrap">
+              {folder.place_count}개 매장
+            </span>
           </div>
-
-          {folder.memo && (
-            <p className="text-sm text-surface-500 dark:text-surface-400 line-clamp-2 -mt-2">
-              {folder.memo}
-            </p>
-          )}
 
           {/* 장소 슬라이더 */}
           <div className="-mx-4">
@@ -107,21 +116,16 @@ function NaverFolderList() {
               onItemClick={showPopup}
               onMoreClick={() => {}}
               showMoreThreshold={10}
+              showRating={false}
+              snap={false}
             />
           </div>
         </section>
       ))}
       
       {hasNextPage && (
-        <div className="px-4 py-4">
-          <Button 
-            variant="ghost" 
-            className="w-full text-surface-400" 
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? "로딩 중..." : "더 보기"}
-          </Button>
+        <div ref={observerTarget} className="p-12 flex justify-center">
+          <Loader2 className="size-6 text-surface-300 animate-spin" />
         </div>
       )}
     </div>
@@ -136,38 +140,54 @@ function YoutubeChannelList() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useYoutubeChannels();
   const showPopup = (id: string) => navigate(`/p/status/${id}`);
 
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0, rootMargin: '200px' }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   if (isLoading) return <LoadingSkeleton />;
 
   const channels = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className="flex flex-col gap-12 py-6">
+    <div className="flex flex-col gap-4 py-4">
       {channels.map((channel) => (
-        <section key={channel.channel_id} className="flex flex-col gap-4 px-4">
-          {/* 헤더: 채널 프로필(크게) + 이름 + 개수 + 구독버튼 */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1 overflow-hidden">
-              <div className="w-12 h-12 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800">
-                <img 
-                  src={channel.channel_thumbnail} 
-                  alt={channel.channel_title} 
-                  className="w-full h-full object-cover" 
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex flex-col gap-0.5 overflow-hidden">
-                <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight truncate">
-                  {channel.channel_title}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm font-medium text-surface-400">
-                  <span>{channel.place_count}개 매장</span>
-                </div>
-              </div>
+        <section key={channel.channel_id} className="flex flex-col gap-2 px-4">
+          {/* 헤더: 채널 프로필 + 이름 + 개수 */}
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800">
+              <img 
+                src={channel.channel_thumbnail} 
+                alt={channel.channel_title} 
+                className="w-full h-full object-cover" 
+                loading="lazy"
+              />
             </div>
-            <Button variant="outline" size="sm" className="h-9 px-4 rounded-full border-surface-200 text-xs font-bold gap-1 flex-shrink-0">
-              <Plus className="size-3.5" />
-              구독
-            </Button>
+            <div className="flex items-end justify-between flex-1 gap-2 overflow-hidden">
+              <h3 className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate">
+                {channel.channel_title}
+              </h3>
+              <span className="text-xs font-medium text-surface-400 mb-0.5 whitespace-nowrap">
+                {channel.place_count}개 매장
+              </span>
+            </div>
           </div>
 
           {/* 장소 슬라이더 */}
@@ -178,21 +198,16 @@ function YoutubeChannelList() {
               onItemClick={showPopup}
               onMoreClick={() => {}}
               showMoreThreshold={10}
+              showRating={false}
+              snap={false}
             />
           </div>
         </section>
       ))}
 
       {hasNextPage && (
-        <div className="px-4 py-4">
-          <Button 
-            variant="ghost" 
-            className="w-full text-surface-400" 
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? "로딩 중..." : "더 보기"}
-          </Button>
+        <div ref={observerTarget} className="p-12 flex justify-center">
+          <Loader2 className="size-6 text-surface-300 animate-spin" />
         </div>
       )}
     </div>
@@ -205,10 +220,34 @@ function YoutubeChannelList() {
 function CommunityList() {
   const navigate = useNavigate();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
     domain: selectedDomain,
   });
+  
   const showPopup = (id: string) => navigate(`/p/status/${id}`);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0, rootMargin: '200px' }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const domains = [
     { id: null, label: "전체" },
@@ -217,23 +256,23 @@ function CommunityList() {
     { id: "bobaedream.co.kr", label: "보배드림" },
   ];
 
-  if (isLoading) return <LoadingSkeleton />;
-
   const regions = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className="py-6">
+    <div className="py-4 flex flex-col gap-2">
       {/* 도메인 필터 */}
-      <div className="flex items-center gap-2 px-4 mb-8 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
         {domains.map((domain) => (
           <button
             key={domain.id || 'all'}
             onClick={() => setSelectedDomain(domain.id)}
+            disabled={isLoading}
             className={cn(
               "px-4 py-1.5 rounded-full text-sm font-bold transition-all border shrink-0",
               selectedDomain === domain.id
                 ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
-                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800"
+                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
           >
             {domain.label}
@@ -241,28 +280,29 @@ function CommunityList() {
         ))}
       </div>
 
-      {/* 지역별 섹션 */}
-      {regions.map(region => (
-        <PlaceSlider
-          key={region.region_name}
-          title={`${region.region_name}지역`}
-          countLabel={`${region.place_count}개 매장`}
-          items={region.preview_contents}
-          onItemClick={showPopup}
-        />
-      ))}
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          {/* 지역별 섹션 */}
+          {regions.map(region => (
+            <PlaceSlider
+              key={region.region_name}
+              title={`${region.region_name}지역`}
+              countLabel={`${region.place_count}개 매장`}
+              items={region.preview_contents}
+              onItemClick={showPopup}
+              showRating={false}
+              snap={false}
+            />
+          ))}
 
-      {hasNextPage && (
-        <div className="px-4 py-4">
-          <Button 
-            variant="ghost" 
-            className="w-full text-surface-400" 
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? "로딩 중..." : "더 보기"}
-          </Button>
-        </div>
+          {hasNextPage && (
+            <div ref={observerTarget} className="p-12 flex justify-center">
+              <Loader2 className="size-6 text-surface-300 animate-spin" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

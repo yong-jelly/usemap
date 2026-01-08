@@ -40,8 +40,8 @@ BEGIN
           AND p.group1 IS NOT NULL
         GROUP BY p.group1
     ),
-    content_previews AS (
-        -- 지역별 최신 게시글 10개씩 추출
+    place_latest_features AS (
+        -- 지역별 각 매장의 가장 최신 게시글 1개만 추출 (중복 제거)
         SELECT 
             p.group1 as r_name,
             p.id as place_id,
@@ -56,19 +56,27 @@ BEGIN
             pf.content_url,
             pf.metadata->>'domain' as domain,
             pf.published_at,
-            row_number() OVER (PARTITION BY p.group1 ORDER BY pf.published_at DESC) as rn
+            row_number() OVER (PARTITION BY p.group1, p.id ORDER BY pf.published_at DESC) as place_rn
         FROM tbl_place_features pf
         JOIN tbl_place p ON pf.place_id = p.id
         WHERE pf.platform_type = 'community'
           AND pf.status = 'active'
           AND (p_domain IS NULL OR pf.metadata->>'domain' = p_domain)
           AND p.group1 IS NOT NULL
+    ),
+    content_previews AS (
+        -- 지역별로 중복 제거된 매장들 중 최신순으로 10개씩 추출
+        SELECT 
+            plf.*,
+            row_number() OVER (PARTITION BY plf.r_name ORDER BY plf.published_at DESC) as rn
+        FROM place_latest_features plf
+        WHERE plf.place_rn = 1
     )
     SELECT 
         rs.r_name::text,
         rs.p_count,
         (
-            SELECT jsonb_agg(to_jsonb(cp.*) - 'r_name' - 'rn')
+            SELECT jsonb_agg(to_jsonb(cp.*) - 'r_name' - 'place_rn' - 'rn')
             FROM content_previews cp
             WHERE cp.r_name = rs.r_name AND cp.rn <= 10
         ) as preview_contents

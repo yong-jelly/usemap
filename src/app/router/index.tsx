@@ -103,7 +103,7 @@ const router = createBrowserRouter([
         element: <ExplorePage />,
       },
       {
-        path: "feature",
+        path: "feature/:tab?",
         element: <FeaturePage />,
       },
       {
