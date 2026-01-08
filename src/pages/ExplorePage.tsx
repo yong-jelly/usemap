@@ -124,6 +124,11 @@ export function ExplorePage() {
     return count;
   }, [filters]);
 
+  // 광역 지역(group1)만 선택되었는지 확인 (구/동 미선택 시 광범위 검색으로 간주)
+  const isBroadSearch = useMemo(() => {
+    return !!filters.group1 && !filters.group2 && !filters.group3;
+  }, [filters.group1, filters.group2, filters.group3]);
+
   const handleLayoutChange = (newLayout: 'feed' | 'grid') => {
     setLayout(newLayout);
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -255,17 +260,28 @@ export function ExplorePage() {
               <Search className="size-10 text-surface-200" />
             </div>
             <h3 className="text-xl font-bold text-surface-900 mb-2 tracking-tight">
-              찾으시는 장소가 없네요
+              {isBroadSearch ? "검색 범위를 좁혀보세요" : "찾으시는 장소가 없네요"}
             </h3>
             <p className="text-surface-400 text-[14px] mb-10 leading-relaxed font-medium">
-              필터나 검색 조건을 변경하여<br />새로운 장소를 발견해보세요.
+              {isBroadSearch ? (
+                <>
+                  {isError ? "검색 범위가 너무 넓어 응답이 지연되고 있습니다." : `광역 지역(${filters.group1}) 전체 검색은 범위가 넓어`}<br />
+                  결과를 불러오는 데 시간이 걸릴 수 있습니다.<br />
+                  구체적인 지역을 선택해 더 빠르게 탐색해보세요!
+                </>
+              ) : (
+                <>
+                  필터나 검색 조건을 변경하여<br />
+                  새로운 장소를 발견해보세요.
+                </>
+              )}
             </p>
             <Button 
-              onClick={resetFilters} 
+              onClick={isBroadSearch ? () => setIsFilterOpen(true) : resetFilters} 
               variant="outline" 
               className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 active:bg-surface-50"
             >
-              조건 초기화
+              {isBroadSearch ? "지역 선택하기" : "조건 초기화"}
             </Button>
           </div>
         ) : (
