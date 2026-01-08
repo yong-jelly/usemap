@@ -45,7 +45,7 @@ export function ExplorePage() {
   const defaultFilters: ExplorerFilterState = {
     group1: "서울",
     group2: "중구",
-    group3: "태평로1가",
+    group3: "",
     categories: [],
     features: [],
     theme_codes: [],
