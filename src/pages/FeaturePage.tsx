@@ -194,32 +194,33 @@ function YoutubeChannelList() {
   const channels = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className="flex flex-col gap-10 py-6">
+    <div className="flex flex-col gap-12 py-6">
       {channels.map((channel) => (
         <section key={channel.channel_id} className="flex flex-col gap-4 px-4">
-          {/* 헤더 */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-surface-200 overflow-hidden">
-                <img src={channel.channel_thumbnail} alt={channel.channel_title} className="w-full h-full object-cover" />
+          {/* 헤더: 채널 프로필(크게) + 이름 + 개수 + 구독버튼 */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1 overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800">
+                <img 
+                  src={channel.channel_thumbnail} 
+                  alt={channel.channel_title} 
+                  className="w-full h-full object-cover" 
+                  loading="lazy"
+                />
               </div>
-              <div className="flex items-center gap-1.5 text-sm font-medium text-surface-500">
-                <span className="text-surface-900 dark:text-white truncate max-w-[150px]">{channel.channel_title}</span>
-                <span className="text-surface-300">•</span>
-                <span>{channel.place_count}개 매장</span>
+              <div className="flex flex-col gap-0.5 overflow-hidden">
+                <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight truncate">
+                  {channel.channel_title}
+                </h3>
+                <div className="flex items-center gap-1.5 text-sm font-medium text-surface-400">
+                  <span>{channel.place_count}개 매장</span>
+                </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="h-9 px-4 rounded-full border-surface-200 text-xs font-bold gap-1">
+            <Button variant="outline" size="sm" className="h-9 px-4 rounded-full border-surface-200 text-xs font-bold gap-1 flex-shrink-0">
               <Plus className="size-3.5" />
               구독
             </Button>
-          </div>
-
-          {/* 제목 영역 (설명 제거) */}
-          <div className="flex flex-col gap-1">
-            <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight">
-              {channel.channel_title}의 맛집 컬렉션
-            </h3>
           </div>
 
           {/* 장소 슬라이더 */}
@@ -267,6 +268,19 @@ function YoutubeChannelList() {
                 </div>
               </div>
             ))}
+
+            {/* 더보기 버튼 (가로 스크롤 끝) */}
+            {channel.place_count > 10 && (
+              <div className="flex-shrink-0 w-36 snap-start flex flex-col">
+                <div className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center gap-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors cursor-pointer bg-surface-50 dark:bg-surface-900/50">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-surface-800 shadow-sm flex items-center justify-center">
+                    <ChevronRight className="size-5" />
+                  </div>
+                  <span className="text-[13px] font-bold">더보기</span>
+                </div>
+                <div className="mt-auto h-6" />
+              </div>
+            )}
           </div>
         </section>
       ))}
