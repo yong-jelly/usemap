@@ -22,7 +22,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * - persistSession: localStorage에 세션 저장 (다중 탭 동기화 필수)
  * - detectSessionInUrl: OAuth 콜백에서 URL의 세션 자동 감지
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {ㅊ
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true, // 자동 토큰 갱신 활성화
     persistSession: true, // localStorage에 세션 영속화 (다중 탭 동기화 필수)
