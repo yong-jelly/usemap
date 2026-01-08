@@ -11,6 +11,8 @@ export const placeKeys = {
   analysis: (id: string) => [...placeKeys.all, "analysis", id] as const,
   list: (tab: string, group1?: string | null) => [...placeKeys.all, "list", tab, group1] as const,
   filters: (filters: any) => [...placeKeys.all, "filters", filters] as const,
+  naverFolders: () => [...placeKeys.all, "naverFolders"] as const,
+  youtubeChannels: () => [...placeKeys.all, "youtubeChannels"] as const,
 };
 
 /**
@@ -32,6 +34,36 @@ export function usePlaceReviews(id: string, limit?: number) {
     queryKey: placeKeys.reviews(id),
     queryFn: () => placeApi.getReviews(id, limit),
     enabled: !!id,
+  });
+}
+
+/**
+ * 네이버 폴더 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useNaverFolders() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.naverFolders(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getNaverFolders(20, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+  });
+}
+
+/**
+ * 유튜브 채널 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useYoutubeChannels() {
+  return useInfiniteQuery({
+    queryKey: placeKeys.youtubeChannels(),
+    queryFn: ({ pageParam = 0 }) => placeApi.getYoutubeChannels(20, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
   });
 }
 

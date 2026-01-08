@@ -65,3 +65,20 @@ export interface PlaceTag {
   tag_name: string;
   count: number;
 }
+
+export interface NaverFolder {
+  folder_id: string;
+  name: string;
+  memo: string;
+  place_count: number;
+  preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+}
+
+export interface YoutubeChannel {
+  channel_id: string;
+  channel_title: string;
+  channel_thumbnail: string;
+  description: string;
+  place_count: number;
+  preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+}

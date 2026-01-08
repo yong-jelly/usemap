@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/api/client";
-import type { Place, PlaceDetails } from "./types";
+import type { Place, PlaceDetails, NaverFolder, YoutubeChannel } from "./types";
 
 /**
  * 장소 관련 API 호출을 관리하는 객체
@@ -66,5 +66,27 @@ export const placeApi = {
     });
     
     return response.data.map((item: any) => item.place_data as Place);
+  },
+
+  /**
+   * 네이버 폴더 목록을 조회합니다 (v2).
+   */
+  getNaverFolders: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<NaverFolder>("v2_get_naver_folders", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 유튜브 채널 목록을 조회합니다 (v2).
+   */
+  getYoutubeChannels: async (limit: number = 20, offset: number = 0) => {
+    const response = await apiClient.rpc<YoutubeChannel>("v2_get_youtube_channels", {
+      p_limit: limit,
+      p_offset: offset,
+    });
+    return response.data;
   },
 };
