@@ -1,26 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
 import { SavedPlacesTab } from "@/features/profile/ui/SavedPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
 import { VisitedPlacesTab } from "@/features/profile/ui/VisitedPlacesTab";
+import { MyFolderList } from "@/features/folder/ui/MyFolderList";
+import { SubscriptionList } from "@/features/folder/ui/SubscriptionList";
 import { Tabs } from "@/shared/ui";
 import { useUserProfile } from "@/entities/user/queries";
+import { useEnsureDefaultFolder } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { Loader2 } from "lucide-react";
-import { Navigate } from "react-router";
+import { useNavigate, useParams, Navigate } from "react-router";
 
 export function ProfilePage() {
+  const navigate = useNavigate();
+  const { tab } = useParams();
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { isAuthenticated, isSyncing } = useUserStore();
-  const [activeTab, setActiveTab] = useState("recent");
+  const { mutate: ensureDefaultFolder } = useEnsureDefaultFolder();
+  
+  const activeTab = tab || "recent";
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      ensureDefaultFolder();
+    }
+  }, [isAuthenticated, ensureDefaultFolder]);
 
   const tabs = [
     { id: "recent", label: "최근" },
     { id: "saved", label: "저장" },
     { id: "liked", label: "좋아요" },
     { id: "visited", label: "방문" },
+    { id: "folder", label: "맛탐정" },
+    { id: "subscription", label: "구독" },
   ];
+
+  const handleTabChange = (newTabId: string) => {
+    navigate(`/profile/${newTabId}`);
+  };
 
   if (isSyncing || (isProfileLoading && isAuthenticated)) {
     return (
@@ -52,7 +71,7 @@ export function ProfilePage() {
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
         className="sticky top-0 z-10 bg-white/80 backdrop-blur-md dark:bg-neutral-900/80"
       />
 
@@ -61,6 +80,8 @@ export function ProfilePage() {
         {activeTab === "saved" && <SavedPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}
         {activeTab === "visited" && <VisitedPlacesTab />}
+        {activeTab === "folder" && <MyFolderList />}
+        {activeTab === "subscription" && <SubscriptionList />}
       </div>
     </div>
   );

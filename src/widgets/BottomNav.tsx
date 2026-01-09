@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { House, Copy, TvMinimalPlay, User } from "lucide-react";
+import { House, Copy, TvMinimalPlay, User, Rss } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
@@ -20,7 +20,7 @@ export function BottomNav() {
    * 네비게이션 아이템 정의
    */
   const navItems = [
-    { href: "/", icon: House, label: "홈" },
+    { href: "/feed", icon: Rss, label: "피드" },
     { href: "/explore", icon: Copy, label: "둘러보기" },
     { href: "/feature", icon: TvMinimalPlay, label: "트렌드" },
     { href: "/profile", icon: User, label: "프로필" },
@@ -38,7 +38,9 @@ export function BottomNav() {
       <div className="relative mx-auto flex h-14 max-w-lg items-center justify-around p-0">
         {navItems.map((item) => {
           // 현재 경로와 아이템의 경로가 일치하는지 확인
-          const isActive = currentPath === item.href || (item.href === "/" && currentPath === "/home");
+          const isActive = currentPath === item.href || 
+            (item.href === "/" && currentPath === "/home") ||
+            (item.href !== "/" && currentPath.startsWith(item.href));
           
           const handleClick = (e: React.MouseEvent) => {
             if (item.href === "/profile" && !isAuthenticated) {

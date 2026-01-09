@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/utils";
 
 // Page Imports
 import { HomePage } from "@/pages/HomePage";
+import { FeedPage } from "@/pages/FeedPage";
 import { ExplorePage } from "@/pages/ExplorePage";
 import { FeaturePage } from "@/pages/FeaturePage";
 import { FeatureDetailPage } from "@/pages/FeatureDetailPage";
@@ -30,6 +31,10 @@ import { GroupDetailPage } from "@/pages/group/GroupDetailPage";
 // Profile Pages
 import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { ProfileEditPage } from "@/pages/profile/ProfileEditPage";
+
+// Folder Pages
+import { FolderCreatePage } from "@/pages/folder/FolderCreatePage";
+import { FolderDetailPage } from "@/pages/folder/FolderDetailPage";
 
 // Place Pages
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
@@ -112,8 +117,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        // element: <HomePage />,
-        element: <MapPage />,
+        element: <FeedPage />,
+      },
+      {
+        path: "feed",
+        element: <FeedPage />,
       },
       {
         path: "home",
@@ -168,8 +176,16 @@ const router = createBrowserRouter([
       {
         path: "profile",
         children: [
-          { index: true, element: <ProfilePage /> },
+          { path: ":tab?", element: <ProfilePage /> },
           { path: "edit", element: <ProfileEditPage /> },
+        ],
+      },
+      // 폴더(맛탐정) 관련 라우트
+      {
+        path: "folder",
+        children: [
+          { path: "create", element: <FolderCreatePage /> },
+          { path: ":id", element: <FolderDetailPage /> },
         ],
       },
       // 장소 상세 페이지 라우트
