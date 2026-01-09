@@ -246,4 +246,19 @@ export const folderApi = {
     });
     return response.data;
   },
+
+  /**
+   * 폴더 내 장소 지도용 경량 목록 조회 (전체)
+   */
+  getFolderPlacesForMap: async (folderId: string) => {
+    const response = await apiClient.rpc<{
+      place_id: string;
+      name: string;
+      x: string;
+      y: string;
+    }>("v1_get_folder_places_for_map", {
+      p_folder_id: folderId,
+    });
+    return response.data;
+  },
 };

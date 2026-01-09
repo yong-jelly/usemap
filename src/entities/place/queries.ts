@@ -22,6 +22,7 @@ export const placeKeys = {
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
   featurePlaces: (type: string, id: string, domain?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domain] as const,
   featureInfo: (type: string, id: string) => [...placeKeys.all, "featureInfo", type, id] as const,
+  featurePlacesForMap: (type: string, id: string, domain?: string | null) => [...placeKeys.all, "featurePlacesForMap", type, id, domain] as const,
 };
 
 /**
@@ -372,5 +373,31 @@ export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community
       }
     },
     enabled: !!params.id,
+  });
+}
+
+/**
+ * 피쳐별 지도용 전체 장소 목록을 조회하는 Hook (버튼 클릭 시 수동 조회)
+ */
+export function useFeaturePlacesForMap(params: { 
+  type: 'folder' | 'youtube' | 'community';
+  id: string;
+  domain?: string | null;
+  enabled?: boolean;
+}) {
+  return useQuery({
+    queryKey: placeKeys.featurePlacesForMap(params.type, params.id, params.domain),
+    queryFn: () => {
+      switch (params.type) {
+        case 'folder':
+          return placeApi.getPlacesByNaverFolderForMap(params.id);
+        case 'youtube':
+          return placeApi.getPlacesByYoutubeChannelForMap(params.id);
+        case 'community':
+          return placeApi.getPlacesByCommunityRegionForMap({ regionName: params.id, domain: params.domain });
+      }
+    },
+    enabled: !!params.id && (params.enabled ?? false),
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 }

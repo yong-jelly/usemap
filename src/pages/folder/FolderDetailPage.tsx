@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { 
   useFolderPlaces, 
   useAddPlaceToFolder, 
@@ -9,8 +11,12 @@ import {
   useRegenerateInviteCode,
   useInviteHistory,
   useHideFolder,
-  useRemovePlaceFromFolder
+  useRemovePlaceFromFolder,
+  useFolderPlacesForMap
 } from "@/entities/folder/queries";
+
+const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
+mapboxgl.accessToken = MAP_TOKEN;
 import { Button, PlaceSliderCard, Input } from "@/shared/ui";
 import { 
   ChevronLeft, 
@@ -220,6 +226,124 @@ function InviteCodeInput({
   );
 }
 
+// 폴더 지도 모달
+function FolderMapModal({ 
+  folderId, 
+  onClose 
+}: { 
+  folderId: string; 
+  onClose: () => void;
+}) {
+  const { show: showPlaceModal } = usePlacePopup();
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markers = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  
+  const { data: mapPlaces, isLoading } = useFolderPlacesForMap(folderId, true);
+
+  // Initialize Map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: [127.0276, 37.4979], // Gangnam
+      zoom: 13,
+    });
+
+    return () => {
+      map.current?.remove();
+      map.current = null;
+    };
+  }, []);
+
+  // Update Markers when places change
+  useEffect(() => {
+    if (!map.current || !mapPlaces || mapPlaces.length === 0) return;
+
+    // Clear existing markers
+    markers.current.forEach(marker => marker.remove());
+    markers.current.clear();
+
+    const bounds = new mapboxgl.LngLatBounds();
+
+    mapPlaces.forEach(place => {
+      if (!place.x || !place.y) return;
+      const lng = parseFloat(place.x);
+      const lat = parseFloat(place.y);
+      
+      if (isNaN(lng) || isNaN(lat)) return;
+
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      el.innerHTML = `
+        <div class="px-2 py-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg shadow-md border border-surface-200 dark:border-surface-800 font-bold text-xs whitespace-nowrap">
+          ${place.name}
+        </div>
+      `;
+
+      el.addEventListener('click', () => {
+        showPlaceModal(place.place_id);
+      });
+
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([lng, lat])
+        .addTo(map.current!);
+      
+      markers.current.set(place.place_id, marker);
+      bounds.extend([lng, lat]);
+    });
+
+    if (!bounds.isEmpty() && markers.current.size > 0) {
+      map.current.fitBounds(bounds, { padding: 50, maxZoom: 15 });
+    }
+  }, [mapPlaces, showPlaceModal]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-surface-900 w-full h-full sm:w-[90vw] sm:h-[80vh] sm:max-w-4xl sm:rounded-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-4 border-b border-surface-100 dark:border-surface-800 flex items-center justify-between shrink-0">
+          <h3 className="text-lg font-bold">지도로 보기</h3>
+          <button onClick={onClose} className="p-2 -mr-2">
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 relative">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-surface-50 dark:bg-surface-900">
+              <Loader2 className="size-8 animate-spin text-surface-300" />
+            </div>
+          ) : mapPlaces && mapPlaces.length === 0 ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-900 text-surface-400">
+              <MapIcon className="size-12 mb-2 opacity-50" />
+              <p>표시할 장소가 없습니다</p>
+            </div>
+          ) : null}
+          <div ref={mapContainer} className="absolute inset-0" />
+        </div>
+
+        <div className="p-3 border-t border-surface-100 dark:border-surface-800 text-center text-sm text-surface-500 shrink-0">
+          {mapPlaces?.length || 0}개 장소
+        </div>
+      </div>
+
+      <style>{`
+        .custom-marker {
+          cursor: pointer;
+        }
+        .mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left {
+          display: none;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // 초대 히스토리 모달
 function InviteHistoryModal({ 
   folderId, 
@@ -363,6 +487,7 @@ export function FolderDetailPage() {
   const [showInviteHistory, setShowInviteHistory] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   // 접근 권한 체크
   const { data: access, isLoading: isAccessLoading, refetch: refetchAccess } = useFolderAccess(id!);
@@ -620,10 +745,10 @@ export function FolderDetailPage() {
             <span className="text-xs font-bold">목록</span>
           </button>
           <button 
-            onClick={() => setViewMode('map')}
+            onClick={() => setShowMapModal(true)}
             className={cn(
               "px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all",
-              viewMode === 'map' ? "bg-white dark:bg-surface-800 shadow-sm text-primary-500" : "text-surface-400"
+              "text-surface-400 hover:text-primary-500"
             )}
           >
             <MapIcon className="size-4" />
@@ -732,6 +857,13 @@ export function FolderDetailPage() {
         <InviteHistoryModal 
           folderId={id!} 
           onClose={() => setShowInviteHistory(false)} 
+        />
+      )}
+
+      {showMapModal && (
+        <FolderMapModal 
+          folderId={id!} 
+          onClose={() => setShowMapModal(false)} 
         />
       )}
     </div>

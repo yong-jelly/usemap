@@ -6,6 +6,7 @@ export const folderKeys = {
   list: (type: 'public' | 'my') => [...folderKeys.all, "list", type] as const,
   details: (id: string) => [...folderKeys.all, "details", id] as const,
   places: (id: string) => [...folderKeys.all, "places", id] as const,
+  placesForMap: (id: string) => [...folderKeys.all, "placesForMap", id] as const,
   access: (id: string) => [...folderKeys.all, "access", id] as const,
   inviteHistory: (id: string) => [...folderKeys.all, "inviteHistory", id] as const,
   reviews: (folderId: string, placeId?: string) => 
@@ -301,5 +302,17 @@ export function useFolderReviews(folderId: string, placeId?: string) {
     queryKey: folderKeys.reviews(folderId, placeId),
     queryFn: () => folderApi.getFolderReviews({ folderId, placeId }),
     enabled: !!folderId,
+  });
+}
+
+/**
+ * 폴더 내 장소 지도용 경량 목록 조회 (전체, 버튼 클릭 시 수동 조회)
+ */
+export function useFolderPlacesForMap(folderId: string, enabled: boolean = false) {
+  return useQuery({
+    queryKey: folderKeys.placesForMap(folderId),
+    queryFn: () => folderApi.getFolderPlacesForMap(folderId),
+    enabled: !!folderId && enabled,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 }

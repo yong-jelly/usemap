@@ -372,4 +372,54 @@ export const placeApi = {
     });
     return response.data;
   },
+
+  // =====================================================
+  // 지도용 전체 데이터 조회 API (페이지네이션 없음)
+  // =====================================================
+
+  /**
+   * 네이버 폴더 지도용 전체 장소 목록을 조회합니다.
+   */
+  getPlacesByNaverFolderForMap: async (folderId: string) => {
+    const response = await apiClient.rpc<{
+      place_id: string;
+      name: string;
+      x: string;
+      y: string;
+    }>("v2_get_places_by_naver_folder_for_map", {
+      p_folder_id: parseInt(folderId),
+    });
+    return response.data;
+  },
+
+  /**
+   * 유튜브 채널 지도용 전체 장소 목록을 조회합니다.
+   */
+  getPlacesByYoutubeChannelForMap: async (channelId: string) => {
+    const response = await apiClient.rpc<{
+      place_id: string;
+      name: string;
+      x: string;
+      y: string;
+    }>("v2_get_places_by_youtube_channel_for_map", {
+      p_channel_id: channelId,
+    });
+    return response.data;
+  },
+
+  /**
+   * 커뮤니티 지역 지도용 전체 장소 목록을 조회합니다.
+   */
+  getPlacesByCommunityRegionForMap: async (params: { regionName: string; domain?: string | null }) => {
+    const response = await apiClient.rpc<{
+      place_id: string;
+      name: string;
+      x: string;
+      y: string;
+    }>("v2_get_places_by_community_region_for_map", {
+      p_region_name: params.regionName,
+      p_domain: params.domain || null,
+    });
+    return response.data;
+  },
 };
