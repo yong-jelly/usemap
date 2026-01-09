@@ -8,7 +8,7 @@ import { Button } from "@/shared/ui";
  */
 export function Header() {
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-200 dark:bg-surface-900/80 dark:border-surface-800">
+    <header className="fixed top-0 inset-x-0 z-50 bg-white border-b border-surface-200 dark:bg-surface-900 dark:border-surface-800">
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
         <div className="flex items-center">
           <Logo />

@@ -34,7 +34,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-surface-100 bg-white/80 backdrop-blur-md dark:bg-surface-900/80 dark:border-surface-800 transition-transform duration-300">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-surface-100 bg-white dark:bg-surface-900 dark:border-surface-800">
       <div className="relative mx-auto flex h-14 max-w-lg items-center justify-around p-0">
         {navItems.map((item) => {
           // 현재 경로와 아이템의 경로가 일치하는지 확인

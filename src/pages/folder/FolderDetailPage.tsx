@@ -32,7 +32,8 @@ import {
   EyeOff,
   Trash2,
   X,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearchModal";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
@@ -57,6 +58,7 @@ function FolderInviteAdminSection({
 }) {
   const [copied, setCopied] = useState(false);
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : true;
+  const { mutate: regenerate, isPending } = useRegenerateInviteCode();
 
   const handleCopy = () => {
     if (inviteCode) {
@@ -66,59 +68,88 @@ function FolderInviteAdminSection({
     }
   };
 
+  const handleRegenerate = () => {
+    if (window.confirm('새로운 초대 코드를 생성하시겠습니까? 기존 코드는 즉시 만료됩니다.')) {
+      regenerate(folderId);
+    }
+  };
+
   return (
-    <div className="mx-5 mb-6 p-4 bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3">
+    <div className="mx-5 mb-6 p-5 bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/20 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Key className="size-4 text-primary-500" />
-          <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 관리</span>
+          <div className="p-1.5 bg-primary-500 rounded-lg">
+            <Key className="size-4 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 관리</span>
+            <span className="text-[10px] text-primary-600/60 dark:text-primary-400/60 font-medium">관리자 전용</span>
+          </div>
         </div>
         <button 
           onClick={onOpenHistory}
-          className="text-xs font-bold text-primary-600 dark:text-primary-400 flex items-center gap-1"
+          className="px-3 py-1.5 bg-white dark:bg-surface-800 rounded-xl shadow-sm text-xs font-bold text-surface-600 dark:text-surface-300 flex items-center gap-1.5 hover:bg-surface-50 transition-colors"
         >
           <History className="size-3.5" />
           히스토리
         </button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="flex-1 bg-white dark:bg-surface-800 rounded-xl px-4 py-3 flex items-center justify-between shadow-sm">
-          <span className={cn(
-            "font-mono font-black tracking-widest text-lg",
-            isExpired ? "text-surface-300 line-through" : "text-surface-900 dark:text-white"
-          )}>
-            {inviteCode || '코드 없음'}
-          </span>
-          {inviteCode && !isExpired && (
-            <button onClick={handleCopy} className="p-1">
-              {copied ? <CheckCircle className="size-4 text-green-500" /> : <Copy className="size-4 text-surface-400" />}
-            </button>
-          )}
-        </div>
-        <div className="flex flex-col gap-1">
-          {!isExpired && (
-            <div className="flex flex-col gap-0.5 text-[10px] text-primary-600 dark:text-primary-400 font-medium px-1">
-              <span className="flex items-center gap-1">
-                <Clock className="size-3" />
-                {expiresAt ? ago(expiresAt) : ''} 후 만료
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-white dark:bg-surface-800 rounded-xl px-4 py-4 flex items-center justify-between shadow-sm border border-primary-100/50 dark:border-primary-900/20">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-bold text-surface-400 uppercase tracking-tight">Current Code</span>
+              <span className={cn(
+                "font-mono font-black tracking-[0.2em] text-2xl",
+                isExpired ? "text-surface-400" : "text-primary-600 dark:text-primary-400"
+              )}>
+                {inviteCode || 'NONE'}
               </span>
             </div>
-          )}
-          {isExpired && (
-            <button 
-              onClick={onOpenHistory}
-              className="p-2 bg-white dark:bg-surface-800 rounded-xl shadow-sm text-primary-500 hover:bg-primary-50 transition-colors"
-              title="코드 재생성"
-            >
-              <RefreshCw className="size-4" />
-            </button>
-          )}
+            <div className="flex items-center gap-1">
+              {inviteCode && (
+                <button 
+                  onClick={handleCopy} 
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all",
+                    copied ? "bg-green-50 text-green-600" : "hover:bg-surface-50 text-surface-400"
+                  )}
+                >
+                  {copied ? <CheckCircle className="size-5" /> : <Copy className="size-5" />}
+                </button>
+              )}
+              <button 
+                onClick={handleRegenerate}
+                disabled={isPending}
+                className="p-2.5 rounded-xl hover:bg-surface-50 text-primary-500 transition-all disabled:opacity-50"
+                title="새 코드 생성"
+              >
+                <RefreshCw className={cn("size-5", isPending && "animate-spin")} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-1.5 text-xs font-medium">
+            {isExpired ? (
+              <span className="text-red-500 flex items-center gap-1">
+                <AlertCircle className="size-3.5" />
+                코드가 만료되었습니다
+              </span>
+            ) : (
+              <span className="text-primary-600 dark:text-primary-400 flex items-center gap-1">
+                <Clock className="size-3.5" />
+                {expiresAt ? ago(expiresAt) : ''} 후 만료
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] text-surface-400 font-medium">
+            24시간마다 갱신 필요
+          </span>
         </div>
       </div>
-      {isExpired && (
-        <p className="text-[11px] text-red-500 font-medium">코드가 만료되었습니다. 메뉴에서 새 코드를 생성하세요.</p>
-      )}
     </div>
   );
 }
@@ -438,7 +469,7 @@ export function FolderDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 헤더 */}
-      <div className="sticky top-0 z-20 bg-white/80 dark:bg-surface-950/80 backdrop-blur-md border-b border-surface-100 dark:border-surface-800 px-4 h-14 flex items-center justify-between">
+      <div className="sticky top-0 z-20 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 px-4 h-14 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="p-2 -ml-2">
           <ChevronLeft className="size-6" />
         </button>

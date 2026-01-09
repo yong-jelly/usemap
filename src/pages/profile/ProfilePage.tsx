@@ -72,7 +72,7 @@ export function ProfilePage() {
         tabs={tabs}
         activeTab={activeTab}
         onChange={handleTabChange}
-        className="sticky top-0 z-10 bg-white/80 backdrop-blur-md dark:bg-neutral-900/80"
+        className="sticky top-0 z-10 bg-white dark:bg-neutral-900"
       />
 
       <div className="pb-20">

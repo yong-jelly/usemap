@@ -3,9 +3,13 @@ import { useNavigate, useParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { useFeaturePageStore } from "@/shared/lib/feature-page-store";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
+import { useToggleFeatureSubscription, useMySubscriptions } from "@/entities/folder/queries";
+import { useUserStore } from "@/entities/user";
+import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
+import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
-import { Loader2 } from "lucide-react";
+import { Loader2, Heart } from "lucide-react";
 
 /**
  * 피쳐 페이지 컴포넌트
@@ -22,7 +26,10 @@ export function FeaturePage() {
     { id: "folder", label: "플레이스" },
     { id: "youtube", label: "유튜브" },
     { id: "community", label: "커뮤니티" },
+    { id: "detective", label: "맛탐정" },
   ];
+
+  // ... (rest of the component)
 
   // 탭 변경 시 또는 마운트 시 스크롤 위치 복원
   useEffect(() => {
@@ -73,10 +80,16 @@ export function FeaturePage() {
         ref={scrollContainerRef}
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto scrollbar-hide"
+        style={{ 
+          willChange: 'scroll-position',
+          WebkitOverflowScrolling: 'touch',
+          transform: 'translateZ(0)',
+        }}
       >
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
         {activeTab === "community" && <CommunityList />}
+        {activeTab === "detective" && <DetectiveList />}
       </div>
     </div>
   );
@@ -123,16 +136,19 @@ function NaverFolderList() {
       {folders.map((folder) => (
         <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
           {/* 제목 영역: 타이틀 + 개수 */}
-          <div className="flex items-end justify-between gap-2">
-            <h3 
-              className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep cursor-pointer hover:underline underline-offset-4"
-              onClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
-            >
-              {folder.name}
-            </h3>
-            <span className="text-sm font-medium text-surface-400 mb-0.5 whitespace-nowrap">
-              {folder.place_count}개 매장
-            </span>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 overflow-hidden">
+              <h3 
+                className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep cursor-pointer hover:underline underline-offset-4 truncate"
+                onClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
+              >
+                {folder.name}
+              </h3>
+              <span className="text-sm font-medium text-surface-400">
+                {folder.place_count}개 매장
+              </span>
+            </div>
+            <FeatureSubscribeButton type="naver_folder" id={folder.folder_id.toString()} />
           </div>
 
           {/* 장소 슬라이더 */}
@@ -212,16 +228,19 @@ function YoutubeChannelList() {
                 loading="lazy"
               />
             </div>
-            <div className="flex items-end justify-between flex-1 gap-2 overflow-hidden">
-              <h3 
-                className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
-                onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
-              >
-                {channel.channel_title}
-              </h3>
-              <span className="text-xs font-medium text-surface-400 mb-0.5 whitespace-nowrap">
-                {channel.place_count}개 매장
-              </span>
+            <div className="flex items-start justify-between flex-1 gap-2 overflow-hidden">
+              <div className="flex flex-col gap-0.5 overflow-hidden">
+                <h3 
+                  className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+                  onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+                >
+                  {channel.channel_title}
+                </h3>
+                <span className="text-xs font-medium text-surface-400">
+                  {channel.place_count}개 매장
+                </span>
+              </div>
+              <FeatureSubscribeButton type="youtube_channel" id={channel.channel_id} />
             </div>
           </div>
 
@@ -305,7 +324,7 @@ function CommunityList() {
             onClick={() => setSelectedDomain(domain.id)}
             disabled={isLoading}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-bold transition-all border shrink-0",
+              "px-4 py-1.5 rounded-full text-sm font-bold transition-colors border shrink-0",
               selectedDomain === domain.id
                 ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
                 : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
@@ -323,17 +342,32 @@ function CommunityList() {
         <>
           {/* 지역별 섹션 */}
           {regions.map(region => (
-            <PlaceSlider
-              key={region.region_name}
-              title={`${region.region_name}지역`}
-              countLabel={`${region.place_count}개 매장`}
-              items={region.preview_contents}
-              onItemClick={showPopup}
-              onTitleClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
-              onMoreClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
-              showRating={false}
-              snap={false}
-            />
+            <div key={region.region_name} className="flex flex-col gap-2">
+              <div className="flex items-start justify-between px-4 mt-4">
+                <div className="flex flex-col gap-0.5 overflow-hidden">
+                  <h3 
+                    className="text-xl font-black text-surface-900 dark:text-white leading-tight cursor-pointer hover:underline underline-offset-4"
+                    onClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                  >
+                    {region.region_name}지역
+                  </h3>
+                  <span className="text-sm font-medium text-surface-400">
+                    {region.place_count}개 매장
+                  </span>
+                </div>
+                <FeatureSubscribeButton type="community_region" id={region.region_name} />
+              </div>
+              <div className="-mx-4">
+                <PlaceSlider
+                  title=""
+                  items={region.preview_contents}
+                  onItemClick={showPopup}
+                  onMoreClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                  showRating={false}
+                  snap={false}
+                />
+              </div>
+            </div>
           ))}
 
           {hasNextPage && (
@@ -374,5 +408,45 @@ function LoadingSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+/**
+ * 공통 구독 버튼 컴포넌트
+ */
+function FeatureSubscribeButton({ type, id }: { type: string; id: string }) {
+  const { isAuthenticated } = useUserStore();
+  const { openLogin } = useAuthModalStore();
+  const { data: mySubscriptions } = useMySubscriptions();
+  const { mutate: toggleSubscription } = useToggleFeatureSubscription();
+
+  const isSubscribed = mySubscriptions?.some(
+    (sub: any) => sub.subscription_type === type && sub.feature_id === id
+  );
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+    toggleSubscription({ type, id });
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleToggle}
+      className={cn(
+        "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors px-3",
+        isSubscribed 
+          ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
+          : "border-surface-200 dark:border-surface-700"
+      )}
+    >
+      <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
+      <span className="text-xs">{isSubscribed ? "구독중" : "구독"}</span>
+    </Button>
   );
 }

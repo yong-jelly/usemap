@@ -51,7 +51,7 @@ export function HomePage() {
         tabs={tabs}
         activeTab={activeTab}
         onChange={setActiveTab}
-        className="sticky top-14 z-40 bg-white/80 backdrop-blur-md dark:bg-surface-900/80"
+        className="sticky top-14 z-40 bg-white dark:bg-surface-900"
       />
 
       <div className="p-4">

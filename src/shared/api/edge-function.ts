@@ -47,3 +47,18 @@ export async function requestCommunityMetaService(url: string) {
     body: { url },
   });
 }
+
+/**
+ * 장소 검색 서비스 (graph-search-place Edge Function)
+ */
+export async function searchPlaceService(query: string) {
+  const result = await callSupabaseFunction<{ items: any[] }>('graph-search-place', {
+    body: { query },
+  });
+  
+  if (result.error) {
+    return { error: true, items: [] };
+  }
+  
+  return { error: false, items: result.results?.items || [] };
+}

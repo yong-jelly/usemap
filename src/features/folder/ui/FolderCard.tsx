@@ -64,7 +64,7 @@ export function FolderCard({ folder }: FolderCardProps) {
             size="sm"
             onClick={handleSubscribe}
             className={cn(
-              "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-all",
+              "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors duration-150",
               isSubscribed 
                 ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
                 : "border-surface-200 dark:border-surface-700"

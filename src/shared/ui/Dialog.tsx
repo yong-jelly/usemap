@@ -51,7 +51,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* 반투명 배경(오버레이) */}
       <div
-        className="fixed inset-0 bg-surface-950/40 backdrop-blur-[2px] animate-fade-in"
+        className="fixed inset-0 bg-surface-950/60 animate-fade-in"
         onClick={() => onOpenChange(false)}
       />
       {/* 다이얼로그 본체 */}

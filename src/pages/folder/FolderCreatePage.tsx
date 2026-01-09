@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useCreateFolder } from "@/entities/folder/queries";
 import { Button, Input } from "@/shared/ui";
-import { ChevronLeft, Lock, Globe, Ghost, Link as LinkIcon, AlertCircle, Loader2, Users, User, Copy, CheckCircle, Clock, X } from "lucide-react";
+import { ChevronLeft, Lock, Globe, Ghost, Link as LinkIcon, AlertCircle, Loader2, Users, User, Copy, CheckCircle, Clock, X, Key } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { CreateFolderResult } from "@/entities/folder/types";
 
@@ -140,6 +140,8 @@ export function FolderCreatePage() {
     },
   ];
 
+  const selectedPermission = permissions.find(p => p.id === permission);
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 헤더 */}
@@ -238,69 +240,81 @@ export function FolderCreatePage() {
           </div>
         </div>
 
-        {/* 초대 폴더 추가 옵션 */}
+        {/* 초대 폴더 안내 및 추가 옵션 */}
         {permission === 'invite' && (
-          <div className="flex flex-col gap-4">
-            <label className="text-sm font-bold text-surface-900 dark:text-white">
-              편집 권한
-            </label>
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                type="button"
-                onClick={() => setPermissionWriteType(0)}
-                className={cn(
-                  "flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left",
-                  permissionWriteType === 0 
-                    ? "border-primary-500 bg-primary-50/50 dark:bg-primary-900/10" 
-                    : "border-surface-100 dark:border-surface-800 hover:border-surface-200 dark:hover:border-surface-700"
-                )}
-              >
-                <div className={cn(
-                  "p-2 rounded-xl",
-                  permissionWriteType === 0 
-                    ? "bg-primary-500 text-white" 
-                    : "bg-surface-100 dark:bg-surface-800 text-surface-500"
-                )}>
-                  <User className="size-5" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className={cn(
-                    "font-bold",
-                    permissionWriteType === 0 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
+          <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Key className="size-4 text-primary-500" />
+                <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 안내</span>
+              </div>
+              <p className="text-xs text-primary-600 dark:text-primary-300 leading-relaxed font-medium">
+                생성 시 5자리의 초대 코드가 자동으로 생성됩니다. 초대 코드는 생성 후 <span className="underline decoration-primary-300 underline-offset-2">24시간 동안만 유효</span>하며, 소유자는 언제든 새로운 코드를 발급할 수 있습니다.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <label className="text-sm font-bold text-surface-900 dark:text-white">
+                편집 권한
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPermissionWriteType(0)}
+                  className={cn(
+                    "flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left",
+                    permissionWriteType === 0 
+                      ? "border-primary-500 bg-primary-50/50 dark:bg-primary-900/10" 
+                      : "border-surface-100 dark:border-surface-800 hover:border-surface-200 dark:hover:border-surface-700"
+                  )}
+                >
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    permissionWriteType === 0 
+                      ? "bg-primary-500 text-white" 
+                      : "bg-surface-100 dark:bg-surface-800 text-surface-500"
                   )}>
-                    관리자만 편집
-                  </span>
-                  <span className="text-xs text-surface-500">초대된 사용자는 보기만 가능합니다.</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPermissionWriteType(1)}
-                className={cn(
-                  "flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left",
-                  permissionWriteType === 1 
-                    ? "border-primary-500 bg-primary-50/50 dark:bg-primary-900/10" 
-                    : "border-surface-100 dark:border-surface-800 hover:border-surface-200 dark:hover:border-surface-700"
-                )}
-              >
-                <div className={cn(
-                  "p-2 rounded-xl",
-                  permissionWriteType === 1 
-                    ? "bg-primary-500 text-white" 
-                    : "bg-surface-100 dark:bg-surface-800 text-surface-500"
-                )}>
-                  <Users className="size-5" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className={cn(
-                    "font-bold",
-                    permissionWriteType === 1 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
+                    <User className="size-5" />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className={cn(
+                      "font-bold",
+                      permissionWriteType === 0 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
+                    )}>
+                      관리자만 편집
+                    </span>
+                    <span className="text-xs text-surface-500">초대된 사용자는 보기만 가능합니다.</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPermissionWriteType(1)}
+                  className={cn(
+                    "flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left",
+                    permissionWriteType === 1 
+                      ? "border-primary-500 bg-primary-50/50 dark:bg-primary-900/10" 
+                      : "border-surface-100 dark:border-surface-800 hover:border-surface-200 dark:hover:border-surface-700"
+                  )}
+                >
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    permissionWriteType === 1 
+                      ? "bg-primary-500 text-white" 
+                      : "bg-surface-100 dark:bg-surface-800 text-surface-500"
                   )}>
-                    함께 편집
-                  </span>
-                  <span className="text-xs text-surface-500">초대된 사용자도 장소를 추가할 수 있습니다.</span>
-                </div>
-              </button>
+                    <Users className="size-5" />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className={cn(
+                      "font-bold",
+                      permissionWriteType === 1 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
+                    )}>
+                      함께 편집
+                    </span>
+                    <span className="text-xs text-surface-500">초대된 사용자도 장소를 추가할 수 있습니다.</span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         )}

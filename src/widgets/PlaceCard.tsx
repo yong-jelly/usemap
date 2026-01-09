@@ -63,7 +63,7 @@ export function PlaceCard({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5] last:border-none overflow-hidden transition-colors">
+    <div className="bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5] last:border-none overflow-hidden transition-colors duration-150">
       {/* 0. 피드 소스 정보 (선택적) */}
       {(sourceTitle || sourceLabel) && (
         <div className="px-5 pt-5 pb-1 flex items-center justify-between">
@@ -107,7 +107,7 @@ export function PlaceCard({
               {folders.length > 0 && (
                 <div 
                   className={cn(
-                    "absolute -bottom-1 left-0 w-full rounded-full transition-all",
+                    "absolute -bottom-1 left-0 w-full rounded-full transition-colors duration-150",
                     folders.length >= 15 ? "h-[5px] bg-[#1E8449]" :
                     folders.length >= 12 ? "h-[4.5px] bg-[#229954]" :
                     folders.length >= 9 ? "h-[4px] bg-[#27AE60]" :
@@ -160,7 +160,14 @@ export function PlaceCard({
         onClick={() => showPopup(place.id)}
       >
         {images.length > 0 ? (
-          <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-3 px-5 py-1">
+          <div 
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-3 px-5 py-1"
+            style={{ 
+              willChange: 'scroll-position',
+              WebkitOverflowScrolling: 'touch',
+              transform: 'translateZ(0)',
+            }}
+          >
             {images.slice(0, 5).map((img: string, index: number) => (
               <div 
                 key={index}
@@ -174,7 +181,7 @@ export function PlaceCard({
                 {index === 0 && showPrice && (place.avg_price > 0 || folders.length > 0) && (
                   <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
                     {place.avg_price > 0 && (
-                      <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-[14px] shadow-md border border-[#2B4562]/5">
+                      <div className="bg-white/95 px-3 py-1.5 rounded-[14px] shadow-md border border-[#2B4562]/5">
                         <div className="text-[14px] font-black text-[#2B4562] tracking-tight">
                           <span className="text-[10px] text-[#2B4562]/40 mr-1 font-bold">가격</span>
                           {formatWithCommas(place.avg_price, '-', true)}원대
@@ -186,9 +193,10 @@ export function PlaceCard({
                 <img
                   src={convertToNaverResizeImageUrl(img)}
                   alt={`${place.name} ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                  className="h-full w-full object-cover"
                   onError={handleImageError}
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             ))}
@@ -235,7 +243,7 @@ export function PlaceCard({
               folders.map((folder: any, i: number) => (
                 <button 
                   key={i}
-                  className="px-3 py-1.5 bg-[#E9F7EF] text-[#27AE60] text-[13px] font-bold rounded-md flex items-center transition-all hover:bg-[#D4EEDC] active:scale-95"
+                  className="px-3 py-1.5 bg-[#E9F7EF] text-[#27AE60] text-[13px] font-bold rounded-md flex items-center transition-colors hover:bg-[#D4EEDC] active:scale-95"
                   onClick={() => setShowAllFolders(false)}
                 >
                   #{folder.title || folder.feature?.title || '폴더'}
@@ -243,7 +251,7 @@ export function PlaceCard({
               ))
             ) : (
               <button 
-                className="px-3 py-1.5 bg-[#E9F7EF] text-[#27AE60] text-[13px] font-bold rounded-md flex items-center transition-all hover:bg-[#D4EEDC] active:scale-95"
+                className="px-3 py-1.5 bg-[#E9F7EF] text-[#27AE60] text-[13px] font-bold rounded-md flex items-center transition-colors hover:bg-[#D4EEDC] active:scale-95"
                 onClick={() => setShowAllFolders(true)}
               >
                 #{folders[0].title || folders[0].feature?.title || '폴더'}
@@ -264,7 +272,7 @@ export function PlaceCard({
           <button 
             onClick={() => setIsLiked(!isLiked)}
             className={cn(
-              "flex items-center gap-1.5 transition-all group",
+              "flex items-center gap-1.5 transition-colors duration-150 group",
               (isLiked || place.interaction?.is_liked) ? "text-[#E05C5C]" : "text-[#2B4562]/40"
             )}
           >
@@ -283,7 +291,7 @@ export function PlaceCard({
           <button 
             onClick={() => setIsSaved(!isSaved)}
             className={cn(
-              "flex items-center gap-1.5 transition-all group",
+              "flex items-center gap-1.5 transition-colors duration-150 group",
               (isSaved || place.interaction?.is_saved) ? "text-[#2B4562]" : "text-[#2B4562]/40"
             )}
           >
@@ -296,7 +304,7 @@ export function PlaceCard({
           href={`https://map.naver.com/p/entry/place/${place.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center size-10 rounded-full bg-[#2B4562]/5 text-[#2B4562] hover:bg-[#2B4562] hover:text-white transition-all active:scale-95"
+          className="flex items-center justify-center size-10 rounded-full bg-[#2B4562]/5 text-[#2B4562] hover:bg-[#2B4562] hover:text-white transition-colors duration-150 active:scale-95"
           onClick={(e) => e.stopPropagation()}
         >
           <MapPinned strokeWidth={1.2} className="size-5" />

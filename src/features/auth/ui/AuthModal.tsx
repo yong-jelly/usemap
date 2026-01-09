@@ -44,7 +44,7 @@ export function AuthModal() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* 배경 오버레이 - 블러 효과와 함께 표시 */}
       <div
-        className="absolute inset-0 bg-surface-950/40 backdrop-blur-[4px] animate-in fade-in duration-300"
+        className="absolute inset-0 bg-surface-950/60 animate-in fade-in duration-300"
         onClick={close}
       />
 

@@ -363,8 +363,8 @@ DECLARE
     v_expires_at TIMESTAMPTZ;
 BEGIN
     -- 권한 체크
-    SELECT owner_id, permission INTO v_owner_id, v_permission 
-    FROM public.tbl_folder WHERE id = p_folder_id;
+    SELECT f.owner_id, f.permission INTO v_owner_id, v_permission 
+    FROM public.tbl_folder f WHERE f.id = p_folder_id;
     
     IF v_owner_id != auth.uid() THEN
         RAISE EXCEPTION '권한이 없습니다.';
@@ -424,9 +424,9 @@ BEGIN
     END IF;
 
     -- 폴더 정보 조회
-    SELECT permission, invite_code, invite_code_expires_at 
+    SELECT f.permission, f.invite_code, f.invite_code_expires_at 
     INTO v_folder_permission, v_stored_code, v_expires_at
-    FROM public.tbl_folder WHERE id = p_folder_id AND is_hidden = FALSE;
+    FROM public.tbl_folder f WHERE f.id = p_folder_id AND f.is_hidden = FALSE;
 
     IF v_folder_permission IS NULL THEN
         RETURN QUERY SELECT false, 'FOLDER_NOT_FOUND'::VARCHAR, NULL::VARCHAR;
@@ -574,9 +574,11 @@ DECLARE
     v_owner_id UUID;
 BEGIN
     -- 권한 체크
-    SELECT owner_id INTO v_owner_id FROM public.tbl_folder WHERE id = p_folder_id;
+    SELECT f.owner_id INTO v_owner_id 
+    FROM public.tbl_folder f 
+    WHERE f.id = p_folder_id;
     
-    IF v_owner_id != auth.uid() THEN
+    IF v_owner_id IS NULL OR v_owner_id != auth.uid() THEN
         RAISE EXCEPTION '권한이 없습니다.';
     END IF;
 
@@ -691,9 +693,9 @@ BEGIN
     END IF;
 
     -- 폴더 정보 조회
-    SELECT owner_id, permission, permission_write_type 
+    SELECT f.owner_id, f.permission, f.permission_write_type 
     INTO v_owner_id, v_permission, v_permission_write_type 
-    FROM public.tbl_folder WHERE id = p_folder_id AND is_hidden = FALSE;
+    FROM public.tbl_folder f WHERE f.id = p_folder_id AND f.is_hidden = FALSE;
     
     IF v_owner_id IS NULL THEN
         RAISE EXCEPTION '폴더를 찾을 수 없습니다.';
@@ -753,9 +755,9 @@ BEGIN
     END IF;
 
     -- 폴더 정보 조회
-    SELECT owner_id, permission, permission_write_type 
+    SELECT f.owner_id, f.permission, f.permission_write_type 
     INTO v_owner_id, v_permission, v_permission_write_type 
-    FROM public.tbl_folder WHERE id = p_folder_id;
+    FROM public.tbl_folder f WHERE f.id = p_folder_id;
 
     -- 장소 등록자 확인
     SELECT user_id INTO v_place_added_by 
