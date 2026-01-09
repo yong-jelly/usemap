@@ -81,9 +81,14 @@ export function FeatureDetailPage() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [127.0276, 37.4979], // Gangnam
+      center: [127.0276, 37.4979], // Gangnam, Korea
       zoom: 13,
     });
+    
+    // Mapbox는 한국 지역을 중심으로 할 때 자동으로 한글 레이블을 우선 표시합니다
+    // 한글 레이블을 더 확실하게 하려면 Mapbox Studio에서 한글 레이블이 포함된 커스텀 스타일을 만들어 사용하세요
+    // 참고: 기본 streets-v12 스타일은 지역에 따라 자동으로 언어를 선택하지만, 
+    // 모든 지역명이 한글로 표시되는 것은 아닐 수 있습니다.
 
     return () => {
       map.current?.remove();

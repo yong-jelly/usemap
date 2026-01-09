@@ -20,7 +20,8 @@ import {
   Heart,
   Bookmark,
   ChevronRight,
-  CookingPot
+  CookingPot,
+  Folder
 } from "lucide-react";
 import { 
   usePlaceByIdWithRecentView,
@@ -34,6 +35,7 @@ import {
   useToggleSave,
   useToggleVisited
 } from "@/entities/place/queries";
+import { FolderSelectionModal } from "./FolderSelection.modal";
 import { useUserStore } from "@/entities/user";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
@@ -100,6 +102,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
   // Feature Form States
   const [showYoutubeAddForm, setShowYoutubeAddForm] = useState(false);
+  const [showFolderModal, setShowFolderModal] = useState(false);
   const [youtubeUrlInput, setYoutubeUrlInput] = useState('');
   const [showCommunityAddForm, setShowCommunityAddForm] = useState(false);
   const [communityUrlInput, setCommunityUrlInput] = useState('');
@@ -471,13 +474,13 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
           <div className="p-6">
             {/* 상호작용 버튼 */}
-            <div className="flex justify-center gap-3 mb-10">
+            <div className="flex justify-between gap-2 mb-8">
               <button
                 onClick={handleToggleVisited}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold",
+                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
                   details?.experience?.is_visited
-                    ? "bg-primary-600 text-white border-primary-600 shadow-md shadow-primary-100"
+                    ? "bg-primary-600 text-white border-primary-600 shadow-sm"
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
@@ -487,9 +490,9 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <button
                 onClick={handleToggleLike}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold",
+                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
                   details?.interaction?.is_liked
-                    ? "bg-red-500 text-white border-red-500 shadow-md shadow-red-100"
+                    ? "bg-red-500 text-white border-red-500 shadow-sm"
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
@@ -499,20 +502,30 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <button
                 onClick={handleToggleSave}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold",
+                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
                   details?.interaction?.is_saved
-                    ? "bg-pink-600 text-white border-pink-600 shadow-md shadow-pink-100"
+                    ? "bg-pink-600 text-white border-pink-600 shadow-sm"
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
                 <Bookmark className={cn("size-4", details?.interaction?.is_saved && "fill-current")} />
                 저장
               </button>
+              <button
+                onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
+                  "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                )}
+              >
+                <Folder className="size-4" />
+                폴더
+              </button>
             </div>
 
             {/* 출처/폴더 태그 */}
             {folderFeatures.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-10">
+              <div className="flex flex-wrap gap-2 mb-8">
                 {folderFeatures.map(folder => (
                   <div 
                     key={folder.id} 
@@ -525,7 +538,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             )}
 
             {/* 장소 정보 요약 */}
-            <div className="flex flex-col gap-6 mb-10">
+            <div className="flex flex-col gap-6 mb-8">
               <div className="flex items-center justify-between">
                 <div className="flex gap-4">
                   <div className="flex flex-col items-center">
@@ -569,8 +582,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
             {/* 메뉴 섹션 */}
             {details?.menus && details.menus.length > 0 && (
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6 px-1">
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-4 px-1">
                   <h3 className="text-xl font-black tracking-tight text-surface-900 dark:text-white">메뉴</h3>
                   <span className="text-xs font-bold text-surface-400">{details.menus.length}개</span>
                 </div>
@@ -626,7 +639,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
             {/* 요약 영역 */}
             {!showReviewForm && (
-              <div className="mb-10 p-5 rounded-3xl bg-primary-50 dark:bg-primary-950/30 flex items-center justify-between gap-4">
+              <div className="mb-8 p-5 rounded-3xl bg-primary-50 dark:bg-primary-950/30 flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-bold text-primary-700 dark:text-primary-300 mb-1">방문 후기를 들려주세요!</p>
                   <p className="text-xs text-primary-600/70 dark:text-primary-400/70">직접 방문한 경험을 공유하면<br />다른 분들께 큰 도움이 됩니다.</p>
@@ -645,7 +658,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
             {/* 리뷰 작성 폼 */}
             {showReviewForm && (
-              <div className="mb-10 p-6 rounded-3xl border-2 border-primary-100 dark:border-primary-900/30 bg-white dark:bg-surface-950 shadow-xl shadow-primary-100/50 dark:shadow-none">
+              <div className="mb-8 p-6 rounded-3xl border-2 border-primary-100 dark:border-primary-900/30 bg-white dark:bg-surface-950 shadow-xl shadow-primary-100/50 dark:shadow-none">
                 <div className="space-y-8">
                   <section>
                     <label className="block text-sm font-black mb-4 flex items-center gap-2 text-surface-900 dark:text-white">
@@ -776,7 +789,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               </div>
             )}
 
-            <div className="space-y-12">
+            <div className="space-y-10">
               {/* 리뷰 목록 */}
               <div className="space-y-6">
                 <div className="flex items-end justify-between px-1">
@@ -1080,6 +1093,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {showFolderModal && (
+        <FolderSelectionModal 
+          placeId={placeId!} 
+          onClose={() => setShowFolderModal(false)} 
+          onCloseAll={handleClose}
+        />
+      )}
     </div>,
     document.body
   );

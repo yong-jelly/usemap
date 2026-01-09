@@ -23,8 +23,10 @@ export const folderApi = {
   /**
    * 내 폴더 목록 조회
    */
-  listMyFolders: async () => {
-    const response = await apiClient.rpc<Folder>("v1_list_my_folders");
+  listMyFolders: async (params: { placeId?: string } = {}) => {
+    const response = await apiClient.rpc<Folder>("v1_list_my_folders", {
+      p_place_id: params.placeId || null,
+    });
     return response.data;
   },
 

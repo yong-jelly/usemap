@@ -31,10 +31,10 @@ export function usePublicFolders() {
 /**
  * 내 폴더 목록 조회
  */
-export function useMyFolders() {
+export function useMyFolders(params: { placeId?: string } = {}) {
   return useQuery({
-    queryKey: folderKeys.list('my'),
-    queryFn: () => folderApi.listMyFolders(),
+    queryKey: [...folderKeys.list('my'), params.placeId],
+    queryFn: () => folderApi.listMyFolders(params),
   });
 }
 
