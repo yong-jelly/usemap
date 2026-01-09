@@ -6,7 +6,7 @@ import { PlaceCard } from "@/widgets";
 import { Loader2, Bell, Settings } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { cn, formatKoreanDate } from "@/shared/lib/utils";
+import { cn, formatRelativeTime } from "@/shared/lib/utils";
 
 export function FeedPage() {
   const navigate = useNavigate();
@@ -118,7 +118,7 @@ export function FeedPage() {
                 sourceLabel={sourceLabel}
                 sourceTitle={item.source_title}
                 sourcePath={sourcePath || undefined}
-                addedAt={formatKoreanDate(item.added_at)}
+                addedAt={formatRelativeTime(item.added_at)}
                 imageAspectRatio="aspect-[3/2]"
                 imageWidth="w-[72%]"
                 showPrice={true}
