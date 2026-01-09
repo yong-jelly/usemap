@@ -46,7 +46,7 @@ export function PlaceSlider({
       )}
       <div 
         className={cn(
-          "flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-4",
+          "flex overflow-x-auto overflow-y-hidden scrollbar-hide gap-3 pb-2 px-4",
           snap && "snap-x"
         )}
         style={{ 

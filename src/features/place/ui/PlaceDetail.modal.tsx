@@ -451,7 +451,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
               {/* 썸네일 리스트 */}
               {allImages.length > 1 && (
-                <div className="mt-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="mt-6 flex gap-2 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide">
                   {allImages.slice(0, 8).map((img, i) => (
                     <button 
                       key={i}

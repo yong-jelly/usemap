@@ -167,7 +167,7 @@ export function PlaceCard({
               "flex gap-3 px-5 py-1",
               (maxImages === 1 || images.length === 1) 
                 ? "overflow-hidden" 
-                : "overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                : "overflow-x-auto snap-x snap-mandatory overflow-y-hidden scrollbar-hide"
             )}
             style={{ 
               willChange: 'scroll-position',

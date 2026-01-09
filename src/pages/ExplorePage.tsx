@@ -220,7 +220,7 @@ export function ExplorePage() {
 
           {/* 활성 필터 태그 (정리된 스타일) */}
           {(filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null) && (
-            <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
               {(activeExtraFilterCount > 1 || (filters.group2 && activeExtraFilterCount > 0)) && (
                 <button 
                   onClick={resetFilters}

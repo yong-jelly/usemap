@@ -126,7 +126,7 @@ export function FeedPage() {
 
           {/* 활성 필터 태그 */}
           {(filters.price_min !== null || filters.price_max !== null) && (
-            <div className="flex items-center gap-2 mt-4 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 mt-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
               <button 
                 onClick={() => setFilters({ price_min: null, price_max: null })}
                 className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
