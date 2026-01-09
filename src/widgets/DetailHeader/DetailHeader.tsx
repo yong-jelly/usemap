@@ -65,12 +65,23 @@ export function DetailHeader({
   const handleShare = () => {
     if (onShare) {
       onShare();
+    } else if (navigator.share) {
+      navigator.share({
+        title: title,
+        url: window.location.href,
+      }).catch(() => {
+        // 공유 취소 또는 오류 시 클립보드 복사로 폴백
+        copyToClipboard();
+      });
     } else {
-      // 기본 공유 동작: URL 복사
-      navigator.clipboard.writeText(window.location.href);
-      setIsLinkCopied(true);
-      setTimeout(() => setIsLinkCopied(false), 2000);
+      copyToClipboard();
     }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsLinkCopied(true);
+    setTimeout(() => setIsLinkCopied(false), 2000);
   };
 
   return (
