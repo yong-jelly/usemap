@@ -12,6 +12,7 @@ interface ProfilePlacesListProps {
   emptyIcon: React.ReactNode;
   imageAspectRatio?: string;
   imageWidth?: string;
+  maxImages?: number;
 }
 
 export function ProfilePlacesList({
@@ -24,6 +25,7 @@ export function ProfilePlacesList({
   emptyIcon,
   imageAspectRatio,
   imageWidth,
+  maxImages,
 }: ProfilePlacesListProps) {
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -81,6 +83,7 @@ export function ProfilePlacesList({
             place={place} 
             imageAspectRatio={imageAspectRatio}
             imageWidth={imageWidth}
+            maxImages={maxImages}
           />
         ))}
       </div>

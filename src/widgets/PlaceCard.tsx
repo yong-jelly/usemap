@@ -21,6 +21,7 @@ interface PlaceCardProps {
   place: any;
   imageAspectRatio?: string; // e.g., "aspect-[4/5]"
   imageWidth?: string; // e.g., "w-[80%]"
+  maxImages?: number; // 최대 표시 이미지 개수
   showPrice?: boolean;
   // 피드용 메타 정보
   sourceLabel?: string;
@@ -37,6 +38,7 @@ export function PlaceCard({
   place, 
   imageAspectRatio = "aspect-[4/5]", 
   imageWidth = "w-[80%]",
+  maxImages,
   showPrice = true,
   sourceLabel,
   sourceTitle,
@@ -161,20 +163,25 @@ export function PlaceCard({
       >
         {images.length > 0 ? (
           <div 
-            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-3 px-5 py-1"
+            className={cn(
+              "flex gap-3 px-5 py-1",
+              (maxImages === 1 || images.length === 1) 
+                ? "overflow-hidden" 
+                : "overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+            )}
             style={{ 
               willChange: 'scroll-position',
               WebkitOverflowScrolling: 'touch',
               transform: 'translateZ(0)',
             }}
           >
-            {images.slice(0, 5).map((img: string, index: number) => (
+            {images.slice(0, maxImages || 5).map((img: string, index: number) => (
               <div 
                 key={index}
                 className={cn(
                   "relative flex-shrink-0 snap-center rounded-[24px] overflow-hidden border-2 border-[#2B4562]/5",
                   imageAspectRatio,
-                  images.length === 1 ? "w-full" : imageWidth
+                  (maxImages !== 1 && images.length === 1) ? "w-full" : imageWidth
                 )}
               >
                 {/* 첫 번째 이미지 상단 오버레이 (가격 & 폴더 정보) */}

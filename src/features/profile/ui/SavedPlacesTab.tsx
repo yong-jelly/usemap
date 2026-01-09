@@ -15,6 +15,9 @@ export function SavedPlacesTab() {
       fetchNextPage={fetchNextPage}
       emptyMessage="저장한 장소가 없습니다."
       emptyIcon={<Bookmark className="h-16 w-16" />}
+      imageAspectRatio="aspect-[3/4]"
+      imageWidth="w-36"
+      maxImages={1}
     />
   );
 }

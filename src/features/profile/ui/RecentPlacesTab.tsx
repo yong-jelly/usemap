@@ -17,6 +17,7 @@ export function RecentPlacesTab() {
       emptyIcon={<Clock className="h-16 w-16" />}
       imageAspectRatio="aspect-[3/4]"
       imageWidth="w-36"
+      maxImages={1}
     />
   );
 }
