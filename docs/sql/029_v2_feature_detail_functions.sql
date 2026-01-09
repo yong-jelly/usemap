@@ -113,14 +113,14 @@ AS $$
 BEGIN
     RETURN QUERY
     WITH unique_places AS (
-        SELECT DISTINCT ON (place_id)
-            place_id,
-            published_at
-        FROM tbl_place_features
-        WHERE platform_type = 'youtube'
-          AND status = 'active'
-          AND metadata->>'channelId' = p_channel_id
-        ORDER BY place_id, published_at DESC
+        SELECT DISTINCT ON (f.place_id)
+            f.place_id,
+            f.published_at
+        FROM tbl_place_features f
+        WHERE f.platform_type = 'youtube'
+          AND f.status = 'active'
+          AND f.metadata->>'channelId' = p_channel_id
+        ORDER BY f.place_id, f.published_at DESC
     )
     SELECT 
         p.id,

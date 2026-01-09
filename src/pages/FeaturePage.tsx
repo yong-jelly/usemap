@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
+import { useFeaturePageStore } from "@/shared/lib/feature-page-store";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
@@ -13,12 +14,34 @@ export function FeaturePage() {
   const navigate = useNavigate();
   const { tab } = useParams();
   const activeTab = tab || "folder";
+  
+  const { scrollPositions, setScrollPosition } = useFeaturePageStore();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { id: "folder", label: "플레이스" },
     { id: "youtube", label: "유튜브" },
     { id: "community", label: "커뮤니티" },
   ];
+
+  // 탭 변경 시 또는 마운트 시 스크롤 위치 복원
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const savedPosition = useFeaturePageStore.getState().scrollPositions[activeTab] || 0;
+      const timeoutId = setTimeout(() => {
+        container.scrollTop = savedPosition;
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [activeTab]);
+
+  // 스크롤 발생 시 위치 저장
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      setScrollPosition(activeTab, scrollContainerRef.current.scrollTop);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-surface-950">
@@ -46,7 +69,11 @@ export function FeaturePage() {
       </div>
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto scrollbar-hide"
+      >
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
         {activeTab === "community" && <CommunityList />}
@@ -228,7 +255,7 @@ function YoutubeChannelList() {
 function CommunityList() {
   const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const { communityDomain: selectedDomain, setCommunityDomain: setSelectedDomain } = useFeaturePageStore();
   
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
     domain: selectedDomain,
