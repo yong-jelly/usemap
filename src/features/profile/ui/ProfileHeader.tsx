@@ -12,49 +12,35 @@ export function ProfileHeader() {
 
   return (
     <div className="bg-white dark:bg-neutral-900">
-      {/* 상단 헤더 바 */}
-      <div className="border-b border-gray-100 dark:border-neutral-800">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">프로필</h1>
-          <button
-            onClick={() => logout()}
-            className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-neutral-800 dark:hover:text-gray-200"
-            aria-label="로그아웃"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
       {/* 프로필 정보 섹션 */}
-      <div className="mx-auto max-w-2xl px-4 py-6">
-        <div className="mb-6 flex items-start gap-4">
+      <div className="mx-auto max-w-2xl px-5 py-6">
+        <div className="mb-8 flex items-center gap-5">
           {/* 프로필 이미지 */}
-          <div className="relative h-20 w-20 flex-shrink-0">
+          <div className="relative h-24 w-24 flex-shrink-0">
             {profile.profile_image_url ? (
               <img
                 src={profile.profile_image_url}
                 alt={profile.nickname}
-                className="h-full w-full rounded-full object-cover border-2 border-gray-100 dark:border-neutral-800"
+                className="h-full w-full rounded-full object-cover border-4 border-surface-50 dark:border-surface-800 shadow-sm"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-gray-100 text-2xl font-bold text-gray-400 dark:bg-neutral-800">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-surface-100 text-3xl font-black text-surface-300 dark:bg-surface-800 dark:text-surface-600">
                 {profile.nickname.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
 
           {/* 사용자 텍스트 정보 */}
-          <div className="flex-1">
-            <div className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="flex-1 overflow-hidden">
+            <h2 className="text-2xl font-black text-surface-900 dark:text-white truncate mb-1">
               {profile.nickname}
-            </div>
+            </h2>
             {profile.bio ? (
-              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              <p className="text-base font-medium text-surface-500 dark:text-surface-400 line-clamp-2 leading-tight">
                 {profile.bio}
               </p>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium text-surface-400 dark:text-surface-500">
                 소개 정보가 없습니다.
               </p>
             )}
@@ -62,21 +48,41 @@ export function ProfileHeader() {
         </div>
 
         {/* 프로필 액션 버튼 */}
-        <div className="mb-2 flex gap-2">
+        <div className="mb-12 flex gap-3">
           <Button
             onClick={() => navigate("/profile/edit")}
             variant="secondary"
-            className="flex-1 rounded-lg bg-gray-100 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-300 dark:hover:bg-neutral-700"
+            className="flex-1 rounded-2xl h-14 text-lg font-black"
           >
             프로필 편집
           </Button>
           <Button
             onClick={() => navigate("/sub-stat/user/me")}
-            className="w-[25%] rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 py-2.5 text-sm font-medium text-white hover:from-blue-600 hover:to-purple-600 dark:from-blue-600 dark:to-purple-600"
+            className="w-[30%] rounded-2xl h-14 text-lg font-black bg-surface-900 text-white dark:bg-white dark:text-black shadow-lg shadow-surface-900/10"
           >
-            <PieChart className="mr-1.5 h-4 w-4" />
+            <PieChart className="mr-2 h-5 w-5 fill-current" />
             분석
           </Button>
+        </div>
+
+        {/* 설정 메뉴 (로그아웃 포함) */}
+        <div className="space-y-1">
+          <div className="text-xs font-black text-surface-300 dark:text-surface-700 uppercase tracking-widest mb-4 px-1">
+            Account
+          </div>
+          <button
+            onClick={() => logout()}
+            className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-surface-50 dark:bg-surface-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-surface-700 transition-colors shadow-sm">
+                <LogOut className="h-5 w-5 text-surface-400 dark:text-surface-500 group-hover:text-accent-rose transition-colors" />
+              </div>
+              <span className="text-lg font-bold text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
+                로그아웃
+              </span>
+            </div>
+          </button>
         </div>
       </div>
     </div>

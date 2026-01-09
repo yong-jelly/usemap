@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
 import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
-import { SavedPlacesTab } from "@/features/profile/ui/SavedPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
 import { VisitedPlacesTab } from "@/features/profile/ui/VisitedPlacesTab";
 import { MyFolderList } from "@/features/folder/ui/MyFolderList";
 import { SubscriptionList } from "@/features/folder/ui/SubscriptionList";
-import { Tabs } from "@/shared/ui";
 import { useUserProfile } from "@/entities/user/queries";
 import { useEnsureDefaultFolder } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams, Navigate } from "react-router";
+import { cn } from "@/shared/lib/utils";
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -20,7 +19,7 @@ export function ProfilePage() {
   const { isAuthenticated, isSyncing } = useUserStore();
   const { mutate: ensureDefaultFolder } = useEnsureDefaultFolder();
   
-  const activeTab = tab || "recent";
+  const activeTab = tab || "profile";
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,8 +28,8 @@ export function ProfilePage() {
   }, [isAuthenticated, ensureDefaultFolder]);
 
   const tabs = [
+    { id: "profile", label: "프로필" },
     { id: "recent", label: "최근" },
-    { id: "saved", label: "저장" },
     { id: "liked", label: "좋아요" },
     { id: "visited", label: "방문" },
     { id: "folder", label: "맛탐정" },
@@ -65,19 +64,34 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900">
-      <ProfileHeader />
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-neutral-900">
+      {/* 상단 헤더 - 타이포 중심 (FeaturePage 스타일) */}
+      <div className="bg-white dark:bg-neutral-900 px-5 pt-8 pb-4 z-10 flex-shrink-0">
+        <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={cn(
+                "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
+                activeTab === tab.id 
+                  ? "text-surface-900 dark:text-white" 
+                  : "text-surface-300 dark:text-surface-700"
+              )}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <Tabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={handleTabChange}
-        className="sticky top-0 z-10 bg-white dark:bg-neutral-900"
-      />
-
-      <div className="pb-20">
+      {/* 컨텐츠 영역 */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        {activeTab === "profile" && <ProfileHeader />}
         {activeTab === "recent" && <RecentPlacesTab />}
-        {activeTab === "saved" && <SavedPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}
         {activeTab === "visited" && <VisitedPlacesTab />}
         {activeTab === "folder" && <MyFolderList />}
