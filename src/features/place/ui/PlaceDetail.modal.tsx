@@ -35,6 +35,7 @@ import {
   useToggleSave,
   useToggleVisited
 } from "@/entities/place/queries";
+import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
 import { useUserStore } from "@/entities/user";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui";
@@ -65,6 +66,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const { data: details, isLoading: isDetailsLoading, isFetching } = usePlaceByIdWithRecentView(placeId!);
   const { data: reviews = [], isLoading: isReviewsLoading } = usePlaceUserReviews(placeId!);
   const { data: placeFeaturesData = [], isLoading: isFeaturesLoading } = usePlaceFeatures(placeId!);
+  const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
   
   // placeId가 변경되면 이전 데이터가 보이지 않도록 체크
   // details.id와 현재 placeId가 다르면 로딩 상태로 처리
@@ -78,6 +80,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const toggleLikeMutation = useToggleLike();
   const toggleSaveMutation = useToggleSave();
   const toggleVisitedMutation = useToggleVisited();
+
+  const isSavedToAnyFolder = useMemo(() => 
+    isAuthenticated && myFolders.some((f: any) => f.is_place_in_folder), 
+    [myFolders, isAuthenticated]
+  );
 
   // UI States
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -484,7 +491,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
-                <MapPinCheck className={cn("size-5", details?.experience?.is_visited && "fill-current text-white")} />
+                <MapPinCheck className={cn("size-5", details?.experience?.is_visited && "text-white")} />
                 가봤어요
               </button>
               <div className="flex gap-2">
@@ -514,10 +521,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
                   className={cn(
                     "flex items-center justify-center p-3 rounded-2xl border transition-all",
-                    "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                    isSavedToAnyFolder
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                   )}
                 >
-                  <Folder className="size-5" />
+                  <Folder className={cn("size-5", isSavedToAnyFolder && "fill-current")} />
                 </button>
               </div>
             </div>
