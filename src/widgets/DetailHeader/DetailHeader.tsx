@@ -126,17 +126,18 @@ export function DetailHeader({
 
       {/* 액션 버튼 영역 */}
       <div className="flex items-center gap-1 shrink-0">
-        {/* 구독 버튼 (feature 타입이거나, 폴더이면서 내 폴더가 아닌 경우) */}
-        {(type === 'feature' || (type === 'folder' && !isOwner)) && onSubscribe && (
+        {/* 구독 버튼 (feature 타입이거나, 폴더 타입인 경우) */}
+        {(type === 'feature' || type === 'folder') && onSubscribe && (
           <button
-            onClick={onSubscribe}
+            onClick={isOwner && type === 'folder' ? undefined : onSubscribe}
             className={cn(
               "p-2 rounded-full transition-all active:scale-90",
               isSubscribed 
                 ? "text-primary-500 bg-primary-50 dark:bg-primary-950/30" 
-                : "text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800"
+                : "text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800",
+              isOwner && type === 'folder' && "cursor-default opacity-100"
             )}
-            title={isSubscribed ? "구독 중" : "구독하기"}
+            title={isOwner && type === 'folder' ? "내 폴더 (구독 중)" : (isSubscribed ? "구독 중" : "구독하기")}
           >
             <div className="relative">
               <Rss className={cn("size-5 transition-transform", isSubscribed && "scale-110")} />

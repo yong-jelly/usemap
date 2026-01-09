@@ -425,13 +425,15 @@ export function FolderDetailPage() {
   const canEdit = access?.can_edit;
 
   const isSubscribed = useMemo(() => {
+    if (isOwner) return true;
     if (!subscriptions || !id) return false;
     return subscriptions.some(sub => 
       sub.subscription_type === 'folder' && sub.feature_id === id && sub.is_subscribed
     );
-  }, [subscriptions, id]);
+  }, [subscriptions, id, isOwner]);
 
   const handleToggleSubscription = () => {
+    if (isOwner) return;
     if (!id) return;
     toggleSubscription(id);
   };
@@ -505,14 +507,14 @@ export function FolderDetailPage() {
 
     const features: GeoJSON.Feature<GeoJSON.Point>[] = mapPlaces
       .filter(place => {
-        if (!place.x || !place.y) return false;
-        const lng = parseFloat(place.x);
-        const lat = parseFloat(place.y);
+        if (place.x === undefined || place.y === undefined || place.x === null || place.y === null) return false;
+        const lng = typeof place.x === 'string' ? parseFloat(place.x) : place.x;
+        const lat = typeof place.y === 'string' ? parseFloat(place.y) : place.y;
         return !isNaN(lng) && !isNaN(lat);
       })
       .map(place => {
-        const lng = parseFloat(place.x!);
-        const lat = parseFloat(place.y!);
+        const lng = typeof place.x === 'string' ? parseFloat(place.x) : place.x as number;
+        const lat = typeof place.y === 'string' ? parseFloat(place.y) : place.y as number;
         
         return {
           type: 'Feature' as const,
@@ -777,7 +779,7 @@ export function FolderDetailPage() {
       <DetailHeader
         type="folder"
         title={folderInfo?.title || "맛탐정 폴더"}
-        subtitle={folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명"}
+        subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
         thumbnailUrl={folderInfo?.owner_avatar_url}
         isOwner={isOwner}
         isSubscribed={isSubscribed}
@@ -844,7 +846,7 @@ export function FolderDetailPage() {
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-6">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
+                  <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
                   <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
                 </div>
                 {folderInfo.permission !== 'default' && (
@@ -853,7 +855,7 @@ export function FolderDetailPage() {
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
+                          <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
                           <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
                         </div>
                       </div>
