@@ -17,7 +17,7 @@ import {
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
 mapboxgl.accessToken = MAP_TOKEN;
-import { Button, PlaceSliderCard, Input } from "@/shared/ui";
+import { Button, Input } from "@/shared/ui";
 import { 
   ChevronLeft, 
   Plus, 
@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
+import { PlaceCard } from "@/widgets/PlaceCard";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { cn, formatKoreanDate } from "@/shared/lib/utils";
 import { ago } from "@/shared/lib/date";
@@ -893,56 +894,28 @@ export function FolderDetailPage() {
           )}
 
           {/* 장소 목록 */}
-          <div className="px-4 pb-24">
+          <div className="flex flex-col">
             {places.length > 0 ? (
-              folderInfo.permission === 'invite' ? (
-                <div className="flex flex-col gap-4">
-                  {places.map((item: any) => (
-                    <div key={item.place_id} className="flex flex-col gap-3 p-4 bg-white dark:bg-surface-900 rounded-2xl shadow-sm border border-surface-100 dark:border-surface-800">
-                      <div className="flex gap-3" onClick={() => showPlaceModal(item.place_id)}>
-                        <div className="size-20 rounded-xl overflow-hidden flex-shrink-0 bg-surface-100">
-                          {item.place_data.image_urls?.[0] && (
-                            <img 
-                              src={item.place_data.image_urls[0]} 
-                              alt={item.place_data.name}
-                              className="size-full object-cover"
-                            />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-surface-900 dark:text-white truncate">
-                            {item.place_data.name}
-                          </h3>
-                          <p className="text-sm text-surface-500 truncate">{item.place_data.category}</p>
-                          <p className="text-xs text-surface-400 mt-1">
-                            {formatKoreanDate(item.added_at)} 추가됨
-                          </p>
-                        </div>
+              <>
+                {places.map((item: any) => (
+                  <div key={item.place_id} className="flex flex-col">
+                    <PlaceCard 
+                      place={item.place_data} 
+                      showPrice={true}
+                      addedAt={formatKoreanDate(item.added_at)}
+                    />
+                    {folderInfo.permission === 'invite' && (
+                      <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
+                        <FolderReviewSection 
+                          folderId={id!}
+                          placeId={item.place_id}
+                          placeName={item.place_data.name}
+                        />
                       </div>
-                      <FolderReviewSection 
-                        folderId={id!}
-                        placeId={item.place_id}
-                        placeName={item.place_data.name}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {places.map((item: any) => (
-                    <div key={item.place_id} className="w-full">
-                      <PlaceSliderCard 
-                        placeId={item.place_id}
-                        name={item.place_data.name}
-                        thumbnail={item.place_data.image_urls?.[0]}
-                        category={item.place_data.category}
-                        onClick={showPlaceModal}
-                        snap={false}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )
+                    )}
+                  </div>
+                ))}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
                 <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
@@ -958,7 +931,7 @@ export function FolderDetailPage() {
             )}
 
             {hasNextPage && (
-              <div className="py-8 flex justify-center">
+              <div className="p-8 pb-24 flex justify-center">
                 <Loader2 className="size-6 text-surface-300 animate-spin" />
               </div>
             )}
