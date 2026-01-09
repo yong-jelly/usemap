@@ -59,6 +59,7 @@ export function FeaturePage() {
  * 네이버 폴더 목록 렌더링 컴포넌트
  */
 function NaverFolderList() {
+  const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNaverFolders();
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
@@ -96,7 +97,10 @@ function NaverFolderList() {
         <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
           {/* 제목 영역: 타이틀 + 개수 */}
           <div className="flex items-end justify-between gap-2">
-            <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep">
+            <h3 
+              className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep cursor-pointer hover:underline underline-offset-4"
+              onClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
+            >
               {folder.name}
             </h3>
             <span className="text-sm font-medium text-surface-400 mb-0.5 whitespace-nowrap">
@@ -110,7 +114,7 @@ function NaverFolderList() {
               title=""
               items={folder.preview_places || []}
               onItemClick={showPopup}
-              onMoreClick={() => {}}
+              onMoreClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
               showMoreThreshold={10}
               showRating={false}
               snap={false}
@@ -132,6 +136,7 @@ function NaverFolderList() {
  * 유튜브 채널 목록 렌더링 컴포넌트
  */
 function YoutubeChannelList() {
+  const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useYoutubeChannels();
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
@@ -169,7 +174,10 @@ function YoutubeChannelList() {
         <section key={channel.channel_id} className="flex flex-col gap-2 px-4">
           {/* 헤더: 채널 프로필 + 이름 + 개수 */}
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800">
+            <div 
+              className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 cursor-pointer"
+              onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+            >
               <img 
                 src={channel.channel_thumbnail} 
                 alt={channel.channel_title} 
@@ -178,7 +186,10 @@ function YoutubeChannelList() {
               />
             </div>
             <div className="flex items-end justify-between flex-1 gap-2 overflow-hidden">
-              <h3 className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate">
+              <h3 
+                className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+                onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+              >
                 {channel.channel_title}
               </h3>
               <span className="text-xs font-medium text-surface-400 mb-0.5 whitespace-nowrap">
@@ -193,7 +204,7 @@ function YoutubeChannelList() {
               title=""
               items={channel.preview_places || []}
               onItemClick={showPopup}
-              onMoreClick={() => {}}
+              onMoreClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
               showMoreThreshold={10}
               showRating={false}
               snap={false}
@@ -215,6 +226,7 @@ function YoutubeChannelList() {
  * 커뮤니티 목록 렌더링 컴포넌트
  */
 function CommunityList() {
+  const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   
@@ -290,6 +302,8 @@ function CommunityList() {
               countLabel={`${region.place_count}개 매장`}
               items={region.preview_contents}
               onItemClick={showPopup}
+              onTitleClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+              onMoreClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
               showRating={false}
               snap={false}
             />

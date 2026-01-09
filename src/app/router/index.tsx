@@ -4,11 +4,13 @@ import { Header, BottomNav } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { AuthModal } from "@/features/auth/ui/AuthModal";
+import { cn } from "@/shared/lib/utils";
 
 // Page Imports
 import { HomePage } from "@/pages/HomePage";
 import { ExplorePage } from "@/pages/ExplorePage";
 import { FeaturePage } from "@/pages/FeaturePage";
+import { FeatureDetailPage } from "@/pages/FeatureDetailPage";
 import { MapPage } from "@/pages/MapPage";
 import { ReviewPage } from "@/pages/ReviewPage";
 import { TrendPage } from "@/pages/TrendPage";
@@ -70,6 +72,9 @@ function PageViewTracker() {
  */
 function RootLayout() {
   const { isOpen: isPlaceModalOpen, placeId: modalPlaceId } = usePlacePopup();
+  const { pathname } = useLocation();
+
+  const isFeatureDetailPage = pathname.includes("/feature/detail/");
   
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
@@ -78,10 +83,13 @@ function RootLayout() {
       {/* <Header /> */}
       {/* 메인 모바일 뷰 컨테이너 (최대 너비 512px) */}
       {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
-      <main className="pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800">
+      <main className={cn(
+        "max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
+        isFeatureDetailPage ? "pb-0" : "pb-14"
+      )}>
         <Outlet />
       </main>
-      <BottomNav />
+      {!isFeatureDetailPage && <BottomNav />}
       <AuthModal />
       
       {/* 전역 장소 상세 모달: usePlacePopup 스토어로 제어 */}
@@ -116,8 +124,11 @@ const router = createBrowserRouter([
         element: <ExplorePage />,
       },
       {
-        path: "feature/:tab?",
-        element: <FeaturePage />,
+        path: "feature",
+        children: [
+          { path: ":tab?", element: <FeaturePage /> },
+          { path: "detail/:type/:id", element: <FeatureDetailPage /> },
+        ],
       },
       {
         path: "map",

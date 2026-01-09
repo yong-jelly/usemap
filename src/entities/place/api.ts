@@ -258,6 +258,63 @@ export const placeApi = {
   },
 
   /**
+   * 네이버 폴더 상세 장소 목록을 조회합니다.
+   */
+  getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<any>("v2_get_places_by_naver_folder", {
+      p_folder_id: parseInt(params.folderId),
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
+   * 유튜브 채널 상세 장소 목록을 조회합니다.
+   */
+  getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<any>("v2_get_places_by_youtube_channel", {
+      p_channel_id: params.channelId,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
+   * 커뮤니티 지역 상세 장소 목록을 조회합니다.
+   */
+  getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<any>("v2_get_places_by_community_region", {
+      p_region_name: params.regionName,
+      p_domain: params.domain || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
+   * 네이버 폴더 정보를 조회합니다.
+   */
+  getNaverFolderInfo: async (folderId: string) => {
+    const response = await apiClient.rpc<NaverFolder>("v2_get_naver_folder_info", {
+      p_folder_id: parseInt(folderId),
+    });
+    return response.data[0];
+  },
+
+  /**
+   * 유튜브 채널 정보를 조회합니다.
+   */
+  getYoutubeChannelInfo: async (channelId: string) => {
+    const response = await apiClient.rpc<YoutubeChannel>("v2_get_youtube_channel_info", {
+      p_channel_id: channelId,
+    });
+    return response.data[0];
+  },
+
+  /**
    * 내가 저장(북마크)한 장소 목록을 조회합니다.
    */
   getMyBookmarkedPlaces: async (limit: number = 20, offset: number = 0) => {

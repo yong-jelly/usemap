@@ -9,6 +9,7 @@ interface PlaceSliderProps {
   items: any[];
   onItemClick?: (id: string) => void;
   onMoreClick?: () => void;
+  onTitleClick?: () => void;
   showMoreThreshold?: number;
   showRating?: boolean;
   snap?: boolean;
@@ -20,6 +21,7 @@ export function PlaceSlider({
   items,
   onItemClick,
   onMoreClick,
+  onTitleClick,
   showMoreThreshold = 10,
   showRating = false,
   snap = false,
@@ -28,7 +30,13 @@ export function PlaceSlider({
     <div className="flex flex-col gap-3.5 mb-6">
       {(title || countLabel) && (
         <div className="flex items-end justify-between gap-2 px-4">
-          <h3 className="text-xl font-black text-surface-900 dark:text-white leading-tight">
+          <h3 
+            className={cn(
+              "text-xl font-black text-surface-900 dark:text-white leading-tight",
+              onTitleClick && "cursor-pointer hover:underline underline-offset-4"
+            )}
+            onClick={onTitleClick}
+          >
             {title}
           </h3>
           {countLabel && (

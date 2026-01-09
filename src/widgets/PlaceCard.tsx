@@ -18,13 +18,21 @@ import { cn } from "@/shared/lib/utils";
 
 interface PlaceCardProps {
   place: any;
+  imageAspectRatio?: string; // e.g., "aspect-[4/5]"
+  imageWidth?: string; // e.g., "w-[80%]"
+  showPrice?: boolean;
 }
 
 /**
  * 여성 직장인 타겟의 미니멀 콘텐츠 중심 장소 카드
  * 마스코트 테마(Navy, Orange, Cream)를 활용한 소프트 벡터 스타일
  */
-export function PlaceCard({ place }: PlaceCardProps) {
+export function PlaceCard({ 
+  place, 
+  imageAspectRatio = "aspect-[4/5]", 
+  imageWidth = "w-[80%]",
+  showPrice = true
+}: PlaceCardProps) {
   const { show: showPlaceModal } = usePlacePopup();
   const [isLiked, setIsLiked] = useState(place.interaction?.is_liked || false);
   const [isSaved, setIsSaved] = useState(place.interaction?.is_saved || false);
@@ -115,12 +123,13 @@ export function PlaceCard({ place }: PlaceCardProps) {
               <div 
                 key={index}
                 className={cn(
-                  "relative flex-shrink-0 snap-center rounded-[24px] overflow-hidden border-2 border-[#2B4562]/5 aspect-[4/5]",
-                  images.length === 1 ? "w-full" : "w-[80%]"
+                  "relative flex-shrink-0 snap-center rounded-[24px] overflow-hidden border-2 border-[#2B4562]/5",
+                  imageAspectRatio,
+                  images.length === 1 ? "w-full" : imageWidth
                 )}
               >
                 {/* 첫 번째 이미지 상단 오버레이 (가격 & 폴더 정보) */}
-                {index === 0 && (place.avg_price > 0 || folders.length > 0) && (
+                {index === 0 && showPrice && (place.avg_price > 0 || folders.length > 0) && (
                   <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
                     {place.avg_price > 0 && (
                       <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-[14px] shadow-md border border-[#2B4562]/5">

@@ -178,6 +178,12 @@ BEGIN
                     'voted_keyword_count', s.voted_keyword_count,
                     'menus', null,
                     'avg_price', calculate_menu_avg_price(p.menus),
+                    'voted_summary_text', (
+                        SELECT (v->>'description')::text
+                        FROM tbl_place_analysis a, jsonb_array_elements(a.voted) v
+                        WHERE a.business_id = p.id
+                        LIMIT 1
+                    ),
                     'street_panorama', p.street_panorama,
                     'place_images', p.place_images,
                     'updated_at', p.updated_at,

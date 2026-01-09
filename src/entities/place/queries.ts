@@ -20,6 +20,8 @@ export const placeKeys = {
   myLiked: () => [...placeKeys.all, "myLiked"] as const,
   myVisited: () => [...placeKeys.all, "myVisited"] as const,
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
+  featurePlaces: (type: string, id: string, domain?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domain] as const,
+  featureInfo: (type: string, id: string) => [...placeKeys.all, "featureInfo", type, id] as const,
 };
 
 /**
@@ -320,5 +322,55 @@ export function useCommunityContents(filters: { domain?: string | null }) {
       if (!lastPage || lastPage.length < 20) return undefined;
       return allPages.length * 20;
     },
+  });
+}
+
+/**
+ * 피쳐별 상세 장소 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useFeaturePlaces(params: { 
+  type: 'folder' | 'youtube' | 'community';
+  id: string;
+  domain?: string | null;
+}) {
+  return useInfiniteQuery({
+    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain),
+    queryFn: ({ pageParam = 0 }) => {
+      const limit = 20;
+      switch (params.type) {
+        case 'folder':
+          return placeApi.getPlacesByNaverFolder({ folderId: params.id, limit, offset: pageParam });
+        case 'youtube':
+          return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam });
+        case 'community':
+          return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam });
+      }
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+    enabled: !!params.id,
+  });
+}
+
+/**
+ * 피쳐 정보(폴더명, 채널명 등)를 조회하는 Hook
+ */
+export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community'; id: string }) {
+  return useQuery({
+    queryKey: placeKeys.featureInfo(params.type, params.id),
+    queryFn: () => {
+      switch (params.type) {
+        case 'folder':
+          return placeApi.getNaverFolderInfo(params.id);
+        case 'youtube':
+          return placeApi.getYoutubeChannelInfo(params.id);
+        case 'community':
+          return Promise.resolve({ name: params.id }); // 지역명 자체가 정보
+      }
+    },
+    enabled: !!params.id,
   });
 }
