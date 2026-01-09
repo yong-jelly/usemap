@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -6,13 +6,13 @@ import {
   useFolderPlaces, 
   useAddPlaceToFolder, 
   useFolderInfo, 
-  useFolderAccess,
-  useVerifyInviteCode,
+  useFolderAccess, 
   useRegenerateInviteCode,
   useInviteHistory,
   useHideFolder,
   useRemovePlaceFromFolder,
-  useFolderPlacesForMap
+  useFolderPlacesForMap,
+  useVerifyInviteCode
 } from "@/entities/folder/queries";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
@@ -34,12 +34,12 @@ import {
   RefreshCw,
   Clock,
   History,
-  Settings,
   EyeOff,
-  Trash2,
   X,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  List,
+  RotateCcw
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
@@ -48,7 +48,7 @@ import { cn, formatKoreanDate } from "@/shared/lib/utils";
 import { ago } from "@/shared/lib/date";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import type { FolderAccess, InviteHistory as InviteHistoryType } from "@/entities/folder/types";
+import type { InviteHistory as InviteHistoryType } from "@/entities/folder/types";
 
 // 초대 관리 섹션 (폴더 상세 상단에 표시)
 function FolderInviteAdminSection({ 
@@ -81,7 +81,7 @@ function FolderInviteAdminSection({
   };
 
   return (
-    <div className="mx-5 mb-6 p-5 bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/20 flex flex-col gap-4">
+    <div className="mx-4 mb-6 p-5 bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/20 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-primary-500 rounded-lg">
@@ -169,7 +169,7 @@ function InviteCodeInput({
   onSuccess: () => void;
 }) {
   const [code, setCode] = useState("");
-  const { mutate: verifyCode, isPending, error } = useVerifyInviteCode();
+  const { mutate: verifyCode, isPending } = useVerifyInviteCode();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -222,124 +222,6 @@ function InviteCodeInput({
           {isPending ? <Loader2 className="animate-spin" /> : "입장하기"}
         </Button>
       </form>
-    </div>
-  );
-}
-
-// 폴더 지도 모달
-function FolderMapModal({ 
-  folderId, 
-  onClose 
-}: { 
-  folderId: string; 
-  onClose: () => void;
-}) {
-  const { show: showPlaceModal } = usePlacePopup();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<Map<string, mapboxgl.Marker>>(new Map());
-  
-  const { data: mapPlaces, isLoading } = useFolderPlacesForMap(folderId, true);
-
-  // Initialize Map
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [127.0276, 37.4979], // Gangnam
-      zoom: 13,
-    });
-
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
-  }, []);
-
-  // Update Markers when places change
-  useEffect(() => {
-    if (!map.current || !mapPlaces || mapPlaces.length === 0) return;
-
-    // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current.clear();
-
-    const bounds = new mapboxgl.LngLatBounds();
-
-    mapPlaces.forEach(place => {
-      if (!place.x || !place.y) return;
-      const lng = parseFloat(place.x);
-      const lat = parseFloat(place.y);
-      
-      if (isNaN(lng) || isNaN(lat)) return;
-
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.innerHTML = `
-        <div class="px-2 py-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg shadow-md border border-surface-200 dark:border-surface-800 font-bold text-xs whitespace-nowrap">
-          ${place.name}
-        </div>
-      `;
-
-      el.addEventListener('click', () => {
-        showPlaceModal(place.place_id);
-      });
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([lng, lat])
-        .addTo(map.current!);
-      
-      markers.current.set(place.place_id, marker);
-      bounds.extend([lng, lat]);
-    });
-
-    if (!bounds.isEmpty() && markers.current.size > 0) {
-      map.current.fitBounds(bounds, { padding: 50, maxZoom: 15 });
-    }
-  }, [mapPlaces, showPlaceModal]);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={onClose}>
-      <div 
-        className="bg-white dark:bg-surface-900 w-full h-full sm:w-[90vw] sm:h-[80vh] sm:max-w-4xl sm:rounded-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-4 border-b border-surface-100 dark:border-surface-800 flex items-center justify-between shrink-0">
-          <h3 className="text-lg font-bold">지도로 보기</h3>
-          <button onClick={onClose} className="p-2 -mr-2">
-            <X className="size-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 relative">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-surface-50 dark:bg-surface-900">
-              <Loader2 className="size-8 animate-spin text-surface-300" />
-            </div>
-          ) : mapPlaces && mapPlaces.length === 0 ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-900 text-surface-400">
-              <MapIcon className="size-12 mb-2 opacity-50" />
-              <p>표시할 장소가 없습니다</p>
-            </div>
-          ) : null}
-          <div ref={mapContainer} className="absolute inset-0" />
-        </div>
-
-        <div className="p-3 border-t border-surface-100 dark:border-surface-800 text-center text-sm text-surface-500 shrink-0">
-          {mapPlaces?.length || 0}개 장소
-        </div>
-      </div>
-
-      <style>{`
-        .custom-marker {
-          cursor: pointer;
-        }
-        .mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }
@@ -479,15 +361,18 @@ export function FolderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
-  const { isAuthenticated, user } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const { openLogin } = useAuthModalStore();
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showInviteHistory, setShowInviteHistory] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
-  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapDataRequested, setMapDataRequested] = useState(false);
+  const [showResetButton, setShowResetButton] = useState(false);
+  const initialZoom = useRef<number | null>(null);
+  const initialCenter = useRef<[number, number] | null>(null);
 
   // 접근 권한 체크
   const { data: access, isLoading: isAccessLoading, refetch: refetchAccess } = useFolderAccess(id!);
@@ -502,11 +387,37 @@ export function FolderDetailPage() {
 
   const { data: folderInfo, isLoading: isInfoLoading } = useFolderInfo(id!);
   const { mutate: addPlace } = useAddPlaceToFolder();
-  const { mutate: removePlace } = useRemovePlaceFromFolder();
   const { mutate: hideFolder } = useHideFolder();
 
   const isOwner = access?.is_owner;
   const canEdit = access?.can_edit;
+
+  // 지도용 데이터 조회
+  const { data: folderMapPlaces, isLoading: isMapLoading } = useFolderPlacesForMap(id!, mapDataRequested);
+
+  const places = useMemo(() => {
+    return placesData?.pages.flatMap(page => page) || [];
+  }, [placesData]);
+
+  const mapPlaces = useMemo(() => {
+    if (folderMapPlaces && folderMapPlaces.length > 0) {
+      return folderMapPlaces;
+    }
+    return places.map(p => ({
+      place_id: p.place_id,
+      name: p.place_data.name,
+      x: p.place_data.x,
+      y: p.place_data.y
+    }));
+  }, [folderMapPlaces, places]);
+
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const clusterLabelMarkers = useRef<mapboxgl.Marker[]>([]);
+  const pointLabelMarkers = useRef<mapboxgl.Marker[]>([]);
+  const sourceId = 'places-source';
+  const clusterLayerId = 'places-clusters';
+  const unclusteredPointLayerId = 'places-unclustered-point';
 
   const handleAddPlace = (place: any) => {
     addPlace({ folderId: id!, placeId: place.id }, {
@@ -526,6 +437,227 @@ export function FolderDetailPage() {
     }
     setShowMenu(false);
   };
+
+  // Initialize Map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: [127.0276, 37.4979],
+      zoom: 13,
+    });
+
+    return () => {
+      map.current?.remove();
+      map.current = null;
+    };
+  }, []);
+
+  // Update Map with Clustering
+  useEffect(() => {
+    if (!map.current || viewMode !== "map" || mapPlaces.length === 0) return;
+
+    const features: GeoJSON.Feature<GeoJSON.Point>[] = mapPlaces
+      .filter(place => {
+        if (!place.x || !place.y) return false;
+        const lng = parseFloat(place.x);
+        const lat = parseFloat(place.y);
+        return !isNaN(lng) && !isNaN(lat);
+      })
+      .map(place => {
+        const lng = parseFloat(place.x!);
+        const lat = parseFloat(place.y!);
+        
+        return {
+          type: 'Feature' as const,
+          properties: {
+            id: place.place_id,
+            name: place.name,
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [lng, lat] as [number, number],
+          },
+        } as GeoJSON.Feature<GeoJSON.Point>;
+      });
+    
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features,
+    };
+
+    if (map.current.getSource(sourceId)) {
+      map.current.removeLayer(clusterLayerId);
+      map.current.removeLayer(unclusteredPointLayerId);
+      map.current.removeSource(sourceId);
+    }
+
+    map.current.addSource(sourceId, {
+      type: 'geojson',
+      data: geojson,
+      cluster: true,
+      clusterMaxZoom: 20,
+      clusterRadius: 50,
+    });
+
+    map.current.addLayer({
+      id: clusterLayerId,
+      type: 'circle',
+      source: sourceId,
+      filter: ['has', 'point_count'],
+      paint: { 'circle-opacity': 0, 'circle-radius': 0 },
+    });
+
+    map.current.addLayer({
+      id: unclusteredPointLayerId,
+      type: 'circle',
+      source: sourceId,
+      filter: ['!', ['has', 'point_count']],
+      paint: { 'circle-opacity': 0, 'circle-radius': 0 },
+    });
+
+    const updateLabels = () => {
+      if (!map.current || !map.current.getSource(sourceId)) return;
+      
+      clusterLabelMarkers.current.forEach(m => m.remove());
+      clusterLabelMarkers.current = [];
+      pointLabelMarkers.current.forEach(m => m.remove());
+      pointLabelMarkers.current = [];
+      
+      const clusterFeatures = map.current.queryRenderedFeatures({ layers: [clusterLayerId] });
+
+      clusterFeatures.forEach((feature) => {
+        if (!feature.properties?.cluster_id) return;
+        const coordinates = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+        const pointCount = feature.properties.point_count as number;
+        const clusterId = feature.properties.cluster_id;
+        
+        (map.current!.getSource(sourceId) as mapboxgl.GeoJSONSource).getClusterLeaves(
+          clusterId,
+          pointCount,
+          0,
+          (err, leaves) => {
+            if (err || !leaves || leaves.length === 0) return;
+            
+            if (pointCount >= 3) {
+              const placeName = leaves[0].properties?.name || '장소';
+              const el = document.createElement('div');
+              el.className = 'cluster-label-marker';
+              el.innerHTML = `
+                <div class="px-2 py-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg shadow-md border border-surface-200 dark:border-surface-800 font-bold text-xs whitespace-nowrap flex items-center gap-1 cursor-pointer">
+                  <span>${placeName}</span>
+                  <span class="text-primary-500">+${pointCount - 1}</span>
+                </div>
+              `;
+              el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                map.current!.easeTo({ center: coordinates, zoom: map.current!.getZoom() + 2 });
+              });
+              const marker = new mapboxgl.Marker(el).setLngLat(coordinates).addTo(map.current!);
+              clusterLabelMarkers.current.push(marker);
+            } else {
+              leaves.forEach((leaf) => {
+                const leafCoords = (leaf.geometry as GeoJSON.Point).coordinates as [number, number];
+                const placeName = leaf.properties?.name || '장소';
+                const placeId = leaf.properties?.id;
+                const el = document.createElement('div');
+                el.className = 'point-label-marker';
+                el.innerHTML = `
+                  <div class="px-2 py-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg shadow-md border border-surface-200 dark:border-surface-800 font-bold text-xs whitespace-nowrap cursor-pointer">
+                    ${placeName}
+                  </div>
+                `;
+                el.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  if (placeId) showPlaceModal(placeId);
+                });
+                const marker = new mapboxgl.Marker(el).setLngLat(leafCoords).addTo(map.current!);
+                pointLabelMarkers.current.push(marker);
+              });
+            }
+          }
+        );
+      });
+
+      const pointFeatures = map.current.queryRenderedFeatures({ layers: [unclusteredPointLayerId] });
+      pointFeatures.forEach((feature) => {
+        const coordinates = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+        const placeName = feature.properties?.name || '장소';
+        const placeId = feature.properties?.id;
+        const el = document.createElement('div');
+        el.className = 'point-label-marker';
+        el.innerHTML = `<div class="px-2 py-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg shadow-md border border-surface-200 dark:border-surface-800 font-bold text-xs whitespace-nowrap cursor-pointer">${placeName}</div>`;
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (placeId) showPlaceModal(placeId);
+        });
+        const marker = new mapboxgl.Marker(el).setLngLat(coordinates).addTo(map.current!);
+        pointLabelMarkers.current.push(marker);
+      });
+    };
+
+    map.current.on('moveend', updateLabels);
+    map.current.on('zoomend', updateLabels);
+    
+    const handleZoomChange = () => {
+      if (!map.current || initialZoom.current === null) return;
+      const currentZoom = map.current.getZoom();
+      const isZoomChanged = Math.abs(currentZoom - initialZoom.current) > 0.1;
+      setShowResetButton(isZoomChanged);
+    };
+    
+    map.current.on('zoomend', handleZoomChange);
+    map.current.on('moveend', handleZoomChange);
+    
+    setTimeout(updateLabels, 100);
+
+    const mapBounds = new mapboxgl.LngLatBounds();
+    geojson.features.forEach(feature => {
+      if (feature.geometry.type === 'Point') {
+        mapBounds.extend(feature.geometry.coordinates as [number, number]);
+      }
+    });
+
+    if (!mapBounds.isEmpty()) {
+      map.current.fitBounds(mapBounds, { padding: 50, maxZoom: 15 });
+      map.current.once('idle', () => {
+        if (map.current && initialZoom.current === null) {
+          initialZoom.current = map.current.getZoom();
+          const center = map.current.getCenter();
+          initialCenter.current = [center.lng, center.lat];
+        }
+      });
+    }
+
+    return () => {
+      if (map.current) {
+        map.current.off('moveend', updateLabels);
+        map.current.off('zoomend', updateLabels);
+        map.current.off('zoomend', handleZoomChange);
+        map.current.off('moveend', handleZoomChange);
+      }
+      clusterLabelMarkers.current.forEach(m => m.remove());
+      pointLabelMarkers.current.forEach(m => m.remove());
+      if (map.current?.getSource(sourceId)) {
+        map.current.removeLayer(clusterLayerId);
+        map.current.removeLayer(unclusteredPointLayerId);
+        map.current.removeSource(sourceId);
+      }
+    };
+  }, [mapPlaces, viewMode, showPlaceModal]);
+
+  useEffect(() => {
+    if (viewMode === "map" && map.current) {
+      map.current.resize();
+      if (mapDataRequested) {
+        initialZoom.current = null;
+        initialCenter.current = null;
+        setShowResetButton(false);
+      }
+    }
+  }, [viewMode, mapDataRequested]);
 
   // 로딩 상태
   if (isAccessLoading) {
@@ -573,7 +705,6 @@ export function FolderDetailPage() {
     );
   }
 
-  // 접근 허용됐으나 데이터 로딩 중
   if (isPlacesLoading || isInfoLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -594,14 +725,13 @@ export function FolderDetailPage() {
     );
   }
 
-  const places = placesData?.pages.flatMap(page => page) || [];
   const isDefaultFolder = folderInfo.permission === 'default';
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
+    <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
       {/* 헤더 */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 px-4 h-14 flex items-center gap-2">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-950 z-20">
+        <button onClick={() => navigate(-1)} className="p-1 -ml-1 shrink-0">
           <ChevronLeft className="size-6" />
         </button>
         
@@ -630,6 +760,15 @@ export function FolderDetailPage() {
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          {canEdit && (
+            <button 
+              className="p-2 text-primary-500" 
+              onClick={() => setIsSearchOpen(true)}
+              title="장소 추가"
+            >
+              <Plus className="size-5" />
+            </button>
+          )}
           <button 
             className={cn("p-2 transition-colors", isLinkCopied && "text-green-500")} 
             onClick={() => {
@@ -667,11 +806,6 @@ export function FolderDetailPage() {
                       폴더 숨기기
                     </button>
                   )}
-                  {!isOwner && (
-                    <div className="px-4 py-3 text-sm text-surface-400">
-                      메뉴 없음
-                    </div>
-                  )}
                 </div>
               </>
             )}
@@ -679,173 +813,199 @@ export function FolderDetailPage() {
         </div>
       </div>
 
-      {/* 폴더 정보 요약 */}
-      <div className="px-5 py-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-black text-surface-900 dark:text-white leading-tight">
-              {folderInfo?.title}
-            </h2>
-            {folderInfo?.permission === 'public' ? (
-              <Users className="size-5 text-surface-400" />
-            ) : (
-              <User className="size-5 text-surface-400" />
-            )}
-            {isDefaultFolder && (
-              <span className="px-2 py-0.5 text-xs font-bold bg-surface-100 dark:bg-surface-800 rounded-full text-surface-500">
-                기본
-              </span>
-            )}
-          </div>
-          {folderInfo?.description && (
-            <p className="text-surface-500 font-medium leading-relaxed">
-              {folderInfo.description}
-            </p>
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* 지도 뷰 */}
+        <div 
+          ref={mapContainer} 
+          className={cn(
+            "absolute inset-0 transition-opacity duration-300",
+            viewMode === "map" ? "opacity-100 z-10" : "opacity-0 -z-10"
           )}
-        </div>
-
-        <div className="flex items-center gap-4 py-2">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
-            <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
-          </div>
-          {folderInfo.permission !== 'default' && (
-            <>
-              <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
-                <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* 초대 관리 섹션 (소유자 + 초대 폴더인 경우) */}
-      {isOwner && folderInfo.permission === 'invite' && (
-        <FolderInviteAdminSection 
-          folderId={id!}
-          inviteCode={folderInfo.invite_code}
-          expiresAt={folderInfo.invite_code_expires_at}
-          onOpenHistory={() => setShowInviteHistory(true)}
         />
-      )}
-
-      {/* 툴바 */}
-      <div className="sticky top-14 z-10 bg-white dark:bg-surface-950 px-4 py-3 flex items-center justify-between border-b border-surface-50 dark:border-surface-900">
-        <div className="flex bg-surface-100 dark:bg-surface-900 p-1 rounded-xl">
-          <button 
-            onClick={() => setViewMode('grid')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all",
-              viewMode === 'grid' ? "bg-white dark:bg-surface-800 shadow-sm text-primary-500" : "text-surface-400"
-            )}
-          >
-            <LayoutGrid className="size-4" />
-            <span className="text-xs font-bold">목록</span>
-          </button>
-          <button 
-            onClick={() => setShowMapModal(true)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all",
-              "text-surface-400 hover:text-primary-500"
-            )}
-          >
-            <MapIcon className="size-4" />
-            <span className="text-xs font-bold">지도</span>
-          </button>
-        </div>
-
-        {canEdit && (
-          <Button 
-            size="sm" 
-            className="rounded-xl font-bold gap-1.5"
-            onClick={() => setIsSearchOpen(true)}
-          >
-            <Plus className="size-4" />
-            장소 추가
-          </Button>
+        
+        {viewMode === "map" && isMapLoading && (
+          <div className="absolute inset-0 z-20 bg-white/80 dark:bg-surface-900/80 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="size-8 text-primary-500 animate-spin" />
+              <span className="text-sm text-surface-500 font-medium">전체 장소 불러오는 중...</span>
+            </div>
+          </div>
         )}
-      </div>
 
-      {/* 목록 영역 */}
-      <div className="flex-1 p-4">
-        {places.length > 0 ? (
-          folderInfo.permission === 'invite' ? (
-            // invite 폴더: 리스트 뷰 + 비공개 리뷰
-            <div className="flex flex-col gap-4">
-              {places.map((item: any) => (
-                <div key={item.place_id} className="flex flex-col gap-3 p-4 bg-white dark:bg-surface-900 rounded-2xl shadow-sm border border-surface-100 dark:border-surface-800">
-                  <div className="flex gap-3" onClick={() => showPlaceModal(item.place_id)}>
-                    <div className="size-20 rounded-xl overflow-hidden flex-shrink-0 bg-surface-100">
-                      {item.place_data.image_urls?.[0] && (
-                        <img 
-                          src={item.place_data.image_urls[0]} 
-                          alt={item.place_data.name}
-                          className="size-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-surface-900 dark:text-white truncate">
-                        {item.place_data.name}
-                      </h3>
-                      <p className="text-sm text-surface-500 truncate">{item.place_data.category}</p>
-                      <p className="text-xs text-surface-400 mt-1">
-                        {formatKoreanDate(item.added_at)} 추가됨
-                      </p>
-                    </div>
+        {/* 리스트 뷰 */}
+        <div 
+          className={cn(
+            "absolute inset-0 bg-white dark:bg-surface-950 overflow-y-auto scrollbar-hide transition-opacity duration-300",
+            viewMode === "list" ? "opacity-100 z-10" : "opacity-0 -z-10"
+          )}
+        >
+          {/* 폴더 정보 요약 */}
+          <div className="px-5 py-6 flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-black text-surface-900 dark:text-white leading-tight">
+                  {folderInfo?.title}
+                </h2>
+                {folderInfo?.permission === 'public' ? (
+                  <Users className="size-5 text-surface-400" />
+                ) : (
+                  <User className="size-5 text-surface-400" />
+                )}
+                {isDefaultFolder && (
+                  <span className="px-2 py-0.5 text-xs font-bold bg-surface-100 dark:bg-surface-800 rounded-full text-surface-500">
+                    기본
+                  </span>
+                )}
+              </div>
+              {folderInfo?.description && (
+                <p className="text-surface-500 font-medium leading-relaxed">
+                  {folderInfo.description}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 py-2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
+                <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
+              </div>
+              {folderInfo.permission !== 'default' && (
+                <>
+                  <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
+                    <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
                   </div>
-                  <FolderReviewSection 
-                    folderId={id!}
-                    placeId={item.place_id}
-                    placeName={item.place_data.name}
-                  />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* 초대 관리 섹션 */}
+          {isOwner && folderInfo.permission === 'invite' && (
+            <FolderInviteAdminSection 
+              folderId={id!}
+              inviteCode={folderInfo.invite_code}
+              expiresAt={folderInfo.invite_code_expires_at}
+              onOpenHistory={() => setShowInviteHistory(true)}
+            />
+          )}
+
+          {/* 장소 목록 */}
+          <div className="px-4 pb-24">
+            {places.length > 0 ? (
+              folderInfo.permission === 'invite' ? (
+                <div className="flex flex-col gap-4">
+                  {places.map((item: any) => (
+                    <div key={item.place_id} className="flex flex-col gap-3 p-4 bg-white dark:bg-surface-900 rounded-2xl shadow-sm border border-surface-100 dark:border-surface-800">
+                      <div className="flex gap-3" onClick={() => showPlaceModal(item.place_id)}>
+                        <div className="size-20 rounded-xl overflow-hidden flex-shrink-0 bg-surface-100">
+                          {item.place_data.image_urls?.[0] && (
+                            <img 
+                              src={item.place_data.image_urls[0]} 
+                              alt={item.place_data.name}
+                              className="size-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-surface-900 dark:text-white truncate">
+                            {item.place_data.name}
+                          </h3>
+                          <p className="text-sm text-surface-500 truncate">{item.place_data.category}</p>
+                          <p className="text-xs text-surface-400 mt-1">
+                            {formatKoreanDate(item.added_at)} 추가됨
+                          </p>
+                        </div>
+                      </div>
+                      <FolderReviewSection 
+                        folderId={id!}
+                        placeId={item.place_id}
+                        placeName={item.place_data.name}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            // 일반 폴더: 그리드 뷰
-            <div className="grid grid-cols-2 gap-4">
-              {places.map((item: any) => (
-                <div key={item.place_id} className="w-full">
-                  <PlaceSliderCard 
-                    placeId={item.place_id}
-                    name={item.place_data.name}
-                    thumbnail={item.place_data.image_urls?.[0]}
-                    category={item.place_data.category}
-                    onClick={showPlaceModal}
-                    snap={false}
-                  />
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {places.map((item: any) => (
+                    <div key={item.place_id} className="w-full">
+                      <PlaceSliderCard 
+                        placeId={item.place_id}
+                        name={item.place_data.name}
+                        thumbnail={item.place_data.image_urls?.[0]}
+                        category={item.place_data.category}
+                        onClick={showPlaceModal}
+                        snap={false}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-            <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
-              <Info className="size-10 text-surface-200" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-surface-900 dark:text-white">아직 등록된 장소가 없습니다</p>
-              <p className="text-sm text-surface-500 mt-1">
-                {isOwner ? "맛집을 검색해서 나만의 폴더를 채워보세요!" : "사용자가 아직 장소를 추가하지 않았습니다."}
-              </p>
-            </div>
-            {isOwner && (
-              <Button onClick={() => setIsSearchOpen(true)} variant="outline" className="mt-2 font-bold">
-                첫 번째 장소 추가하기
-              </Button>
+              )
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                  <Info className="size-10 text-surface-200" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-surface-900 dark:text-white">아직 등록된 장소가 없습니다</p>
+                  <p className="text-sm text-surface-500 mt-1">
+                    {isOwner ? "맛집을 검색해서 나만의 폴더를 채워보세요!" : "사용자가 아직 장소를 추가하지 않았습니다."}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {hasNextPage && (
+              <div className="py-8 flex justify-center">
+                <Loader2 className="size-6 text-surface-300 animate-spin" />
+              </div>
             )}
           </div>
-        )}
-
-        {hasNextPage && (
-          <div className="py-8 flex justify-center">
-            <Loader2 className="size-6 text-surface-300 animate-spin" />
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* 하단 토글 버튼 */}
+      {!isPlacesLoading && places.length > 0 && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30">
+          <button
+            onClick={() => {
+              if (viewMode === "list") {
+                setMapDataRequested(true);
+                setViewMode("map");
+              } else {
+                setViewMode("list");
+              }
+            }}
+            className="bg-surface-900 text-white dark:bg-white dark:text-black px-6 py-3 rounded-full font-black shadow-2xl flex items-center gap-2 transition-all active:scale-95 hover:scale-105 whitespace-nowrap min-w-[100px]"
+          >
+            {viewMode === "list" ? (
+              <><MapIcon className="size-5" /> 지도</>
+            ) : (
+              <><List className="size-5" /> 목록</>
+            )}
+          </button>
+          
+          {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
+            <button
+              onClick={() => {
+                if (map.current && initialZoom.current !== null && initialCenter.current !== null) {
+                  map.current.easeTo({
+                    center: initialCenter.current,
+                    zoom: initialZoom.current,
+                  });
+                  setShowResetButton(false);
+                }
+              }}
+              className="bg-primary-500 text-white px-4 py-3 rounded-full font-black shadow-2xl flex items-center gap-2 transition-all active:scale-95 hover:scale-105 whitespace-nowrap min-w-[100px]"
+            >
+              <RotateCcw className="size-4" />
+              <span>초기화</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <PlaceSearchModal 
         isOpen={isSearchOpen} 
@@ -860,12 +1020,18 @@ export function FolderDetailPage() {
         />
       )}
 
-      {showMapModal && (
-        <FolderMapModal 
-          folderId={id!} 
-          onClose={() => setShowMapModal(false)} 
-        />
-      )}
+      <style>{`
+        .cluster-label-marker,
+        .point-label-marker {
+          cursor: pointer;
+        }
+        .mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left {
+          display: none;
+        }
+        .mapboxgl-marker {
+          z-index: 1;
+        }
+      `}</style>
     </div>
   );
 }

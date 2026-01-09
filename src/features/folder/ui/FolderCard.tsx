@@ -27,12 +27,20 @@ export function FolderCard({
   const { openLogin } = useAuthModalStore();
   
   const { data: mySubscriptions } = useMySubscriptions();
-  const { mutate: toggleSubscription } = useToggleFolderSubscription();
+  const { 
+    mutate: toggleSubscription, 
+    isPending: isTogglePending, 
+    variables: toggledFolderId 
+  } = useToggleFolderSubscription();
 
   const isOwner = folder.owner_id === user?.id;
   const isSubscribed = mySubscriptions?.some(
-    (sub: any) => sub.subscription_type === 'folder' && sub.feature_id === folder.id
+    (sub: any) => sub.subscription_type === 'folder' && sub.feature_id === folder.id && sub.is_subscribed !== false
   );
+
+  // 낙관적 업데이트를 위한 UI 상태 계산
+  const isCurrentlyToggling = isTogglePending && toggledFolderId === folder.id;
+  const displaySubscribed = isCurrentlyToggling ? !isSubscribed : isSubscribed;
 
   const handleSubscribe = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -139,15 +147,16 @@ export function FolderCard({
               variant="outline"
               size="sm"
               onClick={handleSubscribe}
+              disabled={isCurrentlyToggling}
               className={cn(
                 "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors duration-150 px-3",
-                isSubscribed 
+                displaySubscribed 
                   ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
                   : "border-surface-200 dark:border-surface-700"
               )}
             >
-              <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
-              <span className="text-xs">{isSubscribed ? "구독중" : "구독"}</span>
+              <Heart className={cn("size-3.5", displaySubscribed && "fill-primary-500 text-primary-500")} />
+              <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
             </Button>
           )}
         </div>

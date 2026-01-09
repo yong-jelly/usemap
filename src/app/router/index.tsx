@@ -79,7 +79,7 @@ function RootLayout() {
   const { isOpen: isPlaceModalOpen, placeId: modalPlaceId } = usePlacePopup();
   const { pathname } = useLocation();
 
-  const isFeatureDetailPage = pathname.includes("/feature/detail/");
+  const isFeatureDetailPage = pathname.includes("/feature/detail/") || (pathname.startsWith("/folder/") && !pathname.includes("/folder/create"));
   
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">

@@ -435,11 +435,19 @@ function FeatureSubscribeButton({ type, id }: { type: string; id: string }) {
   const { isAuthenticated } = useUserStore();
   const { openLogin } = useAuthModalStore();
   const { data: mySubscriptions } = useMySubscriptions();
-  const { mutate: toggleSubscription } = useToggleFeatureSubscription();
+  const { 
+    mutate: toggleSubscription,
+    isPending: isTogglePending,
+    variables: toggledFeature
+  } = useToggleFeatureSubscription();
 
   const isSubscribed = mySubscriptions?.some(
-    (sub: any) => sub.subscription_type === type && sub.feature_id === id
+    (sub: any) => sub.subscription_type === type && sub.feature_id === id && sub.is_subscribed !== false
   );
+
+  // 낙관적 업데이트를 위한 UI 상태 계산
+  const isCurrentlyToggling = isTogglePending && toggledFeature?.id === id && toggledFeature?.type === type;
+  const displaySubscribed = isCurrentlyToggling ? !isSubscribed : isSubscribed;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -455,15 +463,16 @@ function FeatureSubscribeButton({ type, id }: { type: string; id: string }) {
       variant="outline"
       size="sm"
       onClick={handleToggle}
+      disabled={isCurrentlyToggling}
       className={cn(
         "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors px-3",
-        isSubscribed 
+        displaySubscribed 
           ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
           : "border-surface-200 dark:border-surface-700"
       )}
     >
-      <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
-      <span className="text-xs">{isSubscribed ? "구독중" : "구독"}</span>
+      <Heart className={cn("size-3.5", displaySubscribed && "fill-primary-500 text-primary-500")} />
+      <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
     </Button>
   );
 }

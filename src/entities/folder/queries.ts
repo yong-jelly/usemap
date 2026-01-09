@@ -97,16 +97,31 @@ export function useToggleFolderSubscription() {
   return useMutation({
     mutationFn: folderApi.toggleFolderSubscription,
     onSuccess: (result, folderId) => {
-      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태만 업데이트 (목록에서 제거하지 않음)
-      queryClient.setQueryData<any[]>(subscriptionKey, (old) => 
-        old?.map((sub) => 
-          (sub.subscription_type === 'folder' && sub.feature_id === folderId)
-            ? { ...sub, is_subscribed: result.is_subscribed }
-            : sub
-        )
-      );
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 업데이트하거나 새로 추가 (낙관적 업데이트)
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
+        if (!old) return old;
+        
+        const exists = old.some(sub => sub.subscription_type === 'folder' && sub.feature_id === folderId);
+        
+        if (exists) {
+          return old.map((sub) => 
+            (sub.subscription_type === 'folder' && sub.feature_id === folderId)
+              ? { ...sub, is_subscribed: result.is_subscribed }
+              : sub
+          );
+        } else if (result.is_subscribed) {
+          // 새로 구독한 경우 목록에 추가
+          return [{
+            subscription_type: 'folder',
+            feature_id: folderId,
+            is_subscribed: true,
+            created_at: new Date().toISOString()
+          }, ...old];
+        }
+        return old;
+      });
       
-      // 관련 쿼리 무효화 (상세 정보 등)
+      // 관련 쿼리 무효화 (폴더 상세 및 목록)
       queryClient.invalidateQueries({ queryKey: folderKeys.list('public') });
       queryClient.invalidateQueries({ queryKey: folderKeys.details(folderId) });
     },
@@ -123,14 +138,28 @@ export function useToggleFeatureSubscription() {
   return useMutation({
     mutationFn: folderApi.toggleFeatureSubscription,
     onSuccess: (result, { type, id }) => {
-      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태만 업데이트
-      queryClient.setQueryData<any[]>(subscriptionKey, (old) => 
-        old?.map((sub) => 
-          (sub.subscription_type === type && sub.feature_id === id)
-            ? { ...sub, is_subscribed: result.is_subscribed }
-            : sub
-        )
-      );
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 업데이트하거나 새로 추가 (낙관적 업데이트)
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
+        if (!old) return old;
+
+        const exists = old.some(sub => sub.subscription_type === type && sub.feature_id === id);
+
+        if (exists) {
+          return old.map((sub) => 
+            (sub.subscription_type === type && sub.feature_id === id)
+              ? { ...sub, is_subscribed: result.is_subscribed }
+              : sub
+          );
+        } else if (result.is_subscribed) {
+          return [{
+            subscription_type: type,
+            feature_id: id,
+            is_subscribed: true,
+            created_at: new Date().toISOString()
+          }, ...old];
+        }
+        return old;
+      });
     },
   });
 }
