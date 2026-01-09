@@ -15,8 +15,8 @@ import {
   Globe,
   ExternalLink,
   MapPin,
+  MapPinCheck,
   Share2,
-  CheckCircle2,
   Heart,
   Bookmark,
   ChevronRight,
@@ -474,53 +474,52 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
           <div className="p-6">
             {/* 상호작용 버튼 */}
-            <div className="flex justify-between gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-8">
               <button
                 onClick={handleToggleVisited}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
+                  "flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl border text-base font-black transition-all whitespace-nowrap",
                   details?.experience?.is_visited
                     ? "bg-primary-600 text-white border-primary-600 shadow-sm"
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
-                <CheckCircle2 className={cn("size-4", details?.experience?.is_visited && "fill-current text-white")} />
+                <MapPinCheck className={cn("size-6", details?.experience?.is_visited && "fill-current text-white")} />
                 가봤어요
               </button>
-              <button
-                onClick={handleToggleLike}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
-                  details?.interaction?.is_liked
-                    ? "bg-red-500 text-white border-red-500 shadow-sm"
-                    : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
-                )}
-              >
-                <Heart className={cn("size-4", details?.interaction?.is_liked && "fill-current")} />
-                좋아요
-              </button>
-              <button
-                onClick={handleToggleSave}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
-                  details?.interaction?.is_saved
-                    ? "bg-pink-600 text-white border-pink-600 shadow-sm"
-                    : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
-                )}
-              >
-                <Bookmark className={cn("size-4", details?.interaction?.is_saved && "fill-current")} />
-                저장
-              </button>
-              <button
-                onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border text-[13px] font-black transition-all whitespace-nowrap",
-                  "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
-                )}
-              >
-                <Folder className="size-4" />
-                폴더
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleToggleLike}
+                  className={cn(
+                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    details?.interaction?.is_liked
+                      ? "bg-red-500 text-white border-red-500 shadow-sm"
+                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                  )}
+                >
+                  <Heart className={cn("size-6", details?.interaction?.is_liked && "fill-current")} />
+                </button>
+                <button
+                  onClick={handleToggleSave}
+                  className={cn(
+                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    details?.interaction?.is_saved
+                      ? "bg-pink-600 text-white border-pink-600 shadow-sm"
+                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                  )}
+                >
+                  <Bookmark className={cn("size-6", details?.interaction?.is_saved && "fill-current")} />
+                </button>
+                <button
+                  onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                  className={cn(
+                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                  )}
+                >
+                  <Folder className="size-6" />
+                </button>
+              </div>
             </div>
 
             {/* 출처/폴더 태그 */}
