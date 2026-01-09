@@ -36,8 +36,8 @@ interface PlaceCardProps {
  */
 export function PlaceCard({ 
   place, 
-  imageAspectRatio = "aspect-[4/5]", 
-  imageWidth = "w-[80%]",
+  imageAspectRatio = "aspect-[3/2]", 
+  imageWidth = "w-[72%]",
   maxImages,
   showPrice = true,
   sourceLabel,
@@ -61,7 +61,7 @@ export function PlaceCard({
     e.currentTarget.src = "https://placehold.co/600x400?text=이미지 준비중";
   };
 
-  const images = place.images || [];
+  const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
   const navigate = useNavigate();
 
   return (

@@ -15,9 +15,6 @@ export function VisitedPlacesTab() {
       fetchNextPage={fetchNextPage}
       emptyMessage="방문한 장소가 없습니다."
       emptyIcon={<CheckCircle className="h-16 w-16" />}
-      imageAspectRatio="aspect-[3/4]"
-      imageWidth="w-36"
-      maxImages={1}
     />
   );
 }

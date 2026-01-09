@@ -23,7 +23,7 @@ export interface Folder {
   updated_at: string;
   owner_nickname?: string;
   owner_avatar_url?: string;
-  preview_places?: Partial<Place>[];
+  preview_places?: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
 }
 
 export interface FolderPlace {

@@ -54,13 +54,13 @@ export function FeaturePage() {
     <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
       <div className="bg-white dark:bg-surface-950 px-5 pt-8 pb-4 z-10 flex-shrink-0">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => navigate(`/feature/${tab.id}`)}
               className={cn(
-                "text-2xl font-black transition-colors relative",
+                "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
                 activeTab === tab.id 
                   ? "text-surface-900 dark:text-white" 
                   : "text-surface-300 dark:text-surface-700"
@@ -90,6 +90,57 @@ export function FeaturePage() {
         {activeTab === "youtube" && <YoutubeChannelList />}
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 피쳐 행 헤더 컴포넌트
+ */
+function FeatureRowHeader({ 
+  title, 
+  thumbnail, 
+  count, 
+  onTitleClick, 
+  subscribeType, 
+  subscribeId 
+}: { 
+  title: string; 
+  thumbnail?: string; 
+  count: number; 
+  onTitleClick?: () => void;
+  subscribeType: string;
+  subscribeId: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 overflow-hidden">
+      {thumbnail && (
+        <div 
+          className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 cursor-pointer"
+          onClick={onTitleClick}
+        >
+          <img 
+            src={thumbnail} 
+            alt={title} 
+            className="w-full h-full object-cover" 
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div className="flex items-start justify-between flex-1 gap-2 overflow-hidden">
+        <div className="flex flex-col gap-0.5 overflow-hidden">
+          <h3 
+            className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+            onClick={onTitleClick}
+          >
+            {title}
+          </h3>
+          <span className="text-xs font-medium text-surface-400">
+            {count}개 매장
+          </span>
+        </div>
+        <FeatureSubscribeButton type={subscribeType} id={subscribeId} />
       </div>
     </div>
   );
@@ -135,21 +186,13 @@ function NaverFolderList() {
     <div className="flex flex-col gap-4 py-4">
       {folders.map((folder) => (
         <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
-          {/* 제목 영역: 타이틀 + 개수 */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-col gap-1 overflow-hidden">
-              <h3 
-                className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep cursor-pointer hover:underline underline-offset-4 truncate"
-                onClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
-              >
-                {folder.name}
-              </h3>
-              <span className="text-sm font-medium text-surface-400">
-                {folder.place_count}개 매장
-              </span>
-            </div>
-            <FeatureSubscribeButton type="naver_folder" id={folder.folder_id.toString()} />
-          </div>
+          <FeatureRowHeader 
+            title={folder.name}
+            count={folder.place_count}
+            onTitleClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
+            subscribeType="naver_folder"
+            subscribeId={folder.folder_id.toString()}
+          />
 
           {/* 장소 슬라이더 */}
           <div className="-mx-4">
@@ -215,34 +258,14 @@ function YoutubeChannelList() {
     <div className="flex flex-col gap-4 py-4">
       {channels.map((channel) => (
         <section key={channel.channel_id} className="flex flex-col gap-2 px-4">
-          {/* 헤더: 채널 프로필 + 이름 + 개수 */}
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div 
-              className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 cursor-pointer"
-              onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
-            >
-              <img 
-                src={channel.channel_thumbnail} 
-                alt={channel.channel_title} 
-                className="w-full h-full object-cover" 
-                loading="lazy"
-              />
-            </div>
-            <div className="flex items-start justify-between flex-1 gap-2 overflow-hidden">
-              <div className="flex flex-col gap-0.5 overflow-hidden">
-                <h3 
-                  className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
-                  onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
-                >
-                  {channel.channel_title}
-                </h3>
-                <span className="text-xs font-medium text-surface-400">
-                  {channel.place_count}개 매장
-                </span>
-              </div>
-              <FeatureSubscribeButton type="youtube_channel" id={channel.channel_id} />
-            </div>
-          </div>
+          <FeatureRowHeader 
+            title={channel.channel_title}
+            thumbnail={channel.channel_thumbnail}
+            count={channel.place_count}
+            onTitleClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+            subscribeType="youtube_channel"
+            subscribeId={channel.channel_id}
+          />
 
           {/* 장소 슬라이더 */}
           <div className="-mx-4">
@@ -315,9 +338,9 @@ function CommunityList() {
   const regions = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className="py-4 flex flex-col gap-2">
+    <div className="py-4 flex flex-col gap-4">
       {/* 도메인 필터 */}
-      <div className="flex items-center gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2 px-4 mb-2 overflow-x-auto scrollbar-hide">
         {domains.map((domain) => (
           <button
             key={domain.id || 'all'}
@@ -342,32 +365,26 @@ function CommunityList() {
         <>
           {/* 지역별 섹션 */}
           {regions.map(region => (
-            <div key={region.region_name} className="flex flex-col gap-2">
-              <div className="flex items-start justify-between px-4 mt-4">
-                <div className="flex flex-col gap-0.5 overflow-hidden">
-                  <h3 
-                    className="text-xl font-black text-surface-900 dark:text-white leading-tight cursor-pointer hover:underline underline-offset-4"
-                    onClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
-                  >
-                    {region.region_name}지역
-                  </h3>
-                  <span className="text-sm font-medium text-surface-400">
-                    {region.place_count}개 매장
-                  </span>
-                </div>
-                <FeatureSubscribeButton type="community_region" id={region.region_name} />
-              </div>
+            <section key={region.region_name} className="flex flex-col gap-2 px-4">
+              <FeatureRowHeader 
+                title={`${region.region_name}지역`}
+                count={region.place_count}
+                onTitleClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                subscribeType="community_region"
+                subscribeId={region.region_name}
+              />
               <div className="-mx-4">
                 <PlaceSlider
                   title=""
                   items={region.preview_contents}
                   onItemClick={showPopup}
                   onMoreClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                  showMoreThreshold={10}
                   showRating={false}
                   snap={false}
                 />
               </div>
-            </div>
+            </section>
           ))}
 
           {hasNextPage && (

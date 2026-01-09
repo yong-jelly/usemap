@@ -28,7 +28,7 @@ interface TabsProps {
  */
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn("flex border-b border-surface-200 dark:border-surface-800", className)}>
+    <div className={cn("flex border-b border-surface-200 dark:border-surface-800 overflow-x-auto scrollbar-hide", className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -36,7 +36,7 @@ export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors relative",
+              "flex-1 min-w-[80px] py-3 text-sm font-medium transition-colors relative whitespace-nowrap",
               isActive 
                 ? "text-blue-600 dark:text-blue-400" 
                 : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"

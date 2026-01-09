@@ -202,6 +202,8 @@ export const placeApi = {
     theme_codes?: string[] | null;
     exclude_franchises?: boolean;
     image_limit?: number;
+    price_min?: number;
+    price_max?: number;
   }) => {
     const response = await apiClient.rpc<any>("v2_list_places_by_filters", {
       p_group1: params.group1 || null,
@@ -214,6 +216,8 @@ export const placeApi = {
       p_theme_codes: params.theme_codes && params.theme_codes.length > 0 ? params.theme_codes : null,
       p_exclude_franchises: params.exclude_franchises ?? true,
       p_image_limit: params.image_limit || 3,
+      p_price_min: params.price_min || null,
+      p_price_max: params.price_max || null,
     });
     
     return response.data.map((item: any) => item.place_data as Place);
@@ -354,6 +358,17 @@ export const placeApi = {
     const response = await apiClient.rpc<any>("v1_list_visited_place", {
       p_limit: limit,
       p_offset: offset,
+    });
+    return response.data;
+  },
+
+  /**
+   * 장소 ID 목록으로 상세 정보 목록을 조회합니다.
+   * @param placeIds 장소 ID 배열
+   */
+  listPlacesByIds: async (placeIds: string[]) => {
+    const response = await apiClient.rpc<{ place_data: Place }>("v1_list_places_by_ids", {
+      p_place_ids: placeIds,
     });
     return response.data;
   },

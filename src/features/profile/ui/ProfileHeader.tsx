@@ -60,7 +60,7 @@ export function ProfileHeader() {
             onClick={() => navigate("/sub-stat/user/me")}
             className="w-[30%] rounded-2xl h-14 text-lg font-black bg-surface-900 text-white dark:bg-white dark:text-black shadow-lg shadow-surface-900/10"
           >
-            <PieChart className="mr-2 h-5 w-5 fill-current" />
+            {/* <PieChart className="mr-2 h-5 w-5 fill-current" /> */}
             분석
           </Button>
         </div>

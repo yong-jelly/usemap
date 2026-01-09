@@ -12,6 +12,7 @@ import { cn } from "@/shared/lib/utils";
 import { CategoryTab } from "./ExploreFilterSheet/CategoryTab";
 import { RegionTab } from "./ExploreFilterSheet/RegionTab";
 import { ThemeTab } from "./ExploreFilterSheet/ThemeTab";
+import { PriceTab } from "./ExploreFilterSheet/PriceTab";
 
 interface ExploreFilterSheetProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface ExploreFilterSheetProps {
   onApply: (filters: any) => void;
   onReset: () => void;
   totalCount: number;
+  visibleTabs?: ("region" | "category" | "theme" | "price")[];
 }
 
 export function ExploreFilterSheet({
@@ -29,23 +31,31 @@ export function ExploreFilterSheet({
   onApply,
   onReset,
   totalCount,
+  visibleTabs = ["region", "category", "theme", "price"],
 }: ExploreFilterSheetProps) {
-  const [activeTab, setActiveTab] = useState("category");
+  const [activeTab, setActiveTab] = useState(visibleTabs[0] || "category");
   const [selectedGroup1, setSelectedGroup1] = useState<string | null>(filters.group1);
   const [selectedGroup2, setSelectedGroup2] = useState<string | null>(filters.group2);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(filters.categories || []);
   const [selectedThemes, setSelectedThemes] = useState<string[]>(filters.theme_codes || []);
+  const [selectedPriceMin, setSelectedPriceMin] = useState<number | null>(filters.price_min || null);
+  const [selectedPriceMax, setSelectedPriceMax] = useState<number | null>(filters.price_max || null);
 
-  const tabs = [
+  const allTabs = [
     { id: "region", label: "지역", count: (selectedGroup1 || selectedGroup2) ? 1 : 0 },
     { id: "category", label: "카테고리", count: selectedCategories.length },
     { id: "theme", label: "테마", count: selectedThemes.length },
+    { id: "price", label: "가격", count: (selectedPriceMin !== null || selectedPriceMax !== null) ? 1 : 0 },
   ];
+
+  const tabs = allTabs.filter(tab => visibleTabs.includes(tab.id as any));
 
   const isResetEnabled = selectedGroup1 !== null || 
     (selectedGroup2 !== null && selectedGroup2 !== "전체") || 
     selectedCategories.length > 0 || 
-    selectedThemes.length > 0;
+    selectedThemes.length > 0 ||
+    selectedPriceMin !== null ||
+    selectedPriceMax !== null;
 
   const handleGroup1Select = (group1: string) => {
     setSelectedGroup1(group1);
@@ -81,6 +91,8 @@ export function ExploreFilterSheet({
     setSelectedGroup2(null);
     setSelectedCategories([]);
     setSelectedThemes([]);
+    setSelectedPriceMin(null);
+    setSelectedPriceMax(null);
     onReset();
   };
 
@@ -91,6 +103,8 @@ export function ExploreFilterSheet({
       group3: null, // 상세 지역(dong)은 현재 지원하지 않으므로 null로 초기화
       categories: selectedCategories.length > 0 ? selectedCategories : null,
       theme_codes: selectedThemes.length > 0 ? selectedThemes : null,
+      price_min: selectedPriceMin,
+      price_max: selectedPriceMax,
       exclude_franchises: filters.exclude_franchises ?? true
     });
   };
@@ -154,6 +168,16 @@ export function ExploreFilterSheet({
             <ThemeTab 
               selectedThemes={selectedThemes} 
               onToggle={handleThemeToggle} 
+            />
+          )}
+          {activeTab === "price" && (
+            <PriceTab 
+              selectedMin={selectedPriceMin}
+              selectedMax={selectedPriceMax}
+              onSelect={(min, max) => {
+                setSelectedPriceMin(min);
+                setSelectedPriceMax(max);
+              }}
             />
           )}
         </div>

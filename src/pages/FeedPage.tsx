@@ -187,8 +187,6 @@ export function FeedPage() {
                 sourceTitle={sourceTitle}
                 sourcePath={sourcePath || undefined}
                 addedAt={formatRelativeTime(item.added_at)}
-                imageAspectRatio="aspect-[3/2]"
-                imageWidth="w-[72%]"
                 showPrice={true}
               />
             );

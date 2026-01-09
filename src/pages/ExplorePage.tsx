@@ -30,7 +30,8 @@ interface ExplorerFilterState {
   theme_codes: string[] | null;
   rating: number | null;
   exclude_franchises: boolean;
-  price_max?: number;
+  price_min?: number | null;
+  price_max?: number | null;
 }
 
 /**
@@ -55,6 +56,8 @@ export function ExplorePage() {
     theme_codes: [],
     rating: null,
     exclude_franchises: true,
+    price_min: null,
+    price_max: null,
   };
 
   const [filters, setFilters] = useState<ExplorerFilterState>(defaultFilters);
@@ -125,6 +128,7 @@ export function ExplorePage() {
     if (filters.theme_codes && filters.theme_codes.length > 0) count += filters.theme_codes.length;
     if (!filters.exclude_franchises) count++;
     if (filters.categories && filters.categories.length > 0) count += filters.categories.length;
+    if (filters.price_min !== null || filters.price_max !== null) count++;
     return count;
   }, [filters]);
 
@@ -215,7 +219,7 @@ export function ExplorePage() {
           </div>
 
           {/* 활성 필터 태그 (정리된 스타일) */}
-          {(filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0)) && (
+          {(filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null) && (
             <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto scrollbar-hide">
               {(activeExtraFilterCount > 1 || (filters.group2 && activeExtraFilterCount > 0)) && (
                 <button 
@@ -253,6 +257,18 @@ export function ExplorePage() {
                   </div>
                 );
               })}
+              {(filters.price_min !== null || filters.price_max !== null) && (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-100 dark:border-orange-800/50 shrink-0">
+                  <span>
+                    💰 {filters.price_min === null ? `${filters.price_max! / 10000}만원 이하` : 
+                        filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
+                        `${filters.price_min! / 10000}~${filters.price_max! / 10000}만원`}
+                  </span>
+                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                    setFilters(prev => ({ ...prev, price_min: null, price_max: null }));
+                  }} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -311,7 +327,8 @@ export function ExplorePage() {
           )}>
             {places.map((place) => {
               const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
-              const hasImage = place.images && place.images.length > 0;
+              const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
+              const hasImage = images && images.length > 0;
               
               return layout === 'feed' ? (
                 <PlaceCard key={place.id} place={place} />
@@ -323,7 +340,7 @@ export function ExplorePage() {
                 >
                   {hasImage ? (
                     <img 
-                      src={convertToNaverResizeImageUrl(place.images?.[0])} 
+                      src={convertToNaverResizeImageUrl(images[0])} 
                       className="w-full h-full object-cover"
                       alt={place.name}
                       loading="lazy"

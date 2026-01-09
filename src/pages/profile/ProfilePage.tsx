@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
@@ -18,8 +18,16 @@ export function ProfilePage() {
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { isAuthenticated, isSyncing } = useUserStore();
   const { mutate: ensureDefaultFolder } = useEnsureDefaultFolder();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const activeTab = tab || "profile";
+
+  // 탭 변경 시 스크롤 최상단 이동
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -89,7 +97,10 @@ export function ProfilePage() {
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto scrollbar-hide"
+      >
         {activeTab === "profile" && <ProfileHeader />}
         {activeTab === "recent" && <RecentPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderCard } from "./FolderCard";
 import { Button } from "@/shared/ui";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, FolderPlus } from "lucide-react";
 
 export function MyFolderList() {
   const navigate = useNavigate();
@@ -21,34 +21,46 @@ export function MyFolderList() {
   }
 
   return (
-    <div className="flex flex-col gap-4 py-4">
-      <div className="flex items-center justify-between px-4">
-        <h2 className="text-lg font-bold text-surface-900 dark:text-white">내 맛탐정 폴더</h2>
+    <div className="flex flex-col gap-8 py-4">
+      {/* 폴더 생성 버튼 */}
+      <div className="px-4">
         <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-primary-500 font-bold"
+          variant="outline" 
+          className="w-full h-12 rounded-xl font-bold gap-2 text-surface-600 border-surface-200"
           onClick={handleCreateClick}
         >
-          <Plus className="size-4 mr-1" />
-          새 폴더
+          <FolderPlus className="size-5" />
+          새로운 맛탐정 폴더 만들기
         </Button>
       </div>
 
-      {myFolders && myFolders.length > 0 ? (
-        <div className="flex flex-col">
-          {myFolders.map((folder) => (
-            <FolderCard key={folder.id} folder={folder} />
-          ))}
+      {/* 내 폴더 섹션 */}
+      <div className="flex flex-col gap-4">
+        <div className="px-4">
+          <h2 className="text-xl font-black text-surface-900 dark:text-white">내 맛탐정 폴더</h2>
+          <p className="text-sm text-surface-500">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
         </div>
-      ) : (
-        <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center">
-          <p className="text-surface-500">아직 만든 폴더가 없습니다.</p>
-          <Button onClick={handleCreateClick} size="sm" className="font-bold">
-            첫 폴더 만들기
-          </Button>
-        </div>
-      )}
+
+        {myFolders && myFolders.length > 0 ? (
+          <div className="flex flex-col">
+            {myFolders.map((folder) => (
+              <FolderCard 
+                key={folder.id} 
+                folder={folder} 
+                hideSubscribeButton={true} 
+                showOwner={true} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center mt-2">
+            <p className="text-sm text-surface-500 font-medium">아직 만든 폴더가 없습니다.</p>
+            <Button onClick={handleCreateClick} size="sm" className="font-bold rounded-full px-6">
+              첫 폴더 만들기
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -80,7 +80,7 @@ export function DetectiveList() {
         </div>
         <div className="flex flex-col">
           {publicFolders.map((folder) => (
-            <FolderCard key={folder.id} folder={folder} />
+            <FolderCard key={folder.id} folder={folder} showOwner={true} />
           ))}
         </div>
       </div>

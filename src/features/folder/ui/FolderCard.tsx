@@ -2,17 +2,25 @@ import { useNavigate } from "react-router";
 import { Folder } from "@/entities/folder/types";
 import { PlaceSlider, Button } from "@/shared/ui";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { User, Users, Heart } from "lucide-react";
+import { User, Users, Heart, Lock, Globe, EyeOff, Clock } from "lucide-react";
 import { useToggleFolderSubscription, useMySubscriptions } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn } from "@/shared/lib/utils";
+import { ago, safeFormatDate } from "@/shared/lib/date";
+import React from "react";
 
 interface FolderCardProps {
   folder: Folder;
+  hideSubscribeButton?: boolean;
+  showOwner?: boolean;
 }
 
-export function FolderCard({ folder }: FolderCardProps) {
+export function FolderCard({ 
+  folder, 
+  hideSubscribeButton = false,
+  showOwner = false 
+}: FolderCardProps) {
   const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
   const { isAuthenticated, user } = useUserStore();
@@ -35,61 +43,130 @@ export function FolderCard({ folder }: FolderCardProps) {
     toggleSubscription(folder.id);
   };
 
+  const statusInfo = React.useMemo(() => {
+    if (!isOwner) return null;
+    
+    switch (folder.permission) {
+      case 'public':
+        return { icon: Globe, text: '공개', className: 'text-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800' };
+      case 'private':
+        return { icon: Lock, text: '비공개', className: 'text-surface-400 bg-surface-50 dark:bg-surface-800 border-surface-100 dark:border-surface-700' };
+      case 'hidden':
+        return { icon: EyeOff, text: '링크 공개', className: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800' };
+      case 'invite':
+        return { icon: Users, text: '초대 전용', className: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800' };
+      default:
+        return null;
+    }
+  }, [isOwner, folder.permission]);
+
+  const creationDateLabel = React.useMemo(() => {
+    const date = new Date(folder.created_at);
+    const now = new Date();
+    const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+    
+    if (diffDays > 7) {
+      return safeFormatDate(folder.created_at, { year: '2-digit', month: 'numeric', day: 'numeric' });
+    }
+    return ago(folder.created_at);
+  }, [folder.created_at]);
+
   return (
-    <section className="flex flex-col gap-2 px-4 py-2">
-      {/* 제목 영역: 타이틀 + 개수 */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1 overflow-hidden">
-          <div className="flex items-center gap-1.5 overflow-hidden">
-            <h3 
-              className="text-xl font-black text-surface-900 dark:text-white leading-tight break-keep cursor-pointer hover:underline underline-offset-4 truncate"
-              onClick={() => navigate(`/folder/${folder.id}`)}
-            >
-              {folder.title}
-            </h3>
-            {folder.permission === 'public' ? (
-              <Users className="size-4 text-surface-400 flex-shrink-0" />
+    <section className="flex flex-col gap-3 px-4 py-2">
+      {/* 제목 영역: 프로필 + 타이틀 + 개수 */}
+      <div className="flex items-center gap-2.5 overflow-hidden">
+        {showOwner && (
+          <div 
+            className="w-10 h-10 rounded-full bg-surface-200 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 cursor-pointer"
+            onClick={() => navigate(`/folder/${folder.id}`)}
+          >
+            {folder.owner_avatar_url ? (
+              <img 
+                src={folder.owner_avatar_url} 
+                alt={folder.owner_nickname} 
+                className="w-full h-full object-cover" 
+                loading="lazy"
+              />
             ) : (
-              <User className="size-4 text-surface-400 flex-shrink-0" />
+              <div className="w-full h-full flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                <User className="size-5 text-surface-400" />
+              </div>
             )}
           </div>
-          {folder.description && (
-            <p className="text-sm text-surface-500 line-clamp-1">{folder.description}</p>
+        )}
+        
+        <div className="flex items-start justify-between flex-1 gap-2 overflow-hidden">
+          <div className="flex flex-col gap-0.5 overflow-hidden">
+            <div className="flex items-center gap-1.5 overflow-hidden">
+              <h3 
+                className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+                onClick={() => navigate(`/folder/${folder.id}`)}
+              >
+                {folder.title}
+              </h3>
+              {isOwner && statusInfo && (
+                <div className={cn(
+                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border flex-shrink-0",
+                  statusInfo.className
+                )}>
+                  <statusInfo.icon className="size-2.5" />
+                  <span className="text-[10px] font-bold leading-none">{statusInfo.text}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {showOwner && (
+                <>
+                  <span className="text-xs font-medium text-surface-400">
+                    {folder.owner_nickname || '익명'}
+                  </span>
+                  <span className="text-[10px] text-surface-300">•</span>
+                </>
+              )}
+              <span className="text-xs font-medium text-surface-400">
+                {folder.place_count}개 매장
+              </span>
+              <span className="text-[10px] text-surface-300">•</span>
+              <span className="text-[11px] text-surface-400 flex items-center gap-1">
+                <Clock className="size-3" />
+                {creationDateLabel}
+              </span>
+            </div>
+          </div>
+
+          {!isOwner && !hideSubscribeButton && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSubscribe}
+              className={cn(
+                "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors duration-150 px-3",
+                isSubscribed 
+                  ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
+                  : "border-surface-200 dark:border-surface-700"
+              )}
+            >
+              <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
+              <span className="text-xs">{isSubscribed ? "구독중" : "구독"}</span>
+            </Button>
           )}
         </div>
-        
-        {!isOwner && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSubscribe}
-            className={cn(
-              "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors duration-150",
-              isSubscribed 
-                ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
-                : "border-surface-200 dark:border-surface-700"
-            )}
-          >
-            <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
-            {isSubscribed ? "구독중" : "구독"}
-          </Button>
-        )}
       </div>
 
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs text-surface-400 font-medium">
-          {folder.owner_nickname || '익명'}
-        </span>
-        <span className="text-sm font-medium text-surface-400 whitespace-nowrap">
-          {folder.place_count}개 매장
-        </span>
-      </div>
+      {folder.description && (
+        <p className="text-sm text-surface-500 line-clamp-1 px-0.5">
+          {folder.description}
+        </p>
+      )}
 
       {/* 장소 슬라이더 */}
       <div className="-mx-4">
         <PlaceSlider
           title=""
-          items={folder.preview_places || []}
+          items={folder.preview_places?.map((p: any) => ({
+            ...p,
+            thumbnail: p.thumbnail || p.image_urls?.[0]
+          })) || []}
           onItemClick={showPlaceModal}
           onMoreClick={() => navigate(`/folder/${folder.id}`)}
           showMoreThreshold={5}

@@ -50,15 +50,21 @@ export async function requestCommunityMetaService(url: string) {
 
 /**
  * 장소 검색 서비스 (graph-search-place Edge Function)
+ * 네이버 검색 기반으로 장소 목록을 가져옵니다.
  */
 export async function searchPlaceService(query: string) {
-  const result = await callSupabaseFunction<{ items: any[] }>('graph-search-place', {
+  const result = await callSupabaseFunction<any>('graph-search-place', {
     body: { query },
   });
   
   if (result.error) {
-    return { error: true, items: [] };
+    return { error: true, rows: [] };
   }
   
-  return { error: false, items: result.results?.items || [] };
+  return { 
+    error: false, 
+    rows: result.results?.rows || [],
+    count: result.results?.count || 0,
+    code: result.results?.code || 500
+  };
 }

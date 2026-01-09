@@ -45,6 +45,56 @@ export interface Place {
   group2?: string;
   group3?: string;
   road?: string; // 장소 설명/소개
+  avg_price?: number;
+}
+
+/**
+ * 장소 검색 결과 요약 정보 (graph-search-place API 응답)
+ */
+export interface PlaceSearchSummary {
+  /** 장소 고유 ID (네이버 기반) */
+  id: string;
+  /** 장소명 */
+  name: string;
+  /** 카테고리 (예: 한식) */
+  category: string;
+  /** 비즈니스 카테고리 (예: restaurant) */
+  businessCategory: string;
+  /** 공통 주소 (예: 여수 중앙동) */
+  commonAddress: string;
+  /** 상세 주소 (예: 중앙동 667) */
+  address: string;
+  /** GraphQL 타입 명칭 */
+  __typename: string;
+}
+
+/**
+ * 장소 검색 API 전체 응답 구조
+ */
+export interface PlaceSearchResponse {
+  /** 응답 코드 (200) */
+  code: number;
+  /** 검색된 전체 개수 */
+  count: number;
+  /** 검색된 장소 목록 */
+  rows: PlaceSearchSummary[];
+  /** 검색 파라미터 정보 */
+  param: {
+    /** 검색어 */
+    query: string;
+    /** 시작 인덱스 */
+    start: number;
+    /** 표시 개수 */
+    display: number;
+  };
+}
+
+/**
+ * ID 목록으로 조회된 장소 상세 래퍼
+ */
+export interface PlaceDataWrapper {
+  /** 실제 장소 데이터 */
+  place_data: Place;
 }
 
 export interface ReviewTag {

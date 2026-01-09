@@ -176,8 +176,6 @@ export function FeatureDetailPage() {
                   <PlaceCard 
                     key={place.id} 
                     place={place} 
-                    imageAspectRatio="aspect-[3/2]" 
-                    imageWidth="w-[72%]"
                     showPrice={true}
                   />
                 ))}
