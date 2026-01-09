@@ -777,7 +777,7 @@ export function FolderDetailPage() {
       <DetailHeader
         type="folder"
         title={folderInfo?.title || "맛탐정 폴더"}
-        subtitle={folderInfo?.owner_nickname || "익명"}
+        subtitle={folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명"}
         thumbnailUrl={folderInfo?.owner_avatar_url}
         isOwner={isOwner}
         isSubscribed={isSubscribed}

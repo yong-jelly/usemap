@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, Share2, Settings, User, CheckCircle } from "lucide-react";
+import { ChevronLeft, Share2, Settings, User, CheckCircle, Rss } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
@@ -106,7 +106,7 @@ export function DetailHeader({
               className="w-full h-full object-cover"
             />
           </div>
-        ) : subType === 'folder' ? (
+        ) : type === 'folder' ? (
           <div className="w-10 h-10 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden shrink-0 border border-surface-100 dark:border-surface-800 flex items-center justify-center">
             <User className="size-5 text-surface-400" />
           </div>
@@ -133,10 +133,11 @@ export function DetailHeader({
             size="sm"
             onClick={onSubscribe}
             className={cn(
-              "h-8 px-3 text-xs font-bold rounded-full transition-all",
+              "h-8 px-3 text-xs font-bold rounded-full transition-all gap-1.5",
               isSubscribed ? "bg-surface-50 dark:bg-surface-800 text-surface-500" : "bg-primary-500 text-white"
             )}
           >
+            <Rss className="size-3.5" />
             {isSubscribed ? "구독중" : "구독"}
           </Button>
         )}

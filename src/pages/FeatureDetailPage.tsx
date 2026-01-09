@@ -390,11 +390,11 @@ export function FeatureDetailPage() {
   }, [typedInfo, type, id]);
 
   const headerSubtitle = useMemo(() => {
-    if (type === 'youtube') return "유튜브";
+    if (type === 'youtube') return `${typedInfo?.place_count || places.length}개의 장소`;
     if (type === 'community') return "커뮤니티";
     if (type === 'folder') return "네이버 폴더";
     return "";
-  }, [type]);
+  }, [type, typedInfo, places.length]);
 
   const thumbnailUrl = useMemo(() => {
     if (type === 'youtube' && typedInfo?.thumbnail_url) return typedInfo.thumbnail_url;
