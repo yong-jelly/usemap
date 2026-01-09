@@ -215,43 +215,44 @@ SET search_path = public, auth
 AS $$
 DECLARE
     v_user_id UUID;
+    v_folder_owner_id UUID;
     v_is_owner BOOLEAN;
     v_is_subscribed BOOLEAN;
-    v_permission VARCHAR;
+    v_folder_permission VARCHAR;
 BEGIN
     v_user_id := auth.uid();
     
     -- 기본 정보 및 권한 확인
-    SELECT owner_id, permission INTO v_owner_id, v_permission 
-    FROM public.tbl_folder 
-    WHERE public.tbl_folder.id = p_folder_id AND is_hidden = FALSE;
+    SELECT f.owner_id, f.permission INTO v_folder_owner_id, v_folder_permission 
+    FROM public.tbl_folder f
+    WHERE f.id = p_folder_id AND f.is_hidden = FALSE;
 
-    IF v_owner_id IS NULL THEN
+    IF v_folder_owner_id IS NULL THEN
         RETURN;
     END IF;
 
-    v_is_owner := (v_user_id IS NOT NULL AND v_owner_id = v_user_id);
+    v_is_owner := (v_user_id IS NOT NULL AND v_folder_owner_id = v_user_id);
 
     -- 구독 여부 확인
     IF v_user_id IS NOT NULL THEN
         SELECT EXISTS (
-            SELECT 1 FROM public.tbl_folder_subscribed 
-            WHERE folder_id = p_folder_id AND user_id = v_user_id AND deleted_at IS NULL
+            SELECT 1 FROM public.tbl_folder_subscribed sub
+            WHERE sub.folder_id = p_folder_id AND sub.user_id = v_user_id AND sub.deleted_at IS NULL
         ) INTO v_is_subscribed;
     ELSE
         v_is_subscribed := FALSE;
     END IF;
 
     -- 접근 권한 체크 (v1_check_folder_access와 동일한 로직)
-    IF v_permission = 'hidden' AND NOT v_is_owner THEN
+    IF v_folder_permission = 'hidden' AND NOT v_is_owner THEN
         RETURN;
     END IF;
 
-    IF v_permission = 'invite' AND NOT (v_is_owner OR v_is_subscribed) THEN
+    IF v_folder_permission = 'invite' AND NOT (v_is_owner OR v_is_subscribed) THEN
         RETURN;
     END IF;
 
-    IF v_permission = 'default' AND NOT v_is_owner THEN
+    IF v_folder_permission = 'default' AND NOT v_is_owner THEN
         RETURN;
     END IF;
 
@@ -259,19 +260,19 @@ BEGIN
     SELECT 
         f.id,
         f.owner_id,
-        p.nickname AS owner_nickname,
-        p.profile_image_url AS owner_avatar_url,
+        prof.nickname AS owner_nickname,
+        prof.profile_image_url AS owner_avatar_url,
         f.title,
         f.description,
         f.permission,
         f.permission_write_type,
-        CASE WHEN v_is_owner THEN f.invite_code ELSE NULL END AS invite_code,
-        CASE WHEN v_is_owner THEN f.invite_code_expires_at ELSE NULL END AS invite_code_expires_at,
+        CASE WHEN v_is_owner THEN f.invite_code ELSE NULL::VARCHAR END AS invite_code,
+        CASE WHEN v_is_owner THEN f.invite_code_expires_at ELSE NULL::TIMESTAMPTZ END AS invite_code_expires_at,
         f.subscriber_count,
         f.place_count,
         f.created_at::TIMESTAMPTZ
     FROM public.tbl_folder f
-    LEFT JOIN public.tbl_user_profile p ON f.owner_id = p.auth_user_id
+    LEFT JOIN public.tbl_user_profile prof ON f.owner_id = prof.auth_user_id
     WHERE f.id = p_folder_id;
 END;
 $$;
@@ -858,21 +859,21 @@ AS $$
 DECLARE
     v_user_id UUID;
     v_is_subscribed BOOLEAN;
-    v_owner_id UUID;
+    v_folder_owner_id UUID;
 BEGIN
     v_user_id := auth.uid();
 
     -- 접근 권한 확인 (소유자 또는 구독자)
-    SELECT owner_id INTO v_owner_id FROM public.tbl_folder WHERE id = p_folder_id;
+    SELECT f.owner_id INTO v_folder_owner_id FROM public.tbl_folder f WHERE f.id = p_folder_id;
     
     IF v_user_id IS NOT NULL THEN
         SELECT EXISTS (
-            SELECT 1 FROM public.tbl_folder_subscribed 
-            WHERE folder_id = p_folder_id AND user_id = v_user_id AND deleted_at IS NULL
+            SELECT 1 FROM public.tbl_folder_subscribed sub
+            WHERE sub.folder_id = p_folder_id AND sub.user_id = v_user_id AND sub.deleted_at IS NULL
         ) INTO v_is_subscribed;
     END IF;
 
-    IF v_owner_id != v_user_id AND NOT COALESCE(v_is_subscribed, FALSE) THEN
+    IF v_folder_owner_id != v_user_id AND NOT COALESCE(v_is_subscribed, FALSE) THEN
         RAISE EXCEPTION '권한이 없습니다.';
     END IF;
 
@@ -880,15 +881,15 @@ BEGIN
     SELECT 
         r.id,
         r.user_id,
-        p.nickname as user_nickname,
-        p.profile_image_url as user_avatar,
+        prof.nickname as user_nickname,
+        prof.profile_image_url as user_avatar,
         r.place_id,
         r.review_content,
         r.score,
         r.created_at,
         (r.user_id = v_user_id) as is_my_review
     FROM public.tbl_folder_review r
-    LEFT JOIN public.tbl_user_profile p ON r.user_id = p.auth_user_id
+    LEFT JOIN public.tbl_user_profile prof ON r.user_id = prof.auth_user_id
     WHERE r.folder_id = p_folder_id 
       AND r.deleted_at IS NULL
       AND (p_place_id IS NULL OR r.place_id = p_place_id)
@@ -914,52 +915,52 @@ SET search_path = public, auth
 AS $$
 DECLARE
     v_user_id UUID;
-    v_owner_id UUID;
-    v_permission VARCHAR;
+    v_folder_owner_id UUID;
+    v_folder_permission VARCHAR;
     v_is_owner BOOLEAN;
     v_is_subscribed BOOLEAN;
 BEGIN
     v_user_id := auth.uid();
 
     -- 폴더 정보 및 권한 확인
-    SELECT owner_id, permission INTO v_owner_id, v_permission 
-    FROM public.tbl_folder 
-    WHERE id = p_folder_id AND is_hidden = FALSE;
+    SELECT f.owner_id, f.permission INTO v_folder_owner_id, v_folder_permission 
+    FROM public.tbl_folder f
+    WHERE f.id = p_folder_id AND f.is_hidden = FALSE;
 
-    IF v_owner_id IS NULL THEN
+    IF v_folder_owner_id IS NULL THEN
         RETURN;
     END IF;
 
-    v_is_owner := (v_user_id IS NOT NULL AND v_owner_id = v_user_id);
+    v_is_owner := (v_user_id IS NOT NULL AND v_folder_owner_id = v_user_id);
 
     -- 구독 여부 확인
     IF v_user_id IS NOT NULL THEN
         SELECT EXISTS (
-            SELECT 1 FROM public.tbl_folder_subscribed 
-            WHERE folder_id = p_folder_id AND user_id = v_user_id AND deleted_at IS NULL
+            SELECT 1 FROM public.tbl_folder_subscribed sub
+            WHERE sub.folder_id = p_folder_id AND sub.user_id = v_user_id AND sub.deleted_at IS NULL
         ) INTO v_is_subscribed;
     ELSE
         v_is_subscribed := FALSE;
     END IF;
 
     -- 접근 권한 체크
-    IF v_permission = 'hidden' AND NOT v_is_owner THEN
+    IF v_folder_permission = 'hidden' AND NOT v_is_owner THEN
         RETURN;
     END IF;
 
-    IF v_permission = 'invite' AND NOT (v_is_owner OR v_is_subscribed) THEN
+    IF v_folder_permission = 'invite' AND NOT (v_is_owner OR v_is_subscribed) THEN
         RETURN;
     END IF;
 
-    IF v_permission = 'default' AND NOT v_is_owner THEN
+    IF v_folder_permission = 'default' AND NOT v_is_owner THEN
         RETURN;
     END IF;
 
     RETURN QUERY
     SELECT 
         pl.id,
-        (to_jsonb(pl) || jsonb_build_object('image_urls', pl.images)) AS place_data,
-        fp.created_at::TIMESTAMPTZ AS added_at
+        (to_jsonb(pl) || jsonb_build_object('image_urls', pl.images)) AS p_data,
+        fp.created_at::TIMESTAMPTZ AS a_at
     FROM public.tbl_folder_place fp
     JOIN public.tbl_place pl ON fp.place_id = pl.id
     WHERE fp.folder_id = p_folder_id 
