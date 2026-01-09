@@ -50,10 +50,10 @@ export function useMySubscriptions() {
 /**
  * 내 피드 무한 스크롤 조회
  */
-export function useMyFeed() {
+export function useMyFeed(filters: { price_min?: number | null; price_max?: number | null } = {}) {
   return useInfiniteQuery({
-    queryKey: [...folderKeys.all, "feed"],
-    queryFn: ({ pageParam = 0 }) => folderApi.getMyFeed({ limit: 20, offset: pageParam }),
+    queryKey: [...folderKeys.all, "feed", filters],
+    queryFn: ({ pageParam = 0 }) => folderApi.getMyFeed({ limit: 20, offset: pageParam, ...filters }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < 20) return undefined;
@@ -91,12 +91,23 @@ export function useCreateFolder() {
  */
 export function useToggleFolderSubscription() {
   const queryClient = useQueryClient();
+  const subscriptionKey = [...folderKeys.all, "subscriptions"];
+
   return useMutation({
     mutationFn: folderApi.toggleFolderSubscription,
-    onSuccess: (_, folderId) => {
+    onSuccess: (result, folderId) => {
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태만 업데이트 (목록에서 제거하지 않음)
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => 
+        old?.map((sub) => 
+          (sub.subscription_type === 'folder' && sub.feature_id === folderId)
+            ? { ...sub, is_subscribed: result.is_subscribed }
+            : sub
+        )
+      );
+      
+      // 관련 쿼리 무효화 (상세 정보 등)
       queryClient.invalidateQueries({ queryKey: folderKeys.list('public') });
       queryClient.invalidateQueries({ queryKey: folderKeys.details(folderId) });
-      queryClient.invalidateQueries({ queryKey: [...folderKeys.all, "subscriptions"] });
     },
   });
 }
@@ -106,10 +117,19 @@ export function useToggleFolderSubscription() {
  */
 export function useToggleFeatureSubscription() {
   const queryClient = useQueryClient();
+  const subscriptionKey = [...folderKeys.all, "subscriptions"];
+
   return useMutation({
     mutationFn: folderApi.toggleFeatureSubscription,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...folderKeys.all, "subscriptions"] });
+    onSuccess: (result, { type, id }) => {
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태만 업데이트
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => 
+        old?.map((sub) => 
+          (sub.subscription_type === type && sub.feature_id === id)
+            ? { ...sub, is_subscribed: result.is_subscribed }
+            : sub
+        )
+      );
     },
   });
 }
