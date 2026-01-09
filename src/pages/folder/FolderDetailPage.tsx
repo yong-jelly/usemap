@@ -10,36 +10,33 @@ import {
   useRegenerateInviteCode,
   useInviteHistory,
   useHideFolder,
-  useRemovePlaceFromFolder,
   useFolderPlacesForMap,
-  useVerifyInviteCode
+  useVerifyInviteCode,
+  useToggleFolderSubscription,
+  useMySubscriptions
 } from "@/entities/folder/queries";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
 mapboxgl.accessToken = MAP_TOKEN;
 import { Button, Input } from "@/shared/ui";
 import { 
-  ChevronLeft, 
   Plus, 
   Loader2, 
-  Share2, 
-  MoreVertical,
-  Map as MapIcon,
-  LayoutGrid,
-  Users,
-  User,
-  Info,
-  Key,
-  Copy,
-  RefreshCw,
-  Clock,
-  History,
-  EyeOff,
-  X,
-  CheckCircle,
-  AlertCircle,
-  List,
-  RotateCcw
+  Map as MapIcon, 
+  Users, 
+  User, 
+  Info, 
+  Key, 
+  Copy, 
+  RefreshCw, 
+  Clock, 
+  History, 
+  EyeOff, 
+  X, 
+  CheckCircle, 
+  AlertCircle, 
+  List, 
+  RotateCcw 
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
@@ -50,6 +47,9 @@ import { ago } from "@/shared/lib/date";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import type { InviteHistory as InviteHistoryType } from "@/entities/folder/types";
+import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
+
+// ... (FolderInviteAdminSection, InviteCodeInput, InviteHistoryModal code remains same)
 
 // 초대 관리 섹션 (폴더 상세 상단에 표시)
 function FolderInviteAdminSection({ 
@@ -386,12 +386,55 @@ export function FolderDetailPage() {
     isLoading: isPlacesLoading 
   } = useFolderPlaces(id!);
 
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || viewMode !== 'list') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { 
+        threshold: 0,
+        rootMargin: '200px' 
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, viewMode]);
+
   const { data: folderInfo, isLoading: isInfoLoading } = useFolderInfo(id!);
   const { mutate: addPlace } = useAddPlaceToFolder();
   const { mutate: hideFolder } = useHideFolder();
+  const { mutate: toggleSubscription } = useToggleFolderSubscription();
+  const { data: subscriptions } = useMySubscriptions();
 
   const isOwner = access?.is_owner;
   const canEdit = access?.can_edit;
+
+  const isSubscribed = useMemo(() => {
+    if (!subscriptions || !id) return false;
+    return subscriptions.some(sub => 
+      sub.subscription_type === 'folder' && sub.feature_id === id && sub.is_subscribed
+    );
+  }, [subscriptions, id]);
+
+  const handleToggleSubscription = () => {
+    if (!id) return;
+    toggleSubscription(id);
+  };
 
   // 지도용 데이터 조회
   const { data: folderMapPlaces, isLoading: isMapLoading } = useFolderPlacesForMap(id!, mapDataRequested);
@@ -731,88 +774,43 @@ export function FolderDetailPage() {
   return (
     <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
       {/* 헤더 */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-950 z-20">
-        <button onClick={() => navigate(-1)} className="p-1 -ml-1 shrink-0">
-          <ChevronLeft className="size-6" />
-        </button>
-        
-        <div className="flex-1 flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden shrink-0 border border-surface-100 dark:border-surface-800">
-            {folderInfo.owner_avatar_url ? (
-              <img 
-                src={folderInfo.owner_avatar_url} 
-                alt={folderInfo.owner_nickname} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <User className="size-4 text-surface-400" />
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col min-w-0">
-            <h1 className="text-sm font-black truncate leading-tight">
-              {folderInfo?.title || "맛탐정 폴더"}
-            </h1>
-            <p className="text-[10px] text-surface-400 font-bold truncate">
-              {folderInfo.owner_nickname || '익명'}
-            </p>
-          </div>
-        </div>
+      <DetailHeader
+        type="folder"
+        title={folderInfo?.title || "맛탐정 폴더"}
+        subtitle={folderInfo?.owner_nickname || "익명"}
+        thumbnailUrl={folderInfo?.owner_avatar_url}
+        isOwner={isOwner}
+        isSubscribed={isSubscribed}
+        onSubscribe={handleToggleSubscription}
+        onSettings={() => setShowMenu(!showMenu)}
+      />
 
-        <div className="flex items-center gap-1 shrink-0">
-          {canEdit && (
-            <button 
-              className="p-2 text-primary-500" 
-              onClick={() => setIsSearchOpen(true)}
-              title="장소 추가"
-            >
-              <Plus className="size-5" />
-            </button>
-          )}
-          <button 
-            className={cn("p-2 transition-colors", isLinkCopied && "text-green-500")} 
-            onClick={() => {
-              const url = `${window.location.origin}/folder/${id}`;
-              navigator.clipboard.writeText(url);
-              setIsLinkCopied(true);
-              setTimeout(() => setIsLinkCopied(false), 2000);
-            }}
-          >
-            {isLinkCopied ? <CheckCircle className="size-5" /> : <Share2 className="size-5" />}
-          </button>
-          <div className="relative">
-            <button className="p-2" onClick={() => setShowMenu(!showMenu)}>
-              <MoreVertical className="size-5" />
-            </button>
-            {showMenu && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-800 rounded-xl shadow-lg border border-surface-100 dark:border-surface-700 py-1 z-20">
-                  {isOwner && folderInfo.permission === 'invite' && (
-                    <button 
-                      className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700"
-                      onClick={() => { setShowInviteHistory(true); setShowMenu(false); }}
-                    >
-                      <Key className="size-4" />
-                      초대 코드 관리
-                    </button>
-                  )}
-                  {isOwner && !isDefaultFolder && (
-                    <button 
-                      className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700 text-red-500"
-                      onClick={handleHideFolder}
-                    >
-                      <EyeOff className="size-4" />
-                      폴더 숨기기
-                    </button>
-                  )}
-                </div>
-              </>
+      {/* 폴더 설정 메뉴 (기존 MoreVertical 메뉴 유지) */}
+      {showMenu && isOwner && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+          <div className="absolute right-4 top-14 w-48 bg-white dark:bg-surface-800 rounded-xl shadow-lg border border-surface-100 dark:border-surface-700 py-1 z-20">
+            {folderInfo.permission === 'invite' && (
+              <button 
+                className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700"
+                onClick={() => { setShowInviteHistory(true); setShowMenu(false); }}
+              >
+                <Key className="size-4" />
+                초대 코드 관리
+              </button>
+            )}
+            {!isDefaultFolder && (
+              <button 
+                className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700 text-red-500"
+                onClick={handleHideFolder}
+              >
+                <EyeOff className="size-4" />
+                폴더 숨기기
+              </button>
             )}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* 메인 컨텐츠 */}
       <div className="flex-1 relative overflow-hidden">
@@ -843,42 +841,37 @@ export function FolderDetailPage() {
         >
           {/* 폴더 정보 요약 */}
           <div className="px-5 py-6 flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-surface-900 dark:text-white leading-tight">
-                  {folderInfo?.title}
-                </h2>
-                {folderInfo?.permission === 'public' ? (
-                  <Users className="size-5 text-surface-400" />
-                ) : (
-                  <User className="size-5 text-surface-400" />
-                )}
-                {isDefaultFolder && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-surface-100 dark:bg-surface-800 rounded-full text-surface-500">
-                    기본
-                  </span>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-6">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
+                  <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
+                </div>
+                {folderInfo.permission !== 'default' && (
+                  <>
+                    <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
+                          <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
-              {folderInfo?.description && (
-                <p className="text-surface-500 font-medium leading-relaxed">
-                  {folderInfo.description}
-                </p>
-              )}
-            </div>
 
-            <div className="flex items-center gap-4 py-2">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
-                <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
-              </div>
-              {folderInfo.permission !== 'default' && (
-                <>
-                  <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
-                    <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
-                  </div>
-                </>
+              {/* 맛집추가 버튼 (SUBSCRIBERS 우측, 소유자 또는 편집 권한이 있는 경우) */}
+              {canEdit && (
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsSearchOpen(true)}
+                  className="gap-1.5 font-bold h-9 px-4 rounded-full"
+                >
+                  <Plus className="size-4" />
+                  맛집추가
+                </Button>
               )}
             </div>
           </div>
@@ -931,7 +924,7 @@ export function FolderDetailPage() {
             )}
 
             {hasNextPage && (
-              <div className="p-8 pb-24 flex justify-center">
+              <div ref={observerTarget} className="p-8 pb-24 flex justify-center">
                 <Loader2 className="size-6 text-surface-300 animate-spin" />
               </div>
             )}

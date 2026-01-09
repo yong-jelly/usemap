@@ -3,11 +3,12 @@ import { useParams, useSearchParams, useNavigate } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap } from "@/entities/place/queries";
+import { useMySubscriptions, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets/PlaceCard";
-import { Button } from "@/shared/ui";
-import { ChevronLeft, List, Map as MapIcon, Loader2, RotateCcw } from "lucide-react";
+import { List, Map as MapIcon, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
 mapboxgl.accessToken = MAP_TOKEN;
@@ -37,7 +38,52 @@ export function FeatureDetailPage() {
     domain 
   });
 
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || viewMode !== 'list') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { 
+        threshold: 0,
+        rootMargin: '200px' 
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, viewMode]);
+
   const { data: info } = useFeatureInfo({ type: type as any, id: id || "" });
+  
+  // 구독 정보 조회
+  const { data: subscriptions } = useMySubscriptions();
+  const { mutate: toggleSubscription } = useToggleFeatureSubscription();
+
+  const isSubscribed = useMemo(() => {
+    if (!subscriptions || !type || !id) return false;
+    return subscriptions.some(sub => 
+      sub.subscription_type === type && sub.feature_id === id && sub.is_subscribed
+    );
+  }, [subscriptions, type, id]);
+
+  const handleToggleSubscription = () => {
+    if (!type || !id) return;
+    toggleSubscription({ type: type as any, id });
+  };
   
   // 지도용 전체 데이터 조회 (지도 버튼 클릭 시에만 활성화)
   const { data: featureMapPlaces, isLoading: isMapLoading } = useFeaturePlacesForMap({
@@ -85,11 +131,6 @@ export function FeatureDetailPage() {
       zoom: 13,
     });
     
-    // Mapbox는 한국 지역을 중심으로 할 때 자동으로 한글 레이블을 우선 표시합니다
-    // 한글 레이블을 더 확실하게 하려면 Mapbox Studio에서 한글 레이블이 포함된 커스텀 스타일을 만들어 사용하세요
-    // 참고: 기본 streets-v12 스타일은 지역에 따라 자동으로 언어를 선택하지만, 
-    // 모든 지역명이 한글로 표시되는 것은 아닐 수 있습니다.
-
     return () => {
       map.current?.remove();
       map.current = null;
@@ -100,7 +141,6 @@ export function FeatureDetailPage() {
   useEffect(() => {
     if (!map.current || viewMode !== "map" || mapPlaces.length === 0) return;
 
-    // GeoJSON 데이터 생성
     const features: GeoJSON.Feature<GeoJSON.Point>[] = mapPlaces
       .filter(place => {
         if (!place.x || !place.y) return false;
@@ -130,57 +170,50 @@ export function FeatureDetailPage() {
       features,
     };
 
-    // 기존 소스 제거
     if (map.current.getSource(sourceId)) {
       map.current.removeLayer(clusterLayerId);
       map.current.removeLayer(unclusteredPointLayerId);
       map.current.removeSource(sourceId);
     }
 
-    // 소스 추가 (클러스터링 활성화)
     map.current.addSource(sourceId, {
       type: 'geojson',
       data: geojson,
       cluster: true,
-      clusterMaxZoom: 20, // 클러스터 해제 안 함 (레이블로만 제어)
-      clusterRadius: 50, // 클러스터 반경 (픽셀)
+      clusterMaxZoom: 20,
+      clusterRadius: 50,
     });
 
-    // 보이지 않는 클러스터 레이어 (클러스터 정보 조회용)
     map.current.addLayer({
       id: clusterLayerId,
       type: 'circle',
       source: sourceId,
       filter: ['has', 'point_count'],
       paint: {
-        'circle-opacity': 0, // 완전 투명
+        'circle-opacity': 0,
         'circle-radius': 0,
       },
     });
 
-    // 보이지 않는 개별 포인트 레이어 (개별 포인트 정보 조회용)
     map.current.addLayer({
       id: unclusteredPointLayerId,
       type: 'circle',
       source: sourceId,
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-opacity': 0, // 완전 투명
+        'circle-opacity': 0,
         'circle-radius': 0,
       },
     });
 
-    // 클러스터/포인트 레이블 업데이트 함수
     const updateLabels = () => {
       if (!map.current || !map.current.getSource(sourceId)) return;
       
-      // 기존 마커 제거
       clusterLabelMarkers.current.forEach(m => m.remove());
       clusterLabelMarkers.current = [];
       pointLabelMarkers.current.forEach(m => m.remove());
       pointLabelMarkers.current = [];
       
-      // 클러스터 조회
       const clusterFeatures = map.current.queryRenderedFeatures({
         layers: [clusterLayerId],
       });
@@ -192,18 +225,15 @@ export function FeatureDetailPage() {
         const pointCount = feature.properties.point_count as number;
         const clusterId = feature.properties.cluster_id;
         
-        // 클러스터 내 모든 장소 가져오기
         (map.current!.getSource(sourceId) as mapboxgl.GeoJSONSource).getClusterLeaves(
           clusterId,
-          pointCount, // 모든 장소 가져오기
+          pointCount,
           0,
           (err, leaves) => {
             if (err || !leaves || leaves.length === 0) return;
             
             if (pointCount >= 3) {
-              // 10개 이상: 대표 업체명 +숫자 형태로 표시
-              const firstPlace = leaves[0].properties;
-              const placeName = firstPlace?.name || '장소';
+              const placeName = leaves[0].properties?.name || '장소';
               
               const el = document.createElement('div');
               el.className = 'cluster-label-marker';
@@ -214,15 +244,11 @@ export function FeatureDetailPage() {
                 </div>
               `;
               
-              // 클러스터 클릭 시 줌 레벨 조정
               el.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const currentZoom = map.current!.getZoom();
-                const targetZoom = currentZoom < 4 ? 4 : currentZoom + 2;
-                
                 map.current!.easeTo({
                   center: coordinates,
-                  zoom: targetZoom,
+                  zoom: map.current!.getZoom() + 2,
                 });
               });
               
@@ -233,7 +259,6 @@ export function FeatureDetailPage() {
               
               clusterLabelMarkers.current.push(marker);
             } else {
-              // 10개 미만: 개별 업체명 모두 표시
               leaves.forEach((leaf) => {
                 const leafCoords = (leaf.geometry as GeoJSON.Point).coordinates as [number, number];
                 const placeName = leaf.properties?.name || '장소';
@@ -264,7 +289,6 @@ export function FeatureDetailPage() {
         );
       });
 
-      // 개별 포인트 (클러스터되지 않은) 레이블 표시
       const pointFeatures = map.current.queryRenderedFeatures({
         layers: [unclusteredPointLayerId],
       });
@@ -296,44 +320,30 @@ export function FeatureDetailPage() {
       });
     };
 
-    // 줌/이동 시 레이블 업데이트
     map.current.on('moveend', updateLabels);
     map.current.on('zoomend', updateLabels);
     
-    // 이벤트 핸들러는 레이블에서 직접 처리하므로 여기서는 제거
-
-    // 줌/이동 시 레이블 업데이트
-    map.current.on('moveend', updateLabels);
-    map.current.on('zoomend', updateLabels);
-    
-    // 줌 변경 감지 (초기화 버튼 표시/숨김)
     const handleZoomChange = () => {
       if (!map.current || initialZoom.current === null) return;
-      
       const currentZoom = map.current.getZoom();
-      const isZoomChanged = Math.abs(currentZoom - initialZoom.current) > 0.1; // 0.1 이상 차이면 변경된 것으로 간주
+      const isZoomChanged = Math.abs(currentZoom - initialZoom.current) > 0.1;
       setShowResetButton(isZoomChanged);
     };
     
     map.current.on('zoomend', handleZoomChange);
     map.current.on('moveend', handleZoomChange);
     
-    // 초기 레이블 표시
     setTimeout(updateLabels, 100);
 
-    // 지도 범위 자동 조정
     const mapBounds = new mapboxgl.LngLatBounds();
     geojson.features.forEach(feature => {
       if (feature.geometry.type === 'Point') {
-        const coords = feature.geometry.coordinates as [number, number];
-        mapBounds.extend(coords);
+        mapBounds.extend(feature.geometry.coordinates as [number, number]);
       }
     });
 
     if (!mapBounds.isEmpty()) {
       map.current.fitBounds(mapBounds, { padding: 50, maxZoom: 15 });
-      
-      // fitBounds 완료 후 초기 줌과 중심점 저장
       map.current.once('idle', () => {
         if (map.current && initialZoom.current === null) {
           initialZoom.current = map.current.getZoom();
@@ -341,16 +351,8 @@ export function FeatureDetailPage() {
           initialCenter.current = [center.lng, center.lat];
         }
       });
-    } else {
-      // 데이터가 없을 경우 현재 줌과 중심점 저장
-      if (map.current && initialZoom.current === null) {
-        initialZoom.current = map.current.getZoom();
-        const center = map.current.getCenter();
-        initialCenter.current = [center.lng, center.lat];
-      }
     }
 
-    // Cleanup 함수
     return () => {
       if (map.current) {
         map.current.off('moveend', updateLabels);
@@ -358,14 +360,8 @@ export function FeatureDetailPage() {
         map.current.off('zoomend', handleZoomChange);
         map.current.off('moveend', handleZoomChange);
       }
-      
-      // 마커 제거
       clusterLabelMarkers.current.forEach(m => m.remove());
-      clusterLabelMarkers.current = [];
       pointLabelMarkers.current.forEach(m => m.remove());
-      pointLabelMarkers.current = [];
-      
-      // 레이어 및 소스 제거
       if (map.current?.getSource(sourceId)) {
         map.current.removeLayer(clusterLayerId);
         map.current.removeLayer(unclusteredPointLayerId);
@@ -374,12 +370,9 @@ export function FeatureDetailPage() {
     };
   }, [mapPlaces, viewMode, showPlaceModal]);
 
-  // Handle Resize for Mapbox & Reset initial zoom when switching to map mode
   useEffect(() => {
     if (viewMode === "map" && map.current) {
       map.current.resize();
-      
-      // 지도 모드로 전환 시 초기 줌 리셋 (fitBounds 완료 후 저장됨)
       if (mapDataRequested) {
         initialZoom.current = null;
         initialCenter.current = null;
@@ -389,31 +382,37 @@ export function FeatureDetailPage() {
   }, [viewMode, mapDataRequested]);
 
   const headerTitle = useMemo(() => {
-    if (!typedInfo) return id;
+    if (!typedInfo) return id || "";
     if (type === 'folder') return typedInfo.name;
     if (type === 'youtube') return typedInfo.channel_title;
     if (type === 'community') return `${id}지역`;
-    return id;
+    return id || "";
   }, [typedInfo, type, id]);
+
+  const headerSubtitle = useMemo(() => {
+    if (type === 'youtube') return "유튜브";
+    if (type === 'community') return "커뮤니티";
+    if (type === 'folder') return "네이버 폴더";
+    return "";
+  }, [type]);
+
+  const thumbnailUrl = useMemo(() => {
+    if (type === 'youtube' && typedInfo?.thumbnail_url) return typedInfo.thumbnail_url;
+    return undefined;
+  }, [type, typedInfo]);
 
   return (
     <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
       {/* Header */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-950 z-20">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
-          <ChevronLeft className="size-6" />
-        </Button>
-        <div className="flex flex-col min-w-0">
-          <h1 className="text-lg font-black truncate leading-tight">
-            {headerTitle}
-          </h1>
-          {typedInfo && (
-            <p className="text-xs text-surface-400 font-medium">
-              {typedInfo.place_count || places.length}개의 장소
-            </p>
-          )}
-        </div>
-      </div>
+      <DetailHeader
+        type="feature"
+        subType={type as any}
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        thumbnailUrl={thumbnailUrl}
+        isSubscribed={isSubscribed}
+        onSubscribe={handleToggleSubscription}
+      />
 
       {/* Main Content */}
       <div className="flex-1 relative overflow-hidden">
@@ -426,7 +425,6 @@ export function FeatureDetailPage() {
           )}
         />
         
-        {/* 지도 로딩 오버레이 (지도 데이터 로딩 중) */}
         {viewMode === "map" && isMapLoading && (
           <div className="absolute inset-0 z-20 bg-white/80 dark:bg-surface-900/80 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
@@ -449,6 +447,25 @@ export function FeatureDetailPage() {
             </div>
           ) : (
             <>
+              {/* Feature Info Summary */}
+              <div className="px-5 py-6 flex flex-col gap-4">
+                <div className="flex items-center gap-4 py-2">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
+                    <span className="text-lg font-black text-surface-900 dark:text-white">
+                      {typedInfo?.place_count || places.length}
+                    </span>
+                  </div>
+                  <div className="w-px h-8 bg-surface-100 dark:border-surface-800" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
+                    <span className="text-lg font-black text-surface-900 dark:text-white">
+                      {typedInfo?.subscriber_count || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col">
                 {places.map((place) => (
                   <PlaceCard 
@@ -460,18 +477,8 @@ export function FeatureDetailPage() {
               </div>
               
               {hasNextPage && (
-                <div className="p-8 pb-24 flex justify-center">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => fetchNextPage()} 
-                    disabled={isFetchingNextPage}
-                    className="rounded-full px-8"
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                    ) : null}
-                    {isFetchingNextPage ? "로딩 중..." : "더 보기"}
-                  </Button>
+                <div ref={observerTarget} className="p-8 pb-24 flex justify-center">
+                  <Loader2 className="size-6 text-surface-300 animate-spin" />
                 </div>
               )}
 
@@ -491,7 +498,6 @@ export function FeatureDetailPage() {
           <button
             onClick={() => {
               if (viewMode === "list") {
-                // 지도 모드로 전환 시 전체 데이터 요청
                 setMapDataRequested(true);
                 setViewMode("map");
               } else {
@@ -507,7 +513,6 @@ export function FeatureDetailPage() {
             )}
           </button>
           
-          {/* 초기화 버튼 (지도 모드이고 줌이 변경되었을 때만 표시) */}
           {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
             <button
               onClick={() => {

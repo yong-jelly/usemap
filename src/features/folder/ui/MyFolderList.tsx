@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router";
 import { useMyFolders } from "@/entities/folder/queries";
-import { FolderCard } from "./FolderCard";
+import { FolderList } from "./FolderList";
 import { Button } from "@/shared/ui";
-import { Loader2, Plus, FolderPlus } from "lucide-react";
+import { Loader2, FolderPlus } from "lucide-react";
 
 export function MyFolderList() {
   const navigate = useNavigate();
@@ -10,6 +10,10 @@ export function MyFolderList() {
 
   const handleCreateClick = () => {
     navigate("/folder/create");
+  };
+
+  const handleFolderClick = (folderId: string) => {
+    navigate(`/folder/${folderId}`);
   };
 
   if (isLoading) {
@@ -41,25 +45,22 @@ export function MyFolderList() {
           <p className="text-sm text-surface-500">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
         </div>
 
-        {myFolders && myFolders.length > 0 ? (
-          <div className="flex flex-col">
-            {myFolders.map((folder) => (
-              <FolderCard 
-                key={folder.id} 
-                folder={folder} 
-                hideSubscribeButton={true} 
-                showOwner={true} 
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center mt-2">
-            <p className="text-sm text-surface-500 font-medium">아직 만든 폴더가 없습니다.</p>
-            <Button onClick={handleCreateClick} size="sm" className="font-bold rounded-full px-6">
-              첫 폴더 만들기
-            </Button>
-          </div>
-        )}
+        <div className="px-4">
+          {myFolders && myFolders.length > 0 ? (
+            <FolderList 
+              folders={myFolders} 
+              onFolderClick={handleFolderClick}
+              showCheckbox={false}
+            />
+          ) : (
+            <div className="p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center mt-2">
+              <p className="text-sm text-surface-500 font-medium">아직 만든 폴더가 없습니다.</p>
+              <Button onClick={handleCreateClick} size="sm" className="font-bold rounded-full px-6">
+                첫 폴더 만들기
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

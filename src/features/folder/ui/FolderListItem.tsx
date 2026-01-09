@@ -1,0 +1,105 @@
+import { Globe, Lock, Link as LinkIcon, Ghost, User, Users, Check } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
+import type { Folder, FolderPermission } from "@/entities/folder/types";
+
+export const PERMISSION_INFO: Record<FolderPermission, { label: string; icon: any }> = {
+  public: { 
+    label: '공개', 
+    icon: Globe
+  },
+  private: { 
+    label: '비공개 (전용)', 
+    icon: Lock
+  },
+  hidden: { 
+    label: '비공개 (링크)', 
+    icon: LinkIcon
+  },
+  invite: { 
+    label: '비공개 (초대 전용)', 
+    icon: Ghost
+  },
+  default: { 
+    label: '기본 폴더', 
+    icon: User
+  }
+};
+
+interface FolderListItemProps {
+  folder: Folder;
+  isSelected?: boolean;
+  showCheckbox?: boolean;
+  onClick?: (folderId: string) => void;
+}
+
+export function FolderListItem({ 
+  folder, 
+  isSelected = false, 
+  showCheckbox = false, 
+  onClick 
+}: FolderListItemProps) {
+  const info = PERMISSION_INFO[folder.permission] || PERMISSION_INFO.public;
+  const Icon = info.icon;
+  const isCollaborative = folder.permission === 'invite' && folder.permission_write_type === 1;
+
+  return (
+    <button
+      onClick={() => onClick?.(folder.id)}
+      className={cn(
+        "w-full flex items-center justify-between p-4 rounded-3xl transition-colors text-left border-2",
+        isSelected
+          ? "bg-primary-50/50 dark:bg-primary-900/10 border-primary-500/50"
+          : "bg-white dark:bg-surface-900 border-surface-50 dark:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-800 shadow-sm"
+      )}
+    >
+      <div className="flex items-center gap-4">
+        <div className={cn(
+          "size-12 rounded-2xl flex items-center justify-center shrink-0",
+          isSelected
+            ? "bg-primary-500 text-white"
+            : "bg-surface-100 dark:bg-surface-800 text-surface-500"
+        )}>
+          <Icon className="size-6" />
+        </div>
+        <div className="flex flex-col gap-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className={cn(
+              "text-base font-bold truncate",
+              isSelected ? "text-primary-900 dark:text-primary-100" : "text-surface-900 dark:text-white"
+            )}>
+              {folder.title}
+            </p>
+            {isCollaborative && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-[10px] font-bold text-green-600 dark:text-green-400 shrink-0">
+                <Users className="size-3" />
+                함께 편집
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-surface-500">
+              {info.label}
+            </span>
+            <span className="size-1 rounded-full bg-surface-200 dark:bg-surface-700 shrink-0" />
+            <span className="text-xs font-medium text-surface-400 shrink-0">
+              장소 {folder.place_count}개
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      {showCheckbox && (
+        <div className={cn(
+          "size-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+          isSelected
+            ? "bg-primary-600 border-primary-600 shadow-sm"
+            : "border-surface-200 dark:border-surface-700"
+        )}>
+          {isSelected && (
+            <Check className="size-4 text-white stroke-[3]" />
+          )}
+        </div>
+      )}
+    </button>
+  );
+}
