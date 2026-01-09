@@ -118,6 +118,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT 
@@ -172,6 +173,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT 
@@ -213,6 +215,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_folder_owner_id UUID;
@@ -296,6 +299,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_folder_id VARCHAR;
     v_invite_code VARCHAR(5);
@@ -356,6 +360,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_owner_id UUID;
     v_permission VARCHAR;
@@ -411,6 +416,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_folder_permission VARCHAR;
@@ -489,6 +495,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_folder RECORD;
@@ -570,6 +577,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_owner_id UUID;
 BEGIN
@@ -607,6 +615,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_owner_id UUID;
     v_permission VARCHAR;
@@ -640,6 +649,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_owner_id UUID;
     v_permission VARCHAR;
@@ -679,6 +689,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_owner_id UUID;
@@ -741,6 +752,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_owner_id UUID;
@@ -800,6 +812,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_permission VARCHAR;
@@ -858,6 +871,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_is_subscribed BOOLEAN;
@@ -915,6 +929,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_folder_owner_id UUID;
@@ -981,6 +996,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_exists BOOLEAN;
@@ -1037,6 +1053,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
     v_exists BOOLEAN;
@@ -1092,6 +1109,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     -- 사용자 폴더 구독
@@ -1150,6 +1168,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     WITH all_sources AS (
@@ -1218,6 +1237,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
 BEGIN

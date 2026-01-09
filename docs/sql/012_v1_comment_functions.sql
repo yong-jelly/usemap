@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION public.v1_create_comment_for_place(p_business_id text
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 DECLARE
     new_comment_id uuid;
     caller_user_id uuid := auth.uid();
@@ -35,6 +36,7 @@ CREATE OR REPLACE FUNCTION public.v1_get_comments_for_place(p_business_id text, 
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT c.id, 
@@ -59,6 +61,7 @@ CREATE OR REPLACE FUNCTION public.v1_toggle_comment_like_for_place(p_comment_id 
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 DECLARE
     current_user_id uuid := auth.uid();
     is_liked boolean;

@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION public.v1_upsert_place_user_review(p_place_id charact
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 DECLARE
     caller_user_id uuid := auth.uid();
     v_id uuid;
@@ -47,6 +48,7 @@ CREATE OR REPLACE FUNCTION public.v1_get_place_user_review(p_review_id uuid)
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT r.id, r.user_id, r.place_id, r.review_content, r.score, r.media_urls, r.gender_code, r.age_group_code, r.is_private, r.is_active, r.created_at, r.updated_at, (r.user_id = auth.uid()),
@@ -62,6 +64,7 @@ CREATE OR REPLACE FUNCTION public.v1_list_place_user_review(p_place_id character
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT r.id, r.user_id, r.place_id, r.review_content, r.score, r.media_urls, r.gender_code, r.age_group_code, r.is_private, r.is_active, r.created_at, r.updated_at, (r.user_id = auth.uid()),
