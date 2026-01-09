@@ -390,14 +390,13 @@ export function FeatureDetailPage() {
   }, [typedInfo, type, id]);
 
   const headerSubtitle = useMemo(() => {
-    if (type === 'youtube') return `${typedInfo?.place_count || places.length}개의 장소`;
+    if (type === 'youtube' || type === 'folder') return `${typedInfo?.place_count || places.length}개의 매장`;
     if (type === 'community') return "커뮤니티";
-    if (type === 'folder') return "네이버 폴더";
     return "";
   }, [type, typedInfo, places.length]);
 
   const thumbnailUrl = useMemo(() => {
-    if (type === 'youtube' && typedInfo?.thumbnail_url) return typedInfo.thumbnail_url;
+    if (type === 'youtube' && typedInfo?.channel_thumbnail) return typedInfo.channel_thumbnail;
     return undefined;
   }, [type, typedInfo]);
 
@@ -451,14 +450,14 @@ export function FeatureDetailPage() {
               <div className="px-5 py-6 flex flex-col gap-4">
                 <div className="flex items-center gap-4 py-2">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">PLACES</span>
+                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
                     <span className="text-lg font-black text-surface-900 dark:text-white">
                       {typedInfo?.place_count || places.length}
                     </span>
                   </div>
                   <div className="w-px h-8 bg-surface-100 dark:border-surface-800" />
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">SUBSCRIBERS</span>
+                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
                     <span className="text-lg font-black text-surface-900 dark:text-white">
                       {typedInfo?.subscriber_count || 0}
                     </span>
