@@ -705,74 +705,6 @@ export function FolderDetailPage() {
     }
   }, [viewMode, mapDataRequested]);
 
-  // 로딩 상태
-  if (isAccessLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="size-8 animate-spin text-surface-300" />
-      </div>
-    );
-  }
-
-  // 404 케이스
-  if (access?.access === 'NOT_FOUND') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">폴더를 찾을 수 없습니다</h2>
-        <p className="text-surface-500 mb-8">존재하지 않거나 비공개된 폴더입니다.</p>
-        <Button onClick={() => navigate("/feature?tab=detective")} className="font-bold">
-          맛탐정 목록으로 이동
-        </Button>
-      </div>
-    );
-  }
-
-  // 초대 코드 필요 케이스
-  if (access?.access === 'INVITE_CODE_REQUIRED') {
-    if (!isAuthenticated) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-          <div className="p-6 rounded-full bg-primary-100 dark:bg-primary-900/20 mb-6">
-            <Key className="size-12 text-primary-500" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">로그인이 필요합니다</h2>
-          <p className="text-surface-500 mb-8">이 폴더에 접근하려면 로그인 후 초대 코드를 입력해주세요.</p>
-          <Button onClick={() => openLogin()} className="font-bold">
-            로그인하기
-          </Button>
-        </div>
-      );
-    }
-    return (
-      <InviteCodeInput 
-        folderId={id!} 
-        onSuccess={() => refetchAccess()} 
-      />
-    );
-  }
-
-  if (isPlacesLoading || isInfoLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="size-8 animate-spin text-surface-300" />
-      </div>
-    );
-  }
-
-  if (!folderInfo) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">폴더를 찾을 수 없습니다</h2>
-        <p className="text-surface-500 mb-8">존재하지 않거나 비공개된 폴더입니다.</p>
-        <Button onClick={() => navigate("/feature?tab=detective")} className="font-bold">
-          맛탐정 목록으로 이동
-        </Button>
-      </div>
-    );
-  }
-
-  const isDefaultFolder = folderInfo.permission === 'default';
-
   return (
     <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
       {/* 헤더 */}
@@ -792,7 +724,7 @@ export function FolderDetailPage() {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
           <div className="absolute right-4 top-14 w-48 bg-white dark:bg-surface-800 rounded-xl shadow-lg border border-surface-100 dark:border-surface-700 py-1 z-20">
-            {folderInfo.permission === 'invite' && (
+            {folderInfo?.permission === 'invite' && (
               <button 
                 className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700"
                 onClick={() => { setShowInviteHistory(true); setShowMenu(false); }}
@@ -801,7 +733,7 @@ export function FolderDetailPage() {
                 초대 코드 관리
               </button>
             )}
-            {!isDefaultFolder && (
+            {folderInfo && folderInfo.permission !== 'default' && (
               <button 
                 className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700 text-red-500"
                 onClick={handleHideFolder}
@@ -834,103 +766,136 @@ export function FolderDetailPage() {
           </div>
         )}
 
-        {/* 리스트 뷰 */}
+        {/* 리스트 뷰 / 로딩 / 에러 상태 */}
         <div 
           className={cn(
             "absolute inset-0 bg-white dark:bg-surface-950 overflow-y-auto scrollbar-hide transition-opacity duration-300",
             viewMode === "list" ? "opacity-100 z-10" : "opacity-0 -z-10"
           )}
         >
-          {/* 폴더 정보 요약 */}
-          <div className="px-5 py-6 flex flex-col gap-4">
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-6">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
-                  <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
-                </div>
-                {folderInfo.permission !== 'default' && (
-                  <>
-                    <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
-                          <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* 맛집추가 버튼 (SUBSCRIBERS 우측, 소유자 또는 편집 권한이 있는 경우) */}
-              {canEdit && (
-                <Button 
-                  size="sm" 
-                  onClick={() => setIsSearchOpen(true)}
-                  className="gap-1.5 font-bold h-9 px-4 rounded-full"
-                >
-                  <Plus className="size-4" />
-                  맛집추가
-                </Button>
-              )}
+          {isAccessLoading || isPlacesLoading || isInfoLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="size-8 animate-spin text-surface-300" />
             </div>
-          </div>
-
-          {/* 초대 관리 섹션 */}
-          {isOwner && folderInfo.permission === 'invite' && (
-            <FolderInviteAdminSection 
-              folderId={id!}
-              inviteCode={folderInfo.invite_code}
-              expiresAt={folderInfo.invite_code_expires_at}
-              onOpenHistory={() => setShowInviteHistory(true)}
-            />
-          )}
-
-          {/* 장소 목록 */}
-          <div className="flex flex-col">
-            {places.length > 0 ? (
-              <>
-                {places.map((item: any) => (
-                  <div key={item.place_id} className="flex flex-col">
-                    <PlaceCard 
-                      place={item.place_data} 
-                      showPrice={true}
-                      addedAt={formatKoreanDate(item.added_at)}
-                    />
-                    {folderInfo.permission === 'invite' && (
-                      <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
-                        <FolderReviewSection 
-                          folderId={id!}
-                          placeId={item.place_id}
-                          placeName={item.place_data.name}
-                        />
-                      </div>
+          ) : access?.access === 'NOT_FOUND' || !folderInfo ? (
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+              <h2 className="text-2xl font-bold mb-2">폴더를 찾을 수 없습니다</h2>
+              <p className="text-surface-500 mb-8">존재하지 않거나 비공개된 폴더입니다.</p>
+              <Button onClick={() => navigate("/feature?tab=detective")} className="font-bold">
+                맛탐정 목록으로 이동
+              </Button>
+            </div>
+          ) : access?.access === 'INVITE_CODE_REQUIRED' ? (
+            !isAuthenticated ? (
+              <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                <div className="p-6 rounded-full bg-primary-100 dark:bg-primary-900/20 mb-6">
+                  <Key className="size-12 text-primary-500" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">로그인이 필요합니다</h2>
+                <p className="text-surface-500 mb-8">이 폴더에 접근하려면 로그인 후 초대 코드를 입력해주세요.</p>
+                <Button onClick={() => openLogin()} className="font-bold">
+                  로그인하기
+                </Button>
+              </div>
+            ) : (
+              <InviteCodeInput 
+                folderId={id!} 
+                onSuccess={() => refetchAccess()} 
+              />
+            )
+          ) : (
+            <>
+              {/* 폴더 정보 요약 */}
+              <div className="px-5 py-6 flex flex-col gap-4">
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
+                      <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.place_count || 0}</span>
+                    </div>
+                    {folderInfo?.permission !== 'default' && (
+                      <>
+                        <div className="w-px h-8 bg-surface-100 dark:bg-surface-800" />
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
+                              <span className="text-lg font-black text-surface-900 dark:text-white">{folderInfo?.subscriber_count || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
-                ))}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
-                  <Info className="size-10 text-surface-200" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-surface-900 dark:text-white">아직 등록된 장소가 없습니다</p>
-                  <p className="text-sm text-surface-500 mt-1">
-                    {isOwner ? "맛집을 검색해서 나만의 폴더를 채워보세요!" : "사용자가 아직 장소를 추가하지 않았습니다."}
-                  </p>
-                </div>
-              </div>
-            )}
 
-            {hasNextPage && (
-              <div ref={observerTarget} className="p-8 pb-24 flex justify-center">
-                <Loader2 className="size-6 text-surface-300 animate-spin" />
+                  {canEdit && (
+                    <Button 
+                      size="sm" 
+                      onClick={() => setIsSearchOpen(true)}
+                      className="gap-1.5 font-bold h-9 px-4 rounded-full"
+                    >
+                      <Plus className="size-4" />
+                      맛집추가
+                    </Button>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* 초대 관리 섹션 */}
+              {isOwner && folderInfo?.permission === 'invite' && (
+                <FolderInviteAdminSection 
+                  folderId={id!}
+                  inviteCode={folderInfo.invite_code}
+                  expiresAt={folderInfo.invite_code_expires_at}
+                  onOpenHistory={() => setShowInviteHistory(true)}
+                />
+              )}
+
+              {/* 장소 목록 */}
+              <div className="flex flex-col">
+                {places.length > 0 ? (
+                  <>
+                    {places.map((item: any) => (
+                      <div key={item.place_id} className="flex flex-col">
+                        <PlaceCard 
+                          place={item.place_data} 
+                          showPrice={true}
+                          addedAt={formatKoreanDate(item.added_at)}
+                        />
+                        {folderInfo?.permission === 'invite' && (
+                          <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
+                            <FolderReviewSection 
+                              folderId={id!}
+                              placeId={item.place_id}
+                              placeName={item.place_data.name}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                    <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                      <Info className="size-10 text-surface-200" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-surface-900 dark:text-white">아직 등록된 장소가 없습니다</p>
+                      <p className="text-sm text-surface-500 mt-1">
+                        {isOwner ? "맛집을 검색해서 나만의 폴더를 채워보세요!" : "사용자가 아직 장소를 추가하지 않았습니다."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {hasNextPage && (
+                  <div ref={observerTarget} className="p-8 pb-24 flex justify-center">
+                    <Loader2 className="size-6 text-surface-300 animate-spin" />
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

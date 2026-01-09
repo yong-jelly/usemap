@@ -31,6 +31,11 @@ export function FeedPage() {
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // 페이지 마운트 시 window 스크롤 초기화
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
 

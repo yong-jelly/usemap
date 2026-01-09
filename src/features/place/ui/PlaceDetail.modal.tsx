@@ -485,48 +485,48 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <button
                 onClick={handleToggleVisited}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-black transition-all whitespace-nowrap",
+                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-black whitespace-nowrap",
                   details?.experience?.is_visited
-                    ? "bg-primary-600 text-white border-primary-600 shadow-sm"
-                    : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                    ? "bg-primary-600 text-white border-primary-600"
+                    : "bg-white dark:bg-surface-900 text-surface-500 border-surface-200 dark:border-surface-700"
                 )}
               >
-                <MapPinCheck className={cn("size-5", details?.experience?.is_visited && "text-white")} />
+                <MapPinCheck className="size-5" />
                 가봤어요
               </button>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <button
                   onClick={handleToggleLike}
                   className={cn(
-                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-2.5 rounded-xl border",
                     details?.interaction?.is_liked
                       ? "bg-red-500 text-white border-red-500 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
                   )}
                 >
-                  <Heart className={cn("size-5", details?.interaction?.is_liked && "fill-current")} />
+                  <Heart className="size-5" />
                 </button>
                 <button
                   onClick={handleToggleSave}
                   className={cn(
-                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-2.5 rounded-xl border",
                     details?.interaction?.is_saved
-                      ? "bg-pink-600 text-white border-pink-600 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                      ? "bg-red-500 text-white border-red-500 shadow-sm"
+                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
                   )}
                 >
-                  <Bookmark className={cn("size-5", details?.interaction?.is_saved && "fill-current")} />
+                  <Bookmark className="size-5" />
                 </button>
                 <button
                   onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
                   className={cn(
-                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-2.5 rounded-xl border",
                     isSavedToAnyFolder
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
+                      ? "bg-red-500 text-white border-red-500 shadow-sm"
+                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
                   )}
                 >
-                  <Folder className={cn("size-5", isSavedToAnyFolder && "fill-current")} />
+                  <Folder className="size-5" />
                 </button>
               </div>
             </div>

@@ -62,6 +62,11 @@ export function ExplorePage() {
 
   const [filters, setFilters] = useState<ExplorerFilterState>(defaultFilters);
 
+  // 페이지 마운트 시 window 스크롤 초기화
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   // 필터가 변경될 때마다 스크롤을 최상단으로 이동
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
