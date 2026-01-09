@@ -17,12 +17,12 @@ CREATE TABLE IF NOT EXISTS public.tbl_folder (
     permission VARCHAR DEFAULT 'public', -- 'public', 'private', 'hidden', 'invite', 'default'
     permission_write_type INT DEFAULT 0, -- 0: 소유자만, 1: 초대자 함께
     invite_code VARCHAR(5),
-    invite_code_expires_at TIMESTAMP,
+    invite_code_expires_at TIMESTAMPTZ,
     subscriber_count INT DEFAULT 0,
     place_count INT DEFAULT 0,
     is_hidden BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 폴더 내 장소 테이블
@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_folder_place (
     folder_id VARCHAR NOT NULL REFERENCES public.tbl_folder(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id),
     place_id VARCHAR NOT NULL REFERENCES public.tbl_place(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     PRIMARY KEY (folder_id, place_id)
 );
 
@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS public.tbl_folder_subscribed (
     folder_id VARCHAR NOT NULL REFERENCES public.tbl_folder(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id),
     activation BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     PRIMARY KEY (folder_id, user_id)
 );
 
@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS public.tbl_feature_subscription (
     user_id UUID NOT NULL REFERENCES auth.users(id),
     feature_type VARCHAR NOT NULL, -- 'naver_folder', 'youtube_channel', 'community_region'
     feature_id VARCHAR NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     UNIQUE(user_id, feature_type, feature_id)
 );
 
@@ -267,7 +267,7 @@ BEGIN
         f.permission,
         f.permission_write_type,
         CASE WHEN v_is_owner THEN f.invite_code ELSE NULL::VARCHAR END AS invite_code,
-        CASE WHEN v_is_owner THEN f.invite_code_expires_at ELSE NULL::TIMESTAMPTZ END AS invite_code_expires_at,
+        CASE WHEN v_is_owner THEN f.invite_code_expires_at::TIMESTAMPTZ ELSE NULL::TIMESTAMPTZ END AS invite_code_expires_at,
         f.subscriber_count,
         f.place_count,
         f.created_at::TIMESTAMPTZ
@@ -337,7 +337,7 @@ BEGIN
         f.title,
         f.permission,
         f.invite_code,
-        f.invite_code_expires_at
+        f.invite_code_expires_at::TIMESTAMPTZ
     FROM public.tbl_folder f
     WHERE f.id = v_folder_id;
 END;
@@ -1177,7 +1177,7 @@ BEGIN
             WHEN s.s_type = 'folder' THEN (SELECT f_inner.title FROM public.tbl_folder f_inner WHERE f_inner.id = s.s_id)
             WHEN s.s_type = 'naver_folder' THEN (SELECT nf_inner.name::text FROM public.tbl_naver_folder nf_inner WHERE nf_inner.folder_id::varchar = s.s_id)
             WHEN s.s_type = 'youtube_channel' THEN (SELECT pf_inner.metadata->>'channelTitle' FROM public.tbl_place_features pf_inner WHERE pf_inner.metadata->>'channelId' = s.s_id LIMIT 1)
-            WHEN s.s_type = 'community_region' THEN s.s_id
+            WHEN s.s_type = 'community_region' THEN COALESCE(feed_data.meta, 'unknown') || '|' || s.s_id
             ELSE 'Unknown'
         END as source_title,
         p.id as place_id,
@@ -1185,15 +1185,20 @@ BEGIN
         feed_data.added_time::TIMESTAMPTZ as added_at
     FROM (
         -- 각 소스별 장소 데이터 결합
-        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
+        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
         UNION ALL
-        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
+        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
         UNION ALL
         -- youtube/community는 tbl_place_features에서 가져옴
-        SELECT pf.platform_type as type, 
+        SELECT CASE 
+                 WHEN pf.platform_type = 'youtube' THEN 'youtube_channel'::text
+                 WHEN pf.platform_type = 'community' THEN 'community_region'::text
+                 ELSE pf.platform_type::text
+               END as type, 
                CASE WHEN pf.platform_type = 'youtube' THEN pf.metadata->>'channelId' ELSE (SELECT p_inner.group1 FROM public.tbl_place p_inner WHERE p_inner.id = pf.place_id) END as sid,
                pf.place_id as pid, 
-               pf.published_at::TIMESTAMPTZ as added_time 
+               pf.published_at::TIMESTAMPTZ as added_time,
+               pf.metadata->>'domain' as meta
         FROM public.tbl_place_features pf
         WHERE pf.status = 'active'
     ) feed_data

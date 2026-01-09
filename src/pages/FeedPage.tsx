@@ -66,6 +66,15 @@ export function FeedPage() {
 
   const feedItems = data?.pages.flatMap(page => page) || [];
 
+  const communityMap: Record<string, string> = {
+    'clien.net': '클리앙',
+    'm': '클리앙',
+    'damoang.net': '다모앙',
+    'bobaedream.co.kr': '보배드림',
+    'co.kr': '보배드림',
+    'bluer': '블루리본',
+  };
+
   return (
     <div 
       className="flex flex-col min-h-screen bg-white dark:bg-surface-950"
@@ -107,16 +116,24 @@ export function FeedPage() {
             };
 
             const sourcePath = getSourcePath();
-            const sourceLabel = item.source_type === 'folder' ? '맛탐정 폴더' : 
+            let sourceLabel = item.source_type === 'folder' ? '맛탐정 폴더' : 
                                item.source_type === 'naver_folder' ? '플레이스 폴더' :
                                item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
+            let sourceTitle = item.source_title;
+
+            if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
+              const [domain, region] = sourceTitle.split('|');
+              const communityName = communityMap[domain] || domain;
+              sourceLabel = `커뮤니티 > ${communityName}`;
+              sourceTitle = region;
+            }
 
             return (
               <PlaceCard 
                 key={`${item.source_id}-${item.place_id}-${idx}`}
                 place={item.place_data}
                 sourceLabel={sourceLabel}
-                sourceTitle={item.source_title}
+                sourceTitle={sourceTitle}
                 sourcePath={sourcePath || undefined}
                 addedAt={formatRelativeTime(item.added_at)}
                 imageAspectRatio="aspect-[3/2]"
