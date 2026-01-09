@@ -28,7 +28,7 @@ interface TabsProps {
  */
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn("flex border-b border-surface-200 dark:border-surface-800 overflow-x-auto overflow-y-hidden scrollbar-hide", className)}>
+    <div className={cn("flex border-b border-surface-200 dark:border-surface-800 overflow-x-auto overflow-y-hidden scrollbar-hide pb-1", className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (

@@ -75,7 +75,7 @@ export function ProfilePage() {
     <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-neutral-900">
       {/* 상단 헤더 - 타이포 중심 (FeaturePage 스타일) */}
       <div className="bg-white dark:bg-neutral-900 px-5 pt-8 pb-4 z-10 flex-shrink-0">
-        <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide">
+        <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
           {tabs.map((tab) => (
             <button
               key={tab.id}
