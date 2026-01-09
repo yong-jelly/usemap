@@ -10,6 +10,8 @@ interface ProfilePlacesListProps {
   fetchNextPage: () => void;
   emptyMessage: string;
   emptyIcon: React.ReactNode;
+  imageAspectRatio?: string;
+  imageWidth?: string;
 }
 
 export function ProfilePlacesList({
@@ -20,6 +22,8 @@ export function ProfilePlacesList({
   fetchNextPage,
   emptyMessage,
   emptyIcon,
+  imageAspectRatio,
+  imageWidth,
 }: ProfilePlacesListProps) {
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -72,7 +76,12 @@ export function ProfilePlacesList({
     <div className="mx-auto max-w-2xl bg-gray-50 dark:bg-neutral-900">
       <div className="grid">
         {data.map((place, index) => (
-          <PlaceCard key={`${place.id}-${index}`} place={place} />
+          <PlaceCard 
+            key={`${place.id}-${index}`} 
+            place={place} 
+            imageAspectRatio={imageAspectRatio}
+            imageWidth={imageWidth}
+          />
         ))}
       </div>
       
