@@ -478,46 +478,46 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <button
                 onClick={handleToggleVisited}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl border text-base font-black transition-all whitespace-nowrap",
+                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-black transition-all whitespace-nowrap",
                   details?.experience?.is_visited
                     ? "bg-primary-600 text-white border-primary-600 shadow-sm"
                     : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                 )}
               >
-                <MapPinCheck className={cn("size-6", details?.experience?.is_visited && "fill-current text-white")} />
+                <MapPinCheck className={cn("size-5", details?.experience?.is_visited && "fill-current text-white")} />
                 가봤어요
               </button>
               <div className="flex gap-2">
                 <button
                   onClick={handleToggleLike}
                   className={cn(
-                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
                     details?.interaction?.is_liked
                       ? "bg-red-500 text-white border-red-500 shadow-sm"
                       : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                   )}
                 >
-                  <Heart className={cn("size-6", details?.interaction?.is_liked && "fill-current")} />
+                  <Heart className={cn("size-5", details?.interaction?.is_liked && "fill-current")} />
                 </button>
                 <button
                   onClick={handleToggleSave}
                   className={cn(
-                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
                     details?.interaction?.is_saved
                       ? "bg-pink-600 text-white border-pink-600 shadow-sm"
                       : "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                   )}
                 >
-                  <Bookmark className={cn("size-6", details?.interaction?.is_saved && "fill-current")} />
+                  <Bookmark className={cn("size-5", details?.interaction?.is_saved && "fill-current")} />
                 </button>
                 <button
                   onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
                   className={cn(
-                    "flex items-center justify-center p-4 rounded-2xl border transition-all",
+                    "flex items-center justify-center p-3 rounded-2xl border transition-all",
                     "bg-white dark:bg-surface-900 text-surface-600 border-surface-200 dark:border-surface-800"
                   )}
                 >
-                  <Folder className="size-6" />
+                  <Folder className="size-5" />
                 </button>
               </div>
             </div>
