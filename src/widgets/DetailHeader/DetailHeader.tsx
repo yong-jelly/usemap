@@ -128,18 +128,23 @@ export function DetailHeader({
       <div className="flex items-center gap-1 shrink-0">
         {/* 구독 버튼 (feature 타입이거나, 폴더이면서 내 폴더가 아닌 경우) */}
         {(type === 'feature' || (type === 'folder' && !isOwner)) && onSubscribe && (
-          <Button
-            variant={isSubscribed ? "outline" : "default"}
-            size="sm"
+          <button
             onClick={onSubscribe}
             className={cn(
-              "h-8 px-3 text-xs font-bold rounded-full transition-all gap-1.5",
-              isSubscribed ? "bg-surface-50 dark:bg-surface-800 text-surface-500" : "bg-primary-500 text-white"
+              "p-2 rounded-full transition-all active:scale-90",
+              isSubscribed 
+                ? "text-primary-500 bg-primary-50 dark:bg-primary-950/30" 
+                : "text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800"
             )}
+            title={isSubscribed ? "구독 중" : "구독하기"}
           >
-            <Rss className="size-3.5" />
-            {isSubscribed ? "구독중" : "구독"}
-          </Button>
+            <div className="relative">
+              <Rss className={cn("size-5 transition-transform", isSubscribed && "scale-110")} />
+              {isSubscribed && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary-500 rounded-full border-2 border-white dark:border-surface-950 animate-pulse" />
+              )}
+            </div>
+          </button>
         )}
 
         {/* 공유 버튼 */}
