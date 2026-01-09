@@ -40,8 +40,9 @@ export function PlaceSliderCard({
           <img 
             src={convertToNaverResizeImageUrl(thumbnail)} 
             alt={name} 
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            className="w-full h-full object-cover"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-surface-300 dark:text-surface-600">

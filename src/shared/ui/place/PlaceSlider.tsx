@@ -36,10 +36,17 @@ export function PlaceSlider({
           )}
         </div>
       )}
-      <div className={cn(
-        "flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-4",
-        snap && "snap-x"
-      )}>
+      <div 
+        className={cn(
+          "flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-4",
+          snap && "snap-x"
+        )}
+        style={{ 
+          willChange: 'scroll-position',
+          WebkitOverflowScrolling: 'touch',
+          transform: 'translateZ(0)',
+        }}
+      >
         {items.map((item) => (
           <PlaceSliderCard
             key={item.id || item.place_id}

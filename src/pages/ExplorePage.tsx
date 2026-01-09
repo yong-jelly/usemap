@@ -139,7 +139,7 @@ export function ExplorePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* 1. 고정 통합 헤더 (SNS 스타일) */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-surface-100 transition-all">
+      <header className="sticky top-0 z-40 bg-white border-b border-surface-100">
         <div className="max-w-lg mx-auto">
           {/* 타이틀 및 메인 액션 바 */}
           <div className="flex items-center justify-between px-5 py-4">
@@ -305,9 +305,10 @@ export function ExplorePage() {
                   {hasImage ? (
                     <img 
                       src={convertToNaverResizeImageUrl(place.images?.[0])} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                       alt={place.name}
                       loading="lazy"
+                      decoding="async"
                       onError={handleImageError}
                     />
                   ) : (
@@ -325,8 +326,8 @@ export function ExplorePage() {
                     </div>
                   )}
 
-                  {/* 하단 정보 오버레이 (blur 처리) */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-[2px] p-2 flex flex-col gap-0.5">
+                  {/* 하단 정보 오버레이 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 flex flex-col gap-0.5">
                     <span className="text-[10px] text-white/80 font-bold truncate block">
                       {place.group2} {place.group3}
                     </span>

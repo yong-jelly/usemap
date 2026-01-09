@@ -22,7 +22,7 @@ export function FeaturePage() {
   return (
     <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
-      <div className="bg-white/80 backdrop-blur-md dark:bg-surface-950/80 px-5 pt-8 pb-4 z-10 flex-shrink-0">
+      <div className="bg-white dark:bg-surface-950 px-5 pt-8 pb-4 z-10 flex-shrink-0">
         <div className="flex items-center gap-6">
           {tabs.map((tab) => (
             <button
@@ -44,17 +44,11 @@ export function FeaturePage() {
         </div>
       </div>
 
-      {/* 컨텐츠 영역: 각 탭이 독립적인 스크롤 컨테이너를 가짐 */}
-      <div className="flex-1 relative overflow-hidden">
-        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "folder" && "hidden")}>
-          <NaverFolderList />
-        </div>
-        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "youtube" && "hidden")}>
-          <YoutubeChannelList />
-        </div>
-        <div className={cn("absolute inset-0 overflow-y-auto scrollbar-hide", activeTab !== "community" && "hidden")}>
-          <CommunityList />
-        </div>
+      {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        {activeTab === "folder" && <NaverFolderList />}
+        {activeTab === "youtube" && <YoutubeChannelList />}
+        {activeTab === "community" && <CommunityList />}
       </div>
     </div>
   );
