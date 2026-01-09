@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
   MapPinned, 
   Star, 
@@ -25,12 +25,13 @@ interface PlaceCardProps {
  * 마스코트 테마(Navy, Orange, Cream)를 활용한 소프트 벡터 스타일
  */
 export function PlaceCard({ place }: PlaceCardProps) {
-  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
   const [isLiked, setIsLiked] = useState(place.interaction?.is_liked || false);
   const [isSaved, setIsSaved] = useState(place.interaction?.is_saved || false);
   const [showAllFolders, setShowAllFolders] = useState(false);
   
-  const showPopup = (id: string) => navigate(`/p/status/${id}`);
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
 
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
 

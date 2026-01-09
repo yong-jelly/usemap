@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router";
+import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
   Search, 
   Filter, 
@@ -36,13 +36,14 @@ interface ExplorerFilterState {
  * 탐색 페이지 컴포넌트
  */
 export function ExplorePage() {
-  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
   
-  const showPopup = (id: string) => navigate(`/p/status/${id}`);
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
   
   const defaultFilters: ExplorerFilterState = {
     group1: "서울",

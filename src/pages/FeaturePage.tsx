@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
+import { usePlacePopup } from "@/shared/lib/place-popup";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
@@ -58,9 +59,10 @@ export function FeaturePage() {
  * 네이버 폴더 목록 렌더링 컴포넌트
  */
 function NaverFolderList() {
-  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNaverFolders();
-  const showPopup = (id: string) => navigate(`/p/status/${id}`);
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -130,9 +132,10 @@ function NaverFolderList() {
  * 유튜브 채널 목록 렌더링 컴포넌트
  */
 function YoutubeChannelList() {
-  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useYoutubeChannels();
-  const showPopup = (id: string) => navigate(`/p/status/${id}`);
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -212,14 +215,15 @@ function YoutubeChannelList() {
  * 커뮤니티 목록 렌더링 컴포넌트
  */
 function CommunityList() {
-  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
     domain: selectedDomain,
   });
   
-  const showPopup = (id: string) => navigate(`/p/status/${id}`);
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 

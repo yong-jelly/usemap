@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-router";
 import { Header, BottomNav } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
+import { usePlacePopup } from "@/shared/lib/place-popup";
 import { AuthModal } from "@/features/auth/ui/AuthModal";
 
 // Page Imports
@@ -61,8 +62,15 @@ function PageViewTracker() {
 /**
  * 공통 레이아웃 컴포넌트
  * 헤더, 하단 네비게이션 및 공통 컨테이너를 포함합니다.
+ * 
+ * 전역 상태 기반 모달:
+ * - usePlacePopup 스토어로 모달 상태 관리
+ * - URL 변경 없이 상태로만 모달을 열고 닫아 부모 페이지 재마운트 방지
+ * - 스크롤 위치 및 데이터 상태 완벽 유지
  */
 function RootLayout() {
+  const { isOpen: isPlaceModalOpen, placeId: modalPlaceId } = usePlacePopup();
+  
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
       {/* <ScrollToTop />
@@ -75,6 +83,11 @@ function RootLayout() {
       </main>
       <BottomNav />
       <AuthModal />
+      
+      {/* 전역 장소 상세 모달: usePlacePopup 스토어로 제어 */}
+      {isPlaceModalOpen && modalPlaceId && (
+        <PlaceDetailModal placeIdFromStore={modalPlaceId} />
+      )}
     </div>
   );
 }
@@ -154,6 +167,8 @@ const router = createBrowserRouter([
         element: <PlaceDetailPage />,
       },
       {
+        // URL 직접 접근 시에만 렌더링 (공유 링크, 북마크 등)
+        // 리스트에서 클릭 시에는 usePlacePopup으로 제어 (RootLayout에서 렌더링)
         path: "p/status/:id",
         element: <PlaceDetailModal />,
       },

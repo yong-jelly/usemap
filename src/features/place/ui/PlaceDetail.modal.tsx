@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router";
+import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
   ChevronLeft,
   X, 
@@ -45,14 +46,28 @@ import type { PlaceUserReview, Feature, ReviewTag } from "@/entities/place/types
  * 장소 상세 모달 컴포넌트
  * /p/status/{place_id} 경로에서 렌더링됩니다.
  */
-export function PlaceDetailModal() {
-  const navigate = useNavigate();
-  const { id: placeId } = useParams<{ id: string }>();
-  const { profile: currentUser, isAuthenticated } = useUserStore();
+interface PlaceDetailModalProps {
+  /** store에서 전달받은 placeId (전역 모달용) */
+  placeIdFromStore?: string;
+}
 
-  const { data: details, isLoading: isDetailsLoading } = usePlaceByIdWithRecentView(placeId!);
+export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
+  const navigate = useNavigate();
+  const { id: placeIdFromUrl } = useParams<{ id: string }>();
+  const { profile: currentUser, isAuthenticated } = useUserStore();
+  const { hide: hideModal, isOpen: isModalFromStore } = usePlacePopup();
+  
+  // store에서 온 경우 store의 placeId 사용, URL 직접 접근 시 params에서 가져옴
+  const placeId = placeIdFromStore || placeIdFromUrl;
+
+  const { data: details, isLoading: isDetailsLoading, isFetching } = usePlaceByIdWithRecentView(placeId!);
   const { data: reviews = [], isLoading: isReviewsLoading } = usePlaceUserReviews(placeId!);
   const { data: placeFeaturesData = [], isLoading: isFeaturesLoading } = usePlaceFeatures(placeId!);
+  
+  // placeId가 변경되면 이전 데이터가 보이지 않도록 체크
+  // details.id와 현재 placeId가 다르면 로딩 상태로 처리
+  const isDataStale = details && details.id !== placeId;
+  const showLoading = isDetailsLoading || isDataStale;
 
   const upsertReviewMutation = useUpsertUserReview();
   const deleteReviewMutation = useDeleteUserReview(placeId!);
@@ -132,6 +147,18 @@ export function PlaceDetailModal() {
 
   const [selectedHeroImage, setSelectedHeroImage] = useState<string | null>(null);
 
+  // placeId가 변경되면 UI 상태 초기화
+  useEffect(() => {
+    setSelectedHeroImage(null);
+    setShowReviewForm(false);
+    setShowAllReviews(false);
+    setShowAllMenus(false);
+    setEditingReviewId(null);
+    setActiveContentTab('youtube');
+    setShowYoutubeAddForm(false);
+    setShowCommunityAddForm(false);
+  }, [placeId]);
+
   useEffect(() => {
     if (allImages.length > 0 && !selectedHeroImage) {
       setSelectedHeroImage(allImages[0]);
@@ -196,7 +223,13 @@ export function PlaceDetailModal() {
   }, []);
 
   const handleClose = () => {
-    navigate(-1);
+    // store에서 열린 모달이면 store로 닫기 (부모 페이지 재마운트 방지)
+    if (placeIdFromStore) {
+      hideModal();
+    } else {
+      // URL 직접 접근 시 히스토리 뒤로 가기
+      navigate(-1);
+    }
   };
 
   const toggleTag = (code: string) => {
@@ -376,6 +409,14 @@ export function PlaceDetailModal() {
 
         {/* 메인 콘텐츠 */}
         <div className="flex-1 overflow-y-auto pb-safe scrollbar-hide" style={{ scrollBehavior: 'auto' }}>
+          {/* 로딩 상태 */}
+          {showLoading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <Loader2 className="size-8 animate-spin text-primary-500" />
+              <span className="text-sm font-medium text-surface-400">불러오는 중...</span>
+            </div>
+          ) : (
+          <>
           {/* Hero 섹션 */}
           <div className="relative w-full h-[380px] bg-surface-100 dark:bg-surface-900 overflow-hidden">
             {selectedHeroImage ? (
@@ -998,6 +1039,8 @@ export function PlaceDetailModal() {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
 
