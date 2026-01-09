@@ -2,8 +2,8 @@ import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useMyFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { PlaceSliderCard } from "@/shared/ui";
-import { Loader2, Bell, Settings, Info } from "lucide-react";
+import { PlaceCard } from "@/widgets";
+import { Loader2, Bell, Settings } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatKoreanDate } from "@/shared/lib/utils";
@@ -112,64 +112,17 @@ export function FeedPage() {
                                item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
 
             return (
-              <div key={`${item.source_id}-${item.place_id}-${idx}`} className="flex flex-col gap-3 py-6 px-5 border-b border-surface-50 dark:border-surface-900 last:border-0">
-                {/* 정보 헤더 */}
-                <div className="flex items-center justify-between">
-                  <div 
-                    className={cn(
-                      "flex flex-col cursor-pointer group",
-                      !sourcePath && "cursor-default"
-                    )}
-                    onClick={() => sourcePath && navigate(sourcePath)}
-                  >
-                    <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest mb-0.5">
-                      {sourceLabel}
-                    </span>
-                    <h3 className="text-sm font-bold text-surface-900 dark:text-white group-hover:underline underline-offset-2">
-                      {item.source_title}
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-medium text-surface-400">
-                    {formatKoreanDate(item.added_at)}
-                  </span>
-                </div>
-
-                {/* 장소 카드 (현대적인 SNS 스타일) */}
-                <div 
-                  className="group relative flex flex-col bg-surface-50 dark:bg-surface-900/40 rounded-3xl overflow-hidden cursor-pointer border border-transparent active:bg-surface-100 dark:active:bg-surface-900 transition-colors duration-200"
-                  onClick={() => showPlaceModal(item.place_id)}
-                >
-                  <div className="aspect-[16/9] w-full bg-surface-200 overflow-hidden">
-                    {item.place_data.image_urls?.[0] ? (
-                      <img 
-                        src={item.place_data.image_urls[0]} 
-                        alt={item.place_data.name} 
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-surface-400">
-                        <Info className="size-8 opacity-20" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-4 flex flex-col gap-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-black text-lg text-surface-900 dark:text-white leading-tight">
-                        {item.place_data.name}
-                      </h4>
-                      <span className="px-2 py-0.5 rounded-full bg-white dark:bg-surface-800 text-[10px] font-bold text-surface-500 dark:text-surface-400 border border-surface-100 dark:border-surface-700 whitespace-nowrap">
-                        {item.place_data.category}
-                      </span>
-                    </div>
-                    <p className="text-xs text-surface-500 line-clamp-1 italic">
-                      {item.place_data.address}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <PlaceCard 
+                key={`${item.source_id}-${item.place_id}-${idx}`}
+                place={item.place_data}
+                sourceLabel={sourceLabel}
+                sourceTitle={item.source_title}
+                sourcePath={sourcePath || undefined}
+                addedAt={formatKoreanDate(item.added_at)}
+                imageAspectRatio="aspect-[3/2]"
+                imageWidth="w-[72%]"
+                showPrice={true}
+              />
             );
           })}
           

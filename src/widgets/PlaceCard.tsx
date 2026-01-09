@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
   MapPinned, 
@@ -21,6 +22,11 @@ interface PlaceCardProps {
   imageAspectRatio?: string; // e.g., "aspect-[4/5]"
   imageWidth?: string; // e.g., "w-[80%]"
   showPrice?: boolean;
+  // 피드용 메타 정보
+  sourceLabel?: string;
+  sourceTitle?: string;
+  sourcePath?: string;
+  addedAt?: string;
 }
 
 /**
@@ -31,7 +37,11 @@ export function PlaceCard({
   place, 
   imageAspectRatio = "aspect-[4/5]", 
   imageWidth = "w-[80%]",
-  showPrice = true
+  showPrice = true,
+  sourceLabel,
+  sourceTitle,
+  sourcePath,
+  addedAt
 }: PlaceCardProps) {
   const { show: showPlaceModal } = usePlacePopup();
   const [isLiked, setIsLiked] = useState(place.interaction?.is_liked || false);
@@ -40,17 +50,49 @@ export function PlaceCard({
   
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
   const showPopup = (id: string) => showPlaceModal(id);
-
+  
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+  
+  // ... rest of the code ...
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = "https://placehold.co/600x400?text=이미지 준비중";
   };
 
   const images = place.images || [];
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5] last:border-none overflow-hidden transition-colors">
+      {/* 0. 피드 소스 정보 (선택적) */}
+      {(sourceTitle || sourceLabel) && (
+        <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+          <div 
+            className={cn(
+              "flex flex-col cursor-pointer group",
+              !sourcePath && "cursor-default"
+            )}
+            onClick={() => sourcePath && navigate(sourcePath)}
+          >
+            {sourceLabel && (
+              <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest mb-0.5">
+                {sourceLabel}
+              </span>
+            )}
+            {sourceTitle && (
+              <h3 className="text-[13px] font-bold text-[#2B4562]/60 dark:text-white/60 group-hover:underline underline-offset-2">
+                {sourceTitle}
+              </h3>
+            )}
+          </div>
+          {addedAt && (
+            <span className="text-[10px] font-medium text-surface-300">
+              {addedAt}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* 1. 상단 정보 - 미니멀 헤더 */}
       <header className="flex items-start justify-between p-5 pb-3">
         <div className="flex flex-col gap-1">
