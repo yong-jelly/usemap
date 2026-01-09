@@ -150,9 +150,9 @@ export function ExplorePage() {
           {/* 상단 헤더 - 타이포 중심 + 우측 아이콘 영역 */}
           <div className="px-5 pt-8 pb-4 flex items-end justify-between">
             <div className="flex flex-col">
-              <h1 className="text-2xl font-black text-surface-900 dark:text-white relative w-fit">
+              <h1 className="text-xl font-black text-surface-900 dark:text-white relative w-fit">
                 탐색
-                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
               </h1>
               <button 
                 onClick={() => setIsFilterOpen(true)}

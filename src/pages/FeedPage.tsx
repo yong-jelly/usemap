@@ -97,7 +97,7 @@ export function FeedPage() {
         <div className="px-5 pt-8 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <h1 className="text-2xl font-black text-surface-900 dark:text-white relative">
+              <h1 className="text-xl font-black text-surface-900 dark:text-white relative">
                 피드
                 <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
               </h1>
