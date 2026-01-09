@@ -35,7 +35,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
-import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearchModal";
+import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { cn, formatKoreanDate } from "@/shared/lib/utils";
@@ -228,22 +228,22 @@ function InviteHistoryModal({
   folderId: string; 
   onClose: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
   const { data: history, isLoading } = useInviteHistory(folderId);
   const { mutate: regenerate, isPending } = useRegenerateInviteCode();
   const { data: folderInfo } = useFolderInfo(folderId);
 
   const handleRegenerate = () => {
-    regenerate(folderId, {
-      onSuccess: (result) => {
-        alert(`새 초대 코드: ${result.invite_code}\n(24시간 유효)`);
-      }
-    });
+    if (window.confirm('새로운 초대 코드를 생성하시겠습니까? 기존 코드는 즉시 만료됩니다.')) {
+      regenerate(folderId);
+    }
   };
 
   const copyCode = () => {
     if (folderInfo?.invite_code) {
       navigator.clipboard.writeText(folderInfo.invite_code);
-      alert('초대 코드가 복사되었습니다.');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -273,8 +273,13 @@ function InviteHistoryModal({
                 <div className="flex-1 p-4 bg-surface-50 dark:bg-surface-800 rounded-xl font-mono text-2xl tracking-widest text-center">
                   {folderInfo.invite_code}
                 </div>
-                <Button variant="outline" size="icon" onClick={copyCode}>
-                  <Copy className="size-4" />
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={copyCode}
+                  className={cn(copied && "text-green-500 border-green-200 bg-green-50")}
+                >
+                  {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
                 </Button>
               </div>
             ) : (
@@ -357,6 +362,7 @@ export function FolderDetailPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [showInviteHistory, setShowInviteHistory] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
 
   // 접근 권한 체크
   const { data: access, isLoading: isAccessLoading, refetch: refetchAccess } = useFolderAccess(id!);
@@ -469,20 +475,46 @@ export function FolderDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 헤더 */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 px-4 h-14 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+      <div className="sticky top-0 z-20 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 px-4 h-14 flex items-center gap-2">
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2 shrink-0">
           <ChevronLeft className="size-6" />
         </button>
-        <div className="flex-1 px-4 text-center overflow-hidden">
-          <h1 className="text-lg font-black truncate">{folderInfo?.title || "맛탐정 폴더"}</h1>
+        
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden shrink-0 border border-surface-100 dark:border-surface-800">
+            {folderInfo.owner_avatar_url ? (
+              <img 
+                src={folderInfo.owner_avatar_url} 
+                alt={folderInfo.owner_nickname} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <User className="size-4 text-surface-400" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-sm font-black truncate leading-tight">
+              {folderInfo?.title || "맛탐정 폴더"}
+            </h1>
+            <p className="text-[10px] text-surface-400 font-bold truncate">
+              {folderInfo.owner_nickname || '익명'}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button className="p-2" onClick={() => {
-            const url = `${window.location.origin}/folder/${id}`;
-            navigator.clipboard.writeText(url);
-            alert('링크가 복사되었습니다.');
-          }}>
-            <Share2 className="size-5" />
+
+        <div className="flex items-center gap-1 shrink-0">
+          <button 
+            className={cn("p-2 transition-colors", isLinkCopied && "text-green-500")} 
+            onClick={() => {
+              const url = `${window.location.origin}/folder/${id}`;
+              navigator.clipboard.writeText(url);
+              setIsLinkCopied(true);
+              setTimeout(() => setIsLinkCopied(false), 2000);
+            }}
+          >
+            {isLinkCopied ? <CheckCircle className="size-5" /> : <Share2 className="size-5" />}
           </button>
           <div className="relative">
             <button className="p-2" onClick={() => setShowMenu(!showMenu)}>
