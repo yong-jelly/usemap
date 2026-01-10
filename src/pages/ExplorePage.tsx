@@ -23,6 +23,7 @@ import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import { placeApi } from "@/entities/place/api";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
+import { useUIStore } from "@/shared/model/ui-store";
 
 /**
  * 탐색 페이지 필터 상태 인터페이스
@@ -74,11 +75,23 @@ export function ExplorePage() {
 
   const { history, saveToHistory, removeFromHistory, clearHistory } = useSearchHistory();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { setBottomNavVisible } = useUIStore();
   
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
   const showPopup = (id: string) => showPlaceModal(id);
   
   const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
+
+  // 검색 모드 또는 검색 결과 표시 중일 때 하단 네비게이션 숨기기
+  useEffect(() => {
+    if (isSearchMode || isSearching) {
+      setBottomNavVisible(false);
+    } else {
+      setBottomNavVisible(true);
+    }
+    // 언마운트 시 복구
+    return () => setBottomNavVisible(true);
+  }, [isSearchMode, isSearching, setBottomNavVisible]);
 
   // 페이지 마운트 시 window 스크롤 초기화
   useEffect(() => {
@@ -317,57 +330,59 @@ export function ExplorePage() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-0.5">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
-                    onClick={enterSearchMode}
-                  >
-                    <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
-                  </Button>
-                  <div className="relative">
+                {!isSearching && (
+                  <div className="flex items-center gap-0.5">
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
-                      onClick={() => setIsFilterOpen(true)}
+                      onClick={enterSearchMode}
                     >
-                      <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
+                      <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
                     </Button>
-                    {activeExtraFilterCount > 0 && (
-                      <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold">
-                        {activeExtraFilterCount}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* 레이아웃 전환 버튼 */}
-                  <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
-                    <button 
-                      onClick={() => handleLayoutChange('feed')}
-                      className={cn(
-                        "p-1.5 rounded-lg", 
-                        layout === 'feed' 
-                          ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                          : "text-surface-300 dark:text-surface-600"
+                    <div className="relative">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
+                        onClick={() => setIsFilterOpen(true)}
+                      >
+                        <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
+                      </Button>
+                      {activeExtraFilterCount > 0 && (
+                        <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold">
+                          {activeExtraFilterCount}
+                        </span>
                       )}
-                    >
-                      <ListIcon className="size-4.5" />
-                    </button>
-                    <button 
-                      onClick={() => handleLayoutChange('grid')}
-                      className={cn(
-                        "p-1.5 rounded-lg", 
-                        layout === 'grid' 
-                          ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                          : "text-surface-300 dark:text-surface-600"
-                      )}
-                    >
-                      <LayoutGrid className="size-4.5" />
-                    </button>
+                    </div>
+                    
+                    {/* 레이아웃 전환 버튼 */}
+                    <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
+                      <button 
+                        onClick={() => handleLayoutChange('feed')}
+                        className={cn(
+                          "p-1.5 rounded-lg", 
+                          layout === 'feed' 
+                            ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
+                            : "text-surface-300 dark:text-surface-600"
+                        )}
+                      >
+                        <ListIcon className="size-4.5" />
+                      </button>
+                      <button 
+                        onClick={() => handleLayoutChange('grid')}
+                        className={cn(
+                          "p-1.5 rounded-lg", 
+                          layout === 'grid' 
+                            ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
+                            : "text-surface-300 dark:text-surface-600"
+                        )}
+                      >
+                        <LayoutGrid className="size-4.5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* 활성 필터 태그 (정리된 스타일) */}

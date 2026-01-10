@@ -40,6 +40,8 @@ import { FolderDetailPage } from "@/pages/folder/FolderDetailPage";
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
 import { PlaceDetailModal } from "@/features/place/ui/PlaceDetail.modal";
 
+import { useUIStore } from "@/shared/model/ui-store";
+
 /**
  * 페이지 이동 시 스크롤 위치를 최상단으로 복구하는 컴포넌트
  */
@@ -78,8 +80,10 @@ function PageViewTracker() {
 function RootLayout() {
   const { isOpen: isPlaceModalOpen, placeId: modalPlaceId } = usePlacePopup();
   const { pathname } = useLocation();
+  const { isBottomNavVisible } = useUIStore();
 
   const isFeatureDetailPage = pathname.includes("/feature/detail/") || (pathname.startsWith("/folder/") && !pathname.includes("/folder/create"));
+  const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
@@ -90,11 +94,11 @@ function RootLayout() {
       {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
       <main className={cn(
         "max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
-        isFeatureDetailPage ? "pb-0" : "pb-14"
+        showBottomNav ? "pb-14" : "pb-0"
       )}>
         <Outlet />
       </main>
-      {!isFeatureDetailPage && <BottomNav />}
+      {showBottomNav && <BottomNav />}
       <AuthModal />
       
       {/* 전역 장소 상세 모달: usePlacePopup 스토어로 제어 */}
