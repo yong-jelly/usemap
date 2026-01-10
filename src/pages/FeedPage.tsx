@@ -124,9 +124,12 @@ export function FeedPage() {
                   </span>
                 )}
               </div>
-              <button className="p-2 text-surface-400">
-                <Settings className="size-5" />
-              </button>
+            <button 
+              className="p-2 text-surface-400 hover:text-surface-600 transition-colors"
+              onClick={() => navigate("/feature")}
+            >
+              <Settings className="size-5" />
+            </button>
             </div>
           </div>
 

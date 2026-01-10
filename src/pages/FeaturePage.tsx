@@ -18,7 +18,7 @@ import naverIcon from "@/assets/images/naver-map-logo.png";
 export function FeaturePage() {
   const navigate = useNavigate();
   const { tab } = useParams();
-  const activeTab = tab || "folder";
+  const activeTab = tab || "community";
   
   const { scrollPositions, setScrollPosition } = useFeaturePageStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
