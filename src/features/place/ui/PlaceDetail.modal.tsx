@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
@@ -21,7 +21,8 @@ import {
   Bookmark,
   ChevronRight,
   CookingPot,
-  Folder
+  Folder,
+  MessageCircle
 } from "lucide-react";
 import { 
   usePlaceByIdWithRecentView,
@@ -155,11 +156,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     return [...new Set(combined)]; // Unique images
   }, [details]);
 
-  const [selectedHeroImage, setSelectedHeroImage] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const imageSliderRef = useRef<HTMLDivElement>(null);
 
   // placeId가 변경되면 UI 상태 초기화
   useEffect(() => {
-    setSelectedHeroImage(null);
+    setCurrentImageIndex(0);
     setShowReviewForm(false);
     setShowAllReviews(false);
     setShowAllMenus(false);
@@ -169,11 +171,28 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     setShowCommunityAddForm(false);
   }, [placeId]);
 
+  // 스크롤 위치 감지하여 현재 이미지 인덱스 업데이트
   useEffect(() => {
-    if (allImages.length > 0 && !selectedHeroImage) {
-      setSelectedHeroImage(allImages[0]);
-    }
-  }, [allImages, selectedHeroImage]);
+    const slider = imageSliderRef.current;
+    if (!slider || allImages.length <= 1) return;
+
+    const handleScroll = () => {
+      const scrollLeft = slider.scrollLeft;
+      const itemWidth = slider.offsetWidth;
+      const newIndex = Math.round(scrollLeft / itemWidth);
+      setCurrentImageIndex(Math.min(newIndex, allImages.length - 1));
+    };
+
+    slider.addEventListener('scroll', handleScroll, { passive: true });
+    return () => slider.removeEventListener('scroll', handleScroll);
+  }, [allImages.length]);
+
+  // 도트 클릭 시 해당 이미지로 스크롤
+  const scrollToImage = (index: number) => {
+    if (!imageSliderRef.current) return;
+    const itemWidth = imageSliderRef.current.offsetWidth;
+    imageSliderRef.current.scrollTo({ left: itemWidth * index, behavior: 'smooth' });
+  };
 
   const youtubeFeatures = useMemo(() => placeFeaturesData.filter(f => f.platform_type === 'youtube'), [placeFeaturesData]);
   const communityFeatures = useMemo(() => placeFeaturesData.filter(f => f.platform_type === 'community'), [placeFeaturesData]);
@@ -427,166 +446,241 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             </div>
           ) : (
           <>
-          {/* Hero 섹션 */}
-          <div className="relative w-full h-[380px] bg-surface-100 dark:bg-surface-900 overflow-hidden">
-            {selectedHeroImage ? (
-              <img 
-                src={convertToNaverResizeImageUrl(selectedHeroImage)} 
-                alt={details?.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-surface-300">
-                <Globe className="size-12 opacity-20" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="flex items-end justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                  </div>
-                  <h1 className="text-3xl font-black tracking-tight mb-2 truncate drop-shadow-lg text-white">
-                    {details?.name || "장소 정보"}
-                  </h1>
-                  {details?.road_address && (
-                    <div className="flex items-center gap-1.5 text-white/80 text-sm font-medium">
-                      <MapPin className="size-3.5" />
-                      <span className="truncate">{details.road_address}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 썸네일 리스트 */}
-              {allImages.length > 1 && (
-                <div className="mt-6 flex gap-2 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide">
-                  {allImages.slice(0, 8).map((img, i) => (
-                    <button 
-                      key={i}
-                      onClick={() => setSelectedHeroImage(img)}
-                      className={cn(
-                        "size-14 rounded-xl overflow-hidden shrink-0 border-2",
-                        selectedHeroImage === img ? "border-white shadow-lg" : "border-transparent opacity-60"
-                      )}
+          {/* Hero 이미지 갤러리 - 전체 너비 스와이프 */}
+          <div className="relative w-full bg-surface-100 dark:bg-surface-900">
+            {allImages.length > 0 ? (
+              <>
+                <div 
+                  ref={imageSliderRef}
+                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                  style={{ 
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                  }}
+                >
+                  {allImages.slice(0, 10).map((img, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-full aspect-[4/5] snap-center bg-surface-100 dark:bg-surface-900"
                     >
-                      <img src={convertToNaverResizeImageUrl(img)} className="w-full h-full object-cover" />
-                    </button>
+                      <img
+                        src={convertToNaverResizeImageUrl(img)}
+                        alt={`${details?.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        loading={index === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
+
+                {/* 오버레이 뱃지들 */}
+                {details?.avg_price && details.avg_price > 0 && (
+                  <div className="absolute top-4 left-4 pointer-events-none">
+                    <div className="bg-white/95 dark:bg-surface-900/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                      <span className="text-[13px] font-black text-surface-800 dark:text-white">
+                        {formatWithCommas(details.avg_price, '-', true)}원대
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {folderFeatures.length > 0 && (
+                  <div className="absolute top-4 right-4 pointer-events-none">
+                    <div className="bg-emerald-500 text-white px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1">
+                      <span className="text-[11px] font-black">{folderFeatures.length}</span>
+                      <span className="text-[10px] font-bold opacity-90">폴더</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 도트 인디케이터 */}
+                {allImages.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
+                    {allImages.slice(0, 10).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => scrollToImage(index)}
+                        className={cn(
+                          "rounded-full transition-all duration-200",
+                          currentImageIndex === index 
+                            ? "w-5 h-1.5 bg-white" 
+                            : "w-1.5 h-1.5 bg-white/50 hover:bg-white/70"
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* 방문 뱃지 */}
+                {details?.experience?.is_visited && (
+                  <div className="absolute bottom-4 right-4 bg-primary-500 text-white px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 pointer-events-none">
+                    <MapPinCheck className="size-3.5" />
+                    <span className="text-[11px] font-bold">방문완료</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="aspect-[4/5] flex flex-col items-center justify-center">
+                <Globe className="size-12 text-surface-300 dark:text-surface-700" />
+                <span className="text-[13px] text-surface-400 dark:text-surface-600 mt-2 font-medium">이미지 준비중</span>
+              </div>
+            )}
           </div>
 
-          <div className="p-6">
-            {/* 상호작용 버튼 */}
-            <div className="flex items-center gap-2 mb-8">
-              <button
-                onClick={handleToggleVisited}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-black whitespace-nowrap",
-                  details?.experience?.is_visited
-                    ? "bg-primary-600 text-white border-primary-600"
-                    : "bg-white dark:bg-surface-900 text-surface-500 border-surface-200 dark:border-surface-700"
-                )}
-              >
-                <MapPinCheck className="size-5" />
-                가봤어요
-              </button>
-              <div className="flex gap-1.5">
-                <button
+          <div className="px-4 pt-4 pb-6">
+            {/* 인스타 스타일 상호작용 바 */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <button 
                   onClick={handleToggleLike}
-                  className={cn(
-                    "flex items-center justify-center p-2.5 rounded-xl border",
-                    details?.interaction?.is_liked
-                      ? "bg-red-500 text-white border-red-500 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
-                  )}
+                  className="group active:scale-90 transition-transform"
                 >
-                  <Heart className="size-5" />
+                  <Heart 
+                    className={cn(
+                      "size-7 transition-colors",
+                      details?.interaction?.is_liked 
+                        ? "fill-rose-500 text-rose-500" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} 
+                  />
                 </button>
-                <button
-                  onClick={handleToggleSave}
-                  className={cn(
-                    "flex items-center justify-center p-2.5 rounded-xl border",
-                    details?.interaction?.is_saved
-                      ? "bg-red-500 text-white border-red-500 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
-                  )}
+                <button 
+                  onClick={() => {
+                    const reviewSection = document.getElementById('review-section');
+                    reviewSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="group active:scale-90 transition-transform"
                 >
-                  <Bookmark className="size-5" />
+                  <MessageCircle className="size-7 text-surface-700 dark:text-surface-300" />
                 </button>
-                <button
+                <a
+                  href={`https://map.naver.com/p/entry/place/${placeId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="active:scale-90 transition-transform"
+                >
+                  <MapPin className="size-7 text-surface-700 dark:text-surface-300" />
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
                   onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
-                  className={cn(
-                    "flex items-center justify-center p-2.5 rounded-xl border",
-                    isSavedToAnyFolder
-                      ? "bg-red-500 text-white border-red-500 shadow-sm"
-                      : "bg-white dark:bg-surface-900 text-surface-400 border-surface-200 dark:border-surface-700"
-                  )}
+                  className="group active:scale-90 transition-transform"
                 >
-                  <Folder className="size-5" />
+                  <Folder 
+                    className={cn(
+                      "size-7 transition-colors",
+                      isSavedToAnyFolder 
+                        ? "fill-emerald-500 text-emerald-500" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} 
+                  />
+                </button>
+                <button 
+                  onClick={handleToggleSave}
+                  className="group active:scale-90 transition-transform"
+                >
+                  <Bookmark 
+                    className={cn(
+                      "size-7 transition-colors",
+                      details?.interaction?.is_saved 
+                        ? "fill-surface-900 text-surface-900 dark:fill-white dark:text-white" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} 
+                  />
                 </button>
               </div>
             </div>
 
-            {/* 출처/폴더 태그 */}
-            {folderFeatures.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {folderFeatures.map(folder => (
-                  <div 
-                    key={folder.id} 
-                    className="px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 font-bold text-xs"
-                  >
-                    #{folder.title}
-                  </div>
-                ))}
+            {/* 좋아요 수 */}
+            {(details?.interaction?.place_liked_count || 0) > 0 && (
+              <div className="mb-3">
+                <span className="text-[14px] font-bold text-surface-900 dark:text-white">
+                  좋아요 {details?.interaction?.place_liked_count}개
+                </span>
               </div>
             )}
 
-            {/* 장소 정보 요약 */}
-            <div className="flex flex-col gap-6 mb-8">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-primary-600">
-                      {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
-                    </span>
-                    <span className="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">평점</span>
-                  </div>
-                  <div className="w-px h-8 bg-surface-100 dark:bg-surface-800 self-center" />
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-surface-900 dark:text-white">
-                      {details?.visitor_reviews_total || 0}
-                    </span>
-                    <span className="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">리뷰</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <a 
-                    href={`https://map.naver.com/p/entry/place/${placeId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex flex-col items-center p-2 rounded-2xl hover:bg-surface-50 dark:hover:bg-surface-900"
-                  >
-                    <div className="size-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center mb-1">
-                      <ExternalLink className="size-5" />
-                    </div>
-                    <span className="text-[10px] font-bold text-surface-500">네이버</span>
-                  </a>
-                </div>
+            {/* 장소명 + 위치 */}
+            <div className="mb-4">
+              <div className="flex items-start gap-2 mb-1">
+                <h1 className="text-[18px] font-black text-surface-900 dark:text-white leading-tight">
+                  {details?.name || "장소 정보"}
+                </h1>
+                {folderFeatures.length > 0 && (
+                  <div 
+                    className={cn(
+                      "mt-1.5 h-1.5 rounded-full flex-shrink-0 w-10",
+                      folderFeatures.length >= 15 ? "bg-emerald-600" :
+                      folderFeatures.length >= 10 ? "bg-emerald-500" :
+                      folderFeatures.length >= 5 ? "bg-emerald-400" :
+                      "bg-emerald-300"
+                    )} 
+                  />
+                )}
               </div>
-
-              {details?.road && (
-                <div className="p-4 rounded-2xl bg-surface-50 dark:bg-surface-900">
-                  <p className="text-sm font-medium leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">
-                    {details.road}
-                  </p>
+              <div className="flex items-center gap-2 text-[14px] text-surface-500 dark:text-surface-400">
+                <span className="font-medium">{details?.group2} {details?.group3}</span>
+                <span>·</span>
+                <div className="flex items-center gap-0.5">
+                  <Star className="size-4 fill-amber-400 text-amber-400" />
+                  <span className="font-bold">{details?.visitor_reviews_score?.toFixed(1) || "0.0"}</span>
                 </div>
+                <span>·</span>
+                <span className="font-medium">리뷰 {details?.visitor_reviews_total || 0}</span>
+              </div>
+              {details?.road_address && (
+                <p className="text-[13px] text-surface-400 dark:text-surface-500 mt-1 font-medium">
+                  {details.road_address}
+                </p>
               )}
             </div>
+
+            {/* 가봤어요 버튼 */}
+            <button
+              onClick={handleToggleVisited}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-[14px] font-black transition-all active:scale-[0.98]",
+                details?.experience?.is_visited
+                  ? "bg-primary-600 text-white shadow-lg shadow-primary-200 dark:shadow-none"
+                  : "bg-surface-100 dark:bg-surface-900 text-surface-500 dark:text-surface-400"
+              )}
+            >
+              <MapPinCheck className="size-5" />
+              {details?.experience?.is_visited ? "방문했어요!" : "가봤어요"}
+            </button>
+
+            {/* 폴더 태그 */}
+            {folderFeatures.length > 0 && (
+              <div className="flex items-center gap-2 mt-4 overflow-x-auto scrollbar-hide pb-1">
+                {folderFeatures.slice(0, 4).map(folder => (
+                  <button 
+                    key={folder.id}
+                    className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[12px] font-bold rounded-lg border border-emerald-100 dark:border-emerald-800/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors active:scale-95"
+                    onClick={() => navigate(`/folder/${folder.id}`)}
+                  >
+                    📁 {folder.title}
+                  </button>
+                ))}
+                {folderFeatures.length > 4 && (
+                  <span className="flex-shrink-0 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 text-surface-500 text-[12px] font-bold rounded-lg">
+                    +{folderFeatures.length - 4}개
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="px-4 pb-6">
+            {/* 소개 문구 (있다면) */}
+            {details?.road && (
+              <div className="p-4 rounded-2xl bg-surface-50 dark:bg-surface-900 mb-6">
+                <p className="text-[14px] font-medium leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">
+                  {details.road}
+                </p>
+              </div>
+            )}
 
             {/* 메뉴 섹션 */}
             {details?.menus && details.menus.length > 0 && (
@@ -797,74 +891,73 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               </div>
             )}
 
-            <div className="space-y-10">
-              {/* 리뷰 목록 */}
-              <div className="space-y-6">
-                <div className="flex items-end justify-between px-1">
-                  <h3 className="text-2xl font-black tracking-tight text-surface-900 dark:text-white">
-                    전체 리뷰 <span className="text-primary-600 ml-1">{publicReviews.length}</span>
+            <div className="space-y-8">
+              {/* 리뷰 섹션 */}
+              <section id="review-section" className="scroll-mt-20">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[17px] font-black text-surface-900 dark:text-white flex items-center gap-2">
+                    <MessageCircle className="size-5" />
+                    방문 리뷰
+                    <span className="text-primary-500">{publicReviews.length}</span>
                   </h3>
                 </div>
                 
                 {publicReviews.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {displayedReviews.map(review => (
-                      <article key={review.id} className="p-5 rounded-[24px] bg-white dark:bg-surface-900 border border-surface-50 dark:border-surface-800 shadow-sm">
-                        <div className="flex gap-4">
+                      <article key={review.id} className="p-4 rounded-2xl bg-surface-50 dark:bg-surface-900">
+                        <div className="flex gap-3">
                           <img 
                             src={review.user_profile?.profile_image_url || "/default-avatar.png"} 
-                            className="size-10 rounded-full bg-surface-100 shrink-0 object-cover ring-2 ring-white dark:ring-surface-800 shadow-sm" 
+                            className="size-9 rounded-full bg-surface-200 shrink-0 object-cover" 
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "/default-avatar.png";
                             }}
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-black text-[14px] text-surface-900 dark:text-white truncate">
-                                    {review.user_profile?.nickname || "익명"}
-                                  </span>
-                                  {review.is_private && <Lock className="size-3 text-surface-300" />}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex text-yellow-400 scale-90 -ml-1">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star key={i} className={cn("size-3 fill-current", i >= review.score && "text-surface-100 dark:text-surface-800")} />
-                                    ))}
-                                  </div>
-                                  <span className="text-[10px] text-surface-300 font-bold uppercase tracking-wider">
-                                    {safeFormatDate(review.created_at)}
-                                  </span>
-                                </div>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[13px] text-surface-900 dark:text-white">
+                                  {review.user_profile?.nickname || "익명"}
+                                </span>
+                                {review.is_private && <Lock className="size-3 text-surface-400" />}
+                                <span className="text-[11px] text-surface-400">
+                                  {safeFormatDate(review.created_at)}
+                                </span>
                               </div>
                               
                               {review.is_my_review && !editingReviewId && (
-                                <div className="flex gap-2">
-                                  <button onClick={() => handleStartEditReview(review)} className="p-2 text-surface-300 hover:text-surface-900 hover:bg-surface-50 rounded-lg">
+                                <div className="flex gap-1">
+                                  <button onClick={() => handleStartEditReview(review)} className="p-1.5 text-surface-400 hover:text-surface-700 rounded-lg active:scale-90 transition-transform">
                                     <Pencil className="size-3.5" />
                                   </button>
-                                  <button onClick={() => setShowDeleteReviewConfirm(review.id)} className="p-2 text-surface-300 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                                  <button onClick={() => setShowDeleteReviewConfirm(review.id)} className="p-1.5 text-surface-400 hover:text-rose-500 rounded-lg active:scale-90 transition-transform">
                                     <Trash2 className="size-3.5" />
                                   </button>
                                 </div>
                               )}
                             </div>
+                            
+                            <div className="flex items-center gap-0.5 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={cn("size-3.5", i < review.score ? "fill-amber-400 text-amber-400" : "text-surface-200 dark:text-surface-700")} />
+                              ))}
+                            </div>
 
                             {editingReviewId === review.id ? (
-                              <div className="space-y-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900">
+                              <div className="space-y-3 p-3 rounded-xl bg-white dark:bg-surface-800 mt-2">
                                 <div className="flex gap-1">
                                   {[1,2,3,4,5].map(s => (
-                                    <button key={s} onClick={() => setEditingRating(s)}>
-                                      <Star className={cn("size-6", s <= editingRating ? "text-yellow-400 fill-current" : "text-surface-200")} />
+                                    <button key={s} onClick={() => setEditingRating(s)} className="active:scale-90 transition-transform">
+                                      <Star className={cn("size-6", s <= editingRating ? "fill-amber-400 text-amber-400" : "text-surface-200")} />
                                     </button>
                                   ))}
                                 </div>
                                 <textarea
                                   value={editingComment}
                                   onChange={(e) => setEditingComment(e.target.value)}
-                                  className="w-full p-4 rounded-xl bg-white dark:bg-surface-800 border-none resize-none font-medium text-sm text-surface-700 dark:text-surface-300"
-                                  rows={3}
+                                  className="w-full p-3 rounded-lg bg-surface-50 dark:bg-surface-900 border-none resize-none font-medium text-[13px] text-surface-700 dark:text-surface-300"
+                                  rows={2}
                                 />
                                 <div className="flex flex-wrap gap-1.5">
                                   {availableTags.map(tag => (
@@ -872,29 +965,29 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                                       key={tag.code}
                                       onClick={() => toggleEditTag(tag.code)}
                                       className={cn(
-                                        "px-3 py-1.5 rounded-full text-[10px] font-black border",
+                                        "px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors",
                                         editingTagCodes.includes(tag.code) 
-                                          ? "bg-primary-600 text-white border-primary-600" 
-                                          : "bg-white dark:bg-surface-800 border-surface-100 dark:border-surface-700 text-surface-400"
+                                          ? "bg-primary-500 text-white" 
+                                          : "bg-surface-100 dark:bg-surface-700 text-surface-500"
                                       )}
                                     >
                                       {tag.label}
                                     </button>
                                   ))}
                                 </div>
-                                <div className="flex justify-end gap-2">
-                                  <Button size="sm" variant="ghost" onClick={() => setEditingReviewId(null)} className="font-bold text-surface-400">취소</Button>
-                                  <Button size="sm" onClick={() => handleSaveEditReview(review.id)} className="font-bold">저장</Button>
+                                <div className="flex justify-end gap-2 pt-1">
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingReviewId(null)} className="h-8 px-3 text-[12px] font-bold text-surface-400">취소</Button>
+                                  <Button size="sm" onClick={() => handleSaveEditReview(review.id)} className="h-8 px-4 text-[12px] font-bold">저장</Button>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <p className="text-[14px] leading-relaxed font-medium text-surface-600 dark:text-surface-400 mb-3">{review.review_content}</p>
+                                <p className="text-[13px] leading-relaxed text-surface-600 dark:text-surface-400">{review.review_content}</p>
                                 {review.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1.5">
+                                  <div className="flex flex-wrap gap-1 mt-2">
                                     {review.tags.map(tag => (
-                                      <span key={tag.code} className="px-2.5 py-1 rounded-lg bg-primary-50/50 dark:bg-primary-950/20 text-[10px] font-black text-primary-600/80 tracking-tight">
-                                        #{tag.label}
+                                      <span key={tag.code} className="px-2 py-0.5 rounded-md bg-primary-100/50 dark:bg-primary-900/30 text-[10px] font-bold text-primary-600 dark:text-primary-400">
+                                        {tag.label}
                                       </span>
                                     ))}
                                   </div>
@@ -907,157 +1000,263 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     ))}
                   </div>
                 ) : (
-                  <div className="py-20 flex flex-col items-center justify-center gap-4 bg-surface-50 dark:bg-surface-900 rounded-[32px] text-surface-200">
-                    <Star className="size-12 opacity-10" />
-                    <p className="text-sm font-black">첫 번째 리뷰를 남겨주세요</p>
+                  <div className="py-12 flex flex-col items-center justify-center gap-3 bg-surface-50 dark:bg-surface-900 rounded-2xl">
+                    <MessageCircle className="size-10 text-surface-200 dark:text-surface-700" />
+                    <p className="text-[13px] font-bold text-surface-400">아직 리뷰가 없어요</p>
+                    <p className="text-[12px] text-surface-400">첫 번째 리뷰를 남겨주세요!</p>
                   </div>
                 )}
 
                 {publicReviews.length > 3 && !showAllReviews && (
                   <button 
                     onClick={() => setShowAllReviews(true)} 
-                    className="w-full h-14 rounded-2xl font-black text-[13px] text-surface-400 bg-surface-50 dark:bg-surface-900 hover:bg-surface-100"
+                    className="w-full mt-3 h-11 rounded-xl font-bold text-[13px] text-surface-500 bg-surface-100 dark:bg-surface-900 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors flex items-center justify-center gap-1"
                   >
-                    리뷰 더보기 <span className="text-primary-600 ml-1">{publicReviews.length - 3}</span>
+                    리뷰 더보기
+                    <span className="text-primary-500 font-black">+{publicReviews.length - 3}</span>
                   </button>
                 )}
-              </div>
+              </section>
 
-              {/* 관련 콘텐츠 */}
-              <div className="space-y-6">
-                <h3 className="text-2xl font-black tracking-tight text-surface-900 dark:text-white px-1">관련 콘텐츠</h3>
-                
-                <div className="w-full bg-surface-50 dark:bg-surface-900 p-1.5 rounded-2xl flex gap-1">
+              {/* 관련 콘텐츠 섹션 - 핵심 기능 강조 */}
+              <section className="bg-gradient-to-b from-surface-50 to-white dark:from-surface-900 dark:to-surface-950 -mx-4 px-4 py-6 rounded-t-3xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[17px] font-black text-surface-900 dark:text-white flex items-center gap-2">
+                    🔗 관련 콘텐츠
+                    <span className="text-primary-500">{youtubeFeatures.length + communityFeatures.length}</span>
+                  </h3>
+                </div>
+
+                {/* 콘텐츠 타입 탭 */}
+                <div className="flex gap-2 mb-4">
                   <button 
                     onClick={() => setActiveContentTab('youtube')}
                     className={cn(
-                      "flex-1 py-3 rounded-xl text-xs font-black tracking-wider uppercase",
-                      activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 shadow-sm text-primary-600" : "text-surface-300"
+                      "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold transition-all",
+                      activeContentTab === 'youtube' 
+                        ? "bg-red-500 text-white shadow-lg shadow-red-200 dark:shadow-none" 
+                        : "bg-white dark:bg-surface-800 text-surface-400 border border-surface-100 dark:border-surface-700"
                     )}
                   >
-                    YouTube ({youtubeFeatures.length})
+                    <Youtube className="size-4" />
+                    유튜브
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                      activeContentTab === 'youtube' ? "bg-white/20" : "bg-surface-100 dark:bg-surface-700"
+                    )}>
+                      {youtubeFeatures.length}
+                    </span>
                   </button>
                   <button 
                     onClick={() => setActiveContentTab('community')}
                     className={cn(
-                      "flex-1 py-3 rounded-xl text-xs font-black tracking-wider uppercase",
-                      activeContentTab === 'community' ? "bg-white dark:bg-surface-800 shadow-sm text-primary-600" : "text-surface-300"
+                      "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold transition-all",
+                      activeContentTab === 'community' 
+                        ? "bg-blue-500 text-white shadow-lg shadow-blue-200 dark:shadow-none" 
+                        : "bg-white dark:bg-surface-800 text-surface-400 border border-surface-100 dark:border-surface-700"
                     )}
                   >
-                    커뮤니티 ({communityFeatures.length})
+                    <Globe className="size-4" />
+                    커뮤니티
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                      activeContentTab === 'community' ? "bg-white/20" : "bg-surface-100 dark:bg-surface-700"
+                    )}>
+                      {communityFeatures.length}
+                    </span>
                   </button>
                 </div>
 
-                <div className="space-y-4">
-                  {isAuthenticated && (
-                    <button
-                      onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(!showYoutubeAddForm) : setShowCommunityAddForm(!showCommunityAddForm)}
-                      className="w-full p-4 rounded-2xl border-2 border-dashed border-surface-100 dark:border-surface-800 text-[13px] font-black text-surface-300 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/10 flex items-center justify-center gap-2"
-                    >
-                      <Plus className="size-4" />
-                      링크 추가하기
-                    </button>
-                  )}
-
-                  {(showYoutubeAddForm || showCommunityAddForm) && (
-                    <div className="p-5 rounded-2xl bg-surface-50 dark:bg-surface-900 space-y-4 border-2 border-primary-100 dark:border-primary-900/30 shadow-lg">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={cn("size-2 rounded-full", activeContentTab === 'youtube' ? "bg-red-500" : "bg-blue-500")} />
-                        <span className="text-[10px] font-black tracking-widest uppercase text-surface-400">
-                          {activeContentTab === 'youtube' ? "YouTube Link" : "Community Link"}
+                {/* 링크 추가 영역 - 항상 표시 (로그인 시) */}
+                {isAuthenticated && (
+                  <div className="mb-4">
+                    {(showYoutubeAddForm || showCommunityAddForm) ? (
+                      <div className={cn(
+                        "p-4 rounded-2xl border-2 space-y-3",
+                        activeContentTab === 'youtube' 
+                          ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50" 
+                          : "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          {activeContentTab === 'youtube' ? (
+                            <Youtube className="size-5 text-red-500" />
+                          ) : (
+                            <Globe className="size-5 text-blue-500" />
+                          )}
+                          <span className="text-[13px] font-bold text-surface-700 dark:text-surface-300">
+                            {activeContentTab === 'youtube' ? "YouTube 영상 추가" : "커뮤니티 글 추가"}
+                          </span>
+                        </div>
+                        <Input 
+                          placeholder={activeContentTab === 'youtube' ? "YouTube 링크를 붙여넣으세요" : "커뮤니티 글 링크를 붙여넣으세요"}
+                          value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
+                          onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
+                          className="h-12 rounded-xl border-none bg-white dark:bg-surface-800 text-[14px] placeholder:text-surface-400"
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(false) : setShowCommunityAddForm(false)} 
+                            className="flex-1 h-11 rounded-xl font-bold text-surface-500"
+                          >
+                            취소
+                          </Button>
+                          <Button 
+                            onClick={() => handleAddFeature(activeContentTab)} 
+                            disabled={isRequestProcessing} 
+                            className={cn(
+                              "flex-[2] h-11 rounded-xl font-black",
+                              activeContentTab === 'youtube' ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"
+                            )}
+                          >
+                            {isRequestProcessing ? <Loader2 className="size-4 animate-spin" /> : "추가하기"}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(true) : setShowCommunityAddForm(true)}
+                        className={cn(
+                          "w-full p-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
+                          activeContentTab === 'youtube' 
+                            ? "border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20" 
+                            : "border-blue-200 dark:border-blue-900/50 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                        )}
+                      >
+                        <Plus className="size-5" />
+                        <span className="text-[14px] font-bold">
+                          {activeContentTab === 'youtube' ? "이 맛집이 나온 유튜브 영상 추가" : "이 맛집이 소개된 글 추가"}
                         </span>
-                      </div>
-                      <Input 
-                        placeholder={activeContentTab === 'youtube' ? "https://youtube.com/..." : "https://clien.net/..."}
-                        value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
-                        onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
-                        className="h-12 rounded-xl border-none bg-white dark:bg-surface-800 text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(false) : setShowCommunityAddForm(false)} className="flex-1 font-bold text-surface-400">취소</Button>
-                        <Button size="sm" onClick={() => handleAddFeature(activeContentTab)} disabled={isRequestProcessing} className="flex-[2] font-black">
-                          {isRequestProcessing ? <Loader2 className="size-4 animate-spin" /> : "추가하기"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                      </button>
+                    )}
+                  </div>
+                )}
 
+                {/* 콘텐츠 목록 */}
+                <div className="space-y-3">
                   {activeContentTab === 'youtube' ? (
                     youtubeFeatures.length > 0 ? (
-                      <div className="space-y-3">
-                        {youtubeFeatures.map(feature => (
-                          <div key={feature.id} className="group relative flex items-start gap-4 p-3 rounded-2xl bg-white dark:bg-surface-900 border border-surface-50 dark:border-surface-800">
-                            <div className="relative w-28 aspect-video rounded-xl overflow-hidden shrink-0 shadow-sm">
-                              <img src={feature.metadata?.thumbnails?.medium?.url} className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <Youtube className="size-8 text-white" />
+                      youtubeFeatures.map(feature => (
+                        <a 
+                          key={feature.id} 
+                          href={feature.content_url} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="group block bg-white dark:bg-surface-800 rounded-2xl overflow-hidden border border-surface-100 dark:border-surface-700 hover:shadow-lg transition-shadow"
+                        >
+                          {/* 썸네일 - 크게 */}
+                          <div className="relative aspect-video bg-surface-100 dark:bg-surface-900">
+                            <img 
+                              src={feature.metadata?.thumbnails?.medium?.url || feature.metadata?.thumbnails?.default?.url} 
+                              className="w-full h-full object-cover"
+                              alt={feature.title}
+                            />
+                            {/* 재생 버튼 오버레이 */}
+                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="size-14 rounded-full bg-red-500 flex items-center justify-center shadow-xl">
+                                <div className="w-0 h-0 border-l-[18px] border-l-white border-t-[11px] border-t-transparent border-b-[11px] border-b-transparent ml-1" />
                               </div>
                             </div>
-                            <div className="flex-1 min-w-0 pt-1">
-                              <a href={feature.content_url} target="_blank" rel="noreferrer" className="block text-sm font-black line-clamp-2 leading-snug hover:text-primary-600">
-                                {feature.title}
-                              </a>
-                              <div className="mt-2 flex items-center gap-2">
-                                <div className="size-4 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
-                                  <Youtube className="size-2.5" />
-                                </div>
-                                <span className="text-[11px] text-surface-400 font-bold truncate">
-                                  {feature.metadata?.channelTitle}
-                                </span>
-                              </div>
+                            {/* YouTube 뱃지 */}
+                            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <Youtube className="size-3" />
+                              <span className="text-[10px] font-bold">YouTube</span>
                             </div>
+                            {/* 내가 추가한 경우 삭제 버튼 */}
                             {feature.user_id === currentUser?.auth_user_id && (
-                              <button onClick={() => setShowDeleteFeatureConfirm(feature.id)} className="p-2 opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 bg-red-500 text-white rounded-full shadow-lg">
-                                <X className="size-3" />
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setShowDeleteFeatureConfirm(feature.id);
+                                }} 
+                                className="absolute top-2 right-2 size-8 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-colors"
+                              >
+                                <Trash2 className="size-4" />
                               </button>
                             )}
                           </div>
-                        ))}
-                      </div>
+                          {/* 영상 정보 */}
+                          <div className="p-3">
+                            <h4 className="text-[14px] font-bold text-surface-900 dark:text-white line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">
+                              {feature.title}
+                            </h4>
+                            <p className="text-[12px] text-surface-500 mt-1 font-medium">
+                              {feature.metadata?.channelTitle}
+                            </p>
+                          </div>
+                        </a>
+                      ))
                     ) : (
-                      <div className="py-16 flex flex-col items-center justify-center gap-4 bg-surface-50 dark:bg-surface-900 rounded-[32px] text-surface-200">
-                        <Youtube className="size-12 opacity-10" />
-                        <p className="text-sm font-black">관련 영상이 없습니다</p>
+                      <div className="py-12 flex flex-col items-center justify-center gap-3 bg-white dark:bg-surface-800 rounded-2xl border border-surface-100 dark:border-surface-700">
+                        <div className="size-16 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                          <Youtube className="size-8 text-red-300 dark:text-red-800" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[14px] font-bold text-surface-600 dark:text-surface-400">관련 영상이 없어요</p>
+                          <p className="text-[12px] text-surface-400 mt-1">이 맛집이 나온 영상을 공유해주세요!</p>
+                        </div>
                       </div>
                     )
                   ) : (
                     communityFeatures.length > 0 ? (
-                      <div className="space-y-3">
-                        {communityFeatures.map(feature => (
-                          <div key={feature.id} className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-surface-900 border border-surface-50 dark:border-surface-800">
-                            <div className="size-12 rounded-xl bg-surface-50 dark:bg-surface-800 flex items-center justify-center shrink-0">
-                              <Globe className="size-6 text-surface-200" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <a href={feature.content_url} target="_blank" rel="noreferrer" className="block text-sm font-black truncate hover:text-primary-600">
-                                {feature.title}
-                              </a>
-                              <p className="text-[11px] text-surface-400 font-bold mt-1 tracking-tight">
+                      communityFeatures.map(feature => (
+                        <a 
+                          key={feature.id}
+                          href={feature.content_url} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="group flex items-center gap-3 p-4 bg-white dark:bg-surface-800 rounded-2xl border border-surface-100 dark:border-surface-700 hover:shadow-lg transition-shadow"
+                        >
+                          {/* 플랫폼 아이콘 */}
+                          <div className="size-12 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center shrink-0">
+                            <Globe className="size-6 text-blue-500" />
+                          </div>
+                          {/* 글 정보 */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-[14px] font-bold text-surface-900 dark:text-white line-clamp-1 group-hover:text-blue-500 transition-colors">
+                              {feature.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                                 {getPlatformName(feature.metadata?.domain)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <a href={feature.content_url} target="_blank" rel="noreferrer" className="p-2 text-surface-200 hover:text-primary-600 hover:bg-primary-50 rounded-xl">
-                                <ExternalLink className="size-4" />
-                              </a>
-                              {feature.user_id === currentUser?.auth_user_id && (
-                                <button onClick={() => setShowDeleteFeatureConfirm(feature.id)} className="p-2 text-surface-200 hover:text-red-500 hover:bg-red-50 rounded-xl">
-                                  <Trash2 className="size-4" />
-                                </button>
-                              )}
+                              </span>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                          {/* 액션 */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <div className="size-9 rounded-lg flex items-center justify-center text-surface-300 group-hover:text-blue-500">
+                              <ExternalLink className="size-5" />
+                            </div>
+                            {feature.user_id === currentUser?.auth_user_id && (
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setShowDeleteFeatureConfirm(feature.id);
+                                }} 
+                                className="size-9 rounded-lg flex items-center justify-center text-surface-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            )}
+                          </div>
+                        </a>
+                      ))
                     ) : (
-                      <div className="py-16 flex flex-col items-center justify-center gap-4 bg-surface-50 dark:bg-surface-900 rounded-[32px] text-surface-200">
-                        <Globe className="size-12 opacity-10" />
-                        <p className="text-sm font-black">관련 게시글이 없습니다</p>
+                      <div className="py-12 flex flex-col items-center justify-center gap-3 bg-white dark:bg-surface-800 rounded-2xl border border-surface-100 dark:border-surface-700">
+                        <div className="size-16 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                          <Globe className="size-8 text-blue-300 dark:text-blue-800" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[14px] font-bold text-surface-600 dark:text-surface-400">관련 글이 없어요</p>
+                          <p className="text-[12px] text-surface-400 mt-1">이 맛집 관련 글을 공유해주세요!</p>
+                        </div>
                       </div>
                     )
                   )}
                 </div>
-              </div>
+              </section>
             </div>
           </div>
           </>
