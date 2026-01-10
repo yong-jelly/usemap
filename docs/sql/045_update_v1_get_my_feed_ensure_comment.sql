@@ -6,6 +6,9 @@
 --   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/045_update_v1_get_my_feed_ensure_comment.sql
 -- =====================================================
 
+-- 기존 함수 삭제 (반환 타입 변경을 위해 필요)
+DROP FUNCTION IF EXISTS public.v1_get_my_feed(INT, INT, INT, INT);
+
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(
     p_limit INT DEFAULT 20,
     p_offset INT DEFAULT 0,
