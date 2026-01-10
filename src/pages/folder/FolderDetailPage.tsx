@@ -48,118 +48,9 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import type { InviteHistory as InviteHistoryType } from "@/entities/folder/types";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
+import { FolderSettingsSheet } from "@/features/folder/ui/FolderSettingsSheet";
 
 // ... (FolderInviteAdminSection, InviteCodeInput, InviteHistoryModal code remains same)
-
-// 초대 관리 섹션 (폴더 상세 상단에 표시)
-function FolderInviteAdminSection({ 
-  folderId, 
-  inviteCode, 
-  expiresAt,
-  onOpenHistory 
-}: { 
-  folderId: string; 
-  inviteCode?: string; 
-  expiresAt?: string;
-  onOpenHistory: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-  const isExpired = expiresAt ? new Date(expiresAt) < new Date() : true;
-  const { mutate: regenerate, isPending } = useRegenerateInviteCode();
-
-  const handleCopy = () => {
-    if (inviteCode) {
-      navigator.clipboard.writeText(inviteCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleRegenerate = () => {
-    if (window.confirm('새로운 초대 코드를 생성하시겠습니까? 기존 코드는 즉시 만료됩니다.')) {
-      regenerate(folderId);
-    }
-  };
-
-  return (
-    <div className="mx-4 mb-6 p-5 bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/20 flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-primary-500 rounded-lg">
-            <Key className="size-4 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 관리</span>
-            <span className="text-[10px] text-primary-600/60 dark:text-primary-400/60 font-medium">관리자 전용</span>
-          </div>
-        </div>
-        <button 
-          onClick={onOpenHistory}
-          className="px-3 py-1.5 bg-white dark:bg-surface-800 rounded-xl shadow-sm text-xs font-bold text-surface-600 dark:text-surface-300 flex items-center gap-1.5 hover:bg-surface-50 transition-colors"
-        >
-          <History className="size-3.5" />
-          히스토리
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-white dark:bg-surface-800 rounded-xl px-4 py-4 flex items-center justify-between shadow-sm border border-primary-100/50 dark:border-primary-900/20">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] font-bold text-surface-400 uppercase tracking-tight">Current Code</span>
-              <span className={cn(
-                "font-mono font-black tracking-[0.2em] text-2xl",
-                isExpired ? "text-surface-400" : "text-primary-600 dark:text-primary-400"
-              )}>
-                {inviteCode || 'NONE'}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {inviteCode && (
-                <button 
-                  onClick={handleCopy} 
-                  className={cn(
-                    "p-2.5 rounded-xl transition-all",
-                    copied ? "bg-green-50 text-green-600" : "hover:bg-surface-50 text-surface-400"
-                  )}
-                >
-                  {copied ? <CheckCircle className="size-5" /> : <Copy className="size-5" />}
-                </button>
-              )}
-              <button 
-                onClick={handleRegenerate}
-                disabled={isPending}
-                className="p-2.5 rounded-xl hover:bg-surface-50 text-primary-500 transition-all disabled:opacity-50"
-                title="새 코드 생성"
-              >
-                <RefreshCw className={cn("size-5", isPending && "animate-spin")} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            {isExpired ? (
-              <span className="text-red-500 flex items-center gap-1">
-                <AlertCircle className="size-3.5" />
-                코드가 만료되었습니다
-              </span>
-            ) : (
-              <span className="text-primary-600 dark:text-primary-400 flex items-center gap-1">
-                <Clock className="size-3.5" />
-                {expiresAt ? ago(expiresAt) : ''} 후 만료
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] text-surface-400 font-medium">
-            24시간마다 갱신 필요
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // 초대 코드 입력 UI
 function InviteCodeInput({ 
@@ -473,17 +364,6 @@ export function FolderDetailPage() {
     });
   };
 
-  const handleHideFolder = () => {
-    if (window.confirm('정말 이 폴더를 숨기시겠습니까? 구독자들은 더 이상 접근할 수 없습니다.')) {
-      hideFolder(id!, {
-        onSuccess: () => {
-          navigate('/profile', { replace: true });
-        }
-      });
-    }
-    setShowMenu(false);
-  };
-
   // Initialize Map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -716,35 +596,20 @@ export function FolderDetailPage() {
         isOwner={isOwner}
         isSubscribed={isSubscribed}
         onSubscribe={handleToggleSubscription}
-        onSettings={() => setShowMenu(!showMenu)}
+        onSettings={() => setShowMenu(true)}
       />
 
-      {/* 폴더 설정 메뉴 (기존 MoreVertical 메뉴 유지) */}
-      {showMenu && isOwner && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-          <div className="absolute right-4 top-14 w-48 bg-white dark:bg-surface-800 rounded-xl shadow-lg border border-surface-100 dark:border-surface-700 py-1 z-20">
-            {folderInfo?.permission === 'invite' && (
-              <button 
-                className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700"
-                onClick={() => { setShowInviteHistory(true); setShowMenu(false); }}
-              >
-                <Key className="size-4" />
-                초대 코드 관리
-              </button>
-            )}
-            {folderInfo && folderInfo.permission !== 'default' && (
-              <button 
-                className="w-full px-4 py-3 text-left text-sm font-medium flex items-center gap-2 hover:bg-surface-50 dark:hover:bg-surface-700 text-red-500"
-                onClick={handleHideFolder}
-              >
-                <EyeOff className="size-4" />
-                폴더 숨기기
-              </button>
-            )}
-          </div>
-        </>
-      )}
+      {/* 폴더 설정 시트 */}
+      <FolderSettingsSheet 
+        isOpen={showMenu}
+        onClose={() => setShowMenu(false)}
+        folderId={id!}
+        folderInfo={folderInfo}
+        onOpenHistory={() => {
+          setShowMenu(false);
+          setShowInviteHistory(true);
+        }}
+      />
 
       {/* 메인 컨텐츠 */}
       <div className="flex-1 relative overflow-hidden">
@@ -840,16 +705,6 @@ export function FolderDetailPage() {
                   )}
                 </div>
               </div>
-
-              {/* 초대 관리 섹션 */}
-              {isOwner && folderInfo?.permission === 'invite' && (
-                <FolderInviteAdminSection 
-                  folderId={id!}
-                  inviteCode={folderInfo.invite_code}
-                  expiresAt={folderInfo.invite_code_expires_at}
-                  onOpenHistory={() => setShowInviteHistory(true)}
-                />
-              )}
 
               {/* 장소 목록 */}
               <div className="flex flex-col">
