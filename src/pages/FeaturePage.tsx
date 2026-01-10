@@ -23,10 +23,10 @@ export function FeaturePage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
-    { id: "folder", label: "플레이스" },
-    { id: "youtube", label: "유튜브" },
     { id: "community", label: "커뮤니티" },
     { id: "detective", label: "맛탐정" },
+    { id: "folder", label: "플레이스" },
+    { id: "youtube", label: "유튜브" },
   ];
 
   // 페이지 마운트 시 window 스크롤 초기화 (다른 페이지에서 스크롤 후 진입 시 헤더가 밀리는 문제 방지)
