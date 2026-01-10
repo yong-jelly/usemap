@@ -85,7 +85,13 @@ BEGIN
             ELSE NULL
         END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
-        (to_jsonb(p) || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
+        (to_jsonb(p) || jsonb_build_object(
+            'image_urls', p.images, 
+            'avg_price', calculate_menu_avg_price(p.menus),
+            'interaction', public.v1_common_place_interaction(p.id),
+            'features', public.v1_common_place_features(p.id),
+            'experience', jsonb_build_object('is_visited', public.v1_has_visited_place(p.id))
+        )) as place_data,
         feed_data.added_time::TIMESTAMPTZ as added_at,
         feed_data.comment::TEXT as comment
     FROM (

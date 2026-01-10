@@ -3,6 +3,7 @@ import { useMySubscriptions, useToggleFolderSubscription, useToggleFeatureSubscr
 import { Button } from "@/shared/ui";
 import { Loader2, Heart, ExternalLink } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import naverIcon from "@/assets/images/naver-map-logo.png";
 
 export function SubscriptionList() {
   const navigate = useNavigate();
@@ -62,13 +63,14 @@ export function SubscriptionList() {
 
               const isSubscribed = sub.is_subscribed !== false;
               const displaySubscribed = isToggling ? !isSubscribed : isSubscribed;
+              const displayThumbnail = sub.subscription_type === 'naver_folder' ? naverIcon : sub.thumbnail;
 
               return (
                 <div key={`${sub.subscription_type}-${sub.feature_id}`} className="flex items-center gap-4 p-4 hover:bg-surface-50 dark:hover:bg-surface-900/50 transition-colors">
                   {/* 썸네일/아이콘 */}
                   <div className="size-12 rounded-full bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden border border-surface-100 dark:border-surface-800">
-                    {sub.thumbnail ? (
-                      <img src={sub.thumbnail} alt={sub.title} className="w-full h-full object-cover" />
+                    {displayThumbnail ? (
+                      <img src={displayThumbnail} alt={sub.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-surface-300">
                         <Heart className="size-5" />

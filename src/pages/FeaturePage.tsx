@@ -10,6 +10,7 @@ import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
 import { Loader2, Heart, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
+import naverIcon from "@/assets/images/naver-map-logo.png";
 
 /**
  * 피쳐 페이지 컴포넌트
@@ -214,6 +215,7 @@ function NaverFolderList() {
         <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
           <FeatureRowHeader 
             title={folder.name}
+            thumbnail={naverIcon}
             count={folder.place_count}
             onTitleClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
             subscribeType="naver_folder"

@@ -8,6 +8,7 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
+import naverIcon from "@/assets/images/naver-map-logo.png";
 
 export function FeedPage() {
   const navigate = useNavigate();
@@ -176,6 +177,7 @@ export function FeedPage() {
                                item.source_type === 'naver_folder' ? '플레이스 폴더' :
                                item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
             let sourceTitle = item.source_title;
+            const sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
 
             if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
               const [domain, region] = sourceTitle.split('|');
@@ -190,9 +192,11 @@ export function FeedPage() {
                 place={item.place_data}
                 sourceLabel={sourceLabel}
                 sourceTitle={sourceTitle}
+                sourceImage={sourceImage}
                 sourcePath={sourcePath || undefined}
                 addedAt={formatRelativeTime(item.added_at)}
                 showPrice={true}
+                comment={item.comment}
               />
             );
           })}

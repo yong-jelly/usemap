@@ -71,11 +71,20 @@ export const folderApi = {
   /**
    * 폴더에 장소 추가
    */
-  addPlaceToFolder: async (params: { folderId: string; placeId: string }) => {
+  addPlaceToFolder: async (params: { folderId: string; placeId: string; comment?: string }) => {
     const response = await apiClient.rpc<boolean>("v1_add_place_to_folder", {
       p_folder_id: params.folderId,
       p_place_id: params.placeId,
+      p_comment: params.comment || null,
     });
+    
+    // 에러 체크
+    if (response.meta.code !== 200) {
+      const error = new Error(response.meta.message || '장소 추가에 실패했습니다.');
+      (error as any).meta = response.meta;
+      throw error;
+    }
+    
     return response.data[0];
   },
 

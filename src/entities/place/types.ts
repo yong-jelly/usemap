@@ -36,6 +36,7 @@ export interface Place {
     is_saved: boolean;
     place_comment_count: number;
     is_commented: boolean;
+    is_reviewed: boolean;
   };
   features?: Feature[];
   experience?: {
@@ -146,6 +147,7 @@ export interface PlaceDetails {
   is_saved: boolean;
   place_comment_count: number;
   is_commented: boolean;
+  is_reviewed: boolean;
   comments: PlaceComment[];
   place_tag_count: number;
   is_place_tagged: boolean;

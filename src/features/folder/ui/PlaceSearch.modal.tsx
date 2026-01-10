@@ -7,6 +7,7 @@ import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
+import { PlaceCommentForm } from "./PlaceCommentForm";
 
 /**
  * 장소 검색 모달 컴포넌트
@@ -17,8 +18,8 @@ interface PlaceSearchModalProps {
   isOpen: boolean;
   /** 모달 닫기 핸들러 */
   onClose: () => void;
-  /** 장소 선택 핸들러 */
-  onSelect: (place: Place) => void;
+  /** 장소 선택 핸들러 (코멘트 포함) */
+  onSelect: (place: Place, comment?: string) => void;
 }
 
 export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModalProps) {
@@ -27,6 +28,7 @@ export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModal
   const [detailedPlaces, setDetailedPlaces] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 검색어 입력 시 검색 실행 (디바운스)
@@ -101,6 +103,28 @@ export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModal
     };
   }, [isOpen]);
 
+  // 메모 작성 화면 표시
+  if (selectedPlace) {
+    return createPortal(
+      <PlaceCommentForm
+        place={selectedPlace}
+        onBack={() => setSelectedPlace(null)}
+        onSave={async (comment) => {
+          try {
+            await onSelect(selectedPlace, comment);
+            // 성공 시에만 화면 전환
+            setSelectedPlace(null);
+          } catch (error) {
+            // 에러 발생 시 화면 전환 방지 (메모 작성 화면 유지)
+            // 에러는 이미 onSelect에서 처리됨
+          }
+        }}
+        onClose={onClose}
+      />,
+      document.body
+    );
+  }
+
   if (!isOpen) return null;
 
   return createPortal(
@@ -119,9 +143,6 @@ export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModal
           <h1 className="ml-3 text-lg font-bold text-surface-900 dark:text-surface-50">
             장소 추가
           </h1>
-          <button onClick={onClose} className="ml-auto p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors text-surface-400">
-            <X className="size-5" />
-          </button>
         </header>
 
         {/* 검색창 섹션 */}
@@ -158,7 +179,7 @@ export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModal
               {detailedPlaces.map((place) => (
                 <button
                   key={place.id}
-                  onClick={() => onSelect(place)}
+                  onClick={() => setSelectedPlace(place)}
                   className="flex items-center gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-900 transition-colors text-left group"
                 >
                   <div className="size-20 rounded-[20px] bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0 border border-surface-50 dark:border-surface-800 shadow-sm">

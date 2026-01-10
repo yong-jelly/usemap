@@ -22,6 +22,7 @@ DECLARE
     v_is_saved boolean := false;
     v_place_comment_count int := 0;
     v_is_commented boolean := false;
+    v_is_reviewed boolean := false;
     v_comments jsonb := '[]'::jsonb;
     v_place_tag_count int := 0;
     v_is_place_tagged boolean := false;
@@ -49,6 +50,7 @@ BEGIN
         SELECT liked INTO v_is_liked FROM public.tbl_like WHERE liked_id = p_place_id AND liked_type = 'place' AND user_id = v_user_id;
         SELECT saved INTO v_is_saved FROM public.tbl_save WHERE saved_id = p_place_id AND saved_type = 'place' AND user_id = v_user_id;
         SELECT EXISTS (SELECT 1 FROM public.tbl_comment_for_place WHERE business_id = p_place_id AND user_id = v_user_id AND is_active = true) INTO v_is_commented;
+        SELECT EXISTS (SELECT 1 FROM public.tbl_place_user_review WHERE place_id = p_place_id AND user_id = v_user_id AND is_active = true) INTO v_is_reviewed;
     END IF;
 
     RETURN jsonb_build_object(
@@ -58,6 +60,7 @@ BEGIN
         'is_saved', COALESCE(v_is_saved, false),
         'place_comment_count', COALESCE(v_place_comment_count, 0),
         'is_commented', COALESCE(v_is_commented, false),
+        'is_reviewed', COALESCE(v_is_reviewed, false),
         'comments', COALESCE(v_comments, '[]'::jsonb)
     );
 END;

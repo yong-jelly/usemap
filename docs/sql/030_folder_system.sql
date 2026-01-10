@@ -976,7 +976,12 @@ BEGIN
     RETURN QUERY
     SELECT 
         pl.id,
-        (to_jsonb(pl) || jsonb_build_object('image_urls', pl.images)) AS p_data,
+        (to_jsonb(pl) || jsonb_build_object(
+            'image_urls', pl.images,
+            'interaction', public.v1_common_place_interaction(pl.id),
+            'features', public.v1_common_place_features(pl.id),
+            'experience', jsonb_build_object('is_visited', public.v1_has_visited_place(pl.id))
+        )) AS p_data,
         fp.created_at::TIMESTAMPTZ AS a_at
     FROM public.tbl_folder_place fp
     JOIN public.tbl_place pl ON fp.place_id = pl.id

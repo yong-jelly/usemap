@@ -9,6 +9,7 @@ import { PlaceCard } from "@/widgets/PlaceCard";
 import { List, Map as MapIcon, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
+import naverIcon from "@/assets/images/naver-map-logo.png";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
 mapboxgl.accessToken = MAP_TOKEN;
@@ -397,6 +398,7 @@ export function FeatureDetailPage() {
 
   const thumbnailUrl = useMemo(() => {
     if (type === 'youtube' && typedInfo?.channel_thumbnail) return typedInfo.channel_thumbnail;
+    if (type === 'naver') return naverIcon;
     return undefined;
   }, [type, typedInfo]);
 

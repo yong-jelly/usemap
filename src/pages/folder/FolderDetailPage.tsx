@@ -39,6 +39,7 @@ import {
   RotateCcw 
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
+import { PlaceCommentForm } from "@/features/folder/ui/PlaceCommentForm";
 import { FolderReviewSection } from "@/features/folder/ui/FolderReviewSection";
 import { PlaceCard } from "@/widgets/PlaceCard";
 import { usePlacePopup } from "@/shared/lib/place-popup";
@@ -263,6 +264,7 @@ export function FolderDetailPage() {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
+  const [editingPlace, setEditingPlace] = useState<{ placeId: string; place: any; comment?: string } | null>(null);
   const initialZoom = useRef<number | null>(null);
   const initialCenter = useRef<[number, number] | null>(null);
 
@@ -356,11 +358,42 @@ export function FolderDetailPage() {
   const clusterLayerId = 'places-clusters';
   const unclusteredPointLayerId = 'places-unclustered-point';
 
-  const handleAddPlace = (place: any) => {
-    addPlace({ folderId: id!, placeId: place.id }, {
-      onSuccess: () => {
-        setIsSearchOpen(false);
-      }
+  const handleAddPlace = async (place: any, comment?: string) => {
+    return new Promise<void>((resolve, reject) => {
+      addPlace({ folderId: id!, placeId: place.id, comment }, {
+        onSuccess: () => {
+          setIsSearchOpen(false);
+          setEditingPlace(null);
+          resolve();
+        },
+        onError: (error: any) => {
+          const errorMessage = error?.message || error?.meta?.message || '장소 추가에 실패했습니다.';
+          alert(errorMessage);
+          reject(error); // 에러 발생 시 Promise reject하여 화면 전환 방지
+        }
+      });
+    });
+  };
+
+  const handleEditComment = (placeId: string, place: any, comment?: string) => {
+    setEditingPlace({ placeId, place, comment });
+  };
+
+  const handleSaveComment = async (comment: string) => {
+    if (!editingPlace) return;
+    
+    return new Promise<void>((resolve, reject) => {
+      addPlace({ folderId: id!, placeId: editingPlace.placeId, comment }, {
+        onSuccess: () => {
+          setEditingPlace(null);
+          resolve();
+        },
+        onError: (error: any) => {
+          const errorMessage = error?.message || error?.meta?.message || '메모 저장에 실패했습니다.';
+          alert(errorMessage);
+          reject(error); // 에러 발생 시 Promise reject하여 화면 전환 방지
+        }
+      });
     });
   };
 
@@ -717,6 +750,35 @@ export function FolderDetailPage() {
                           showPrice={true}
                           addedAt={formatKoreanDate(item.added_at)}
                         />
+                        {/* 메모 표시 및 편집 UI */}
+                        <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
+                          {item.comment ? (
+                            <div className="flex flex-col gap-2">
+                              <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
+                                <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap">
+                                  {item.comment}
+                                </p>
+                              </div>
+                              {canEdit && (
+                                <button
+                                  onClick={() => handleEditComment(item.place_id, item.place_data, item.comment)}
+                                  className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
+                                >
+                                  메모 수정
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            canEdit && (
+                              <button
+                                onClick={() => handleEditComment(item.place_id, item.place_data)}
+                                className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                              >
+                                + 메모 추가
+                              </button>
+                            )
+                          )}
+                        </div>
                         {folderInfo?.permission === 'invite' && (
                           <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
                             <FolderReviewSection 
@@ -800,6 +862,16 @@ export function FolderDetailPage() {
         onClose={() => setIsSearchOpen(false)}
         onSelect={handleAddPlace}
       />
+
+      {editingPlace && (
+        <PlaceCommentForm
+          place={editingPlace.place}
+          initialComment={editingPlace.comment}
+          onBack={() => setEditingPlace(null)}
+          onSave={handleSaveComment}
+          onClose={() => setEditingPlace(null)}
+        />
+      )}
 
       {showInviteHistory && (
         <InviteHistoryModal 

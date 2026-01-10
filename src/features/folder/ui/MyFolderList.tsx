@@ -26,23 +26,24 @@ export function MyFolderList() {
 
   return (
     <div className="flex flex-col gap-8 py-4">
-      {/* 폴더 생성 버튼 */}
-      <div className="px-4">
-        <Button 
-          variant="outline" 
-          className="w-full h-12 rounded-xl font-bold gap-2 text-surface-600 border-surface-200"
-          onClick={handleCreateClick}
-        >
-          <FolderPlus className="size-5" />
-          새로운 맛탐정 폴더 만들기
-        </Button>
-      </div>
-
       {/* 내 폴더 섹션 */}
       <div className="flex flex-col gap-4">
-        <div className="px-4">
-          <h2 className="text-xl font-black text-surface-900 dark:text-white">내 맛탐정 폴더</h2>
-          <p className="text-sm text-surface-500">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
+        <div className="mx-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">내 맛탐정 폴더</h2>
+            <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              onClick={handleCreateClick}
+            >
+              <FolderPlus className="size-4" />
+              <span className="text-xs">맛탐정 생성</span>
+            </Button>
+          </div>
         </div>
 
         <div className="px-4">

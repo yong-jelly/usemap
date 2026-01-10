@@ -286,7 +286,7 @@ export function ExplorePage() {
             {[...Array(2)].map((_, i) => (
               <div key={i} className="bg-white dark:bg-surface-950">
                 {/* 이미지 스켈레톤 */}
-                <Skeleton className="aspect-[4/5] w-full" />
+                <Skeleton className="aspect-[4/3] w-full" />
                 {/* 컨텐츠 스켈레톤 */}
                 <div className="px-4 pt-3 pb-4 space-y-3">
                   {/* 액션 버튼 */}

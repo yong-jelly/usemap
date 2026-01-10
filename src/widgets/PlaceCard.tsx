@@ -199,7 +199,12 @@ export function PlaceCard({
               <Heart className={cn("size-7", isLiked ? "fill-rose-500 text-rose-500" : "text-surface-700 dark:text-surface-300")} />
             </button>
             <button onClick={() => showPopup(place.id)} className="active:scale-90 transition-transform">
-              <MessageCircle className="size-7 text-surface-700 dark:text-surface-300" />
+              <MessageCircle className={cn(
+                "size-7", 
+                place.interaction?.is_reviewed 
+                  ? "fill-primary-500 text-primary-500" 
+                  : "text-surface-700 dark:text-surface-300"
+              )} />
             </button>
             <a href={`https://map.naver.com/p/entry/place/${place.id}`} target="_blank" rel="noopener noreferrer" className="active:scale-90 transition-transform" onClick={(e) => e.stopPropagation()}>
               <MapPinned className="size-7 text-surface-700 dark:text-surface-300" />
