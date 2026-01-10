@@ -1,6 +1,9 @@
 -- =====================================================
 -- 019_v1_search_and_list_functions.sql
 -- 장소 검색 및 개인화된 목록 조회 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/019_v1_search_and_list_functions.sql
 -- =====================================================
 
 -- 1. 이름 기반 장소 검색 함수

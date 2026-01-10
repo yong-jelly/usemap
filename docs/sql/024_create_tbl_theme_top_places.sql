@@ -2,6 +2,9 @@
 -- 024_create_tbl_theme_top_places.sql
 -- 각 테마별 상위 인기 장소 캐시 테이블
 -- 실시간 연산량을 획기적으로 줄여 5초 타임아웃 해결
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/024_create_tbl_theme_top_places.sql
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS public.tbl_theme_top_places (

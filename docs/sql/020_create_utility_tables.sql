@@ -1,6 +1,9 @@
 -- =====================================================
 -- 020_create_utility_tables.sql
 -- 캐싱, 검색 이력 및 공통 코드 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/020_create_utility_tables.sql
 -- =====================================================
 
 -- 1. 버킷 데이터 저장 테이블 (tbl_bucket)

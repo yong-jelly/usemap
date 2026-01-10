@@ -1,6 +1,9 @@
 -- =====================================================
 -- 018_v1_more_aggregation_functions.sql
 -- 추가적인 집계 관련 RPC 함수 정의 (그룹별, 사용자별 통계 등)
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/018_v1_more_aggregation_functions.sql
 -- =====================================================
 
 -- 1. 플랫폼/그룹별 장소 피처 통계 집계

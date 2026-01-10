@@ -1,6 +1,9 @@
 -- =====================================================
 -- 008_create_folder_tables.sql
 -- 사용자 정의 폴더 및 네이버 공유 폴더 관련 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/008_create_folder_tables.sql
 -- =====================================================
 
 -- 1. 사용자 정의 폴더 테이블 (tbl_folder)

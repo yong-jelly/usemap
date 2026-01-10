@@ -1,6 +1,9 @@
 -- =====================================================
 -- 016_v1_aggregation_functions.sql
 -- 장소 피처, 사용자 장소 통계 등 집계 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/016_v1_aggregation_functions.sql
 -- =====================================================
 
 -- 1. 장소 피처 통계 결합 및 캐싱 함수

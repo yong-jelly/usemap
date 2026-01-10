@@ -1,6 +1,9 @@
 -- =====================================================
 -- 017_v1_utility_functions.sql
 -- 공통 응답 처리 및 가격 계산 등 유틸리티 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/017_v1_utility_functions.sql
 -- =====================================================
 
 -- 1. 표준 API 응답 생성 함수

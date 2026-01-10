@@ -1,5 +1,7 @@
 -- =====================================================
--- 023_create_mv_place_theme_scores.sql (경량화 버전)
+-- 023_create_mv_place_theme_scores.sql
+-- 장소 테마 점수 머티리얼라이즈드 뷰 생성 (경량화 버전)
+-- 
 -- 실행 방법:
 --   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/023_create_mv_place_theme_scores.sql
 -- =====================================================

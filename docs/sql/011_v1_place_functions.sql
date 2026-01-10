@@ -1,6 +1,9 @@
 -- =====================================================
 -- 011_v1_place_functions.sql
 -- 장소 조회 및 상세 정보 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/011_v1_place_functions.sql
 -- =====================================================
 
 -- 1. 장소 상세 정보 조회 (댓글, 좋아요, 저장 상태 포함)

@@ -1,6 +1,9 @@
 -- =====================================================
 -- 002_create_common_functions.sql
 -- 공통적으로 사용되는 트리거 함수 및 유틸리티 함수들을 정의합니다.
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/002_create_common_functions.sql
 -- =====================================================
 
 -- 1. updated_at 컬럼 자동 업데이트 함수

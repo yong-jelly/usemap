@@ -1,6 +1,9 @@
 -- =====================================================
 -- 009_create_review_tables.sql
 -- 사용자 리뷰, 방문자 평가 및 태그 매핑 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/009_create_review_tables.sql
 -- =====================================================
 
 -- 1. 장소 리뷰 테이블 (tbl_place_review)

@@ -1,6 +1,9 @@
 -- =====================================================
 -- 001_create_extensions.sql
 -- 데이터베이스 확장을 활성화합니다.
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/001_create_extensions.sql
 -- =====================================================
 
 -- uuid-ossp 확장: UUID 생성을 위한 함수(uuid_generate_v4 등) 제공

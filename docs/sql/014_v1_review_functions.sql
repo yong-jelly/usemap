@@ -1,6 +1,9 @@
 -- =====================================================
 -- 014_v1_review_functions.sql
 -- 사용자 리뷰 작성, 조회 및 수정 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/014_v1_review_functions.sql
 -- =====================================================
 
 -- 1. 사용자 리뷰 작성/수정 함수 (태그 매핑 포함)

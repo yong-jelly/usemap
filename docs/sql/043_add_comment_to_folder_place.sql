@@ -1,11 +1,84 @@
 -- =====================================================
--- 042_update_v1_get_my_feed_add_source_image.sql
--- 피드 조회 시 소스의 프로필 이미지를 포함하도록 개선
+-- 043_add_comment_to_folder_place.sql
+-- 폴더에 장소 추가 시 코멘트 기능 추가
 -- 
 -- 실행 방법:
---   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/042_update_v1_get_my_feed_add_source_image.sql
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/043_add_comment_to_folder_place.sql
 -- =====================================================
 
+-- 1. tbl_folder_place 테이블에 comment 컬럼 추가
+ALTER TABLE public.tbl_folder_place 
+ADD COLUMN IF NOT EXISTS comment TEXT;
+
+-- 2. v1_add_place_to_folder 함수에 코멘트 파라미터 추가
+DROP FUNCTION IF EXISTS public.v1_add_place_to_folder(VARCHAR, VARCHAR);
+CREATE OR REPLACE FUNCTION public.v1_add_place_to_folder(
+    p_folder_id VARCHAR,
+    p_place_id VARCHAR,
+    p_comment TEXT DEFAULT NULL
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+#variable_conflict use_column
+DECLARE
+    v_user_id UUID;
+    v_owner_id UUID;
+    v_permission VARCHAR;
+    v_permission_write_type INT;
+    v_is_subscribed BOOLEAN;
+    v_can_write BOOLEAN := FALSE;
+BEGIN
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION '로그인이 필요합니다.';
+    END IF;
+
+    -- 폴더 정보 조회
+    SELECT f.owner_id, f.permission, f.permission_write_type 
+    INTO v_owner_id, v_permission, v_permission_write_type 
+    FROM public.tbl_folder f WHERE f.id = p_folder_id AND f.is_hidden = FALSE;
+    
+    IF v_owner_id IS NULL THEN
+        RAISE EXCEPTION '폴더를 찾을 수 없습니다.';
+    END IF;
+
+    -- 권한 체크
+    IF v_owner_id = v_user_id THEN
+        v_can_write := TRUE;
+    ELSIF v_permission = 'invite' AND v_permission_write_type = 1 THEN
+        -- invite 폴더이고 공동 편집이 허용된 경우, 구독자인지 확인
+        SELECT EXISTS (
+            SELECT 1 FROM public.tbl_folder_subscribed 
+            WHERE folder_id = p_folder_id AND user_id = v_user_id AND deleted_at IS NULL
+        ) INTO v_is_subscribed;
+        v_can_write := v_is_subscribed;
+    END IF;
+
+    IF NOT v_can_write THEN
+        RAISE EXCEPTION '권한이 없습니다.';
+    END IF;
+
+    INSERT INTO public.tbl_folder_place (folder_id, user_id, place_id, comment)
+    VALUES (p_folder_id, v_user_id, p_place_id, p_comment)
+    ON CONFLICT (folder_id, place_id) DO UPDATE 
+        SET deleted_at = NULL, 
+            user_id = v_user_id,
+            comment = COALESCE(p_comment, tbl_folder_place.comment);
+
+    -- 카운트 업데이트
+    UPDATE public.tbl_folder 
+    SET place_count = (SELECT count(*) FROM public.tbl_folder_place WHERE folder_id = p_folder_id AND deleted_at IS NULL),
+        updated_at = NOW()
+    WHERE id = p_folder_id;
+
+    RETURN TRUE;
+END;
+$$;
+
+-- 3. v1_get_my_feed 함수에 코멘트 정보 포함
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(
     p_limit INT DEFAULT 20,
     p_offset INT DEFAULT 0,
@@ -19,7 +92,8 @@ RETURNS TABLE (
     source_image VARCHAR,
     place_id VARCHAR,
     place_data JSONB,
-    added_at TIMESTAMPTZ
+    added_at TIMESTAMPTZ,
+    comment TEXT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -82,12 +156,13 @@ BEGIN
         END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
         (to_jsonb(p) || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
-        feed_data.added_time::TIMESTAMPTZ as added_at
+        feed_data.added_time::TIMESTAMPTZ as added_at,
+        feed_data.comment::TEXT as comment
     FROM (
         -- 각 소스별 장소 데이터 결합
-        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
+        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, NULL::text as meta, fp.comment FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
         UNION ALL
-        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
+        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as meta, NULL::text as comment FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
         UNION ALL
         -- youtube/community는 tbl_place_features에서 가져옴
         SELECT CASE 
@@ -98,7 +173,8 @@ BEGIN
                CASE WHEN pf.platform_type = 'youtube' THEN pf.metadata->>'channelId' ELSE (SELECT p_inner.group1 FROM public.tbl_place p_inner WHERE p_inner.id = pf.place_id) END as sid,
                pf.place_id as pid, 
                pf.published_at::TIMESTAMPTZ as added_time,
-               pf.metadata->>'domain' as meta
+               pf.metadata->>'domain' as meta,
+               NULL::text as comment
         FROM public.tbl_place_features pf
         WHERE pf.status = 'active'
     ) feed_data
@@ -110,3 +186,5 @@ BEGIN
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;
+
+COMMENT ON COLUMN public.tbl_folder_place.comment IS '폴더에 장소를 추가할 때 작성한 코멘트/메모';

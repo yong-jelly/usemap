@@ -1,6 +1,9 @@
 -- =====================================================
 -- 037_update_list_my_folders.sql
 -- 내 폴더 목록 조회 시 특정 장소 포함 여부 및 공동 편집 권한 확인 기능 추가
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/037_update_list_my_folders.sql
 -- =====================================================
 
 DROP FUNCTION IF EXISTS public.v1_list_my_folders();

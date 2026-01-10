@@ -1,6 +1,9 @@
 -- =====================================================
 -- 006_create_comment_tables.sql
 -- 장소에 대한 사용자 댓글 및 좋아요 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/006_create_comment_tables.sql
 -- =====================================================
 
 -- 1. 장소 댓글 테이블 (tbl_comment_for_place)

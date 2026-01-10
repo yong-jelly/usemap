@@ -1,9 +1,9 @@
 -- =====================================================
--- 042_update_v1_get_my_feed_add_source_image.sql
--- 피드 조회 시 소스의 프로필 이미지를 포함하도록 개선
+-- 045_update_v1_get_my_feed_ensure_comment.sql
+-- 피드 조회 시 폴더에 남긴 코멘트 정보를 확실히 포함하도록 개선
 -- 
 -- 실행 방법:
---   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/042_update_v1_get_my_feed_add_source_image.sql
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/045_update_v1_get_my_feed_ensure_comment.sql
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(
@@ -19,7 +19,8 @@ RETURNS TABLE (
     source_image VARCHAR,
     place_id VARCHAR,
     place_data JSONB,
-    added_at TIMESTAMPTZ
+    added_at TIMESTAMPTZ,
+    comment TEXT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -82,12 +83,13 @@ BEGIN
         END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
         (to_jsonb(p) || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
-        feed_data.added_time::TIMESTAMPTZ as added_at
+        feed_data.added_time::TIMESTAMPTZ as added_at,
+        feed_data.comment::TEXT as comment
     FROM (
         -- 각 소스별 장소 데이터 결합
-        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
+        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, NULL::text as meta, fp.comment FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
         UNION ALL
-        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as meta FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
+        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as meta, NULL::text as comment FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
         UNION ALL
         -- youtube/community는 tbl_place_features에서 가져옴
         SELECT CASE 
@@ -98,7 +100,8 @@ BEGIN
                CASE WHEN pf.platform_type = 'youtube' THEN pf.metadata->>'channelId' ELSE (SELECT p_inner.group1 FROM public.tbl_place p_inner WHERE p_inner.id = pf.place_id) END as sid,
                pf.place_id as pid, 
                pf.published_at::TIMESTAMPTZ as added_time,
-               pf.metadata->>'domain' as meta
+               pf.metadata->>'domain' as meta,
+               NULL::text as comment
         FROM public.tbl_place_features pf
         WHERE pf.status = 'active'
     ) feed_data
@@ -110,3 +113,6 @@ BEGIN
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;
+
+COMMENT ON FUNCTION public.v1_get_my_feed IS '내가 구독하거나 소유한 폴더/채널의 장소 피드를 조회합니다. (코멘트 포함)';
+GRANT EXECUTE ON FUNCTION public.v1_get_my_feed TO authenticated;

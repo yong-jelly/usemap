@@ -1,6 +1,9 @@
 -- =====================================================
 -- 038_update_v1_get_my_feed.sql
 -- 피드 조회 시 내가 소유하거나 참여(장소 추가)한 폴더도 포함하도록 개선
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/038_update_v1_get_my_feed.sql
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(

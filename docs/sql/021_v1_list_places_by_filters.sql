@@ -1,6 +1,9 @@
 -- =====================================================
 -- 021_v1_list_places_by_filters.sql
 -- 필터 기반 장소 목록 조회 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/021_v1_list_places_by_filters.sql
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.v1_list_places_by_filters(

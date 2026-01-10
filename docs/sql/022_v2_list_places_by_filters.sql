@@ -11,9 +11,9 @@
 --   CREATE INDEX idx_place_group_reviews_no_franchise 
 --   ON public.tbl_place (group1, visitor_reviews_total DESC NULLS LAST)
 --   WHERE is_franchise = FALSE;
+-- 
 -- 실행 방법:
 --   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/022_v2_list_places_by_filters.sql
-
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.v2_list_places_by_filters(

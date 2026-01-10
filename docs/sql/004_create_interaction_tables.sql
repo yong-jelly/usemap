@@ -1,6 +1,9 @@
 -- =====================================================
 -- 004_create_interaction_tables.sql
 -- 좋아요, 저장, 방문 기록 테이블 생성 및 정책 설정
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/004_create_interaction_tables.sql
 -- =====================================================
 
 -- 1. 좋아요 테이블 (tbl_like)

@@ -1,6 +1,9 @@
 -- =====================================================
 -- 005_create_place_tables.sql
 -- 장소(음식점 등) 관련 메타데이터 및 분석 정보를 저장하는 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/005_create_place_tables.sql
 -- =====================================================
 
 -- 1. 기본 장소 테이블 (tbl_place)

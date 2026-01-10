@@ -1,6 +1,9 @@
 -- =====================================================
 -- 012_v1_comment_functions.sql
 -- 장소 댓글 생성 및 조회 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/012_v1_comment_functions.sql
 -- =====================================================
 
 -- 1. 장소 댓글 생성 함수

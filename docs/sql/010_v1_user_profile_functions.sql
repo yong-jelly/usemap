@@ -1,6 +1,9 @@
 -- =====================================================
 -- 010_v1_user_profile_functions.sql
 -- 사용자 프로필 관리 관련 RPC 함수 정의 (v1 & v2)
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/010_v1_user_profile_functions.sql
 -- =====================================================
 
 -- 1. 프로필 상세 조회 (v1)

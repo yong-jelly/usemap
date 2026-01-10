@@ -1,6 +1,9 @@
 -- =====================================================
 -- 015_v1_tag_functions.sql
 -- 장소 태그 추가, 삭제 및 조회 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/015_v1_tag_functions.sql
 -- =====================================================
 
 -- 1. 장소에 태그 추가 함수

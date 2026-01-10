@@ -1,6 +1,9 @@
 -- =====================================================
 -- 013_v1_interaction_functions.sql
 -- 좋아요, 저장 등 사용자 상호작용 관련 RPC 함수 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/013_v1_interaction_functions.sql
 -- =====================================================
 
 -- 1. 좋아요 토글 함수

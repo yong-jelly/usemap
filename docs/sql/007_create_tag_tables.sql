@@ -1,6 +1,9 @@
 -- =====================================================
 -- 007_create_tag_tables.sql
 -- 장소 태그 마스터 및 사용자 태그 연결 테이블 정의
+-- 
+-- 실행 방법:
+--   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/007_create_tag_tables.sql
 -- =====================================================
 
 -- 1. 장소 태그 마스터 테이블 (tbl_tag_master_for_place)
