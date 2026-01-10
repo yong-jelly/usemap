@@ -281,6 +281,20 @@ export function FolderDetailPage() {
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // 페이지 마운트 시 window 스크롤 초기화
+  useEffect(() => {
+    if (viewMode === 'list') {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, []);
+
+  // 뷰 모드 변경 시 스크롤 초기화
+  useEffect(() => {
+    if (viewMode === 'list') {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, [viewMode]);
+
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage || viewMode !== 'list') return;
 
@@ -311,7 +325,11 @@ export function FolderDetailPage() {
   const { data: folderInfo, isLoading: isInfoLoading } = useFolderInfo(id!);
   const { mutate: addPlace } = useAddPlaceToFolder();
   const { mutate: hideFolder } = useHideFolder();
-  const { mutate: toggleSubscription } = useToggleFolderSubscription();
+  const { 
+    mutate: toggleSubscription, 
+    isPending: isTogglePending, 
+    variables: toggledFolderId 
+  } = useToggleFolderSubscription();
   const { data: subscriptions } = useMySubscriptions();
 
   const isOwner = access?.is_owner;
@@ -324,6 +342,10 @@ export function FolderDetailPage() {
       sub.subscription_type === 'folder' && sub.feature_id === id && sub.is_subscribed
     );
   }, [subscriptions, id, isOwner]);
+
+  // 낙관적 업데이트를 위한 UI 상태 계산
+  const isCurrentlyToggling = isTogglePending && toggledFolderId === id;
+  const displaySubscribed = isCurrentlyToggling ? !isSubscribed : isSubscribed;
 
   const handleToggleSubscription = () => {
     if (isOwner) return;
@@ -619,18 +641,26 @@ export function FolderDetailPage() {
   }, [viewMode, mapDataRequested]);
 
   return (
-    <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
+    <div className={cn(
+      "flex flex-col bg-white dark:bg-surface-950 relative",
+      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-screen"
+    )}>
       {/* 헤더 */}
-      <DetailHeader
-        type="folder"
-        title={folderInfo?.title || "맛탐정 폴더"}
-        subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
-        thumbnailUrl={folderInfo?.owner_avatar_url}
-        isOwner={isOwner}
-        isSubscribed={isSubscribed}
-        onSubscribe={handleToggleSubscription}
-        onSettings={() => setShowMenu(true)}
-      />
+      <div className={cn(
+        viewMode === "list" ? "sticky top-0 z-40" : "relative z-40"
+      )}>
+        <DetailHeader
+          type="folder"
+          title={folderInfo?.title || "맛탐정 폴더"}
+          subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
+          thumbnailUrl={folderInfo?.owner_avatar_url}
+          isOwner={isOwner}
+          isSubscribed={displaySubscribed}
+          isSubscribing={isCurrentlyToggling}
+          onSubscribe={handleToggleSubscription}
+          onSettings={() => setShowMenu(true)}
+        />
+      </div>
 
       {/* 폴더 설정 시트 */}
       <FolderSettingsSheet 
@@ -645,13 +675,16 @@ export function FolderDetailPage() {
       />
 
       {/* 메인 컨텐츠 */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className={cn(
+        "relative",
+        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full"
+      )}>
         {/* 지도 뷰 */}
         <div 
           ref={mapContainer} 
           className={cn(
             "absolute inset-0 transition-opacity duration-300",
-            viewMode === "map" ? "opacity-100 z-10" : "opacity-0 -z-10"
+            viewMode === "map" ? "opacity-100 z-10" : "opacity-0 -z-10 pointer-events-none"
           )}
         />
         
@@ -667,16 +700,16 @@ export function FolderDetailPage() {
         {/* 리스트 뷰 / 로딩 / 에러 상태 */}
         <div 
           className={cn(
-            "absolute inset-0 bg-white dark:bg-surface-950 overflow-y-auto scrollbar-hide transition-opacity duration-300",
-            viewMode === "list" ? "opacity-100 z-10" : "opacity-0 -z-10"
+            "bg-white dark:bg-surface-950 transition-opacity duration-300",
+            viewMode === "list" ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 -z-10 pointer-events-none hidden"
           )}
         >
           {isAccessLoading || isPlacesLoading || isInfoLoading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center py-40">
               <Loader2 className="size-8 animate-spin text-surface-300" />
             </div>
           ) : access?.access === 'NOT_FOUND' || !folderInfo ? (
-            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+            <div className="flex flex-col items-center justify-center py-40 p-6 text-center">
               <h2 className="text-2xl font-bold mb-2">폴더를 찾을 수 없습니다</h2>
               <p className="text-surface-500 mb-8">존재하지 않거나 비공개된 폴더입니다.</p>
               <Button onClick={() => navigate("/feature?tab=detective")} className="font-bold">
@@ -685,7 +718,7 @@ export function FolderDetailPage() {
             </div>
           ) : access?.access === 'INVITE_CODE_REQUIRED' ? (
             !isAuthenticated ? (
-              <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+              <div className="flex flex-col items-center justify-center py-40 p-6 text-center">
                 <div className="p-6 rounded-full bg-primary-100 dark:bg-primary-900/20 mb-6">
                   <Key className="size-12 text-primary-500" />
                 </div>

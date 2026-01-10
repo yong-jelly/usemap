@@ -42,7 +42,9 @@ export function DetectiveList() {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const publicFolders = publicFoldersData?.pages.flatMap((page) => page) || [];
+  const publicFolders = (publicFoldersData?.pages.flatMap((page) => page) || []).filter(
+    (folder) => folder.place_count > 0
+  );
 
   if (isPublicLoading) {
     return (
@@ -56,16 +58,16 @@ export function DetectiveList() {
     <div className="flex flex-col gap-6 py-1">
       {/* 공개 폴더 섹션 */}
       <div className="flex flex-col gap-4">
-        <div className="mx-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
+        <div className="mx-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
             <h2 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">추천 맛탐정</h2>
             <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">다른 사용자들이 공유한 맛집 리스트입니다.</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
             <Button 
               variant="outline" 
               size="sm"
-              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm flex-1 sm:flex-none"
               onClick={() => {
                 if (!isAuthenticated) {
                   openLogin();
@@ -80,7 +82,7 @@ export function DetectiveList() {
             <Button 
               variant="outline" 
               size="sm"
-              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm flex-1 sm:flex-none"
               onClick={() => {
                 if (!isAuthenticated) {
                   openLogin();

@@ -160,6 +160,14 @@ export function useToggleFeatureSubscription() {
         }
         return old;
       });
+
+      // 구독 목록 쿼리 무효화하여 서버에서 최신 데이터 가져오기
+      queryClient.invalidateQueries({ queryKey: subscriptionKey });
+      
+      // 피쳐 정보 쿼리도 무효화 (is_subscribed 포함)
+      queryClient.invalidateQueries({ 
+        queryKey: ["place", "featureInfo", type, id] 
+      });
     },
   });
 }

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, Share2, Settings, User, CheckCircle, Rss } from "lucide-react";
+import { ChevronLeft, Share2, Settings, User, CheckCircle, Heart } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
@@ -22,6 +22,8 @@ interface DetailHeaderProps {
   isSubscribed?: boolean;
   /** 소유자 여부 (폴더인 경우) */
   isOwner?: boolean;
+  /** 구독 토글 중인지 여부 (낙관적 업데이트용) */
+  isSubscribing?: boolean;
   /** 구독 버튼 클릭 핸들러 */
   onSubscribe?: () => void;
   /** 공유 버튼 클릭 핸들러 */
@@ -46,6 +48,7 @@ export function DetailHeader({
   thumbnailUrl,
   isSubscribed = false,
   isOwner = false,
+  isSubscribing = false,
   onSubscribe,
   onShare,
   onSettings,
@@ -130,21 +133,19 @@ export function DetailHeader({
         {(type === 'feature' || type === 'folder') && onSubscribe && (
           <button
             onClick={isOwner && type === 'folder' ? undefined : onSubscribe}
+            disabled={isSubscribing}
             className={cn(
-              "p-2 rounded-full transition-all active:scale-90",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-colors duration-150 text-xs",
               isSubscribed 
-                ? "text-primary-500 bg-primary-50 dark:bg-primary-950/30" 
-                : "text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800",
-              isOwner && type === 'folder' && "cursor-default opacity-100"
+                ? "bg-primary-50 border border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
+                : "bg-surface-100 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300",
+              isOwner && type === 'folder' && "cursor-default opacity-100",
+              isSubscribing && "opacity-50 cursor-not-allowed"
             )}
             title={isOwner && type === 'folder' ? "내 폴더 (구독 중)" : (isSubscribed ? "구독 중" : "구독하기")}
           >
-            <div className="relative">
-              <Rss className={cn("size-5 transition-transform", isSubscribed && "scale-110")} />
-              {isSubscribed && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary-500 rounded-full border-2 border-white dark:border-surface-950 animate-pulse" />
-              )}
-            </div>
+            <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
+            <span>{isSubscribed ? "구독중" : "구독"}</span>
           </button>
         )}
 

@@ -11,7 +11,8 @@ import {
   Bookmark, 
   ChevronRight,
   Sparkles,
-  CookingPot
+  CookingPot,
+  Users
 } from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
@@ -113,7 +114,11 @@ export function PlaceCard({
                   }}
                 />
               )}
-              <Sparkles className="size-3.5 text-white" />
+              {sourceLabel?.toLowerCase().includes('커뮤니티') ? (
+                <Users className="size-3.5 text-white" />
+              ) : (
+                <Sparkles className="size-3.5 text-white" />
+              )}
             </div>
             <div className="flex flex-col">
               {sourceLabel && <span className="text-[10px] font-bold text-primary-500 uppercase">{sourceLabel}</span>}

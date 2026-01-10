@@ -21,7 +21,6 @@ export function FeaturePage() {
   const activeTab = tab || "community";
   
   const { scrollPositions, setScrollPosition } = useFeaturePageStore();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { id: "community", label: "커뮤니티" },
@@ -37,65 +36,58 @@ export function FeaturePage() {
 
   // 탭 변경 시 또는 마운트 시 스크롤 위치 복원
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      const savedPosition = useFeaturePageStore.getState().scrollPositions[activeTab] || 0;
-      const timeoutId = setTimeout(() => {
-        container.scrollTop = savedPosition;
-      }, 0);
-      return () => clearTimeout(timeoutId);
-    }
+    const savedPosition = useFeaturePageStore.getState().scrollPositions[activeTab] || 0;
+    const timeoutId = setTimeout(() => {
+      window.scrollTo({ top: savedPosition, left: 0, behavior: "auto" });
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [activeTab]);
 
   // 스크롤 발생 시 위치 저장
-  const handleScroll = () => {
-    if (scrollContainerRef.current) {
-      setScrollPosition(activeTab, scrollContainerRef.current.scrollTop);
-    }
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(activeTab, window.scrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeTab, setScrollPosition]);
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-surface-950">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
-      <div className="bg-white dark:bg-surface-950 px-5 pt-8 pb-4 z-10 flex-shrink-0">
-        <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => navigate(`/feature/${tab.id}`)}
-              className={cn(
-                "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
-                activeTab === tab.id 
-                  ? "text-surface-900 dark:text-white" 
-                  : "text-surface-300 dark:text-surface-700"
-              )}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
-              )}
-            </button>
-          ))}
+      <header className="sticky top-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
+        <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
+          <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => navigate(`/feature/${tab.id}`)}
+                className={cn(
+                  "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
+                  activeTab === tab.id 
+                    ? "text-surface-900 dark:text-white" 
+                    : "text-surface-300 dark:text-surface-700"
+                )}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <div 
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto scrollbar-hide"
-        style={{ 
-          willChange: 'scroll-position',
-          WebkitOverflowScrolling: 'touch',
-          transform: 'translateZ(0)',
-        }}
-      >
+      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
         <div className="pt-2" />
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
-      </div>
+      </main>
     </div>
   );
 }

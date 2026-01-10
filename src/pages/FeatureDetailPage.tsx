@@ -6,7 +6,7 @@ import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap } from "@/enti
 import { useMySubscriptions, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets/PlaceCard";
-import { List, Map as MapIcon, Loader2, RotateCcw } from "lucide-react";
+import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 import naverIcon from "@/assets/images/naver-map-logo.png";
@@ -41,6 +41,20 @@ export function FeatureDetailPage() {
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // 페이지 마운트 시 window 스크롤 초기화
+  useEffect(() => {
+    if (viewMode === 'list') {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, []);
+
+  // 뷰 모드 변경 시 스크롤 초기화
+  useEffect(() => {
+    if (viewMode === 'list') {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, [viewMode]);
+
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage || viewMode !== 'list') return;
 
@@ -70,20 +84,36 @@ export function FeatureDetailPage() {
 
   const { data: info } = useFeatureInfo({ type: type as any, id: id || "" });
   
+  // URL type을 subscription_type으로 변환
+  const subscriptionType = useMemo(() => {
+    if (type === 'folder') return 'naver_folder';
+    if (type === 'youtube') return 'youtube_channel';
+    if (type === 'community') return 'community_region';
+    return type;
+  }, [type]);
+  
   // 구독 정보 조회
   const { data: subscriptions } = useMySubscriptions();
-  const { mutate: toggleSubscription } = useToggleFeatureSubscription();
+  const { 
+    mutate: toggleSubscription, 
+    isPending: isTogglePending, 
+    variables: toggledFeature 
+  } = useToggleFeatureSubscription();
 
   const isSubscribed = useMemo(() => {
-    if (!subscriptions || !type || !id) return false;
+    if (!subscriptions || !subscriptionType || !id) return false;
     return subscriptions.some(sub => 
-      sub.subscription_type === type && sub.feature_id === id && sub.is_subscribed
+      sub.subscription_type === subscriptionType && sub.feature_id === id && sub.is_subscribed !== false
     );
-  }, [subscriptions, type, id]);
+  }, [subscriptions, subscriptionType, id]);
+
+  // 낙관적 업데이트를 위한 UI 상태 계산
+  const isCurrentlyToggling = isTogglePending && toggledFeature?.type === subscriptionType && toggledFeature?.id === id;
+  const displaySubscribed = isCurrentlyToggling ? !isSubscribed : isSubscribed;
 
   const handleToggleSubscription = () => {
-    if (!type || !id) return;
-    toggleSubscription({ type: type as any, id });
+    if (!subscriptionType || !id) return;
+    toggleSubscription({ type: subscriptionType, id });
   };
   
   // 지도용 전체 데이터 조회 (지도 버튼 클릭 시에만 활성화)
@@ -403,26 +433,37 @@ export function FeatureDetailPage() {
   }, [type, typedInfo]);
 
   return (
-    <div className="flex flex-col h-dvh bg-white dark:bg-surface-950 overflow-hidden relative">
+    <div className={cn(
+      "flex flex-col bg-white dark:bg-surface-950 relative",
+      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-screen"
+    )}>
       {/* Header */}
-      <DetailHeader
-        type="feature"
-        subType={type as any}
-        title={headerTitle}
-        subtitle={headerSubtitle}
-        thumbnailUrl={thumbnailUrl}
-        isSubscribed={isSubscribed}
-        onSubscribe={handleToggleSubscription}
-      />
+      <div className={cn(
+        viewMode === "list" ? "sticky top-0 z-40" : "relative z-40"
+      )}>
+        <DetailHeader
+          type="feature"
+          subType={type as any}
+          title={headerTitle}
+          subtitle={headerSubtitle}
+          thumbnailUrl={thumbnailUrl}
+          isSubscribed={displaySubscribed}
+          isSubscribing={isCurrentlyToggling}
+          onSubscribe={handleToggleSubscription}
+        />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className={cn(
+        "relative",
+        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full"
+      )}>
         {/* Map View */}
         <div 
           ref={mapContainer} 
           className={cn(
             "absolute inset-0 transition-opacity duration-300",
-            viewMode === "map" ? "opacity-100 z-10" : "opacity-0 -z-10"
+            viewMode === "map" ? "opacity-100 z-10" : "opacity-0 -z-10 pointer-events-none"
           )}
         />
         
@@ -438,32 +479,60 @@ export function FeatureDetailPage() {
         {/* List View */}
         <div 
           className={cn(
-            "absolute inset-0 bg-white dark:bg-surface-950 overflow-y-auto scrollbar-hide transition-opacity duration-300",
-            viewMode === "list" ? "opacity-100 z-10" : "opacity-0 -z-10"
+            "bg-white dark:bg-surface-950 transition-opacity duration-300",
+            viewMode === "list" ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 -z-10 pointer-events-none hidden"
           )}
         >
           {isLoading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center py-40">
               <Loader2 className="size-8 text-surface-300 animate-spin" />
             </div>
           ) : (
             <>
               {/* Feature Info Summary */}
               <div className="px-5 py-6 flex flex-col gap-4">
-                <div className="flex items-center gap-4 py-2">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
-                    <span className="text-lg font-black text-surface-900 dark:text-white">
-                      {typedInfo?.place_count || places.length}
-                    </span>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
+                      <span className="text-lg font-black text-surface-900 dark:text-white">
+                        {typedInfo?.place_count || places.length}
+                      </span>
+                    </div>
+                    <div className="w-px h-8 bg-surface-100 dark:border-surface-800" />
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
+                      <span className="text-lg font-black text-surface-900 dark:text-white">
+                        {typedInfo?.subscriber_count || 0}
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-surface-100 dark:border-surface-800" />
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">구독</span>
-                    <span className="text-lg font-black text-surface-900 dark:text-white">
-                      {typedInfo?.subscriber_count || 0}
-                    </span>
-                  </div>
+                  {type === 'folder' && typedInfo?.share_id && (
+                    <button
+                      onClick={() => {
+                        const naverMapUrl = `https://map.naver.com/p/favorite/myPlace/folder/${typedInfo.share_id}?c=6.00,0,0,0,dh`;
+                        window.open(naverMapUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                      title="네이버 지도에서 보기"
+                    >
+                      <ExternalLink className="size-4" />
+                      <span className="text-xs font-bold">네이버 지도</span>
+                    </button>
+                  )}
+                  {type === 'youtube' && id && (
+                    <button
+                      onClick={() => {
+                        const youtubeUrl = `https://www.youtube.com/channel/${id}`;
+                        window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                      title="YouTube 채널에서 보기"
+                    >
+                      <ExternalLink className="size-4" />
+                      <span className="text-xs font-bold">채널 바로가기</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -484,7 +553,7 @@ export function FeatureDetailPage() {
               )}
 
               {places.length === 0 && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full text-surface-400 gap-2">
+                <div className="flex flex-col items-center justify-center py-40 text-surface-400 gap-2">
                   <p>장소가 없습니다.</p>
                 </div>
               )}

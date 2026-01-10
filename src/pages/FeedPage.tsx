@@ -180,13 +180,18 @@ export function FeedPage() {
                                item.source_type === 'naver_folder' ? '플레이스 폴더' :
                                item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
             let sourceTitle = item.source_title;
-            const sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
+            let sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
 
             if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
               const [domain, region] = sourceTitle.split('|');
               const communityName = communityMap[domain] || domain;
               sourceLabel = `커뮤니티 > ${communityName}`;
               sourceTitle = region;
+              // 커뮤니티인 경우 이미지를 undefined로 설정하여 아이콘 표시
+              sourceImage = undefined;
+            } else if (item.source_type === 'community_region') {
+              // 커뮤니티인 경우 이미지를 undefined로 설정하여 아이콘 표시
+              sourceImage = undefined;
             }
 
             return (

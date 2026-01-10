@@ -6,6 +6,7 @@ import type {
   YoutubeChannel, 
   CommunityContent, 
   CommunityRegion,
+  CommunityRegionInfo,
   PlaceUserReview,
   Feature
 } from "./types";
@@ -314,6 +315,16 @@ export const placeApi = {
   getYoutubeChannelInfo: async (channelId: string) => {
     const response = await apiClient.rpc<YoutubeChannel>("v2_get_youtube_channel_info", {
       p_channel_id: channelId,
+    });
+    return response.data[0];
+  },
+
+  /**
+   * 커뮤니티 지역 정보를 조회합니다.
+   */
+  getCommunityRegionInfo: async (regionName: string) => {
+    const response = await apiClient.rpc<CommunityRegionInfo>("v2_get_community_region_info", {
+      p_region_name: regionName,
     });
     return response.data[0];
   },

@@ -184,6 +184,8 @@ export interface NaverFolder {
   memo: string;
   place_count: number;
   preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+  share_id?: string;
+  is_subscribed?: boolean;
 }
 
 export interface YoutubeChannel {
@@ -193,6 +195,13 @@ export interface YoutubeChannel {
   description: string;
   place_count: number;
   preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+  is_subscribed?: boolean;
+}
+
+export interface CommunityRegionInfo {
+  region_name: string;
+  place_count: number;
+  is_subscribed?: boolean;
 }
 
 export interface CommunityContent {

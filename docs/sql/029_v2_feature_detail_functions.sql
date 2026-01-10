@@ -233,16 +233,19 @@ COMMENT ON FUNCTION public.v2_get_places_by_community_region IS '커뮤니티에
 GRANT EXECUTE ON FUNCTION public.v2_get_places_by_community_region TO authenticated, anon;
 
 -- 4. 네이버 폴더 정보 조회
+DROP FUNCTION IF EXISTS public.v2_get_naver_folder_info(bigint);
 CREATE OR REPLACE FUNCTION public.v2_get_naver_folder_info(p_folder_id bigint)
 RETURNS TABLE (
     folder_id bigint,
     name text,
     memo text,
-    place_count bigint
+    place_count bigint,
+    share_id text,
+    is_subscribed boolean
 ) 
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, public
+SET search_path = public, auth, public
 AS $$
 BEGIN
     RETURN QUERY
@@ -250,7 +253,17 @@ BEGIN
         f.folder_id,
         f.name::text,
         f.memo,
-        (SELECT count(*) FROM tbl_naver_folder_place fp WHERE fp.folder_id = f.folder_id) as place_count
+        (SELECT count(*) FROM tbl_naver_folder_place fp WHERE fp.folder_id = f.folder_id) as place_count,
+        f.share_id::text,
+        COALESCE((
+            SELECT EXISTS(
+                SELECT 1 FROM tbl_feature_subscription fs
+                WHERE fs.feature_type = 'naver_folder'
+                  AND fs.feature_id = f.folder_id::text
+                  AND fs.user_id = auth.uid()
+                  AND fs.deleted_at IS NULL
+            )
+        ), false) as is_subscribed
     FROM tbl_naver_folder f
     WHERE f.folder_id = p_folder_id;
 END;
@@ -260,17 +273,19 @@ COMMENT ON FUNCTION public.v2_get_naver_folder_info IS '네이버 폴더 정보�
 GRANT EXECUTE ON FUNCTION public.v2_get_naver_folder_info TO authenticated, anon;
 
 -- 5. 유튜브 채널 정보 조회
+DROP FUNCTION IF EXISTS public.v2_get_youtube_channel_info(text);
 CREATE OR REPLACE FUNCTION public.v2_get_youtube_channel_info(p_channel_id text)
 RETURNS TABLE (
     channel_id text,
     channel_title text,
     channel_thumbnail text,
     description text,
-    place_count bigint
+    place_count bigint,
+    is_subscribed boolean
 ) 
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, public
+SET search_path = public, auth, public
 AS $$
 BEGIN
     RETURN QUERY
@@ -279,7 +294,16 @@ BEGIN
         MAX(metadata->>'channelTitle') as c_title,
         MAX(metadata->'thumbnails'->'medium'->>'url') as c_thumb,
         MAX(metadata->'localized'->>'description') as c_desc,
-        count(DISTINCT place_id) as p_count
+        count(DISTINCT place_id) as p_count,
+        COALESCE((
+            SELECT EXISTS(
+                SELECT 1 FROM tbl_feature_subscription fs
+                WHERE fs.feature_type = 'youtube_channel'
+                  AND fs.feature_id = p_channel_id
+                  AND fs.user_id = auth.uid()
+                  AND fs.deleted_at IS NULL
+            )
+        ), false) as is_subscribed
     FROM tbl_place_features
     WHERE platform_type = 'youtube'
       AND status = 'active'
@@ -290,3 +314,39 @@ $$;
 
 COMMENT ON FUNCTION public.v2_get_youtube_channel_info IS '유튜브 채널 정보를 조회합니다.';
 GRANT EXECUTE ON FUNCTION public.v2_get_youtube_channel_info TO authenticated, anon;
+
+-- 6. 커뮤니티 지역 정보 조회
+CREATE OR REPLACE FUNCTION public.v2_get_community_region_info(p_region_name text)
+RETURNS TABLE (
+    region_name text,
+    place_count bigint,
+    is_subscribed boolean
+) 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        p_region_name as region_name,
+        count(DISTINCT pf.place_id) as place_count,
+        COALESCE((
+            SELECT EXISTS(
+                SELECT 1 FROM tbl_feature_subscription fs
+                WHERE fs.feature_type = 'community_region'
+                  AND fs.feature_id = p_region_name
+                  AND fs.user_id = auth.uid()
+                  AND fs.deleted_at IS NULL
+            )
+        ), false) as is_subscribed
+    FROM tbl_place_features pf
+    JOIN tbl_place p ON pf.place_id = p.id
+    WHERE pf.platform_type = 'community'
+      AND pf.status = 'active'
+      AND p.group1 = p_region_name;
+END;
+$$;
+
+COMMENT ON FUNCTION public.v2_get_community_region_info IS '커뮤니티 지역 정보를 조회합니다.';
+GRANT EXECUTE ON FUNCTION public.v2_get_community_region_info TO authenticated, anon;

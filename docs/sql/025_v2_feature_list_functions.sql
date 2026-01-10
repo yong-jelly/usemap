@@ -50,7 +50,7 @@ BEGIN
             ) p_sub
         ) as preview_places
     FROM tbl_naver_folder f
-    ORDER BY f.last_use_time DESC NULLS LAST, f.creation_time DESC
+    ORDER BY f.last_use_time DESC NULLS LAST
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;

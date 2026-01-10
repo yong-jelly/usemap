@@ -370,7 +370,7 @@ export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community
         case 'youtube':
           return placeApi.getYoutubeChannelInfo(params.id);
         case 'community':
-          return Promise.resolve({ name: params.id }); // 지역명 자체가 정보
+          return placeApi.getCommunityRegionInfo(params.id);
       }
     },
     enabled: !!params.id,
