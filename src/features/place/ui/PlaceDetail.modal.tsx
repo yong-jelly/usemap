@@ -106,6 +106,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [youtubeUrlInput, setYoutubeUrlInput] = useState('');
   const [showCommunityAddForm, setShowCommunityAddForm] = useState(false);
   const [communityUrlInput, setCommunityUrlInput] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 10;
 
   const [editingRating, setEditingRating] = useState(0);
   const [editingComment, setEditingComment] = useState('');
@@ -297,6 +299,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     const url = platform === 'youtube' ? youtubeUrlInput : communityUrlInput;
     if (!url.trim()) return;
     setIsRequestProcessing(true);
+    setRetryCount(0);
     try {
       let title: string | null = null;
       let metadata: any = null;
@@ -307,9 +310,32 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         if (error) throw new Error('YouTube 정보를 가져올 수 없습니다.');
         title = results.title; metadata = results;
       } else {
-        const { error, results } = await requestCommunityMetaService(url);
-        if (error) throw new Error('커뮤니티 정보를 가져올 수 없습니다.');
-        title = results.title; metadata = results;
+        // 커뮤니티 정보 가져오기 재시도 로직
+        let communityResults = null;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          setRetryCount(attempt);
+          try {
+            const { error: metaError, results } = await requestCommunityMetaService(url);
+            if (!metaError && results) {
+              communityResults = results;
+              break;
+            }
+          } catch (error) {
+            console.error(`커뮤니티 정보 가져오기 시도 ${attempt}/${maxRetries} 실패:`, error);
+          }
+
+          // 마지막 시도가 아니면 1초 대기
+          if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        }
+
+        if (!communityResults) {
+          throw new Error('커뮤니티 정보를 가져올 수 없습니다. 나중에 다시 시도해주세요.');
+        }
+
+        title = communityResults.title;
+        metadata = communityResults;
       }
       await upsertPlaceFeatureMutation.mutateAsync({
         p_business_id: placeId!, p_platform_type: platform, p_content_url: url, p_title: title, p_metadata: metadata
@@ -317,7 +343,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
       if (platform === 'youtube') { setYoutubeUrlInput(''); setShowYoutubeAddForm(false); }
       else { setCommunityUrlInput(''); setShowCommunityAddForm(false); }
     } catch (e: any) { alert(e.message); }
-    finally { setIsRequestProcessing(false); }
+    finally { 
+      setIsRequestProcessing(false);
+      setRetryCount(0);
+    }
   };
 
   const handleDeleteFeature = async () => {
@@ -663,7 +692,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 )}
               </section>
 
-              <section className="bg-surface-50 dark:bg-surface-900 -mx-4 px-4 py-8">
+              <section className="bg-surface-50 dark:bg-surface-900 -mx-4 px-4 py-8 relative">
+                {isRequestProcessing && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface-50/80 dark:bg-surface-900/80">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="size-6 animate-spin text-primary-600" />
+                      <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">
+                        {retryCount > 0 ? `처리중... ${retryCount}/${maxRetries}` : '처리중...'}
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <h3 className="text-[16px] font-bold mb-4">🔗 관련 콘텐츠</h3>
                 <div className="flex gap-2 mb-4">
                   <button 
