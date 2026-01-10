@@ -305,19 +305,7 @@ export function ExplorePage() {
                     {isSearching ? "검색 결과" : "탐색"}
                     <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
                   </h1>
-                  {isSearching ? (
-                    <div className="flex items-center gap-2 mt-2.5">
-                      <span className="text-[14px] font-bold text-primary-600 dark:text-primary-400 truncate max-w-[140px]">
-                        "{searchQueryDisplay}"
-                      </span>
-                      <button
-                        onClick={exitSearchMode}
-                        className="flex items-center gap-1 rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-xs font-bold text-surface-900 dark:text-white active:opacity-60 shrink-0"
-                      >
-                        검색 종료
-                      </button>
-                    </div>
-                  ) : (
+                  {!isSearching && (
                     <button 
                       onClick={() => setIsFilterOpen(true)}
                       className="flex items-center gap-1 mt-2.5 active:opacity-60"
@@ -502,77 +490,132 @@ export function ExplorePage() {
             )}
           </div>
         ) : isSearching ? (
-          searchResults.length > 0 ? (
-            <div className={cn(
-              layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
-            )}>
-              {searchResults.map((place) => {
-                if (layout === 'feed') {
-                  return <PlaceCard key={`search-${place.id}`} place={place} />;
-                }
+          <>
+            {/* 검색 키워드 및 종료 버튼 표시 - 검색 결과가 있을 때만 */}
+            {searchResults.length > 0 && (
+              <div className="relative mx-4 mb-3 mt-4 overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50 via-white to-surface-50 dark:from-primary-950/30 dark:via-surface-900 dark:to-surface-950 border border-primary-100/50 dark:border-surface-800 shadow-sm">
+                {/* 배경 장식 */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100/20 dark:bg-primary-900/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 
-                const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
-                const images = place.images || place.image_urls || [];
-                const hasImage = images.length > 0;
-                
-                return (
-                  <div 
-                    key={`search-${place.id}`}
-                    className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
-                    onClick={() => showPopup(place.id)}
-                  >
-                    {hasImage ? (
-                      <img 
-                        src={convertToNaverResizeImageUrl(images[0])} 
-                        className="w-full h-full object-cover"
-                        alt={place.name}
-                        loading="lazy"
-                        decoding="async"
-                        onError={handleImageError}
-                      />
-                    ) : (
-                      <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
-                    )}
+                <div className="relative p-4 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    {/* 아이콘 영역 */}
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-surface-800 shadow-sm flex-shrink-0 border border-primary-100/50 dark:border-surface-700">
+                      <Search className="size-5 text-primary-600 dark:text-primary-400" />
+                    </div>
                     
-                    {folders.length > 0 && (
-                      <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm">
-                        {folders.length}
-                      </span>
-                    )}
-
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                      <span className="text-[10px] text-white/80 font-bold truncate block">
-                        {place.group2} {place.group3}
-                      </span>
-                      <span className="text-[13px] text-white font-black truncate block leading-tight">
-                        {place.name}
-                      </span>
+                    {/* 텍스트 영역 */}
+                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-surface-500 dark:text-surface-400 uppercase tracking-wide">
+                          검색 결과
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-[10px] font-black">
+                          {searchResults.length}개
+                        </span>
+                      </div>
+                      
+                      {/* 검색 키워드 - 배지 형태로 강조 */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-surface-800 border border-primary-200/50 dark:border-primary-800/50 shadow-sm">
+                          <span className="text-sm font-black text-surface-900 dark:text-white leading-tight">
+                            "{searchQueryDisplay}"
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-40 text-center px-10">
-              <div className="size-20 bg-surface-50 dark:bg-surface-900 rounded-full flex items-center justify-center mb-6">
-                <Search className="size-10 text-surface-200 dark:text-surface-700" />
+                  
+                  {/* 종료 버튼 - 우측 상단 */}
+                  <button
+                    onClick={exitSearchMode}
+                    className="flex items-center justify-center size-9 rounded-xl bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-white dark:hover:bg-surface-800 active:opacity-60 flex-shrink-0 shadow-sm"
+                    aria-label="검색 종료"
+                  >
+                    <X className="size-4.5" />
+                  </button>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2 tracking-tight">
-                검색 결과가 없습니다
-              </h3>
-              <p className="text-surface-400 dark:text-surface-500 text-[14px] mb-10 leading-relaxed font-medium">
-                "{searchQueryDisplay}"에 대한 검색 결과가 없습니다.<br />
-                다른 검색어로 다시 시도해보세요.
-              </p>
-              <Button 
-                onClick={enterSearchMode}
-                variant="outline" 
-                className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 dark:border-surface-800 active:bg-surface-50 dark:active:bg-surface-900"
-              >
-                다시 검색하기
-              </Button>
-            </div>
-          )
+            )}
+            {searchResults.length > 0 ? (
+              <div className={cn(
+                layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+              )}>
+                {searchResults.map((place) => {
+                  if (layout === 'feed') {
+                    return <PlaceCard key={`search-${place.id}`} place={place} />;
+                  }
+                  
+                  const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+                  const images = place.images || place.image_urls || [];
+                  const hasImage = images.length > 0;
+                  
+                  return (
+                    <div 
+                      key={`search-${place.id}`}
+                      className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
+                      onClick={() => showPopup(place.id)}
+                    >
+                      {hasImage ? (
+                        <img 
+                          src={convertToNaverResizeImageUrl(images[0])} 
+                          className="w-full h-full object-cover"
+                          alt={place.name}
+                          loading="lazy"
+                          decoding="async"
+                          onError={handleImageError}
+                        />
+                      ) : (
+                        <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
+                      )}
+                      
+                      {folders.length > 0 && (
+                        <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm">
+                          {folders.length}
+                        </span>
+                      )}
+
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                        <span className="text-[10px] text-white/80 font-bold truncate block">
+                          {place.group2} {place.group3}
+                        </span>
+                        <span className="text-[13px] text-white font-black truncate block leading-tight">
+                          {place.name}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-40 text-center px-10">
+                <div className="size-20 bg-surface-50 dark:bg-surface-900 rounded-full flex items-center justify-center mb-6">
+                  <Search className="size-10 text-surface-200 dark:text-surface-700" />
+                </div>
+                <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2 tracking-tight">
+                  검색 결과가 없습니다
+                </h3>
+                <p className="text-surface-400 dark:text-surface-500 text-[14px] mb-10 leading-relaxed font-medium">
+                  "{searchQueryDisplay}"에 대한 검색 결과가 없습니다.<br />
+                  다른 검색어로 다시 시도해보세요.
+                </p>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={enterSearchMode}
+                    className="px-8 py-3 rounded-xl text-[15px] font-bold border-2 border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white active:bg-surface-50 dark:active:bg-surface-900"
+                  >
+                    다시 검색하기
+                  </button>
+                  <button 
+                    onClick={exitSearchMode}
+                    className="px-8 py-3 rounded-xl text-[15px] font-bold border-2 border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white active:bg-surface-50 dark:active:bg-surface-900"
+                  >
+                    종료
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         ) : isInitialLoading ? (
           <div className="space-y-3">
             {[...Array(2)].map((_, i) => (
