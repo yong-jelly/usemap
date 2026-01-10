@@ -87,6 +87,9 @@ export function ExplorePage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [filters]);
 
+  // 검색 모드이거나 검색 결과 표시 중일 때는 필터 쿼리 비활성화
+  const shouldFetchByFilters = !isSearchMode && !isSearching;
+  
   const {
     data,
     isLoading,
@@ -94,7 +97,7 @@ export function ExplorePage() {
     hasNextPage,
     fetchNextPage,
     isError,
-  } = usePlacesByFilters(filters);
+  } = usePlacesByFilters(filters, shouldFetchByFilters);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 

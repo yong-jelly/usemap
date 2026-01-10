@@ -229,7 +229,7 @@ export function usePlacesByTab(tabName: string, group1: string | null = null) {
 /**
  * 필터별 장소 목록을 무한 스크롤로 조회하는 Hook
  */
-export function usePlacesByFilters(filters: any) {
+export function usePlacesByFilters(filters: any, enabled: boolean = true) {
   return useInfiniteQuery({
     queryKey: placeKeys.filters(filters),
     queryFn: ({ pageParam = 0 }) => 
@@ -244,6 +244,7 @@ export function usePlacesByFilters(filters: any) {
       if (lastPage.length < 21) return undefined;
       return allPages.length * 21;
     },
+    enabled,
   });
 }
 
