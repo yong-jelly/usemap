@@ -17,8 +17,11 @@ import { THEMES } from "@/widgets/ExploreFilterSheet/ThemeTab";
 import { Button, Input, Skeleton } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
-import { PlaceSearchModal } from "@/features/place/ui/PlaceSearch.modal";
-import type { Place } from "@/entities/place/types";
+import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
+import { searchPlaceService } from "@/shared/api/edge-function";
+import { placeApi } from "@/entities/place/api";
+import type { Place, PlaceSearchSummary } from "@/entities/place/types";
+import { History, ChevronLeft } from "lucide-react";
 
 /**
  * 탐색 페이지 필터 상태 인터페이스
@@ -45,10 +48,15 @@ export function ExplorePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
   
-  // 검색 결과 상태
+  // 검색 상태
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchQueryDisplay, setSearchQueryDisplay] = useState("");
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+
+  const { history, saveToHistory, removeFromHistory, clearHistory } = useSearchHistory();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
   const showPopup = (id: string) => showPlaceModal(id);
@@ -153,169 +161,299 @@ export function ExplorePage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSearchResults = (results: Place[], query: string) => {
-    setSearchResults(results);
-    setSearchQueryDisplay(query);
-    setIsSearching(true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  const handleSearch = async (query: string) => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
+
+    setIsSearchLoading(true);
+    saveToHistory(trimmedQuery);
+    setSearchQueryDisplay(trimmedQuery);
+
+    try {
+      const res = await searchPlaceService(trimmedQuery);
+      if (!res.error && res.rows) {
+        const ids = res.rows.map((row: PlaceSearchSummary) => row.id);
+        if (ids.length > 0) {
+          const data = await placeApi.listPlacesByIds(ids);
+          const places = data.map(item => item.place_data);
+          setSearchResults(places);
+        } else {
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+      }
+      setIsSearching(true);
+      setIsSearchMode(false);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } catch (err) {
+      console.error("Search error:", err);
+      setSearchResults([]);
+      setIsSearching(true);
+    } finally {
+      setIsSearchLoading(false);
+    }
   };
 
   const exitSearchMode = () => {
+    setIsSearchMode(false);
     setIsSearching(false);
     setSearchResults([]);
+    setSearchQuery("");
     setSearchQueryDisplay("");
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
+
+  // 검색 모드 진입 시 포커스
+  useEffect(() => {
+    if (isSearchMode) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isSearchMode]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 1. 고정 통합 헤더 (FeaturePage 스타일) */}
       <header className="sticky top-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto">
-          {/* 상단 헤더 - 타이포 중심 + 우측 아이콘 영역 */}
-          <div className="px-5 pt-8 pb-4 flex items-end justify-between">
-            <div className="flex flex-col">
-              <h1 className="text-xl font-black text-surface-900 dark:text-white relative w-fit">
-                {isSearching ? "검색 결과" : "탐색"}
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
-              </h1>
-              {isSearching ? (
-                <div className="flex items-center gap-2 mt-2.5">
-                  <span className="text-[14px] font-bold text-primary-600 dark:text-primary-400">
-                    "{searchQueryDisplay}"
-                  </span>
-                  <button
-                    onClick={exitSearchMode}
-                    className="flex items-center gap-1 rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-xs font-bold text-surface-900 dark:text-white transition-colors active:opacity-60"
-                  >
-                    검색 종료
-                  </button>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => setIsFilterOpen(true)}
-                  className="flex items-center gap-1 mt-2.5 group active:opacity-60 transition-opacity"
-                >
-                  <span className="text-[14px] font-bold text-surface-400 dark:text-surface-500 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
-                    {filters.group2 || filters.group1} {filters.group3 && `· ${filters.group3}`}
-                  </span>
-                  <ChevronDown className="size-4 text-surface-300 dark:text-surface-600 group-hover:text-surface-400 dark:group-hover:text-surface-500 transition-colors" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-0.5">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                onClick={() => setIsSearchMode(true)}
+          {isSearchMode ? (
+            /* 검색 모드 헤더 */
+            <div className="flex h-14 items-center px-4 gap-2">
+              <button 
+                onClick={exitSearchMode}
+                className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
               >
-                <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
-              </Button>
-              <div className="relative">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                  onClick={() => setIsFilterOpen(true)}
-                >
-                  <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
-                </Button>
-                {activeExtraFilterCount > 0 && (
-                  <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
-                    {activeExtraFilterCount}
-                  </span>
+                <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-white" />
+              </button>
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-surface-300" />
+                <Input 
+                  ref={searchInputRef}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch(searchQuery);
+                  }}
+                  placeholder="장소, 메뉴, 지역 검색"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border-none h-11 pl-10 pr-10 rounded-xl font-bold focus-visible:ring-0 dark:text-white"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => {
+                      setSearchQuery("");
+                      setIsSearching(false);
+                      setSearchResults([]);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-500"
+                  >
+                    <X className="size-3" />
+                  </button>
                 )}
               </div>
-              
-              {/* 레이아웃 전환 버튼 */}
-              <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
-                <button 
-                  onClick={() => handleLayoutChange('feed')}
-                  className={cn(
-                    "p-1.5 rounded-lg transition-colors", 
-                    layout === 'feed' 
-                      ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                      : "text-surface-300 dark:text-surface-600"
-                  )}
-                >
-                  <ListIcon className="size-4.5" />
-                </button>
-                <button 
-                  onClick={() => handleLayoutChange('grid')}
-                  className={cn(
-                    "p-1.5 rounded-lg transition-colors", 
-                    layout === 'grid' 
-                      ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                      : "text-surface-300 dark:text-surface-600"
-                  )}
-                >
-                  <LayoutGrid className="size-4.5" />
-                </button>
-              </div>
+              <button 
+                onClick={() => handleSearch(searchQuery)}
+                disabled={!searchQuery.trim() || isSearchLoading}
+                className="ml-1 px-2 py-2 font-bold text-primary-600 disabled:text-surface-300 transition-colors"
+              >
+                {isSearchLoading ? <Loader2 className="size-5 animate-spin" /> : "검색"}
+              </button>
             </div>
-          </div>
+          ) : (
+            /* 일반 모드 헤더 */
+            <>
+              {/* 상단 헤더 - 타이포 중심 + 우측 아이콘 영역 */}
+              <div className="px-5 pt-8 pb-4 flex items-end justify-between">
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-black text-surface-900 dark:text-white relative w-fit">
+                    {isSearching ? "검색 결과" : "탐색"}
+                    <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                  </h1>
+                  {isSearching ? (
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <span className="text-[14px] font-bold text-primary-600 dark:text-primary-400">
+                        "{searchQueryDisplay}"
+                      </span>
+                      <button
+                        onClick={exitSearchMode}
+                        className="flex items-center gap-1 rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-xs font-bold text-surface-900 dark:text-white transition-colors active:opacity-60"
+                      >
+                        검색 종료
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => setIsFilterOpen(true)}
+                      className="flex items-center gap-1 mt-2.5 group active:opacity-60 transition-opacity"
+                    >
+                      <span className="text-[14px] font-bold text-surface-400 dark:text-surface-500 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
+                        {filters.group2 || filters.group1} {filters.group3 && `· ${filters.group3}`}
+                      </span>
+                      <ChevronDown className="size-4 text-surface-300 dark:text-surface-600 group-hover:text-surface-400 dark:group-hover:text-surface-500 transition-colors" />
+                    </button>
+                  )}
+                </div>
 
-          {/* 활성 필터 태그 (정리된 스타일) */}
-          {!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null) && (
-            <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
-              {(activeExtraFilterCount > 1 || (filters.group2 && activeExtraFilterCount > 0)) && (
-                <button 
-                  onClick={resetFilters}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
-                >
-                  <RotateCcw className="size-3" />
-                  초기화
-                </button>
-              )}
-              {filters.group2 && (
-                <div key={filters.group2} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold border border-blue-100 dark:border-blue-800/50 shrink-0">
-                  <span>{filters.group2}</span>
-                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                    setFilters(prev => ({ ...prev, group2: null }));
-                  }} />
-                </div>
-              )}
-              {filters.categories?.map(cat => (
-                <div key={cat} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 text-[11px] font-bold border border-surface-100 dark:border-surface-800 shrink-0">
-                  <span>{cat}</span>
-                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                    setFilters(prev => ({ ...prev, categories: prev.categories?.filter(c => c !== cat) || [] }));
-                  }} />
-                </div>
-              ))}
-              {filters.theme_codes?.map(themeCode => {
-                const theme = THEMES.find(t => t.code === themeCode);
-                return (
-                  <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-100 dark:border-indigo-800/50 shrink-0">
-                    <span>✨ {theme?.theme_name || themeCode}</span>
-                    <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                      setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
-                    }} />
+                <div className="flex items-center gap-0.5">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
+                    onClick={() => setIsSearchMode(true)}
+                  >
+                    <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
+                  </Button>
+                  <div className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
+                      onClick={() => setIsFilterOpen(true)}
+                    >
+                      <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
+                    </Button>
+                    {activeExtraFilterCount > 0 && (
+                      <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
+                        {activeExtraFilterCount}
+                      </span>
+                    )}
                   </div>
-                );
-              })}
-              {(filters.price_min !== null || filters.price_max !== null) && (
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-100 dark:border-orange-800/50 shrink-0">
-                  <span>
-                    💰 {filters.price_min === null ? `${filters.price_max! / 10000}만원 이하` : 
-                        filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
-                        `${filters.price_min! / 10000}~${filters.price_max! / 10000}만원`}
-                  </span>
-                  <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                    setFilters(prev => ({ ...prev, price_min: null, price_max: null }));
-                  }} />
+                  
+                  {/* 레이아웃 전환 버튼 */}
+                  <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
+                    <button 
+                      onClick={() => handleLayoutChange('feed')}
+                      className={cn(
+                        "p-1.5 rounded-lg transition-colors", 
+                        layout === 'feed' 
+                          ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
+                          : "text-surface-300 dark:text-surface-600"
+                      )}
+                    >
+                      <ListIcon className="size-4.5" />
+                    </button>
+                    <button 
+                      onClick={() => handleLayoutChange('grid')}
+                      className={cn(
+                        "p-1.5 rounded-lg transition-colors", 
+                        layout === 'grid' 
+                          ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
+                          : "text-surface-300 dark:text-surface-600"
+                      )}
+                    >
+                      <LayoutGrid className="size-4.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 활성 필터 태그 (정리된 스타일) */}
+              {!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null) && (
+                <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
+                  {(activeExtraFilterCount > 1 || (filters.group2 && activeExtraFilterCount > 0)) && (
+                    <button 
+                      onClick={resetFilters}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                    >
+                      <RotateCcw className="size-3" />
+                      초기화
+                    </button>
+                  )}
+                  {filters.group2 && (
+                    <div key={filters.group2} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold border border-blue-100 dark:border-blue-800/50 shrink-0">
+                      <span>{filters.group2}</span>
+                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                        setFilters(prev => ({ ...prev, group2: null }));
+                      }} />
+                    </div>
+                  )}
+                  {filters.categories?.map(cat => (
+                    <div key={cat} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 text-[11px] font-bold border border-surface-100 dark:border-surface-800 shrink-0">
+                      <span>{cat}</span>
+                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                        setFilters(prev => ({ ...prev, categories: prev.categories?.filter(c => c !== cat) || [] }));
+                      }} />
+                    </div>
+                  ))}
+                  {filters.theme_codes?.map(themeCode => {
+                    const theme = THEMES.find(t => t.code === themeCode);
+                    return (
+                      <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-100 dark:border-indigo-800/50 shrink-0">
+                        <span>✨ {theme?.theme_name || themeCode}</span>
+                        <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                          setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
+                        }} />
+                      </div>
+                    );
+                  })}
+                  {(filters.price_min !== null || filters.price_max !== null) && (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-100 dark:border-orange-800/50 shrink-0">
+                      <span>
+                        💰 {filters.price_min === null ? `${filters.price_max! / 10000}만원 이하` : 
+                            filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
+                            `${filters.price_min! / 10000}~${filters.price_max! / 10000}만원`}
+                      </span>
+                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
+                        setFilters(prev => ({ ...prev, price_min: null, price_max: null }));
+                      }} />
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </header>
 
       {/* 2. 메인 피드 영역 */}
       <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
-        {isSearching ? (
+        {isSearchMode ? (
+          /* 검색 기록 표시 */
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-surface-950 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[15px] font-black text-surface-900 dark:text-white">최근 검색어</h3>
+              {history.length > 0 && (
+                <button 
+                  onClick={clearHistory}
+                  className="text-[12px] font-bold text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors"
+                >
+                  전체 삭제
+                </button>
+              )}
+            </div>
+
+            {history.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {history.map((item, index) => (
+                  <div 
+                    key={`${item}-${index}`}
+                    className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 group"
+                  >
+                    <button 
+                      onClick={() => {
+                        setSearchQuery(item);
+                        handleSearch(item);
+                      }}
+                      className="text-sm font-bold text-surface-700 dark:text-surface-300 hover:text-primary-600 transition-colors"
+                    >
+                      {item}
+                    </button>
+                    <button 
+                      onClick={() => removeFromHistory(item)}
+                      className="p-0.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-800 text-surface-300 hover:text-surface-500 transition-colors"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-surface-300 dark:text-surface-700">
+                <History className="size-12 opacity-20 mb-4" />
+                <p className="text-sm font-bold">최근 검색 기록이 없습니다.</p>
+              </div>
+            )}
+          </div>
+        ) : isSearching ? (
           <div className={cn(
             layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
@@ -398,7 +536,10 @@ export function ExplorePage() {
                   다른 검색어로 다시 시도해보세요.
                 </p>
                 <Button 
-                  onClick={() => setIsSearchMode(true)} 
+                  onClick={() => {
+                    setIsSearchMode(true);
+                    setIsSearching(false);
+                  }} 
                   variant="outline" 
                   className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 dark:border-surface-800 active:bg-surface-50 dark:active:bg-surface-900"
                 >
@@ -544,13 +685,6 @@ export function ExplorePage() {
           </div>
         )}
       </main>
-
-      {/* 검색 모달 */}
-      <PlaceSearchModal 
-        isOpen={isSearchMode}
-        onClose={() => setIsSearchMode(false)}
-        onSearchResults={handleSearchResults}
-      />
 
       {/* 필터 바텀 시트 */}
       <ExploreFilterSheet
