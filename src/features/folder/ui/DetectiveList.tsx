@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { usePublicFolders } from "@/entities/folder/queries";
 import { FolderCard } from "./FolderCard";
 import { Button } from "@/shared/ui";
-import { Loader2, FolderHeart } from "lucide-react";
+import { Loader2, FolderHeart, FolderPlus } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 
@@ -53,7 +53,7 @@ export function DetectiveList() {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-4">
+    <div className="flex flex-col gap-6 py-1">
       {/* 공개 폴더 섹션 */}
       <div className="flex flex-col gap-4">
         <div className="mx-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-center justify-between gap-3">
@@ -61,21 +61,38 @@ export function DetectiveList() {
             <h2 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">추천 맛탐정</h2>
             <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">다른 사용자들이 공유한 맛집 리스트입니다.</p>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shrink-0 shadow-sm"
-            onClick={() => {
-              if (!isAuthenticated) {
-                openLogin();
-                return;
-              }
-              navigate("/profile/folder");
-            }}
-          >
-            <FolderHeart className="size-4" />
-            <span className="text-xs">내 폴더 관리</span>
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  openLogin();
+                  return;
+                }
+                navigate("/folder/create");
+              }}
+            >
+              <FolderPlus className="size-4" />
+              <span className="text-xs">맛탐정 생성</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  openLogin();
+                  return;
+                }
+                navigate("/profile/folder");
+              }}
+            >
+              <FolderHeart className="size-4" />
+              <span className="text-xs">내 폴더 관리</span>
+            </Button>
+          </div>
         </div>
         <div className="flex flex-col">
           {publicFolders.map((folder) => (
