@@ -9,7 +9,7 @@ import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
-import { Loader2, Heart } from "lucide-react";
+import { Loader2, Heart, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
 
 /**
  * 피쳐 페이지 컴포넌트
@@ -89,10 +89,28 @@ export function FeaturePage() {
           transform: 'translateZ(0)',
         }}
       >
-        {activeTab === "folder" && <NaverFolderList />}
-        {activeTab === "youtube" && <YoutubeChannelList />}
+        <div className="pt-2" />
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}
+        {activeTab === "folder" && <NaverFolderList />}
+        {activeTab === "youtube" && <YoutubeChannelList />}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 피쳐 페이지 상단 안내 공지 컴포넌트
+ */
+function FeatureInfoNotice({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
+  return (
+    <div className="mx-4 mb-2 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-start gap-3">
+      <div className="p-2 rounded-xl bg-white dark:bg-surface-800 shadow-sm flex-shrink-0">
+        <Icon className="size-5 text-surface-600 dark:text-surface-400" />
+      </div>
+      <div className="flex flex-col gap-0.5 pt-0.5">
+        <h4 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">{title}</h4>
+        <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -187,6 +205,11 @@ function NaverFolderList() {
 
   return (
     <div className="flex flex-col gap-4 py-4">
+      <FeatureInfoNotice 
+        icon={MapPin} 
+        title="플레이스 추천" 
+        description="네이버 지도 등에서 엄선된 테마별 맛집 리스트입니다." 
+      />
       {folders.map((folder) => (
         <section key={folder.folder_id} className="flex flex-col gap-2 px-4">
           <FeatureRowHeader 
@@ -259,6 +282,11 @@ function YoutubeChannelList() {
 
   return (
     <div className="flex flex-col gap-4 py-4">
+      <FeatureInfoNotice 
+        icon={Youtube} 
+        title="유튜브 맛집" 
+        description="인기 유튜브 채널에서 소개된 맛집들을 확인해보세요." 
+      />
       {channels.map((channel) => (
         <section key={channel.channel_id} className="flex flex-col gap-2 px-4">
           <FeatureRowHeader 
@@ -342,6 +370,11 @@ function CommunityList() {
 
   return (
     <div className="py-4 flex flex-col gap-4">
+      <FeatureInfoNotice 
+        icon={MessageSquare} 
+        title="커뮤니티 픽" 
+        description="다모앙, 클리앙 등 주요 커뮤니티 유저들이 추천하는 지역별 맛집입니다." 
+      />
       {/* 도메인 필터 */}
       <div className="flex items-center gap-2 px-4 mb-2 overflow-x-auto overflow-y-hidden scrollbar-hide">
         {domains.map((domain) => (
