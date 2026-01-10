@@ -282,17 +282,31 @@ export function ExplorePage() {
       {/* 2. 메인 피드 영역 */}
       <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
         {isInitialLoading ? (
-          <div className="space-y-8 mt-10 px-5">
+          <div className="space-y-3">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="size-10 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton className="h-3 w-40" />
+              <div key={i} className="bg-white dark:bg-surface-950">
+                {/* 이미지 스켈레톤 */}
+                <Skeleton className="aspect-[4/5] w-full" />
+                {/* 컨텐츠 스켈레톤 */}
+                <div className="px-4 pt-3 pb-4 space-y-3">
+                  {/* 액션 버튼 */}
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="size-6 rounded" />
+                    <Skeleton className="size-6 rounded" />
+                    <Skeleton className="size-6 rounded" />
+                  </div>
+                  {/* 장소명 */}
+                  <Skeleton className="h-5 w-40" />
+                  {/* 위치/별점 */}
+                  <Skeleton className="h-4 w-32" />
+                  {/* 해시태그 */}
+                  <div className="flex gap-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-14" />
                   </div>
                 </div>
-                <Skeleton className="aspect-square w-full rounded-2xl" />
+                <div className="h-2 bg-surface-50 dark:bg-surface-900" />
               </div>
             ))}
           </div>
@@ -328,7 +342,7 @@ export function ExplorePage() {
           </div>
         ) : (
           <div className={cn(
-            layout === 'feed' ? "flex flex-col pt-4" : "grid grid-cols-3 gap-0.5 pt-0.5"
+            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
             {places.map((place) => {
               const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
