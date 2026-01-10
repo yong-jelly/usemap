@@ -174,9 +174,15 @@ export function ExplorePage() {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return;
 
+    // 즉시 검색 결과 모드로 전환하고 로딩 표시
+    setIsSearching(true);
+    setIsSearchMode(false);
     setIsSearchLoading(true);
-    saveToHistory(trimmedQuery);
     setSearchQueryDisplay(trimmedQuery);
+    setSearchResults([]); // 이전 결과 초기화
+    
+    saveToHistory(trimmedQuery);
+    window.scrollTo({ top: 0, behavior: 'instant' });
 
     try {
       const res = await searchPlaceService(trimmedQuery);
@@ -201,13 +207,9 @@ export function ExplorePage() {
       } else {
         setSearchResults([]);
       }
-      setIsSearching(true);
-      setIsSearchMode(false);
-      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch (err) {
       console.error("Search error:", err);
       setSearchResults([]);
-      setIsSearching(true);
     } finally {
       setIsSearchLoading(false);
     }
@@ -431,7 +433,13 @@ export function ExplorePage() {
 
       {/* 2. 메인 피드 영역 */}
       <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
-        {isSearchMode ? (
+        {isSearchLoading ? (
+          /* 검색 중 로딩 상태 */
+          <div className="flex flex-col items-center justify-center py-40 gap-4">
+            <Loader2 className="size-10 text-primary-500 animate-spin" />
+            <p className="text-surface-400 font-bold">"{searchQueryDisplay}" 검색 중...</p>
+          </div>
+        ) : isSearchMode ? (
           /* 검색 기록 표시 */
           <div className="p-5">
             <div className="flex items-center justify-between mb-4">
