@@ -57,7 +57,7 @@ BEGIN
     SELECT r.id, r.user_id, r.place_id, r.review_content, r.score, r.media_urls, r.gender_code, r.age_group_code, r.is_private, r.is_active, r.created_at, r.updated_at, (r.user_id = auth.uid()),
         (SELECT COALESCE(jsonb_agg(jsonb_build_object('code', m.tag_code, 'label', t.tag_label, 'is_positive', t.is_positive, 'group', t.tag_group)), '[]'::jsonb) FROM tbl_place_user_review_tag_map m LEFT JOIN tbl_place_review_tag_master t ON m.tag_code = t.tag_code WHERE m.review_id = r.id),
         jsonb_build_object('nickname', COALESCE(u.nickname, ''), 'profile_image_url', u.profile_image_url)
-    FROM tbl_place_user_review r LEFT JOIN tbl_user_profile u ON r.user_id = u.auth_user_id WHERE r.id = p_review_id AND r.is_active = TRUE;
+    FROM tbl_place_user_review r LEFT JOIN tbl_user_profile u ON r.user_id = u.auth_user_id WHERE r.id = p_review_id AND r.is_active = TRUE AND (r.is_private = FALSE OR r.user_id = auth.uid());
 END;
 $function$;
 
@@ -73,7 +73,10 @@ BEGIN
     SELECT r.id, r.user_id, r.place_id, r.review_content, r.score, r.media_urls, r.gender_code, r.age_group_code, r.is_private, r.is_active, r.created_at, r.updated_at, (r.user_id = auth.uid()),
         (SELECT COALESCE(jsonb_agg(jsonb_build_object('code', m.tag_code, 'label', t.tag_label, 'is_positive', t.is_positive, 'group', t.tag_group)), '[]'::jsonb) FROM tbl_place_user_review_tag_map m LEFT JOIN tbl_place_review_tag_master t ON m.tag_code = t.tag_code WHERE m.review_id = r.id),
         jsonb_build_object('nickname', COALESCE(u.nickname, ''), 'profile_image_url', u.profile_image_url, 'gender_code', u.gender_code, 'age_group_code', u.age_group_code)
-    FROM tbl_place_user_review r LEFT JOIN tbl_user_profile u ON r.user_id = u.auth_user_id WHERE r.place_id = p_place_id AND r.is_active = TRUE
+    FROM tbl_place_user_review r LEFT JOIN tbl_user_profile u ON r.user_id = u.auth_user_id 
+    WHERE r.place_id = p_place_id 
+      AND r.is_active = TRUE
+      AND (r.is_private = FALSE OR r.user_id = auth.uid())
     ORDER BY r.created_at DESC LIMIT p_limit OFFSET p_offset;
 END;
 $function$;
