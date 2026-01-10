@@ -41,6 +41,22 @@ interface ExplorerFilterState {
 }
 
 /**
+ * 탐색 페이지 필터 기본 상태
+ */
+const DEFAULT_FILTERS: ExplorerFilterState = {
+  group1: "서울",
+  group2: "중구",
+  group3: "",
+  categories: [],
+  features: [],
+  theme_codes: [],
+  rating: null,
+  exclude_franchises: true,
+  price_min: null,
+  price_max: null,
+};
+
+/**
  * 탐색 페이지 컴포넌트
  */
 export function ExplorePage() {
@@ -62,20 +78,7 @@ export function ExplorePage() {
   // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
   const showPopup = (id: string) => showPlaceModal(id);
   
-  const defaultFilters: ExplorerFilterState = {
-    group1: "서울",
-    group2: "중구",
-    group3: "",
-    categories: [],
-    features: [],
-    theme_codes: [],
-    rating: null,
-    exclude_franchises: true,
-    price_min: null,
-    price_max: null,
-  };
-
-  const [filters, setFilters] = useState<ExplorerFilterState>(defaultFilters);
+  const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
 
   // 페이지 마운트 시 window 스크롤 초기화
   useEffect(() => {
@@ -101,8 +104,10 @@ export function ExplorePage() {
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // 무한 스크롤 Observer
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    // 검색 모드이거나 로딩 중, 또는 다음 페이지가 없으면 옵저버 실행 안함
+    if (!shouldFetchByFilters || !hasNextPage || isFetchingNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -111,8 +116,8 @@ export function ExplorePage() {
         }
       },
       { 
-        threshold: 0,
-        rootMargin: '200px' // 화면 하단 도착 200px 전에 로드 시작
+        threshold: 0.1,
+        rootMargin: '400px' // 여유 있게 미리 로드
       }
     );
 
@@ -126,11 +131,11 @@ export function ExplorePage() {
         observer.unobserve(currentTarget);
       }
     };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, shouldFetchByFilters]);
 
   const places = useMemo(() => (data?.pages.flatMap((page) => page) || []) as any[], [data]);
 
-  const resetFilters = () => setFilters(defaultFilters);
+  const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
   const isInitialLoading = isLoading && places.length === 0;
 
   const FALLBACK_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
@@ -656,7 +661,7 @@ export function ExplorePage() {
           </div>
         )}
 
-        {hasNextPage && !isInitialLoading && (
+        {hasNextPage && !isInitialLoading && shouldFetchByFilters && (
           <div ref={observerTarget} className="p-12 flex justify-center">
             <Loader2 className="size-6 text-surface-300 animate-spin" />
           </div>
