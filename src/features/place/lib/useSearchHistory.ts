@@ -1,42 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const SEARCH_HISTORY_KEY = "place_search_history";
 const MAX_HISTORY_COUNT = 10;
 
 export function useSearchHistory() {
-  const [history, setHistory] = useState<string[]>([]);
-
-  useEffect(() => {
-    const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY);
-    if (savedHistory) {
+  const [history, setHistory] = useState<string[]>(() => {
+    // 초기값을 동기적으로 불러오기 (SSR 고려)
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (saved) {
       try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error("Failed to parse search history", e);
+        return JSON.parse(saved);
+      } catch {
+        return [];
       }
     }
+    return [];
+  });
+
+  const saveToHistory = useCallback((searchTerm: string) => {
+    if (!searchTerm.trim()) return;
+    setHistory(prev => {
+      const newHistory = [
+        searchTerm,
+        ...prev.filter((item) => item !== searchTerm),
+      ].slice(0, MAX_HISTORY_COUNT);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
   }, []);
 
-  const saveToHistory = (searchTerm: string) => {
-    if (!searchTerm.trim()) return;
-    const newHistory = [
-      searchTerm,
-      ...history.filter((item) => item !== searchTerm),
-    ].slice(0, MAX_HISTORY_COUNT);
-    setHistory(newHistory);
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
-  };
+  const removeFromHistory = useCallback((searchTerm: string) => {
+    setHistory(prev => {
+      const newHistory = prev.filter((item) => item !== searchTerm);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
 
-  const removeFromHistory = (searchTerm: string) => {
-    const newHistory = history.filter((item) => item !== searchTerm);
-    setHistory(newHistory);
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
-  };
-
-  const clearHistory = () => {
+  const clearHistory = useCallback(() => {
     setHistory([]);
     localStorage.removeItem(SEARCH_HISTORY_KEY);
-  };
+  }, []);
 
   return {
     history,

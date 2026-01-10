@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
   Search, 
@@ -9,7 +9,9 @@ import {
   List as ListIcon,
   SquareX,
   RotateCcw,
-  Loader2
+  Loader2,
+  History,
+  ChevronLeft
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
@@ -21,7 +23,6 @@ import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import { placeApi } from "@/entities/place/api";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
-import { History, ChevronLeft } from "lucide-react";
 
 /**
  * 탐색 페이지 필터 상태 인터페이스
@@ -161,7 +162,7 @@ export function ExplorePage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = useCallback(async (query: string) => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return;
 
@@ -172,11 +173,20 @@ export function ExplorePage() {
     try {
       const res = await searchPlaceService(trimmedQuery);
       if (!res.error && res.rows) {
-        const ids = res.rows.map((row: PlaceSearchSummary) => row.id);
-        if (ids.length > 0) {
-          const data = await placeApi.listPlacesByIds(ids);
-          const places = data.map(item => item.place_data);
-          setSearchResults(places);
+        // 중복 ID 제거
+        const uniqueIds = [...new Set(res.rows.map((row: PlaceSearchSummary) => row.id))] as string[];
+        if (uniqueIds.length > 0) {
+          const data = await placeApi.listPlacesByIds(uniqueIds);
+          // 중복 place_data 제거 (ID 기준)
+          const seenIds = new Set<string>();
+          const uniquePlaces = data
+            .map(item => item.place_data)
+            .filter(place => {
+              if (seenIds.has(place.id)) return false;
+              seenIds.add(place.id);
+              return true;
+            });
+          setSearchResults(uniquePlaces);
         } else {
           setSearchResults([]);
         }
@@ -193,21 +203,29 @@ export function ExplorePage() {
     } finally {
       setIsSearchLoading(false);
     }
-  };
+  }, [saveToHistory]);
 
-  const exitSearchMode = () => {
+  const exitSearchMode = useCallback(() => {
     setIsSearchMode(false);
     setIsSearching(false);
     setSearchResults([]);
     setSearchQuery("");
     setSearchQueryDisplay("");
     window.scrollTo({ top: 0, behavior: 'instant' });
-  };
+  }, []);
+
+  const enterSearchMode = useCallback(() => {
+    setIsSearchMode(true);
+    setIsSearching(false);
+  }, []);
 
   // 검색 모드 진입 시 포커스
   useEffect(() => {
     if (isSearchMode) {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
+      // requestAnimationFrame으로 다음 프레임에 포커스
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
     }
   }, [isSearchMode]);
 
@@ -221,12 +239,12 @@ export function ExplorePage() {
             <div className="flex h-14 items-center px-4 gap-2">
               <button 
                 onClick={exitSearchMode}
-                className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                className="p-1.5 -ml-1.5 rounded-full active:bg-surface-100 dark:active:bg-surface-800"
               >
                 <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-white" />
               </button>
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-surface-300" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-surface-300 pointer-events-none" />
                 <Input 
                   ref={searchInputRef}
                   value={searchQuery}
@@ -235,15 +253,11 @@ export function ExplorePage() {
                     if (e.key === "Enter") handleSearch(searchQuery);
                   }}
                   placeholder="장소, 메뉴, 지역 검색"
-                  className="w-full bg-surface-50 dark:bg-surface-900 border-none h-11 pl-10 pr-10 rounded-xl font-bold focus-visible:ring-0 dark:text-white"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border-none h-11 pl-10 pr-10 rounded-xl font-bold focus-visible:ring-0 dark:text-white [-webkit-tap-highlight-color:transparent]"
                 />
                 {searchQuery && (
                   <button 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setIsSearching(false);
-                      setSearchResults([]);
-                    }}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-500"
                   >
                     <X className="size-3" />
@@ -253,7 +267,7 @@ export function ExplorePage() {
               <button 
                 onClick={() => handleSearch(searchQuery)}
                 disabled={!searchQuery.trim() || isSearchLoading}
-                className="ml-1 px-2 py-2 font-bold text-primary-600 disabled:text-surface-300 transition-colors"
+                className="ml-1 px-3 py-2 font-bold text-primary-600 disabled:text-surface-300"
               >
                 {isSearchLoading ? <Loader2 className="size-5 animate-spin" /> : "검색"}
               </button>
@@ -270,12 +284,12 @@ export function ExplorePage() {
                   </h1>
                   {isSearching ? (
                     <div className="flex items-center gap-2 mt-2.5">
-                      <span className="text-[14px] font-bold text-primary-600 dark:text-primary-400">
+                      <span className="text-[14px] font-bold text-primary-600 dark:text-primary-400 truncate max-w-[140px]">
                         "{searchQueryDisplay}"
                       </span>
                       <button
                         onClick={exitSearchMode}
-                        className="flex items-center gap-1 rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-xs font-bold text-surface-900 dark:text-white transition-colors active:opacity-60"
+                        className="flex items-center gap-1 rounded-md border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-xs font-bold text-surface-900 dark:text-white active:opacity-60 shrink-0"
                       >
                         검색 종료
                       </button>
@@ -283,12 +297,12 @@ export function ExplorePage() {
                   ) : (
                     <button 
                       onClick={() => setIsFilterOpen(true)}
-                      className="flex items-center gap-1 mt-2.5 group active:opacity-60 transition-opacity"
+                      className="flex items-center gap-1 mt-2.5 active:opacity-60"
                     >
-                      <span className="text-[14px] font-bold text-surface-400 dark:text-surface-500 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
+                      <span className="text-[14px] font-bold text-surface-400 dark:text-surface-500">
                         {filters.group2 || filters.group1} {filters.group3 && `· ${filters.group3}`}
                       </span>
-                      <ChevronDown className="size-4 text-surface-300 dark:text-surface-600 group-hover:text-surface-400 dark:group-hover:text-surface-500 transition-colors" />
+                      <ChevronDown className="size-4 text-surface-300 dark:text-surface-600" />
                     </button>
                   )}
                 </div>
@@ -297,8 +311,8 @@ export function ExplorePage() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                    onClick={() => setIsSearchMode(true)}
+                    className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
+                    onClick={enterSearchMode}
                   >
                     <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
                   </Button>
@@ -306,13 +320,13 @@ export function ExplorePage() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
+                      className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
                       onClick={() => setIsFilterOpen(true)}
                     >
                       <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
                     </Button>
                     {activeExtraFilterCount > 0 && (
-                      <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
+                      <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold">
                         {activeExtraFilterCount}
                       </span>
                     )}
@@ -323,7 +337,7 @@ export function ExplorePage() {
                     <button 
                       onClick={() => handleLayoutChange('feed')}
                       className={cn(
-                        "p-1.5 rounded-lg transition-colors", 
+                        "p-1.5 rounded-lg", 
                         layout === 'feed' 
                           ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
                           : "text-surface-300 dark:text-surface-600"
@@ -334,7 +348,7 @@ export function ExplorePage() {
                     <button 
                       onClick={() => handleLayoutChange('grid')}
                       className={cn(
-                        "p-1.5 rounded-lg transition-colors", 
+                        "p-1.5 rounded-lg", 
                         layout === 'grid' 
                           ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
                           : "text-surface-300 dark:text-surface-600"
@@ -348,40 +362,43 @@ export function ExplorePage() {
 
               {/* 활성 필터 태그 (정리된 스타일) */}
               {!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null) && (
-                <div className="flex items-center gap-2 px-5 pb-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
+                <div 
+                  className="flex items-center gap-2 px-5 pb-4 overflow-x-auto overflow-y-hidden scrollbar-hide"
+                  style={{ WebkitOverflowScrolling: 'touch' }}
+                >
                   {(activeExtraFilterCount > 1 || (filters.group2 && activeExtraFilterCount > 0)) && (
                     <button 
                       onClick={resetFilters}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 active:bg-surface-200 dark:active:bg-surface-700"
                     >
                       <RotateCcw className="size-3" />
                       초기화
                     </button>
                   )}
                   {filters.group2 && (
-                    <div key={filters.group2} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold border border-blue-100 dark:border-blue-800/50 shrink-0">
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold border border-blue-100 dark:border-blue-800/50 shrink-0">
                       <span>{filters.group2}</span>
-                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                        setFilters(prev => ({ ...prev, group2: null }));
-                      }} />
+                      <button className="size-3 active:opacity-60" onClick={() => setFilters(prev => ({ ...prev, group2: null }))}>
+                        <X className="size-3" />
+                      </button>
                     </div>
                   )}
                   {filters.categories?.map(cat => (
-                    <div key={cat} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 text-[11px] font-bold border border-surface-100 dark:border-surface-800 shrink-0">
+                    <div key={`cat-${cat}`} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 text-[11px] font-bold border border-surface-100 dark:border-surface-800 shrink-0">
                       <span>{cat}</span>
-                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                        setFilters(prev => ({ ...prev, categories: prev.categories?.filter(c => c !== cat) || [] }));
-                      }} />
+                      <button className="size-3 active:opacity-60" onClick={() => setFilters(prev => ({ ...prev, categories: prev.categories?.filter(c => c !== cat) || [] }))}>
+                        <X className="size-3" />
+                      </button>
                     </div>
                   ))}
                   {filters.theme_codes?.map(themeCode => {
                     const theme = THEMES.find(t => t.code === themeCode);
                     return (
-                      <div key={themeCode} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-100 dark:border-indigo-800/50 shrink-0">
+                      <div key={`theme-${themeCode}`} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-100 dark:border-indigo-800/50 shrink-0">
                         <span>✨ {theme?.theme_name || themeCode}</span>
-                        <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                          setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }));
-                        }} />
+                        <button className="size-3 active:opacity-60" onClick={() => setFilters(prev => ({ ...prev, theme_codes: prev.theme_codes?.filter(t => t !== themeCode) || [] }))}>
+                          <X className="size-3" />
+                        </button>
                       </div>
                     );
                   })}
@@ -392,9 +409,9 @@ export function ExplorePage() {
                             filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
                             `${filters.price_min! / 10000}~${filters.price_max! / 10000}만원`}
                       </span>
-                      <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                        setFilters(prev => ({ ...prev, price_min: null, price_max: null }));
-                      }} />
+                      <button className="size-3 active:opacity-60" onClick={() => setFilters(prev => ({ ...prev, price_min: null, price_max: null }))}>
+                        <X className="size-3" />
+                      </button>
                     </div>
                   )}
                 </div>
@@ -408,13 +425,13 @@ export function ExplorePage() {
       <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
         {isSearchMode ? (
           /* 검색 기록 표시 */
-          <div className="flex-1 overflow-y-auto bg-white dark:bg-surface-950 p-5">
+          <div className="p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[15px] font-black text-surface-900 dark:text-white">최근 검색어</h3>
               {history.length > 0 && (
                 <button 
                   onClick={clearHistory}
-                  className="text-[12px] font-bold text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors"
+                  className="text-[12px] font-bold text-surface-400 active:text-surface-600 dark:active:text-surface-200"
                 >
                   전체 삭제
                 </button>
@@ -425,21 +442,21 @@ export function ExplorePage() {
               <div className="flex flex-wrap gap-2">
                 {history.map((item, index) => (
                   <div 
-                    key={`${item}-${index}`}
-                    className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 group"
+                    key={`history-${index}-${item}`}
+                    className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800"
                   >
                     <button 
                       onClick={() => {
                         setSearchQuery(item);
                         handleSearch(item);
                       }}
-                      className="text-sm font-bold text-surface-700 dark:text-surface-300 hover:text-primary-600 transition-colors"
+                      className="text-sm font-bold text-surface-700 dark:text-surface-300 active:text-primary-600"
                     >
                       {item}
                     </button>
                     <button 
                       onClick={() => removeFromHistory(item)}
-                      className="p-0.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-800 text-surface-300 hover:text-surface-500 transition-colors"
+                      className="p-0.5 rounded-full text-surface-300 active:bg-surface-200 dark:active:bg-surface-800"
                     >
                       <X className="size-3" />
                     </button>
@@ -454,21 +471,23 @@ export function ExplorePage() {
             )}
           </div>
         ) : isSearching ? (
-          <div className={cn(
-            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
-          )}>
-            {searchResults.length > 0 ? (
-              searchResults.map((place) => {
-                const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
-                const images = place.images || place.image_urls || ((place as any).thumbnail ? [(place as any).thumbnail] : []);
-                const hasImage = images && images.length > 0;
+          searchResults.length > 0 ? (
+            <div className={cn(
+              layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+            )}>
+              {searchResults.map((place) => {
+                if (layout === 'feed') {
+                  return <PlaceCard key={`search-${place.id}`} place={place} />;
+                }
                 
-                return layout === 'feed' ? (
-                  <PlaceCard key={place.id} place={place} />
-                ) : (
+                const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+                const images = place.images || place.image_urls || [];
+                const hasImage = images.length > 0;
+                
+                return (
                   <div 
-                    key={place.id} 
-                    className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 transition-opacity cursor-pointer group flex items-center justify-center"
+                    key={`search-${place.id}`}
+                    className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
                     onClick={() => showPopup(place.id)}
                   >
                     {hasImage ? (
@@ -481,73 +500,48 @@ export function ExplorePage() {
                         onError={handleImageError}
                       />
                     ) : (
-                      <div className="flex flex-col items-center justify-center text-surface-300 dark:text-surface-700">
-                        <SquareX className="size-10 stroke-[1.5]" />
-                      </div>
+                      <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
                     )}
                     
-                    {/* 상단 우측 폴더 갯수 표시 */}
                     {folders.length > 0 && (
-                      <div className="absolute top-1.5 right-1.5 z-10">
-                        <span className="flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm shadow-sm">
-                          {folders.length}
-                        </span>
-                      </div>
+                      <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm">
+                        {folders.length}
+                      </span>
                     )}
 
-                    {/* 하단 정보 오버레이 */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 flex flex-col gap-0.5">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                       <span className="text-[10px] text-white/80 font-bold truncate block">
                         {place.group2} {place.group3}
                       </span>
-                      <div className="relative inline-block w-fit max-w-full">
-                        <span className="text-[13px] text-white font-black truncate block leading-tight">
-                          {place.name}
-                        </span>
-                        {/* 폴더 갯수에 따른 녹색선 */}
-                        {folders.length > 0 && (
-                          <div 
-                            className={cn(
-                              "absolute -bottom-0.5 left-0 w-full rounded-full",
-                              folders.length >= 15 ? "h-[2.5px] bg-[#1E8449]" :
-                              folders.length >= 12 ? "h-[2.2px] bg-[#229954]" :
-                              folders.length >= 9 ? "h-[2px] bg-[#27AE60]" :
-                              folders.length >= 6 ? "h-[1.8px] bg-[#2ECC71]" :
-                              folders.length >= 3 ? "h-[1.5px] bg-[#52BE80]" :
-                              "h-[1.2px] bg-[#ABEBC6]"
-                            )} 
-                          />
-                        )}
-                      </div>
+                      <span className="text-[13px] text-white font-black truncate block leading-tight">
+                        {place.name}
+                      </span>
                     </div>
                   </div>
                 );
-              })
-            ) : (
-              <div className="col-span-3 flex flex-col items-center justify-center py-40 text-center px-10">
-                <div className="size-20 bg-surface-50 dark:bg-surface-900 rounded-full flex items-center justify-center mb-6">
-                  <Search className="size-10 text-surface-200 dark:text-surface-700" />
-                </div>
-                <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2 tracking-tight">
-                  검색 결과가 없습니다
-                </h3>
-                <p className="text-surface-400 dark:text-surface-500 text-[14px] mb-10 leading-relaxed font-medium">
-                  "{searchQueryDisplay}"에 대한 검색 결과가 없습니다.<br />
-                  다른 검색어로 다시 시도해보세요.
-                </p>
-                <Button 
-                  onClick={() => {
-                    setIsSearchMode(true);
-                    setIsSearching(false);
-                  }} 
-                  variant="outline" 
-                  className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 dark:border-surface-800 active:bg-surface-50 dark:active:bg-surface-900"
-                >
-                  다시 검색하기
-                </Button>
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-40 text-center px-10">
+              <div className="size-20 bg-surface-50 dark:bg-surface-900 rounded-full flex items-center justify-center mb-6">
+                <Search className="size-10 text-surface-200 dark:text-surface-700" />
               </div>
-            )}
-          </div>
+              <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2 tracking-tight">
+                검색 결과가 없습니다
+              </h3>
+              <p className="text-surface-400 dark:text-surface-500 text-[14px] mb-10 leading-relaxed font-medium">
+                "{searchQueryDisplay}"에 대한 검색 결과가 없습니다.<br />
+                다른 검색어로 다시 시도해보세요.
+              </p>
+              <Button 
+                onClick={enterSearchMode}
+                variant="outline" 
+                className="rounded-2xl px-10 h-13 font-bold border-2 border-surface-100 dark:border-surface-800 active:bg-surface-50 dark:active:bg-surface-900"
+              >
+                다시 검색하기
+              </Button>
+            </div>
+          )
         ) : isInitialLoading ? (
           <div className="space-y-3">
             {[...Array(2)].map((_, i) => (
@@ -612,16 +606,18 @@ export function ExplorePage() {
             layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
             {places.map((place) => {
+              if (layout === 'feed') {
+                return <PlaceCard key={`feed-${place.id}`} place={place} />;
+              }
+
               const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
-              const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
-              const hasImage = images && images.length > 0;
+              const images = place.images || place.image_urls || [];
+              const hasImage = images.length > 0;
               
-              return layout === 'feed' ? (
-                <PlaceCard key={place.id} place={place} />
-              ) : (
+              return (
                 <div 
-                  key={place.id} 
-                  className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 transition-opacity cursor-pointer group flex items-center justify-center"
+                  key={`grid-${place.id}`}
+                  className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
                   onClick={() => showPopup(place.id)}
                 >
                   {hasImage ? (
@@ -634,44 +630,22 @@ export function ExplorePage() {
                       onError={handleImageError}
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-surface-300 dark:text-surface-700">
-                      <SquareX className="size-10 stroke-[1.5]" />
-                    </div>
+                    <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
                   )}
                   
-                  {/* 상단 우측 폴더 갯수 표시 */}
                   {folders.length > 0 && (
-                    <div className="absolute top-1.5 right-1.5 z-10">
-                      <span className="flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm shadow-sm">
-                        {folders.length}
-                      </span>
-                    </div>
+                    <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm">
+                      {folders.length}
+                    </span>
                   )}
 
-                  {/* 하단 정보 오버레이 */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 flex flex-col gap-0.5">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                     <span className="text-[10px] text-white/80 font-bold truncate block">
                       {place.group2} {place.group3}
                     </span>
-                    <div className="relative inline-block w-fit max-w-full">
-                      <span className="text-[13px] text-white font-black truncate block leading-tight">
-                        {place.name}
-                      </span>
-                      {/* 폴더 갯수에 따른 녹색선 */}
-                      {folders.length > 0 && (
-                        <div 
-                          className={cn(
-                            "absolute -bottom-0.5 left-0 w-full rounded-full",
-                            folders.length >= 15 ? "h-[2.5px] bg-[#1E8449]" :
-                            folders.length >= 12 ? "h-[2.2px] bg-[#229954]" :
-                            folders.length >= 9 ? "h-[2px] bg-[#27AE60]" :
-                            folders.length >= 6 ? "h-[1.8px] bg-[#2ECC71]" :
-                            folders.length >= 3 ? "h-[1.5px] bg-[#52BE80]" :
-                            "h-[1.2px] bg-[#ABEBC6]"
-                          )} 
-                        />
-                      )}
-                    </div>
+                    <span className="text-[13px] text-white font-black truncate block leading-tight">
+                      {place.name}
+                    </span>
                   </div>
                 </div>
               );
