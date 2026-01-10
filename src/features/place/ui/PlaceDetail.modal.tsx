@@ -538,6 +538,18 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         </button>
                       ))}
                     </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <button 
+                        onClick={() => setIsPrivate(!isPrivate)}
+                        className={cn(
+                          "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors",
+                          isPrivate ? "bg-surface-900 text-white" : "text-surface-400 hover:bg-surface-100"
+                        )}
+                      >
+                        {isPrivate ? <Lock className="size-3.5 fill-current" /> : <Lock className="size-3.5" />}
+                        {isPrivate ? "나만 보기 (비공개)" : "전체 공개"}
+                      </button>
+                    </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" onClick={resetReviewForm} className="flex-1 h-10 text-[13px] font-bold">취소</Button>
                       <Button onClick={handleSaveReview} className="flex-1 h-10 text-[13px] font-bold bg-primary-600 text-white">기록 완료</Button>
@@ -549,23 +561,95 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   <div className="space-y-3">
                     {displayedReviews.map(review => (
                       <article key={review.id} className="p-4 rounded-xl border border-surface-50 bg-white dark:bg-surface-900">
-                        <div className="flex gap-3">
-                          <img 
-                            src={review.user_profile?.profile_image_url || "/default-avatar.png"} 
-                            className="size-8 rounded-full bg-surface-100"
-                            loading="lazy" decoding="async"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-[13px]">{review.user_profile?.nickname || "익명"}</span>
-                              <span className="text-[11px] text-surface-400">{safeFormatDate(review.created_at)}</span>
+                        {editingReviewId === review.id ? (
+                          <div className="space-y-4">
+                            <div className="flex justify-between px-2">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <button key={s} onClick={() => setEditingRating(s)} className="active:scale-90 transition-transform">
+                                  <Star className={cn("size-8", s <= editingRating ? "text-amber-400 fill-current" : "text-surface-200")} />
+                                </button>
+                              ))}
                             </div>
-                            <div className="flex items-center gap-0.5 mb-2 text-amber-400">
-                              {[...Array(5)].map((_, i) => <Star key={i} className={cn("size-3", i < review.score ? "fill-current" : "text-surface-100")} />)}
+                            <textarea
+                              value={editingComment}
+                              onChange={(e) => setEditingComment(e.target.value)}
+                              className="w-full h-24 p-3 rounded-lg bg-surface-50 border-none resize-none text-[13px] focus:ring-1 focus:ring-primary-500"
+                              maxLength={200}
+                            />
+                            <div className="flex flex-wrap gap-1.5">
+                              {availableTags.map(tag => (
+                                <button
+                                  key={tag.code}
+                                  onClick={() => toggleEditTag(tag.code)}
+                                  className={cn(
+                                    "px-2.5 py-1 rounded-full text-[10px] font-bold",
+                                    editingTagCodes.includes(tag.code) ? "bg-primary-600 text-white" : "bg-white text-surface-400 border border-surface-100"
+                                  )}
+                                >
+                                  {tag.label}
+                                </button>
+                              ))}
                             </div>
-                            <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed">{review.review_content}</p>
+                            <div className="flex items-center justify-between pt-1">
+                              <button 
+                                onClick={() => setEditingIsPrivate(!editingIsPrivate)}
+                                className={cn(
+                                  "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors",
+                                  editingIsPrivate ? "bg-surface-900 text-white" : "text-surface-400 hover:bg-surface-100"
+                                )}
+                              >
+                                {editingIsPrivate ? <Lock className="size-3.5 fill-current" /> : <Lock className="size-3.5" />}
+                                {editingIsPrivate ? "나만 보기 (비공개)" : "전체 공개"}
+                              </button>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" onClick={() => setEditingReviewId(null)} className="flex-1 h-10 text-[13px] font-bold">취소</Button>
+                              <Button onClick={() => handleSaveEditReview(review.id)} className="flex-1 h-10 text-[13px] font-bold bg-primary-600 text-white">수정 완료</Button>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="flex gap-3">
+                            <img 
+                              src={review.user_profile?.profile_image_url || "/default-avatar.png"} 
+                              className="size-8 rounded-full bg-surface-100"
+                              loading="lazy" decoding="async"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="font-bold text-[13px] truncate">{review.user_profile?.nickname || "익명"}</span>
+                                  {review.is_private && <Lock className="size-3 text-surface-400 fill-current" />}
+                                </div>
+                                <span className="text-[11px] text-surface-400 shrink-0">{safeFormatDate(review.created_at)}</span>
+                              </div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-0.5 text-amber-400">
+                                  {[...Array(5)].map((_, i) => <Star key={i} className={cn("size-3", i < review.score ? "fill-current" : "text-surface-100")} />)}
+                                </div>
+                                {review.is_my_review && (
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => handleStartEditReview(review)} className="p-1 text-surface-400 hover:text-primary-500">
+                                      <Pencil className="size-3.5" />
+                                    </button>
+                                    <button onClick={() => setShowDeleteReviewConfirm(review.id)} className="p-1 text-surface-400 hover:text-rose-500">
+                                      <Trash2 className="size-3.5" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed">{review.review_content}</p>
+                              {review.tags && review.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-3">
+                                  {review.tags.map(tag => (
+                                    <span key={tag.code} className="text-[10px] text-surface-400 bg-surface-50 px-1.5 py-0.5 rounded">
+                                      {tag.label}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </article>
                     ))}
                     {publicReviews.length > 3 && !showAllReviews && (
