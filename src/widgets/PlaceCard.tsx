@@ -92,9 +92,13 @@ export function PlaceCard({
   const isLongComment = comment && comment.length > COMMENT_LIMIT;
   const displayComment = isCommentExpanded ? comment : (comment?.slice(0, COMMENT_LIMIT) + (isLongComment ? "..." : ""));
   
-  const handleFolderClick = (e: React.MouseEvent, folderId: string) => {
+  const handleFolderClick = (e: React.MouseEvent, folder: any) => {
     e.stopPropagation();
-    navigate(`/folder/${folderId}`);
+    if (folder.platform_type === "folder" && folder.metadata?.channelId) {
+      navigate(`/feature/detail/folder/${folder.metadata.channelId}`);
+    } else {
+      navigate(`/folder/${folder.id}`);
+    }
   };
   
   const handleFoldersToggle = (e: React.MouseEvent) => {
@@ -328,11 +332,11 @@ export function PlaceCard({
           ))}
           {folders.length > 0 && (
             <>
-              {isFoldersExpanded ? (
+              {isFoldersExpanded || folders.length === 1 ? (
                 folders.map((folder: any, i: number) => (
                   <button
                     key={folder.id || i}
-                    onClick={(e) => handleFolderClick(e, folder.id)}
+                    onClick={(e) => handleFolderClick(e, folder)}
                     className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
                   >
                     {folder.title || `폴더 ${i + 1}`}
