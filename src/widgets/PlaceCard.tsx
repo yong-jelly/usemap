@@ -30,6 +30,8 @@ interface PlaceCardProps {
   sourcePath?: string;
   addedAt?: string;
   comment?: string;
+  className?: string;
+  hideShadow?: boolean;
 }
 
 /**
@@ -45,7 +47,9 @@ export function PlaceCard({
   sourcePath,
   addedAt,
   comment,
-  imageAspectRatio = "aspect-[4/3]"
+  imageAspectRatio = "aspect-[4/3]",
+  className,
+  hideShadow = false
 }: PlaceCardProps) {
   const { show: showPlaceModal } = usePlacePopup();
   const [isLiked, setIsLiked] = useState(place?.experience?.is_liked || false);
@@ -131,7 +135,11 @@ export function PlaceCard({
   }, [displayImages.length]);
 
   return (
-    <article className="bg-white dark:bg-surface-950 shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+    <article className={cn(
+      "bg-white dark:bg-surface-950",
+      !hideShadow && "shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
+      className
+    )}>
       {/* 소스 정보 - 플랫한 스타일 */}
       {(sourceTitle || sourceLabel) && (
         <div className="px-4 pt-4 pb-2 flex items-center justify-between">

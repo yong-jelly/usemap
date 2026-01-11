@@ -668,8 +668,8 @@ export function FolderDetailPage() {
 
   return (
     <div className={cn(
-      "flex flex-col bg-white dark:bg-surface-950 relative",
-      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-screen"
+      "flex flex-col relative",
+      viewMode === "map" ? "h-dvh overflow-hidden bg-white dark:bg-surface-950" : "min-h-screen bg-surface-300 dark:bg-surface-900"
     )}>
       {/* 헤더 */}
       <div className={cn(
@@ -726,7 +726,7 @@ export function FolderDetailPage() {
         {/* 리스트 뷰 / 로딩 / 에러 상태 */}
         <div 
           className={cn(
-            "bg-white dark:bg-surface-950 transition-opacity duration-300",
+            "transition-opacity duration-300",
             viewMode === "list" ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 -z-10 pointer-events-none hidden"
           )}
         >
@@ -763,7 +763,7 @@ export function FolderDetailPage() {
           ) : (
             <>
               {/* 폴더 정보 요약 */}
-              <div className="px-5 py-6 flex flex-col gap-4">
+              <div className="px-5 py-6 flex flex-col gap-4 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-6">
                     <div className="flex flex-col gap-0.5">
@@ -799,18 +799,19 @@ export function FolderDetailPage() {
               </div>
 
               {/* 장소 목록 */}
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-3 pb-20">
                 {places.length > 0 ? (
                   <>
                     {places.map((item: any) => (
-                      <div key={item.place_id} className="flex flex-col">
+                      <div key={item.place_id} className="flex flex-col bg-white dark:bg-surface-950 overflow-hidden">
                         <PlaceCard 
                           place={item.place_data} 
                           showPrice={true}
                           addedAt={formatKoreanDate(item.added_at)}
+                          hideShadow={true}
                         />
                         {/* 메모 표시 및 편집 UI */}
-                        <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
+                        <div className="px-5 pb-5">
                           {item.comment ? (
                             <div className="flex flex-col gap-2">
                               <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
@@ -839,7 +840,7 @@ export function FolderDetailPage() {
                           )}
                         </div>
                         {folderInfo?.permission === 'invite' && (
-                          <div className="px-5 pb-5 bg-white dark:bg-surface-900 border-b-8 border-[#FFF9F5]">
+                          <div className="px-5 pb-5">
                             <FolderReviewSection 
                               folderId={id!}
                               placeId={item.place_id}
@@ -851,7 +852,7 @@ export function FolderDetailPage() {
                     ))}
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
                     <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
                       <Info className="size-10 text-surface-200" />
                     </div>

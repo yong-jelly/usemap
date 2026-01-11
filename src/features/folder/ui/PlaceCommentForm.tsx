@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, Loader2, Star, MapPin, Trash2 } from "lucide-react";
+import { ChevronLeft, Loader2, Star, MapPin, Trash2, FolderEdit } from "lucide-react";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { Button, ConfirmDialog } from "@/shared/ui";
 import type { Place } from "@/entities/place/types";
+import { FolderSelectionModal } from "@/features/place/ui/FolderSelection.modal";
 
 interface PlaceCommentFormProps {
   place: Place;
@@ -32,6 +33,7 @@ export function PlaceCommentForm({
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isFolderSelectionOpen, setIsFolderSelectionOpen] = useState(false);
 
   useEffect(() => {
     setComment(initialComment);
@@ -99,6 +101,13 @@ export function PlaceCommentForm({
               {initialComment ? "메모 수정" : "메모 작성"}
             </h1>
             <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsFolderSelectionOpen(true)}
+                className="p-2 text-surface-400 hover:text-primary-500 transition-colors"
+                title="폴더 관리"
+              >
+                <FolderEdit className="size-5" />
+              </button>
               {onDelete && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -162,11 +171,11 @@ export function PlaceCommentForm({
             </div>
 
             {/* 작성/수정 시간 정보 */}
-            {(addedAt || updatedAt) && (
+            {(addedAt || (updatedAt && initialComment)) && (
               <div className="px-5 py-3 bg-surface-50/50 dark:bg-surface-900/50 border-b border-surface-100 dark:border-surface-800 flex flex-col gap-1">
                 {addedAt && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-surface-400 uppercase tracking-wider">최초 작성</span>
+                    <span className="text-[10px] font-bold text-surface-400 uppercase tracking-wider">최초 추가</span>
                     <span className="text-[11px] font-medium text-surface-500">
                       {new Date(addedAt).toLocaleString('ko-KR', {
                         year: 'numeric',
@@ -178,7 +187,7 @@ export function PlaceCommentForm({
                     </span>
                   </div>
                 )}
-                {updatedAt && updatedAt !== addedAt && (
+                {updatedAt && initialComment && updatedAt !== addedAt && (
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-surface-400 uppercase tracking-wider">마지막 수정</span>
                     <span className="text-[11px] font-medium text-surface-500">
@@ -248,6 +257,17 @@ export function PlaceCommentForm({
         isLoading={isDeleting}
         variant="danger"
       />
+
+      {isFolderSelectionOpen && (
+        <FolderSelectionModal
+          placeId={place.id}
+          onClose={() => setIsFolderSelectionOpen(false)}
+          onSuccess={() => {
+            // 폴더 상태가 변경되었을 수 있으므로 필요한 경우 처리
+            // 여기서는 단순 닫기
+          }}
+        />
+      )}
     </>,
     document.body
   );
