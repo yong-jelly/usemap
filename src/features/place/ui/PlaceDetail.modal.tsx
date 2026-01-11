@@ -692,6 +692,72 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 )}
               </section>
 
+              {details?.menus && details.menus.length > 0 && (
+                <section>
+                  <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-50 mb-4">메뉴</h3>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    {visibleMenus.map((menu: any, index: number) => {
+                      const menuImage = menu.image || menu.images?.[0];
+                      const menuName = menu.text || menu.name || '메뉴명 없음';
+                      const menuPrice = menu.price || '';
+                      
+                      return (
+                        <div
+                          key={index}
+                          className="relative flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-900 p-0"
+                        >
+                          <div className="relative h-24 w-full flex-shrink-0 bg-gray-100 dark:bg-surface-800">
+                            {menuImage ? (
+                              <img
+                                src={convertToNaverResizeImageUrl(menuImage)}
+                                alt={menuName}
+                                className="h-full w-full object-cover object-center"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : (
+                              <div className="bg-surface-200 dark:bg-surface-800 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500 h-full w-full">
+                                <CookingPot className="size-6 mb-1" />
+                                <span className="text-[10px]">이미지 준비중</span>
+                              </div>
+                            )}
+                            {menu.recommend && (
+                              <div className="absolute top-2 left-2 flex items-center rounded bg-yellow-400 px-2 py-0.5 text-xs font-bold text-white shadow">
+                                <Star className="mr-1 h-3 w-3 fill-current" />
+                                대표
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-1 flex-col items-center justify-center p-2">
+                            <h3 className="mb-1 text-center text-xs text-gray-900 dark:text-gray-50 truncate w-full px-1">
+                              {menuName}
+                            </h3>
+                            {menuPrice && menuPrice !== '' && (
+                              <p className="text-xs text-gray-900 dark:text-gray-50">
+                                {typeof menuPrice === 'number' 
+                                  ? formatWithCommas(menuPrice, ',', false) + '원'
+                                  : menuPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'
+                                }
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {details.menus.length > MAX_VISIBLE_MENUS && !showAllMenus && (
+                    <button
+                      onClick={() => setShowAllMenus(true)}
+                      className="mt-4 w-full rounded-md border border-gray-800 dark:border-gray-600 py-2 text-sm font-medium text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-surface-800 transition-colors"
+                    >
+                      모든 메뉴 보기 ({details.menus.length}개)
+                    </button>
+                  )}
+                </section>
+              )}
+
               <section className="bg-surface-50 dark:bg-surface-900 -mx-4 px-4 py-8 relative">
                 {isRequestProcessing && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface-50/80 dark:bg-surface-900/80">
