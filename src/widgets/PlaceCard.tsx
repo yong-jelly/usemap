@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
+import { useToggleLike, useToggleSave } from "@/entities/place/queries";
 
 interface PlaceCardProps {
   place: any;
@@ -47,15 +48,41 @@ export function PlaceCard({
   imageAspectRatio = "aspect-[4/3]"
 }: PlaceCardProps) {
   const { show: showPlaceModal } = usePlacePopup();
-  const [isLiked, setIsLiked] = useState(place.interaction?.is_liked || false);
-  const [isSaved, setIsSaved] = useState(place.interaction?.is_saved || false);
+  const [isLiked, setIsLiked] = useState(place?.experience?.is_liked || false);
+  const [isSaved, setIsSaved] = useState(place?.experience?.is_saved || false);
+  const isReviewed = place?.experience?.user_review_id !== null;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFoldersExpanded, setIsFoldersExpanded] = useState(false);
   const [isCommentExpanded, setIsCommentExpanded] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const toggleLikeMutation = useToggleLike();
+  const toggleSaveMutation = useToggleSave();
   
   const showPopup = (id: string) => showPlaceModal(id);
+  
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newStatus = !isLiked;
+    setIsLiked(newStatus);
+    toggleLikeMutation.mutate({ 
+      likedId: place.id, 
+      likedType: 'place', 
+      refId: place.id 
+    });
+  };
+
+  const handleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newStatus = !isSaved;
+    setIsSaved(newStatus);
+    toggleSaveMutation.mutate({ 
+      savedId: place.id, 
+      savedType: 'place', 
+      refId: place.id 
+    });
+  };
   
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
   const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
@@ -80,6 +107,11 @@ export function PlaceCard({
   };
 
   useEffect(() => {
+    setIsLiked(place?.experience?.is_liked || false);
+    setIsSaved(place?.experience?.is_saved || false);
+  }, [place?.experience?.is_liked, place?.experience?.is_saved]);
+
+  useEffect(() => {
     const slider = sliderRef.current;
     if (!slider || displayImages.length <= 1) return;
 
@@ -95,7 +127,7 @@ export function PlaceCard({
   }, [displayImages.length]);
 
   return (
-    <article className="bg-white dark:bg-surface-950 border-b border-surface-50">
+    <article className="bg-white dark:bg-surface-950 shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
       {/* 소스 정보 - 플랫한 스타일 */}
       {(sourceTitle || sourceLabel) && (
         <div className="px-4 pt-4 pb-2 flex items-center justify-between">
@@ -197,28 +229,57 @@ export function PlaceCard({
       </div>
 
       {/* 컨텐츠 영역 - Flat & Modern */}
-      <div className="px-4 pt-4 pb-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-5">
-            <button onClick={() => setIsLiked(!isLiked)} className="active:scale-90 transition-transform">
-              <Heart className={cn("size-7", isLiked ? "fill-rose-500 text-rose-500" : "text-surface-700 dark:text-surface-300")} />
-            </button>
-            <button onClick={() => showPopup(place.id)} className="active:scale-90 transition-transform">
-              <MessageCircle className={cn(
-                "size-7", 
-                place.interaction?.is_reviewed 
-                  ? "fill-primary-500 text-primary-500" 
-                  : "text-surface-700 dark:text-surface-300"
-              )} />
-            </button>
-            <a href={`https://map.naver.com/p/entry/place/${place.id}`} target="_blank" rel="noopener noreferrer" className="active:scale-90 transition-transform" onClick={(e) => e.stopPropagation()}>
-              <MapPinned className="size-7 text-surface-700 dark:text-surface-300" />
-            </a>
-          </div>
-          <button onClick={() => setIsSaved(!isSaved)} className="active:scale-90 transition-transform">
-            <Bookmark className={cn("size-7", isSaved ? "fill-surface-900 text-surface-900" : "text-surface-700 dark:text-surface-300")} />
+      <div className="px-2 pt-1 pb-5">
+      {/* 인터랙션 버튼 - 모바일 최적화된 심플한 디자인 */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-1.5">
+          <button 
+            onClick={handleLike} 
+            className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+          >
+            <Heart className={cn(
+              "size-[26px] transition-colors", 
+              isLiked 
+                ? "fill-rose-500 text-rose-500" 
+                : "text-surface-600 dark:text-surface-400"
+            )} />
           </button>
+
+          <button 
+            onClick={() => showPopup(place.id)} 
+            className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+          >
+            <MessageCircle className={cn(
+              "size-[26px] transition-colors", 
+              isReviewed 
+                ? "fill-indigo-500 text-indigo-500" 
+                : "text-surface-600 dark:text-surface-400"
+            )} />
+          </button>
+
+          <a 
+            href={`https://map.naver.com/p/entry/place/${place.id}`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center justify-center size-10 rounded-full text-surface-600 dark:text-surface-400 transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MapPinned className="size-[26px]" />
+          </a>
         </div>
+
+        <button 
+          onClick={handleSave} 
+          className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+        >
+          <Bookmark className={cn(
+            "size-[26px] transition-colors", 
+            isSaved 
+              ? "fill-amber-500 text-amber-500" 
+              : "text-surface-600 dark:text-surface-400"
+          )} />
+        </button>
+      </div>
 
         <div className="cursor-pointer" onClick={() => showPopup(place.id)}>
           <div className="flex items-baseline gap-2 mb-1">
@@ -292,7 +353,6 @@ export function PlaceCard({
           )}
         </div>
       </div>
-      <div className="h-2 bg-surface-50" />
     </article>
   );
 }

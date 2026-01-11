@@ -479,7 +479,7 @@ export function FeatureDetailPage() {
         {/* List View */}
         <div 
           className={cn(
-            "bg-white dark:bg-surface-950 transition-opacity duration-300",
+            "bg-surface-300 dark:bg-surface-900 transition-opacity duration-300",
             viewMode === "list" ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 -z-10 pointer-events-none hidden"
           )}
         >
@@ -490,7 +490,7 @@ export function FeatureDetailPage() {
           ) : (
             <>
               {/* Feature Info Summary */}
-              <div className="px-5 py-6 flex flex-col gap-4">
+              <div className="px-5 py-6 flex flex-col gap-4 bg-white dark:bg-surface-950">
                 <div className="flex items-center justify-between gap-4 py-2">
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-0.5">
@@ -536,7 +536,7 @@ export function FeatureDetailPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-3">
                 {places.map((place) => (
                   <PlaceCard 
                     key={place.id} 

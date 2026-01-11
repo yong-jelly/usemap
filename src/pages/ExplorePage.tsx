@@ -435,7 +435,7 @@ export function ExplorePage() {
       </header>
 
       {/* 2. 메인 피드 영역 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
+      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-surface-300 dark:bg-surface-900 min-h-screen">
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */
           <div className="flex flex-col items-center justify-center py-40 gap-4">
@@ -539,7 +539,7 @@ export function ExplorePage() {
             )}
             {searchResults.length > 0 ? (
               <div className={cn(
-                layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+                layout === 'feed' ? "flex flex-col gap-3" : "grid grid-cols-3 gap-0.5 pt-0.5"
               )}>
                 {searchResults.map((place) => {
                   if (layout === 'feed') {
@@ -617,11 +617,11 @@ export function ExplorePage() {
             )}
           </>
         ) : isInitialLoading ? (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-surface-950">
+              <div key={i} className="bg-white dark:bg-surface-950 shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
                 {/* 이미지 스켈레톤 */}
-                <Skeleton className="aspect-[4/3] w-full" />
+                <Skeleton className="aspect-[4/3] w-full rounded-none" />
                 {/* 컨텐츠 스켈레톤 */}
                 <div className="px-4 pt-3 pb-4 space-y-3">
                   {/* 액션 버튼 */}
@@ -641,7 +641,6 @@ export function ExplorePage() {
                     <Skeleton className="h-4 w-14" />
                   </div>
                 </div>
-                <div className="h-2 bg-surface-50 dark:bg-surface-900" />
               </div>
             ))}
           </div>
@@ -677,7 +676,7 @@ export function ExplorePage() {
           </div>
         ) : (
           <div className={cn(
-            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+            layout === 'feed' ? "flex flex-col gap-3" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
             {places.map((place) => {
               if (layout === 'feed') {

@@ -163,7 +163,7 @@ export function FeedPage() {
           <Loader2 className="size-8 animate-spin text-surface-300" />
         </div>
       ) : feedItems.length > 0 ? (
-        <div className="flex-1 flex flex-col pb-20">
+        <div className="flex-1 flex flex-col gap-3 pb-20 bg-surface-300 dark:bg-surface-900">
           {feedItems.map((item: any, idx: number) => {
             const getSourcePath = () => {
               switch (item.source_type) {

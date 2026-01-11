@@ -316,9 +316,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           setRetryCount(attempt);
           try {
             const { error: metaError, results } = await requestCommunityMetaService(url);
+            
             if (!metaError && results) {
-              communityResults = results;
-              break;
+              // 클리앙 차단 패턴 체크 (notConnection.html?blockedIp)
+              const isClienBlocked = results.domain === 'clien.net' && 
+                                   results.url?.includes('notConnection.html?blockedIp');
+              
+              if (!isClienBlocked) {
+                communityResults = results;
+                break;
+              }
+              console.warn(`커뮤니티 정보 가져오기 시도 ${attempt}/${maxRetries} - 클리앙 차단 패턴 감지`);
             }
           } catch (error) {
             console.error(`커뮤니티 정보 가져오기 시도 ${attempt}/${maxRetries} 실패:`, error);
