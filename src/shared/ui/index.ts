@@ -9,6 +9,7 @@ export * from "./BottomSheet";
 export * from "./Drawer";
 export * from "./Tabs";
 export * from "./Dialog";
+export * from "./ConfirmDialog";
 export * from "./Skeleton";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";

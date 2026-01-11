@@ -13,7 +13,8 @@ import {
   useFolderPlacesForMap,
   useVerifyInviteCode,
   useToggleFolderSubscription,
-  useMySubscriptions
+  useMySubscriptions,
+  useRemovePlaceFromFolder
 } from "@/entities/folder/queries";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
@@ -331,6 +332,7 @@ export function FolderDetailPage() {
   const { data: folderInfo, isLoading: isInfoLoading } = useFolderInfo(id!);
   const { mutate: addPlace } = useAddPlaceToFolder();
   const { mutate: hideFolder } = useHideFolder();
+  const { mutate: removePlace } = useRemovePlaceFromFolder();
   const { 
     mutate: toggleSubscription, 
     isPending: isTogglePending, 
@@ -420,6 +422,24 @@ export function FolderDetailPage() {
           const errorMessage = error?.message || error?.meta?.message || '메모 저장에 실패했습니다.';
           alert(errorMessage);
           reject(error); // 에러 발생 시 Promise reject하여 화면 전환 방지
+        }
+      });
+    });
+  };
+
+  const handleDeletePlace = async () => {
+    if (!editingPlace) return;
+
+    return new Promise<void>((resolve, reject) => {
+      removePlace({ folderId: id!, placeId: editingPlace.placeId }, {
+        onSuccess: () => {
+          setEditingPlace(null);
+          resolve();
+        },
+        onError: (error: any) => {
+          const errorMessage = error?.message || error?.meta?.message || '장소 제거에 실패했습니다.';
+          alert(errorMessage);
+          reject(error);
         }
       });
     });
@@ -910,6 +930,7 @@ export function FolderDetailPage() {
           updatedAt={editingPlace.updatedAt}
           onBack={() => setEditingPlace(null)}
           onSave={handleSaveComment}
+          onDelete={canEdit ? handleDeletePlace : undefined}
           onClose={() => setEditingPlace(null)}
         />
       )}
