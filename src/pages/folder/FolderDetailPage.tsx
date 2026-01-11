@@ -264,7 +264,13 @@ export function FolderDetailPage() {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
-  const [editingPlace, setEditingPlace] = useState<{ placeId: string; place: any; comment?: string } | null>(null);
+  const [editingPlace, setEditingPlace] = useState<{ 
+    placeId: string; 
+    place: any; 
+    comment?: string;
+    addedAt?: string;
+    updatedAt?: string;
+  } | null>(null);
   const initialZoom = useRef<number | null>(null);
   const initialCenter = useRef<[number, number] | null>(null);
 
@@ -397,8 +403,8 @@ export function FolderDetailPage() {
     });
   };
 
-  const handleEditComment = (placeId: string, place: any, comment?: string) => {
-    setEditingPlace({ placeId, place, comment });
+  const handleEditComment = (placeId: string, place: any, comment?: string, addedAt?: string, updatedAt?: string) => {
+    setEditingPlace({ placeId, place, comment, addedAt, updatedAt });
   };
 
   const handleSaveComment = async (comment: string) => {
@@ -794,7 +800,7 @@ export function FolderDetailPage() {
                               </div>
                               {canEdit && (
                                 <button
-                                  onClick={() => handleEditComment(item.place_id, item.place_data, item.comment)}
+                                  onClick={() => handleEditComment(item.place_id, item.place_data, item.comment, item.added_at, item.updated_at)}
                                   className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
                                 >
                                   메모 수정
@@ -804,7 +810,7 @@ export function FolderDetailPage() {
                           ) : (
                             canEdit && (
                               <button
-                                onClick={() => handleEditComment(item.place_id, item.place_data)}
+                                onClick={() => handleEditComment(item.place_id, item.place_data, undefined, item.added_at, item.updated_at)}
                                 className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                               >
                                 + 메모 추가
@@ -900,6 +906,8 @@ export function FolderDetailPage() {
         <PlaceCommentForm
           place={editingPlace.place}
           initialComment={editingPlace.comment}
+          addedAt={editingPlace.addedAt}
+          updatedAt={editingPlace.updatedAt}
           onBack={() => setEditingPlace(null)}
           onSave={handleSaveComment}
           onClose={() => setEditingPlace(null)}

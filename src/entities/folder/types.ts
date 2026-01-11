@@ -31,6 +31,7 @@ export interface FolderPlace {
   place_id: string;
   place_data: Place;
   added_at: string;
+  updated_at?: string;
   comment?: string;
 }
 

@@ -3,18 +3,28 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, Loader2, Star, MapPin } from "lucide-react";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
-import { Button, Input } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 import type { Place } from "@/entities/place/types";
 
 interface PlaceCommentFormProps {
   place: Place;
   initialComment?: string;
+  addedAt?: string;
+  updatedAt?: string;
   onBack: () => void;
   onSave: (comment: string) => Promise<void> | void;
   onClose: () => void;
 }
 
-export function PlaceCommentForm({ place, initialComment = "", onBack, onSave, onClose }: PlaceCommentFormProps) {
+export function PlaceCommentForm({ 
+  place, 
+  initialComment = "", 
+  addedAt,
+  updatedAt,
+  onBack, 
+  onSave, 
+  onClose 
+}: PlaceCommentFormProps) {
   const [comment, setComment] = useState(initialComment);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +129,40 @@ export function PlaceCommentForm({ place, initialComment = "", onBack, onSave, o
               </div>
             </div>
           </div>
+
+          {/* 작성/수정 시간 정보 */}
+          {(addedAt || updatedAt) && (
+            <div className="px-5 py-3 bg-surface-50/50 dark:bg-surface-900/50 border-b border-surface-100 dark:border-surface-800 flex flex-col gap-1">
+              {addedAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-surface-400 uppercase tracking-wider">최초 작성</span>
+                  <span className="text-[11px] font-medium text-surface-500">
+                    {new Date(addedAt).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+              {updatedAt && updatedAt !== addedAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-surface-400 uppercase tracking-wider">마지막 수정</span>
+                  <span className="text-[11px] font-medium text-surface-500">
+                    {new Date(updatedAt).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 코멘트 입력 영역 */}
           <div className="p-5">
