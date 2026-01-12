@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_naver_folder (
     follow_count integer DEFAULT 0,
     view_count integer DEFAULT 0,
     url character varying(2048),
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_naver_folder_pkey PRIMARY KEY (folder_id)
 );
 

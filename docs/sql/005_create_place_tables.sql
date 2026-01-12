@@ -135,8 +135,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_place_feed_group (
     debug_good_taste_tags integer DEFAULT 0,
     debug_atmosphere_tags integer DEFAULT 0,
     debug_recent_features integer DEFAULT 0,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now())
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_place_feed_group_tab_score ON public.tbl_place_feed_group USING btree (tab_name, group1, total_score DESC);
@@ -178,9 +178,9 @@ CREATE TABLE IF NOT EXISTS public.tbl_place_view_stats (
     hour_bucket timestamp with time zone NOT NULL,
     view_count integer DEFAULT 1 NOT NULL,
     unique_sessions integer DEFAULT 1 NOT NULL,
-    last_viewed_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_viewed_at timestamp with time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_place_view_stats_pkey PRIMARY KEY (id),
     CONSTRAINT uk_tbl_place_view_stats_place_hour UNIQUE (place_id, hour_bucket)
 );

@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_like (
     liked_id text NOT NULL,
     liked_type text NOT NULL,
     liked boolean DEFAULT true NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     ref_liked_id character varying,
     CONSTRAINT tbl_like_pkey PRIMARY KEY (id),
     CONSTRAINT tbl_like_user_liked_item_unique UNIQUE (user_id, liked_id, liked_type),
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_save (
     saved_id text NOT NULL,
     saved_type text NOT NULL,
     saved boolean DEFAULT true NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     ref_saved_id text,
     CONSTRAINT tbl_save_pkey PRIMARY KEY (id),
     CONSTRAINT tbl_save_user_saved_item_unique UNIQUE (user_id, saved_id, saved_type),
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_visited (
     user_id uuid NOT NULL,
     place_id character varying NOT NULL,
     visited_at timestamp with time zone,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_visited_pkey PRIMARY KEY (id)
 );
 

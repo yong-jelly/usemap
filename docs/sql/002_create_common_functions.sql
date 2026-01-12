@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION public.update_updated_at_column()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-   NEW.updated_at = timezone('utc'::text, now());
+   NEW.updated_at = now();
    RETURN NEW;
 END;
 $function$;

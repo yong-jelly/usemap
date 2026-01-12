@@ -21,6 +21,8 @@ DECLARE
     v_place_comment_count int := 0;
     v_is_commented boolean := false;
     v_is_reviewed boolean := false;
+    v_visit_count int := 0;
+    v_last_visited_at timestamp with time zone := NULL;
     v_comments jsonb := '[]'::jsonb;
     v_tags jsonb := '[]'::jsonb;
 BEGIN
@@ -33,6 +35,10 @@ BEGIN
         SELECT saved INTO v_is_saved FROM public.tbl_save WHERE saved_id = p_place_id AND saved_type = 'place' AND user_id = v_user_id;
         SELECT EXISTS (SELECT 1 FROM public.tbl_comment_for_place WHERE business_id = p_place_id AND user_id = v_user_id AND is_active = true) INTO v_is_commented;
         SELECT EXISTS (SELECT 1 FROM public.tbl_place_user_review WHERE place_id = p_place_id AND user_id = v_user_id AND is_active = true) INTO v_is_reviewed;
+        
+        -- 방문 통계 추가
+        SELECT count(*), max(visited_at) INTO v_visit_count, v_last_visited_at 
+        FROM public.tbl_visited WHERE user_id = v_user_id AND place_id = p_place_id;
     END IF;
 
     RETURN jsonb_build_object(
@@ -42,7 +48,9 @@ BEGIN
         'is_saved', COALESCE(v_is_saved, false),
         'place_comment_count', COALESCE(v_place_comment_count, 0),
         'is_commented', COALESCE(v_is_commented, false),
-        'is_reviewed', COALESCE(v_is_reviewed, false)
+        'is_reviewed', COALESCE(v_is_reviewed, false),
+        'visit_count', COALESCE(v_visit_count, 0),
+        'last_visited_at', v_last_visited_at
     );
 END;
 $function$;

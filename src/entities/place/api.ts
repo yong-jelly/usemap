@@ -140,14 +140,57 @@ export const placeApi = {
   },
 
   /**
-   * 방문 기록을 저장하거나 취소합니다.
+   * 방문 기록을 저장하거나 수정합니다.
    */
-  toggleVisited: async (params: { placeId: string; cancel?: boolean }) => {
+  upsertVisited: async (params: {
+    placeId: string;
+    visitedAt?: string;
+    companion?: string;
+    note?: string;
+    visitId?: string;
+  }) => {
     const response = await apiClient.rpc<any>("v1_save_or_update_visited_place", {
       p_place_id: params.placeId,
-      p_cancel: params.cancel ?? false,
+      p_visited_at: params.visitedAt || new Date().toISOString(),
+      p_companion: params.companion || null,
+      p_note: params.note || null,
+      p_visit_id: params.visitId || null,
     });
-    return response.data;
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 방문 기록을 삭제합니다.
+   */
+  deleteVisited: async (visitId: string) => {
+    const response = await apiClient.rpc<any>("v1_delete_visited_place", {
+      p_visit_id: visitId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 특정 장소의 방문 히스토리를 조회합니다.
+   */
+  listVisitedHistory: async (placeId: string) => {
+    const response = await apiClient.rpc<any>("v1_list_visited_history", {
+      p_place_id: placeId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data; // jsonb_agg returns the array directly
+  },
+
+  /**
+   * 특정 장소의 방문 통계(횟수, 마지막 방문일)를 조회합니다.
+   */
+  getVisitStats: async (placeId: string) => {
+    const response = await apiClient.rpc<any>("v1_get_place_visit_stats", {
+      p_place_id: placeId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
   },
 
   /**

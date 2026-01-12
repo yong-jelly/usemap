@@ -28,7 +28,7 @@ CREATE POLICY "Allow anonymous access" ON public.tbl_bucket FOR SELECT USING (tr
 CREATE TABLE IF NOT EXISTS public.tbl_search_history (
     id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     keyword text NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
     result integer DEFAULT 0 NOT NULL,
     user_id uuid
 );

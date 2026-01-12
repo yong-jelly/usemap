@@ -41,6 +41,8 @@ export interface Place {
   features?: Feature[];
   experience?: {
     is_visited: boolean;
+    visit_count?: number;
+    last_visited_at?: string | null;
   } | null;
   group1?: string;
   group2?: string;

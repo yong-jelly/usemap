@@ -10,9 +10,9 @@ import {
   Lock,
   Loader2
 } from "lucide-react";
+import { useVisitHistory, useUpsertVisited, useDeleteVisited } from "@/entities/place/queries";
 import { Button, Input, ConfirmDialog } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
-import { ago } from "@/shared/lib/date";
 
 interface VisitRecord {
   id: string;
@@ -36,25 +36,19 @@ const MOCK_VISITS: VisitRecord[] = [
 
 type ViewMode = 'list' | 'add' | 'edit';
 
-export function VisitHistoryModal({ placeName, onClose }: VisitHistoryModalProps) {
-  const [visits, setVisits] = useState<VisitRecord[]>(MOCK_VISITS);
+export function VisitHistoryModal({ placeId, placeName, onClose }: VisitHistoryModalProps) {
+  const { data: visits = [], isLoading: isListLoading } = useVisitHistory(placeId);
+  const upsertMutation = useUpsertVisited();
+  const deleteMutation = useDeleteVisited(placeId);
+
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   // 폼 상태
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [companion, setCompanion] = useState('');
   const [note, setNote] = useState('');
-
-  // 모달이 열릴 때 body 스크롤 방지
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
 
   const resetForm = () => {
     setDate(new Date().toISOString().split('T')[0]);
@@ -75,41 +69,51 @@ export function VisitHistoryModal({ placeName, onClose }: VisitHistoryModalProps
 
   const goToEdit = (visit: VisitRecord) => {
     setEditingId(visit.id);
-    setDate(visit.date);
+    // date가 ISO string으로 올 수 있으므로 YYYY-MM-DD 형식으로 변환
+    setDate(new Date(visit.date).toISOString().split('T')[0]);
     setCompanion(visit.companion);
     setNote(visit.note);
     setViewMode('edit');
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    // 목업: 실제 API 호출 시뮬레이션
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const newVisit: VisitRecord = {
-      id: Date.now().toString(),
-      date,
-      companion,
-      note
-    };
-    setVisits([newVisit, ...visits]);
-    setIsSaving(false);
-    goToList();
+    try {
+      await upsertMutation.mutateAsync({
+        placeId,
+        visitedAt: new Date(date).toISOString(),
+        companion,
+        note,
+      });
+      goToList();
+    } catch (error: any) {
+      alert(error.message || "저장에 실패했습니다.");
+    }
   };
 
   const handleUpdate = async () => {
-    setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setVisits(prev => prev.map(v => v.id === editingId ? { ...v, date, companion, note } : v));
-    setIsSaving(false);
-    goToList();
+    if (!editingId) return;
+    try {
+      await upsertMutation.mutateAsync({
+        placeId,
+        visitId: editingId,
+        visitedAt: new Date(date).toISOString(),
+        companion,
+        note,
+      });
+      goToList();
+    } catch (error: any) {
+      alert(error.message || "수정에 실패했습니다.");
+    }
   };
 
   const handleDelete = async () => {
     if (!deleteTargetId) return;
-    setVisits(prev => prev.filter(v => v.id !== deleteTargetId));
-    setDeleteTargetId(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTargetId);
+      setDeleteTargetId(null);
+    } catch (error: any) {
+      alert(error.message || "삭제에 실패했습니다.");
+    }
   };
 
   const handleBackClick = () => {
@@ -119,6 +123,8 @@ export function VisitHistoryModal({ placeName, onClose }: VisitHistoryModalProps
       goToList();
     }
   };
+
+  const isSaving = upsertMutation.isPending;
 
   // 헤더 타이틀
   const getHeaderTitle = () => {
@@ -162,24 +168,14 @@ export function VisitHistoryModal({ placeName, onClose }: VisitHistoryModalProps
                 추가
               </button>
             )}
-            {viewMode === 'add' && (
+            {(viewMode === 'add' || viewMode === 'edit') && (
               <Button
-                onClick={handleSave}
+                onClick={viewMode === 'add' ? handleSave : handleUpdate}
                 disabled={isSaving}
                 className="h-8 px-4 rounded-full font-bold text-sm"
                 size="sm"
               >
-                {isSaving ? <Loader2 className="size-4 animate-spin" /> : "저장"}
-              </Button>
-            )}
-            {viewMode === 'edit' && (
-              <Button
-                onClick={handleUpdate}
-                disabled={isSaving}
-                className="h-8 px-4 rounded-full font-bold text-sm"
-                size="sm"
-              >
-                {isSaving ? <Loader2 className="size-4 animate-spin" /> : "수정완료"}
+                {isSaving ? <Loader2 className="size-4 animate-spin" /> : viewMode === 'add' ? "저장" : "수정완료"}
               </Button>
             )}
           </header>
@@ -197,141 +193,146 @@ export function VisitHistoryModal({ placeName, onClose }: VisitHistoryModalProps
             className="flex-1 overflow-y-auto pb-safe scrollbar-hide"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            {/* 추가/수정 폼 */}
-            {(viewMode === 'add' || viewMode === 'edit') && (
-              <div className="p-4 space-y-5">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
-                    <Calendar className="size-3.5" /> 언제 갔나요?
-                  </label>
-                  <Input 
-                    type="date" 
-                    value={date} 
-                    onChange={(e) => setDate(e.target.value)}
-                    className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
-                  />
-                </div>
-                
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
-                    <Users className="size-3.5" /> 누구랑 갔나요?
-                  </label>
-                  <Input 
-                    placeholder="예: 친구, 가족, 연인, 동료" 
-                    value={companion}
-                    onChange={(e) => setCompanion(e.target.value)}
-                    className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
-                    <History className="size-3.5" /> 간단한 메모
-                  </label>
-                  <textarea 
-                    placeholder="어떤 추억이 있었나요?"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    className={cn(
-                      "w-full min-h-[120px] p-4 rounded-xl",
-                      "bg-white dark:bg-surface-900",
-                      "border border-surface-200 dark:border-surface-800",
-                      "text-surface-900 dark:text-surface-50 text-[14px]",
-                      "placeholder:text-surface-400",
-                      "resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                    )}
-                  />
-                </div>
+            {isListLoading ? (
+              <div className="flex flex-col items-center justify-center h-full py-20">
+                <Loader2 className="size-8 animate-spin text-primary-500" />
               </div>
-            )}
-
-            {/* 목록 */}
-            {viewMode === 'list' && (
-              <div className="p-4">
-                {visits.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[12px] font-bold text-surface-400">
-                        전체 {visits.length}건
-                      </span>
+            ) : (
+              <>
+                {/* 추가/수정 폼 */}
+                {(viewMode === 'add' || viewMode === 'edit') && (
+                  <div className="p-4 space-y-5">
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
+                        <Calendar className="size-3.5" /> 언제 갔나요?
+                      </label>
+                      <Input 
+                        type="date" 
+                        value={date} 
+                        onChange={(e) => setDate(e.target.value)}
+                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
+                      />
                     </div>
                     
-                    {visits.map((visit) => (
-                      <div 
-                        key={visit.id}
-                        className="relative p-4 bg-surface-50 dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            {/* 날짜 + 상대 시간 */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[14px] font-bold text-surface-900 dark:text-surface-50">
-                                {new Date(visit.date).toLocaleDateString('ko-KR', { 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })}
-                              </span>
-                              <span className="text-[11px] text-primary-500 font-medium">
-                                {ago(visit.date)}
-                              </span>
-                            </div>
-                            
-                            {/* 동행인 태그 */}
-                            {visit.companion && (
-                              <div className="inline-flex items-center gap-1 px-2 py-1 mb-2 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg text-[11px] font-bold text-surface-600 dark:text-surface-400">
-                                <Users className="size-3" />
-                                {visit.companion}
-                              </div>
-                            )}
-
-                            {/* 메모 */}
-                            {visit.note && (
-                              <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed">
-                                {visit.note}
-                              </p>
-                            )}
-                          </div>
-                          
-                          {/* 수정/삭제 버튼 - 항상 표시 */}
-                          <div className="flex items-center gap-0.5 shrink-0">
-                            <button 
-                              onClick={() => goToEdit(visit)}
-                              className="p-2 text-surface-400 hover:text-primary-500 rounded-full"
-                            >
-                              <Pencil className="size-4" />
-                            </button>
-                            <button 
-                              onClick={() => setDeleteTargetId(visit.id)}
-                              className="p-2 text-surface-400 hover:text-rose-500 rounded-full"
-                            >
-                              <Trash2 className="size-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <div className="size-16 bg-surface-100 dark:bg-surface-900 rounded-full flex items-center justify-center mb-4">
-                      <History className="size-8 text-surface-300" />
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
+                        <Users className="size-3.5" /> 누구랑 갔나요?
+                      </label>
+                      <Input 
+                        placeholder="예: 친구, 가족, 연인, 동료" 
+                        value={companion}
+                        onChange={(e) => setCompanion(e.target.value)}
+                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
+                      />
                     </div>
-                    <p className="text-[15px] font-bold text-surface-900 dark:text-surface-50 mb-1">
-                      아직 방문 기록이 없어요
-                    </p>
-                    <p className="text-[13px] text-surface-400 mb-6">
-                      이 장소에서의 추억을 기록해보세요!
-                    </p>
-                    <Button 
-                      onClick={goToAdd}
-                      className="px-6 h-11 rounded-xl bg-primary-600 text-white font-bold"
-                    >
-                      첫 방문 기록하기
-                    </Button>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-bold text-surface-600 dark:text-surface-400 flex items-center gap-1.5">
+                        <History className="size-3.5" /> 간단한 메모
+                      </label>
+                      <textarea 
+                        placeholder="어떤 추억이 있었나요?"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        className={cn(
+                          "w-full min-h-[120px] p-4 rounded-xl",
+                          "bg-white dark:bg-surface-900",
+                          "border border-surface-200 dark:border-surface-800",
+                          "text-surface-900 dark:text-surface-50 text-[14px]",
+                          "placeholder:text-surface-400",
+                          "resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                        )}
+                      />
+                    </div>
                   </div>
                 )}
-              </div>
+
+                {/* 목록 */}
+                {viewMode === 'list' && (
+                  <div className="p-4">
+                    {visits.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[12px] font-bold text-surface-400">
+                            전체 {visits.length}건
+                          </span>
+                        </div>
+                        
+                        {visits.map((visit: any) => (
+                          <div 
+                            key={visit.id}
+                            className="relative p-4 bg-surface-50 dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                {/* 날짜 + 상대 시간 */}
+                                <div className="flex items-center gap-2 mb-2 text-left">
+                                  <span className="text-[14px] font-bold text-surface-900 dark:text-surface-50">
+                                    {new Date(visit.date).toLocaleDateString('ko-KR', { 
+                                      year: 'numeric', 
+                                      month: 'long', 
+                                      day: 'numeric' 
+                                    })}
+                                  </span>
+                                </div>
+                                
+                                {/* 동행인 태그 */}
+                                {visit.companion && (
+                                  <div className="inline-flex items-center gap-1 px-2 py-1 mb-2 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg text-[11px] font-bold text-surface-600 dark:text-surface-400">
+                                    <Users className="size-3" />
+                                    {visit.companion}
+                                  </div>
+                                )}
+
+                                {/* 메모 */}
+                                {visit.note && (
+                                  <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed text-left">
+                                    {visit.note}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              {/* 수정/삭제 버튼 - 항상 표시 */}
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                <button 
+                                  onClick={() => goToEdit(visit)}
+                                  className="p-2 text-surface-400 hover:text-primary-500 rounded-full"
+                                >
+                                  <Pencil className="size-4" />
+                                </button>
+                                <button 
+                                  onClick={() => setDeleteTargetId(visit.id)}
+                                  className="p-2 text-surface-400 hover:text-rose-500 rounded-full"
+                                >
+                                  <Trash2 className="size-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <div className="size-16 bg-surface-100 dark:bg-surface-900 rounded-full flex items-center justify-center mb-4">
+                          <History className="size-8 text-surface-300" />
+                        </div>
+                        <p className="text-[15px] font-bold text-surface-900 dark:text-surface-50 mb-1">
+                          아직 방문 기록이 없어요
+                        </p>
+                        <p className="text-[13px] text-surface-400 mb-6">
+                          이 장소에서의 추억을 기록해보세요!
+                        </p>
+                        <Button 
+                          onClick={goToAdd}
+                          className="px-6 h-11 rounded-xl bg-primary-600 text-white font-bold"
+                        >
+                          첫 방문 기록하기
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

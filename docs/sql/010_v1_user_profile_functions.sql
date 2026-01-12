@@ -43,7 +43,7 @@ BEGIN
         nickname = COALESCE(p_nickname, nickname),
         bio = COALESCE(p_bio, bio),
         profile_image_url = COALESCE(p_profile_image_url, profile_image_url),
-        updated_at = timezone('utc'::text, now())
+        updated_at = now()
     WHERE auth_user_id = v_user_id;
 
     RETURN QUERY SELECT * FROM public.tbl_user_profile WHERE auth_user_id = v_user_id;
@@ -88,7 +88,7 @@ BEGIN
         nickname = EXCLUDED.nickname,
         bio = COALESCE(EXCLUDED.bio, tbl_user_profile.bio),
         profile_image_url = COALESCE(EXCLUDED.profile_image_url, tbl_user_profile.profile_image_url),
-        updated_at = timezone('utc'::text, now());
+        updated_at = now();
 
     RETURN QUERY SELECT * FROM public.tbl_user_profile WHERE auth_user_id = v_user_id;
 END;

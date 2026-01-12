@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_tag_master_for_place (
     category character varying(20) NOT NULL,
     topic character varying(50) NOT NULL,
     level integer DEFAULT 1 NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
     CONSTRAINT tbl_tag_master_for_place_pkey PRIMARY KEY (id),
     CONSTRAINT tbl_tag_master_for_place_tag_name_key UNIQUE (tag_name),
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_place_tag (
     business_id text NOT NULL,
     tag_id uuid NOT NULL,
     additional_data jsonb,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_place_tag_pkey PRIMARY KEY (id),
     CONSTRAINT unique_user_business_tag UNIQUE (user_id, business_id, tag_id)
 );
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS public.tbl_tag_history (
     user_id uuid,
     action_type character varying(20) NOT NULL,
     change_details jsonb,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_tag_history_pkey PRIMARY KEY (id),
     CONSTRAINT tbl_tag_history_action_type_check CHECK (((action_type)::text = ANY ((ARRAY['CREATE'::character varying, 'UPDATE'::character varying, 'DELETE'::character varying])::text[])))
 );

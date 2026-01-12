@@ -92,7 +92,7 @@ BEGIN
             bio = COALESCE(p_bio, bio),
             profile_image_url = COALESCE(p_profile_image_url, profile_image_url),
             email = COALESCE(p_email, email),
-            updated_at = timezone('utc'::text, now())
+            updated_at = now()
         WHERE auth_user_id = v_current_user_id
         RETURNING to_jsonb(tbl_user_profile.*) INTO v_result;
     END IF;

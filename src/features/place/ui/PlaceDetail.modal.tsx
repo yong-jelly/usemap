@@ -34,7 +34,7 @@ import {
   useDeletePlaceFeature,
   useToggleLike,
   useToggleSave,
-  useToggleVisited
+  useVisitStats
 } from "@/entities/place/queries";
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
@@ -42,7 +42,7 @@ import { VisitHistoryModal } from "./VisitHistory.modal";
 import { useUserStore } from "@/entities/user";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
-import { ago, safeFormatDate } from "@/shared/lib/date";
+import { safeFormatDate } from "@/shared/lib/date";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { requestYouTubeMetaService, requestCommunityMetaService } from "@/shared/api/edge-function";
 import type { PlaceUserReview, Feature, ReviewTag } from "@/entities/place/types";
@@ -67,6 +67,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const { data: reviews = [] } = usePlaceUserReviews(placeId!);
   const { data: placeFeaturesData = [] } = usePlaceFeatures(placeId!);
   const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
+  const { data: visitStats } = useVisitStats(placeId!);
   
   const isDataStale = details && details.id !== placeId;
   const showLoading = isDetailsLoading || isDataStale;
@@ -440,7 +441,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
                   {details?.experience?.is_visited && (
                     <div className="absolute bottom-4 right-4 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-bold">
-                      방문완료
+                      다녀왔어요
                     </div>
                   )}
                 </>
@@ -494,9 +495,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               </div>
 
-              {/* 방문 기록 영역 - 테스트용: 두 가지 케이스 모두 표시 */}
-              <div className="space-y-3 pt-1">
-                {/* 케이스 1: 방문한 적 있음 */}
+              {/* 방문 기록 영역 */}
+              {visitStats && visitStats.visit_count > 0 ? (
                 <button
                   onClick={() => setShowVisitHistoryModal(true)}
                   className="w-full flex items-center justify-between py-2.5"
@@ -505,22 +505,23 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <div className="size-8 rounded-full bg-primary-500 flex items-center justify-center">
                       <MapPinCheck className="size-4 text-white" />
                     </div>
-                    <div className="flex flex-col items-start">
+                    <div className="flex flex-col items-start text-left">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-[15px] font-black text-surface-900 dark:text-white">3회</span>
+                        <span className="text-[15px] font-black text-surface-900 dark:text-white">
+                          {visitStats.visit_count}회
+                        </span>
                         <span className="text-[13px] text-surface-400">방문했어요</span>
                       </div>
-                      <span className="text-[11px] text-surface-400">마지막 방문 {ago('2026-01-07')}</span>
+                      <span className="text-[11px] text-surface-400">
+                        마지막 방문 {safeFormatDate(visitStats.last_visited_at, { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-950/50 rounded-full text-primary-600">
                     <span className="text-[12px] font-bold">기록 보기</span>
                   </div>
                 </button>
-
-                <div className="border-t border-dashed border-surface-100 dark:border-surface-800" />
-
-                {/* 케이스 2: 방문한 적 없음 - 가이드 형태 */}
+              ) : (
                 <button
                   onClick={() => isAuthenticated ? setShowVisitHistoryModal(true) : alert('로그인이 필요합니다.')}
                   className="w-full flex items-center justify-between py-2.5"
@@ -529,7 +530,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <div className="size-8 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center border-2 border-dashed border-surface-200 dark:border-surface-700">
                       <MapPin className="size-4 text-surface-400" />
                     </div>
-                    <div className="flex flex-col items-start">
+                    <div className="flex flex-col items-start text-left">
                       <span className="text-[14px] font-bold text-surface-700 dark:text-surface-200">여기 다녀오셨나요?</span>
                       <span className="text-[11px] text-surface-400">언제, 누구와 갔는지 기록해보세요</span>
                     </div>
@@ -538,15 +539,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <span className="text-[12px] font-bold text-white dark:text-surface-900">기록하기</span>
                   </div>
                 </button>
-              </div>
-              
-              {/* TODO: 실제 구현 시 조건부 렌더링으로 교체
-              {details?.experience?.is_visited ? (
-                // 방문한 적 있음 UI
-              ) : (
-                // 방문한 적 없음 UI (가이드 형태)
               )}
-              */}
 
               {folderFeatures.length > 0 && (
                 <div className="flex items-center gap-2 mt-4 overflow-x-auto scrollbar-hide pb-1">
@@ -564,11 +557,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             </div>
 
             <div className="p-4 space-y-8">
-              {details?.road && (
+              {/* {details?.road && (
                 <div className="p-4 bg-surface-50 dark:bg-surface-900 rounded-xl">
                   <p className="text-[14px] leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">{details.road}</p>
                 </div>
-              )}
+              )} */}
 
               <section id="review-section">
                 <div className="flex items-center justify-between mb-4">

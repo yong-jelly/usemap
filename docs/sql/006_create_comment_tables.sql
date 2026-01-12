@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS public.tbl_comment_for_place (
     parent_comment_id uuid,
     comment_level integer DEFAULT 0 NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_comment_for_place_pkey PRIMARY KEY (id),
     CONSTRAINT check_comment_hierarchy CHECK ((((comment_level = 0) AND (parent_comment_id IS NULL)) OR ((comment_level = 1) AND (parent_comment_id IS NOT NULL)))),
     CONSTRAINT tbl_comment_for_place_comment_level_check CHECK ((comment_level = ANY (ARRAY[0, 1]))),
@@ -49,7 +49,7 @@ CREATE POLICY "Allow users to deactivate their own comments" ON public.tbl_comme
 CREATE TABLE IF NOT EXISTS public.tbl_comment_likes_for_place (
     comment_id uuid NOT NULL,
     user_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT tbl_comment_likes_for_place_pkey PRIMARY KEY (comment_id, user_id)
 );
 
