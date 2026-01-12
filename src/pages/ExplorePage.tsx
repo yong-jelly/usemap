@@ -253,7 +253,7 @@ export function ExplorePage() {
   }, [isSearchMode]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
+    <div className="flex flex-col min-h-dvh bg-white dark:bg-surface-950">
       {/* 1. 고정 통합 헤더 (FeaturePage 스타일) */}
       <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto">
@@ -276,7 +276,7 @@ export function ExplorePage() {
                     if (e.key === "Enter") handleSearch(searchQuery);
                   }}
                   placeholder="장소, 메뉴, 지역 검색"
-                  className="w-full bg-surface-50 dark:bg-surface-900 border-none h-11 pl-10 pr-10 rounded-xl font-bold focus-visible:ring-0 dark:text-white [-webkit-tap-highlight-color:transparent]"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border-none h-11 pl-10 pr-10 rounded-xl font-bold focus-visible:ring-0 text-base dark:text-white [-webkit-tap-highlight-color:transparent]"
                 />
                 {searchQuery && (
                   <button 
@@ -436,9 +436,10 @@ export function ExplorePage() {
 
       {/* 2. 메인 피드 영역 */}
       <main className={cn(
-        "flex-1 w-full max-w-lg mx-auto pb-24 bg-surface-300 dark:bg-surface-900 min-h-screen",
-        isSearchMode ? "pt-16" : 
-        (!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : "pt-[110px]"
+        "flex-1 w-full max-w-lg mx-auto pb-24 min-h-dvh",
+        isSearchMode ? "pt-16 bg-white dark:bg-surface-950" : "bg-surface-300 dark:bg-surface-900",
+        (!isSearchMode && !isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : 
+        (!isSearchMode ? "pt-[110px]" : "")
       )}>
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */

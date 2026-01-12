@@ -12,7 +12,7 @@
   }
 
   body {
-    @apply min-h-screen bg-white text-surface-900 antialiased scrollbar-hide;
+    @apply min-h-dvh bg-white text-surface-900 antialiased scrollbar-hide;
     font-family: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
     letter-spacing: -0.01em;
   }

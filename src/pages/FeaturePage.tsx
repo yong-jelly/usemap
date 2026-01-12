@@ -54,7 +54,7 @@ export function FeaturePage() {
   }, [activeTab, setScrollPosition]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
+    <div className="flex flex-col min-h-dvh bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
       <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
@@ -81,7 +81,7 @@ export function FeaturePage() {
       </header>
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-24 bg-white dark:bg-surface-950 min-h-screen">
+      <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-24 bg-white dark:bg-surface-950 min-h-dvh">
         <div className="pt-2" />
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}

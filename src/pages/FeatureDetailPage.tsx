@@ -435,7 +435,7 @@ export function FeatureDetailPage() {
   return (
     <div className={cn(
       "flex flex-col bg-white dark:bg-surface-950 relative",
-      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-screen"
+      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-dvh"
     )}>
       {/* Header */}
       <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950">

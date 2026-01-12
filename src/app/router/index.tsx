@@ -86,14 +86,14 @@ function RootLayout() {
   const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
+    <div className="min-h-dvh bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
       {/* <ScrollToTop />
       <PageViewTracker /> */}
       {/* <Header /> */}
       {/* 메인 모바일 뷰 컨테이너 (최대 너비 512px) */}
-      {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
+      {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
       <main className={cn(
-        "max-w-lg mx-auto min-h-screen bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
+        "max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
         showBottomNav ? "pb-14" : "pb-0"
       )}>
         <Outlet />

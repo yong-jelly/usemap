@@ -91,7 +91,7 @@ function InviteCodeInput({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-dvh p-6 text-center">
       <div className="p-6 rounded-full bg-primary-100 dark:bg-primary-900/20 mb-6">
         <Key className="size-12 text-primary-500" />
       </div>
@@ -669,7 +669,7 @@ export function FolderDetailPage() {
   return (
     <div className={cn(
       "flex flex-col relative",
-      viewMode === "map" ? "h-dvh overflow-hidden bg-white dark:bg-surface-950" : "min-h-screen bg-surface-300 dark:bg-surface-900"
+      viewMode === "map" ? "h-dvh overflow-hidden bg-white dark:bg-surface-950" : "min-h-dvh bg-surface-300 dark:bg-surface-900"
     )}>
       {/* 헤더 */}
       <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950">
