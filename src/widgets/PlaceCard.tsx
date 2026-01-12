@@ -269,9 +269,9 @@ export function PlaceCard({
             className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
           >
             <MessageCircle className="size-[26px] text-surface-800 dark:text-surface-200" />
-            {(place.interaction?.place_comment_count ?? place.visitor_reviews_total ?? 0) > 0 && (
+            {(place.interaction ? (place.interaction.place_reviews_count ?? 0) : (place.visitor_reviews_total ?? 0)) > 0 && (
               <span className="text-[13px] font-bold text-surface-800 dark:text-surface-200">
-                {place.interaction?.place_comment_count ?? place.visitor_reviews_total}
+                {place.interaction ? place.interaction.place_reviews_count : place.visitor_reviews_total}
               </span>
             )}
           </button>

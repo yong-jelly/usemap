@@ -479,9 +479,9 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
                   >
                     <MessageCircle className="size-7 text-surface-700 dark:text-surface-300" />
-                    {(details?.interaction?.place_comment_count ?? details?.visitor_reviews_total ?? 0) > 0 && (
+                    {(details?.interaction?.place_reviews_count ?? 0) > 0 && (
                       <span className="text-[14px] font-bold text-surface-800 dark:text-surface-200">
-                        {details?.interaction?.place_comment_count ?? details?.visitor_reviews_total}
+                        {details?.interaction?.place_reviews_count}
                       </span>
                     )}
                   </button>
@@ -537,7 +537,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
                   </div>
                   <span className="text-surface-200">|</span>
-                  <span className="text-surface-500">리뷰 {details?.visitor_reviews_total || 0}</span>
+                  <span className="text-surface-500">리뷰 {details?.interaction?.place_reviews_count || 0}</span>
                 </div>
               </div>
 

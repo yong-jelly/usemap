@@ -35,6 +35,7 @@ export interface Place {
     is_liked: boolean;
     is_saved: boolean;
     place_comment_count: number;
+    place_reviews_count: number;
     is_commented: boolean;
     is_reviewed: boolean;
   };
@@ -148,6 +149,7 @@ export interface PlaceDetails {
   is_liked: boolean;
   is_saved: boolean;
   place_comment_count: number;
+  place_reviews_count: number;
   is_commented: boolean;
   is_reviewed: boolean;
   comments: PlaceComment[];
@@ -185,7 +187,14 @@ export interface NaverFolder {
   name: string;
   memo: string;
   place_count: number;
-  preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+  preview_places: (Partial<Place> & { 
+    thumbnail?: string; 
+    score?: number; 
+    review_count?: number;
+    place_liked_count?: number;
+    place_reviews_count?: number;
+    features?: any[];
+  })[];
   share_id?: string;
   is_subscribed?: boolean;
 }
@@ -196,7 +205,14 @@ export interface YoutubeChannel {
   channel_thumbnail: string;
   description: string;
   place_count: number;
-  preview_places: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
+  preview_places: (Partial<Place> & { 
+    thumbnail?: string; 
+    score?: number; 
+    review_count?: number;
+    place_liked_count?: number;
+    place_reviews_count?: number;
+    features?: any[];
+  })[];
   is_subscribed?: boolean;
 }
 
@@ -220,6 +236,9 @@ export interface CommunityContent {
   content_url: string;
   domain: string;
   published_at: string;
+  place_liked_count?: number;
+  place_reviews_count?: number;
+  features?: any[];
 }
 
 export interface CommunityRegion {

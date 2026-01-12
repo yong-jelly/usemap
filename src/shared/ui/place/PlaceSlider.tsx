@@ -65,6 +65,9 @@ export function PlaceSlider({
             category={item.category}
             score={item.score}
             reviewCount={item.review_count}
+            placeLikedCount={item.place_liked_count}
+            placeReviewsCount={item.place_reviews_count}
+            features={item.features}
             onClick={onItemClick}
             showRating={showRating}
             snap={snap}

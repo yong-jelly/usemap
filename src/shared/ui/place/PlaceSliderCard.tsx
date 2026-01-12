@@ -1,6 +1,6 @@
-import { Star, SquareX, Bookmark } from "lucide-react";
-import { convertToNaverResizeImageUrl } from "@/shared/lib";
+import { Star } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { PlaceThumbnail } from "./PlaceThumbnail";
 
 interface PlaceSliderCardProps {
   placeId: string;
@@ -10,6 +10,9 @@ interface PlaceSliderCardProps {
   category?: string;
   score?: number;
   reviewCount?: number;
+  placeLikedCount?: number;
+  placeReviewsCount?: number;
+  features?: any[];
   onClick?: (id: string) => void;
   showRating?: boolean;
   snap?: boolean;
@@ -23,6 +26,9 @@ export function PlaceSliderCard({
   category,
   score = 0,
   reviewCount = 0,
+  placeLikedCount = 0,
+  placeReviewsCount = 0,
+  features = [],
   onClick,
   showRating = false,
   snap = false,
@@ -33,35 +39,25 @@ export function PlaceSliderCard({
         "flex-shrink-0 w-36 cursor-pointer group",
         snap && "snap-start"
       )}
-      onClick={() => onClick?.(placeId)}
     >
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2 shadow-sm bg-surface-100 dark:bg-surface-800">
-        {thumbnail ? (
-          <img 
-            src={convertToNaverResizeImageUrl(thumbnail)} 
-            alt={name} 
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-surface-300 dark:text-surface-600">
-            <SquareX className="size-8 stroke-[1.5]" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-        <div className="absolute bottom-2 left-2 right-8 flex flex-col gap-0.5">
-          <span className="text-white text-[13px] font-bold line-clamp-1">{name}</span>
-          <div className="flex items-center gap-1 text-white/80 text-[10px] font-medium">
-            <span>{group2}</span>
-            <span className="opacity-50">•</span>
-            <span>{category}</span>
-          </div>
-        </div>
-        <button className="absolute bottom-2 right-2 p-1 text-white/90 hover:text-white transition-colors">
-          <Bookmark className="size-4" />
-        </button>
-      </div>
+      <PlaceThumbnail
+        placeId={placeId}
+        name={name}
+        thumbnail={thumbnail}
+        group2={group2}
+        category={category}
+        features={features}
+        interaction={{
+          place_liked_count: placeLikedCount,
+          place_reviews_count: placeReviewsCount,
+        }}
+        onClick={onClick}
+        aspectRatio="aspect-[3/4]"
+        rounded
+        showBadge
+        showUnderline
+        showCounts
+      />
       {showRating && (
         <div className="flex items-center gap-1.5 mt-1">
            <div className="flex items-center gap-0.5">

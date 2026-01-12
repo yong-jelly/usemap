@@ -309,7 +309,7 @@ export const placeApi = {
    * 네이버 폴더 상세 장소 목록을 조회합니다.
    */
   getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number }) => {
-    const response = await apiClient.rpc<any>("v2_get_places_by_naver_folder", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place }>("v2_get_places_by_naver_folder", {
       p_folder_id: parseInt(params.folderId),
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
@@ -321,7 +321,7 @@ export const placeApi = {
    * 유튜브 채널 상세 장소 목록을 조회합니다.
    */
   getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number }) => {
-    const response = await apiClient.rpc<any>("v2_get_places_by_youtube_channel", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v2_get_places_by_youtube_channel", {
       p_channel_id: params.channelId,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
@@ -333,7 +333,7 @@ export const placeApi = {
    * 커뮤니티 지역 상세 장소 목록을 조회합니다.
    */
   getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number }) => {
-    const response = await apiClient.rpc<any>("v2_get_places_by_community_region", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v2_get_places_by_community_region", {
       p_region_name: params.regionName,
       p_domain: params.domain || null,
       p_limit: params.limit || 20,
@@ -376,7 +376,7 @@ export const placeApi = {
    * 내가 저장(북마크)한 장소 목록을 조회합니다.
    */
   getMyBookmarkedPlaces: async (limit: number = 20, offset: number = 0) => {
-    const response = await apiClient.rpc<any>("v1_get_my_bookmarked_places", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; added_at: string }>("v1_get_my_bookmarked_places", {
       p_limit: limit,
       p_offset: offset,
     });
@@ -387,7 +387,7 @@ export const placeApi = {
    * 내가 최근 본 장소 목록을 조회합니다.
    */
   getMyRecentViewPlaces: async (limit: number = 20, offset: number = 0) => {
-    const response = await apiClient.rpc<any>("v1_get_my_recent_view_places", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; added_at: string }>("v1_get_my_recent_view_places", {
       p_limit: limit,
       p_offset: offset,
     });
@@ -398,7 +398,7 @@ export const placeApi = {
    * 내가 좋아요 누른 장소 목록을 조회합니다.
    */
   getMyLikedPlaces: async (limit: number = 20, offset: number = 0) => {
-    const response = await apiClient.rpc<any>("v1_get_my_liked_places", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; added_at: string }>("v1_get_my_liked_places", {
       p_limit: limit,
       p_offset: offset,
     });
@@ -409,7 +409,7 @@ export const placeApi = {
    * 내가 방문한 장소 목록을 조회합니다.
    */
   getMyVisitedPlaces: async (limit: number = 20, offset: number = 0) => {
-    const response = await apiClient.rpc<any>("v1_list_visited_place", {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; added_at: string }>("v1_list_visited_place", {
       p_limit: limit,
       p_offset: offset,
     });

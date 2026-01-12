@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Loader2, SquareX } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { convertToNaverResizeImageUrl, cn } from "@/shared/lib";
+import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 
 interface ProfilePlacesListProps {
   data: any[];
@@ -73,66 +73,25 @@ export function ProfilePlacesList({
   return (
     <div className="mx-auto bg-white dark:bg-surface-950">
       <div className="grid grid-cols-3 gap-0.5">
-        {data.map((place, index) => {
-          const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+        {data.map((item, index) => {
+          // unified place_data 구조 지원
+          const place = item.place_data || item;
+          const placeId = item.place_id || place.id;
           const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
-          const hasImage = images && images.length > 0;
           
           return (
-            <div 
-              key={`${place.id}-${index}`} 
-              className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 transition-opacity cursor-pointer group flex items-center justify-center"
-              onClick={() => showPlaceModal(place.id)}
-            >
-              {hasImage ? (
-                <img 
-                  src={convertToNaverResizeImageUrl(images[0])} 
-                  className="w-full h-full object-cover"
-                  alt={place.name}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-surface-300 dark:text-surface-700">
-                  <SquareX className="size-10 stroke-[1.5]" />
-                </div>
-              )}
-              
-              {/* 상단 우측 폴더 갯수 표시 */}
-              {folders.length > 0 && (
-                <div className="absolute top-1.5 right-1.5 z-10">
-                  <span className="flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-black rounded-sm shadow-sm">
-                    {folders.length}
-                  </span>
-                </div>
-              )}
-
-              {/* 하단 정보 오버레이 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 flex flex-col gap-0.5">
-                <span className="text-[10px] text-white/80 font-bold truncate block">
-                  {place.group2} {place.group3}
-                </span>
-                <div className="relative inline-block w-fit max-w-full">
-                  <span className="text-[12px] text-white font-black truncate block leading-tight">
-                    {place.name}
-                  </span>
-                  {/* 폴더 갯수에 따른 녹색선 */}
-                  {folders.length > 0 && (
-                    <div 
-                      className={cn(
-                        "absolute -bottom-0.5 left-0 w-full rounded-full",
-                        folders.length >= 15 ? "h-[2px] bg-[#1E8449]" :
-                        folders.length >= 12 ? "h-[1.8px] bg-[#229954]" :
-                        folders.length >= 9 ? "h-[1.5px] bg-[#27AE60]" :
-                        folders.length >= 6 ? "h-[1.2px] bg-[#2ECC71]" :
-                        folders.length >= 3 ? "h-[1px] bg-[#52BE80]" :
-                        "h-[0.8px] bg-[#ABEBC6]"
-                      )} 
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
+            <PlaceThumbnail
+              key={`${placeId}-${index}`}
+              placeId={placeId}
+              name={place.name}
+              thumbnail={images[0]}
+              group2={place.group2}
+              group3={place.group3}
+              category={place.category}
+              features={place.features}
+              interaction={place.interaction}
+              onClick={showPlaceModal}
+            />
           );
         })}
       </div>

@@ -538,11 +538,12 @@ export function FeatureDetailPage() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {places.map((place) => (
+                {places.map((item: any) => (
                   <PlaceCard 
-                    key={place.id} 
-                    place={place} 
+                    key={item.place_id} 
+                    place={item.place_data} 
                     showPrice={true}
+                    addedAt={item.published_at ? item.published_at : undefined}
                   />
                 ))}
               </div>
