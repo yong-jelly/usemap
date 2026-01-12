@@ -252,6 +252,7 @@ export function useRegenerateInviteCode() {
     onSuccess: (_, folderId) => {
       queryClient.invalidateQueries({ queryKey: folderKeys.details(folderId) });
       queryClient.invalidateQueries({ queryKey: folderKeys.inviteHistory(folderId) });
+      queryClient.invalidateQueries({ queryKey: folderKeys.list('my') });
     },
   });
 }

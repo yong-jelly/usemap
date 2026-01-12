@@ -6,13 +6,17 @@ interface FolderListProps {
   selectedFolderIds?: string[];
   onFolderClick?: (folderId: string) => void;
   showCheckbox?: boolean;
+  showMoreOptions?: boolean;
+  onMoreClick?: (folder: Folder) => void;
 }
 
 export function FolderList({ 
   folders, 
   selectedFolderIds = [], 
   onFolderClick, 
-  showCheckbox = false 
+  showCheckbox = false,
+  showMoreOptions = false,
+  onMoreClick
 }: FolderListProps) {
   return (
     <div className="space-y-3">
@@ -22,7 +26,9 @@ export function FolderList({
           folder={folder}
           isSelected={selectedFolderIds.includes(folder.id)}
           showCheckbox={showCheckbox}
+          showMoreOptions={showMoreOptions}
           onClick={onFolderClick}
+          onMoreClick={onMoreClick}
         />
       ))}
     </div>

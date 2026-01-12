@@ -48,14 +48,31 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 
   // Portal을 사용하여 document.body 하위에 렌더링
   return createPortal(
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       {/* 반투명 배경(오버레이) */}
       <div
-        className="fixed inset-0 bg-surface-950/60 animate-fade-in"
-        onClick={() => onOpenChange(false)}
+        className="fixed inset-0 bg-surface-950/60 animate-fade-in pointer-events-auto"
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenChange(false);
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       />
       {/* 다이얼로그 본체 */}
-      <div className="relative z-[1001] animate-scale-in">{children}</div>
+      <div 
+        className="relative z-[100000] animate-scale-in pointer-events-auto"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
     </div>,
     document.body
   );

@@ -33,8 +33,14 @@ export function ConfirmDialog({
   isLoading = false,
   variant = "default"
 }: ConfirmDialogProps) {
-  const handleConfirm = async () => {
+  const handleConfirm = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     await onConfirm();
+    onOpenChange(false);
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onOpenChange(false);
   };
 
@@ -50,7 +56,7 @@ export function ConfirmDialog({
         <DialogFooter className="mt-8 gap-2">
           <Button
             variant="ghost"
-            onClick={() => onOpenChange(false)}
+            onClick={handleCancel}
             className="flex-1 h-12 rounded-xl font-bold text-surface-500"
             disabled={isLoading}
           >

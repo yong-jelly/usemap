@@ -5,6 +5,7 @@ import {
   DrawerContent, 
   DrawerHeader, 
   DrawerTitle, 
+  DrawerDescription,
   DrawerFooter,
   Button 
 } from "@/shared/ui";
@@ -112,6 +113,10 @@ export function ExploreFilterSheet({
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent className="bg-white dark:bg-surface-900 border-t-2 border-[#2B4562]/10 shadow-none rounded-t-[32px] max-w-lg mx-auto h-[85vh]">
+        <DrawerHeader className="sr-only">
+          <DrawerTitle>필터 설정</DrawerTitle>
+          <DrawerDescription>지역, 카테고리, 테마, 가격 등 맛집 검색 필터를 설정하세요.</DrawerDescription>
+        </DrawerHeader>
         {/* <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-surface-200 dark:bg-surface-800" /> */}
         
         {/* Tabs */}

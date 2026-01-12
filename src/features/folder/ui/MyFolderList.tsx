@@ -1,12 +1,22 @@
 import { useNavigate } from "react-router";
-import { useMyFolders } from "@/entities/folder/queries";
+import { useState } from "react";
+import { useMyFolders, useHideFolder } from "@/entities/folder/queries";
 import { FolderList } from "./FolderList";
-import { Button } from "@/shared/ui";
+import { FolderListOptionsSheet } from "./FolderListOptionsSheet";
+import { FolderSettingsSheet } from "./FolderSettingsSheet";
+import { Button, ConfirmDialog } from "@/shared/ui";
 import { Loader2, FolderPlus } from "lucide-react";
+import type { Folder } from "@/entities/folder/types";
 
 export function MyFolderList() {
   const navigate = useNavigate();
   const { data: myFolders, isLoading } = useMyFolders();
+  const { mutate: hideFolder, isPending: isHiding } = useHideFolder();
+
+  const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleCreateClick = () => {
     navigate("/folder/create");
@@ -14,6 +24,44 @@ export function MyFolderList() {
 
   const handleFolderClick = (folderId: string) => {
     navigate(`/folder/${folderId}`);
+  };
+
+  const handleMoreClick = (folder: Folder) => {
+    setSelectedFolder(folder);
+    setShowOptions(true);
+  };
+
+  const handleEdit = (folder: Folder) => {
+    setSelectedFolder(folder);
+    setShowSettings(true);
+  };
+
+  const handleShare = (folder: Folder) => {
+    if (navigator.share) {
+      navigator.share({
+        title: folder.title,
+        text: folder.description,
+        url: `${window.location.origin}/folder/${folder.id}`,
+      }).catch(console.error);
+    } else {
+      // fallback to clipboard
+      navigator.clipboard.writeText(`${window.location.origin}/folder/${folder.id}`);
+      alert("링크가 복사되었습니다.");
+    }
+  };
+
+  const handleDelete = () => {
+    if (!selectedFolder) return;
+    
+    hideFolder(selectedFolder.id, {
+      onSuccess: () => {
+        setShowDeleteConfirm(false);
+        setSelectedFolder(null);
+      },
+      onError: (error: any) => {
+        alert(error.message || "폴더 삭제에 실패했습니다.");
+      }
+    });
   };
 
   if (isLoading) {
@@ -52,6 +100,8 @@ export function MyFolderList() {
               folders={myFolders} 
               onFolderClick={handleFolderClick}
               showCheckbox={false}
+              showMoreOptions={true}
+              onMoreClick={handleMoreClick}
             />
           ) : (
             <div className="p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center mt-2">
@@ -63,6 +113,40 @@ export function MyFolderList() {
           )}
         </div>
       </div>
+
+      <FolderListOptionsSheet
+        isOpen={showOptions}
+        onClose={() => setShowOptions(false)}
+        folder={selectedFolder}
+        onEdit={handleEdit}
+        onShare={handleShare}
+        onDelete={() => setShowDeleteConfirm(true)}
+        dismissible={!showDeleteConfirm}
+      />
+
+      {selectedFolder && (
+        <FolderSettingsSheet
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          folderId={selectedFolder.id}
+          folderInfo={selectedFolder}
+          onOpenHistory={() => {
+            setShowSettings(false);
+          }}
+        />
+      )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="폴더 삭제"
+        description="정말 이 폴더를 숨기시겠습니까? 숨김 처리 후에는 본인을 포함하여 초대된 모든 구성원에게도 폴더가 노출되지 않으며 복구할 수 없습니다."
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        onConfirm={handleDelete}
+        isLoading={isHiding}
+        variant="danger"
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Globe, Lock, Link as LinkIcon, Ghost, User, Users, Check } from "lucide-react";
+import { Globe, Lock, Link as LinkIcon, Ghost, User, Users, Check, MoreVertical } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Folder, FolderPermission } from "@/entities/folder/types";
 
@@ -29,30 +29,34 @@ interface FolderListItemProps {
   folder: Folder;
   isSelected?: boolean;
   showCheckbox?: boolean;
+  showMoreOptions?: boolean;
   onClick?: (folderId: string) => void;
+  onMoreClick?: (folder: Folder) => void;
 }
 
 export function FolderListItem({ 
   folder, 
   isSelected = false, 
   showCheckbox = false, 
-  onClick 
+  showMoreOptions = false,
+  onClick,
+  onMoreClick
 }: FolderListItemProps) {
   const info = PERMISSION_INFO[folder.permission] || PERMISSION_INFO.public;
   const Icon = info.icon;
   const isCollaborative = folder.permission === 'invite' && folder.permission_write_type === 1;
 
   return (
-    <button
+    <div
       onClick={() => onClick?.(folder.id)}
       className={cn(
-        "w-full flex items-center justify-between p-4 rounded-3xl transition-colors text-left border-2",
+        "w-full flex items-center justify-between p-4 rounded-3xl transition-colors text-left border-2 cursor-pointer",
         isSelected
           ? "bg-primary-50/50 dark:bg-primary-900/10 border-primary-500/50"
           : "bg-white dark:bg-surface-900 border-surface-50 dark:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-800 shadow-sm"
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
         <div className={cn(
           "size-12 rounded-2xl flex items-center justify-center shrink-0",
           isSelected
@@ -88,18 +92,33 @@ export function FolderListItem({
         </div>
       </div>
       
-      {showCheckbox && (
-        <div className={cn(
-          "size-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-          isSelected
-            ? "bg-primary-600 border-primary-600 shadow-sm"
-            : "border-surface-200 dark:border-surface-700"
-        )}>
-          {isSelected && (
-            <Check className="size-4 text-white stroke-[3]" />
-          )}
-        </div>
-      )}
-    </button>
+      <div className="flex items-center gap-2">
+        {showMoreOptions && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              (e.currentTarget as HTMLButtonElement).blur();
+              onMoreClick?.(folder);
+            }}
+            className="p-1.5 text-surface-400 hover:text-surface-600 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors shrink-0"
+          >
+            <MoreVertical className="size-5" />
+          </button>
+        )}
+
+        {showCheckbox && (
+          <div className={cn(
+            "size-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+            isSelected
+              ? "bg-primary-600 border-primary-600 shadow-sm"
+              : "border-surface-200 dark:border-surface-700"
+          )}>
+            {isSelected && (
+              <Check className="size-4 text-white stroke-[3]" />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
