@@ -18,7 +18,6 @@ export function ProfilePage() {
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { isAuthenticated, isSyncing } = useUserStore();
   const { mutate: ensureDefaultFolder } = useEnsureDefaultFolder();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const activeTab = tab || "profile";
 
@@ -29,9 +28,7 @@ export function ProfilePage() {
 
   // 탭 변경 시 스크롤 최상단 이동
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [activeTab]);
 
   useEffect(() => {
@@ -77,34 +74,35 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px)] bg-white dark:bg-neutral-900">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-neutral-900">
       {/* 상단 헤더 - 타이포 중심 (FeaturePage 스타일) */}
-      <div className="bg-white dark:bg-neutral-900 px-5 pt-8 pb-4 z-10 flex-shrink-0">
-        <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={cn(
-                "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
-                activeTab === tab.id 
-                  ? "text-surface-900 dark:text-white" 
-                  : "text-surface-300 dark:text-surface-700"
-              )}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
-              )}
-            </button>
-          ))}
+      <div className="fixed top-0 inset-x-0 bg-white dark:bg-neutral-900 z-20">
+        <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
+          <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={cn(
+                  "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
+                  activeTab === tab.id 
+                    ? "text-surface-900 dark:text-white" 
+                    : "text-surface-300 dark:text-surface-700"
+                )}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* 컨텐츠 영역 */}
       <div 
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto scrollbar-hide"
+        className="flex-1 w-full max-w-lg mx-auto pt-24 pb-14"
       >
         {activeTab === "profile" && <ProfileHeader />}
         {activeTab === "recent" && <RecentPlacesTab />}

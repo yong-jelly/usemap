@@ -437,8 +437,8 @@ export function ExplorePage() {
       {/* 2. 메인 피드 영역 */}
       <main className={cn(
         "flex-1 w-full max-w-lg mx-auto pb-24 bg-surface-300 dark:bg-surface-900 min-h-screen",
-        isSearchMode ? "pt-14" : 
-        (!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[132px]" : "pt-24"
+        isSearchMode ? "pt-16" : 
+        (!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : "pt-[110px]"
       )}>
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */

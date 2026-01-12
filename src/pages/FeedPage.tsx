@@ -159,13 +159,13 @@ export function FeedPage() {
       </header>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center pt-24">
+        <div className="flex-1 flex items-center justify-center pt-[110px]">
           <Loader2 className="size-8 animate-spin text-surface-300" />
         </div>
       ) : feedItems.length > 0 ? (
         <div className={cn(
           "flex-1 flex flex-col gap-3 pb-20 bg-surface-300 dark:bg-surface-900",
-          (filters.price_min !== null || filters.price_max !== null) ? "pt-[140px]" : "pt-24"
+          (filters.price_min !== null || filters.price_max !== null) ? "pt-[125px]" : "pt-[88px]"
         )}>
           {feedItems.map((item: any, idx: number) => {
             const getSourcePath = () => {

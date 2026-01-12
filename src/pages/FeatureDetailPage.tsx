@@ -438,10 +438,8 @@ export function FeatureDetailPage() {
       viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-screen"
     )}>
       {/* Header */}
-      <div className={cn(
-        viewMode === "list" ? "fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950" : "relative z-40"
-      )}>
-        <div className={cn(viewMode === "list" && "max-w-lg mx-auto")}>
+      <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950">
+        <div className="max-w-lg mx-auto">
           <DetailHeader
             type="feature"
             subType={type as any}
@@ -457,8 +455,9 @@ export function FeatureDetailPage() {
 
       {/* Main Content */}
       <div className={cn(
-        "relative",
-        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full pt-16"
+        "relative flex-1",
+        viewMode === "map" ? "overflow-hidden" : "w-full",
+        "pt-16"
       )}>
         {/* Map View */}
         <div 

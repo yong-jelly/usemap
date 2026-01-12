@@ -672,10 +672,8 @@ export function FolderDetailPage() {
       viewMode === "map" ? "h-dvh overflow-hidden bg-white dark:bg-surface-950" : "min-h-screen bg-surface-300 dark:bg-surface-900"
     )}>
       {/* 헤더 */}
-      <div className={cn(
-        viewMode === "list" ? "fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950" : "relative z-40"
-      )}>
-        <div className={cn(viewMode === "list" && "max-w-lg mx-auto")}>
+      <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950">
+        <div className="max-w-lg mx-auto">
           <DetailHeader
             type="folder"
             title={folderInfo?.title || "맛탐정 폴더"}
@@ -704,8 +702,9 @@ export function FolderDetailPage() {
 
       {/* 메인 컨텐츠 */}
       <div className={cn(
-        "relative",
-        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full pt-16"
+        "relative flex-1",
+        viewMode === "map" ? "overflow-hidden" : "w-full",
+        "pt-16"
       )}>
         {/* 지도 뷰 */}
         <div 

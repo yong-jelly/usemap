@@ -81,7 +81,7 @@ export function FeaturePage() {
       </header>
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pt-20 pb-24 bg-white dark:bg-surface-950 min-h-screen">
+      <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-24 bg-white dark:bg-surface-950 min-h-screen">
         <div className="pt-2" />
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}
