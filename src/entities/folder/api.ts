@@ -31,6 +31,18 @@ export const folderApi = {
   },
 
   /**
+   * 특정 사용자의 공개 폴더 목록 조회
+   */
+  listUserSharedFolders: async (params: { userId: string; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<Folder>("v1_list_user_shared_folders", {
+      p_user_id: params.userId,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 폴더 생성
    */
   createFolder: async (params: {

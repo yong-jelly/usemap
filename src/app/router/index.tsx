@@ -31,6 +31,7 @@ import { GroupDetailPage } from "@/pages/group/GroupDetailPage";
 // Profile Pages
 import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { ProfileEditPage } from "@/pages/profile/ProfileEditPage";
+import { UserSharedFolderPage } from "@/pages/profile/UserSharedFolderPage";
 
 // Folder Pages
 import { FolderCreatePage } from "@/pages/folder/FolderCreatePage";
@@ -82,7 +83,9 @@ function RootLayout() {
   const { pathname } = useLocation();
   const { isBottomNavVisible } = useUIStore();
 
-  const isFeatureDetailPage = pathname.includes("/feature/detail/") || (pathname.startsWith("/folder/") && !pathname.includes("/folder/create"));
+  const isFeatureDetailPage = pathname.includes("/feature/detail/") || 
+    (pathname.startsWith("/folder/") && !pathname.includes("/folder/create")) ||
+    pathname.startsWith("/p/user/");
   const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
   return (
@@ -198,10 +201,12 @@ const router = createBrowserRouter([
         element: <PlaceDetailPage />,
       },
       {
-        // URL 직접 접근 시에만 렌더링 (공유 링크, 북마크 등)
-        // 리스트에서 클릭 시에는 usePlacePopup으로 제어 (RootLayout에서 렌더링)
         path: "p/status/:id",
         element: <PlaceDetailModal />,
+      },
+      {
+        path: "p/user/:userId",
+        element: <UserSharedFolderPage />,
       },
       // 정의되지 않은 모든 경로에 대한 404 처리
       {

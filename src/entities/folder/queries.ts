@@ -3,7 +3,8 @@ import { folderApi } from "./api";
 
 export const folderKeys = {
   all: ["folder"] as const,
-  list: (type: 'public' | 'my') => [...folderKeys.all, "list", type] as const,
+  list: (type: 'public' | 'my' | 'user') => [...folderKeys.all, "list", type] as const,
+  userList: (userId: string) => [...folderKeys.list('user'), userId] as const,
   details: (id: string) => [...folderKeys.all, "details", id] as const,
   places: (id: string) => [...folderKeys.all, "places", id] as const,
   placesForMap: (id: string) => [...folderKeys.all, "placesForMap", id] as const,
@@ -45,6 +46,23 @@ export function useMySubscriptions() {
   return useQuery({
     queryKey: [...folderKeys.all, "subscriptions"],
     queryFn: () => folderApi.listMySubscriptions(),
+  });
+}
+
+/**
+ * 특정 사용자의 공개 폴더 목록 조회 (무한 스크롤)
+ */
+export function useUserSharedFolders(userId: string) {
+  return useInfiniteQuery({
+    queryKey: folderKeys.userList(userId),
+    queryFn: ({ pageParam = 0 }) => 
+      folderApi.listUserSharedFolders({ userId, limit: 20, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+    enabled: !!userId,
   });
 }
 

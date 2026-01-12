@@ -9,3 +9,12 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
 }
+
+export interface Subscriber {
+  subscriber_id: string;
+  nickname: string;
+  profile_image_url?: string;
+  folder_names: string[];
+  total_folders: number;
+  created_at: string;
+}

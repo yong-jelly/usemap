@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/client";
 import { supabase } from "@/shared/lib/supabase";
-import type { UserProfile } from "./types";
+import type { UserProfile, Subscriber } from "./types";
 
 export interface ProfileUpdateData {
   nickname: string;
@@ -69,5 +69,13 @@ export const userApi = {
   logout: async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-  }
+  },
+
+  /**
+   * 나를 구독하고 있는 사용자 목록을 조회합니다.
+   */
+  getMySubscribers: async (): Promise<Subscriber[]> => {
+    const response = await apiClient.rpc<Subscriber>("v1_list_my_subscribers");
+    return response.data || [];
+  },
 };

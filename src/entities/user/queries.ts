@@ -5,6 +5,7 @@ import { useUserStore } from "./index";
 export const userKeys = {
   all: ["user"] as const,
   profile: () => [...userKeys.all, "profile"] as const,
+  subscribers: () => [...userKeys.all, "subscribers"] as const,
 };
 
 /**
@@ -75,5 +76,15 @@ export function useLogout() {
       queryClient.clear();
       window.location.href = "/";
     },
+  });
+}
+
+/**
+ * 내 구독자 목록을 조회하는 Hook
+ */
+export function useMySubscribers() {
+  return useQuery({
+    queryKey: userKeys.subscribers(),
+    queryFn: () => userApi.getMySubscribers(),
   });
 }

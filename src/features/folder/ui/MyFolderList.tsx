@@ -4,6 +4,7 @@ import { useMyFolders, useHideFolder } from "@/entities/folder/queries";
 import { FolderList } from "./FolderList";
 import { FolderListOptionsSheet } from "./FolderListOptionsSheet";
 import { FolderSettingsSheet } from "./FolderSettingsSheet";
+import { FolderCreateModal } from "./FolderCreate.modal";
 import { Button, ConfirmDialog } from "@/shared/ui";
 import { Loader2, FolderPlus } from "lucide-react";
 import type { Folder } from "@/entities/folder/types";
@@ -17,9 +18,10 @@ export function MyFolderList() {
   const [showOptions, setShowOptions] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const handleCreateClick = () => {
-    navigate("/folder/create");
+    setShowCreateModal(true);
   };
 
   const handleFolderClick = (folderId: string) => {
@@ -147,6 +149,12 @@ export function MyFolderList() {
         isLoading={isHiding}
         variant="danger"
       />
+
+      {showCreateModal && (
+        <FolderCreateModal 
+          onClose={() => setShowCreateModal(false)} 
+        />
+      )}
     </div>
   );
 }

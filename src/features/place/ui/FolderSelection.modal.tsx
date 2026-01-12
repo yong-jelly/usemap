@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { 
   ChevronLeft,
-  Settings, 
   Loader2,
-  Folder
+  Folder,
+  FolderPlus
 } from "lucide-react";
 import { useMyFolders, useAddPlaceToFolder, useRemovePlaceFromFolder } from "@/entities/folder/queries";
 import { FolderListItem } from "@/features/folder/ui/FolderListItem";
+import { FolderCreateModal } from "@/features/folder/ui/FolderCreate.modal";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useNavigate } from "react-router";
@@ -28,6 +29,7 @@ export function FolderSelectionModal({ placeId, onClose, onCloseAll, onSuccess }
   const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>([]);
   const [initialFolderIds, setInitialFolderIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     if (folders) {
@@ -68,10 +70,8 @@ export function FolderSelectionModal({ placeId, onClose, onCloseAll, onSuccess }
     }
   };
 
-  const goToFolderSettings = () => {
-    if (onCloseAll) onCloseAll();
-    onClose();
-    navigate('/profile/folder');
+  const handleCreateClick = () => {
+    setShowCreateModal(true);
   };
 
   return createPortal(
@@ -98,17 +98,29 @@ export function FolderSelectionModal({ placeId, onClose, onCloseAll, onSuccess }
             >
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : "저장"}
             </button>
-            <button 
-              onClick={goToFolderSettings}
-              className="p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors text-surface-600 dark:text-surface-400"
-            >
-              <Settings className="size-5" />
-            </button>
           </div>
         </header>
 
         {/* 폴더 목록 */}
-        <div className="flex-1 overflow-y-auto p-4 pb-safe scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-4 pb-safe scrollbar-hide flex flex-col gap-4">
+          <div className="p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <h2 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">내 맛탐정 폴더</h2>
+              <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="rounded-full font-bold gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+                onClick={handleCreateClick}
+              >
+                <FolderPlus className="size-4" />
+                <span className="text-xs">맛탐정 생성</span>
+              </Button>
+            </div>
+          </div>
+
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
               <Loader2 className="size-8 animate-spin text-primary-500" />
@@ -145,6 +157,12 @@ export function FolderSelectionModal({ placeId, onClose, onCloseAll, onSuccess }
           </Button>
         </div> */}
       </div>
+
+      {showCreateModal && (
+        <FolderCreateModal 
+          onClose={() => setShowCreateModal(false)} 
+        />
+      )}
     </div>,
     document.body
   );

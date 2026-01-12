@@ -5,6 +5,7 @@ import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
 import { VisitedPlacesTab } from "@/features/profile/ui/VisitedPlacesTab";
 import { MyFolderList } from "@/features/folder/ui/MyFolderList";
 import { SubscriptionList } from "@/features/folder/ui/SubscriptionList";
+import { SubscriberList } from "@/features/profile/ui/SubscriberList";
 import { useUserProfile } from "@/entities/user/queries";
 import { useEnsureDefaultFolder } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
@@ -44,6 +45,7 @@ export function ProfilePage() {
     { id: "visited", label: "방문" },
     { id: "folder", label: "맛탐정" },
     { id: "subscription", label: "구독" },
+    { id: "subscribers", label: "구독자" },
   ];
 
   const handleTabChange = (newTabId: string) => {
@@ -110,6 +112,7 @@ export function ProfilePage() {
         {activeTab === "visited" && <VisitedPlacesTab />}
         {activeTab === "folder" && <MyFolderList />}
         {activeTab === "subscription" && <SubscriptionList />}
+        {activeTab === "subscribers" && <SubscriberList />}
       </div>
     </div>
   );

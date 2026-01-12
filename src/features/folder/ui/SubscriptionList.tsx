@@ -49,7 +49,7 @@ export function SubscriptionList() {
       {/* 구독 섹션 */}
       <div className="flex flex-col gap-4">
         <div className="px-4">
-          <h2 className="text-xl font-black text-surface-900 dark:text-white">내가 구독한 맛탐정</h2>
+          <h2 className="text-xl font-black text-surface-900 dark:text-white">내가 구독중인 맛탐정</h2>
           <p className="text-sm text-surface-500">관심 있는 채널이나 폴더에서 업데이트를 받아보고 있습니다.</p>
         </div>
 
