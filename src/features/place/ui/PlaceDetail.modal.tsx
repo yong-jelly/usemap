@@ -38,6 +38,7 @@ import {
 } from "@/entities/place/queries";
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
+import { VisitHistoryModal } from "./VisitHistory.modal";
 import { useUserStore } from "@/entities/user";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
@@ -76,7 +77,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const deletePlaceFeatureMutation = useDeletePlaceFeature(placeId!);
   const toggleLikeMutation = useToggleLike();
   const toggleSaveMutation = useToggleSave();
-  const toggleVisitedMutation = useToggleVisited();
 
   const isSavedToAnyFolder = useMemo(() => 
     isAuthenticated && myFolders.some((f: any) => f.is_place_in_folder), 
@@ -103,6 +103,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
   const [showYoutubeAddForm, setShowYoutubeAddForm] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
+  const [showVisitHistoryModal, setShowVisitHistoryModal] = useState(false);
   const [youtubeUrlInput, setYoutubeUrlInput] = useState('');
   const [showCommunityAddForm, setShowCommunityAddForm] = useState(false);
   const [communityUrlInput, setCommunityUrlInput] = useState('');
@@ -204,11 +205,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const handleToggleSave = () => {
     if (!isAuthenticated) return alert('로그인이 필요합니다.');
     toggleSaveMutation.mutate({ savedId: placeId!, savedType: 'place', refId: placeId! });
-  };
-
-  const handleToggleVisited = () => {
-    if (!isAuthenticated) return alert('로그인이 필요합니다.');
-    toggleVisitedMutation.mutate({ placeId: placeId!, cancel: details?.experience?.is_visited });
   };
 
   useEffect(() => {
@@ -498,15 +494,59 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               </div>
 
-              <button
-                onClick={handleToggleVisited}
-                className={cn(
-                  "w-full py-3.5 rounded-xl text-[14px] font-bold",
-                  details?.experience?.is_visited ? "bg-primary-600 text-white" : "bg-surface-100 text-surface-500"
-                )}
-              >
-                {details?.experience?.is_visited ? "방문 완료" : "가봤어요"}
-              </button>
+              {/* 방문 기록 영역 - 테스트용: 두 가지 케이스 모두 표시 */}
+              <div className="space-y-3 pt-1">
+                {/* 케이스 1: 방문한 적 있음 */}
+                <button
+                  onClick={() => setShowVisitHistoryModal(true)}
+                  className="w-full flex items-center justify-between py-2.5"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="size-8 rounded-full bg-primary-500 flex items-center justify-center">
+                      <MapPinCheck className="size-4 text-white" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[15px] font-black text-surface-900 dark:text-white">3회</span>
+                        <span className="text-[13px] text-surface-400">방문했어요</span>
+                      </div>
+                      <span className="text-[11px] text-surface-400">마지막 방문 {ago('2026-01-07')}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-950/50 rounded-full text-primary-600">
+                    <span className="text-[12px] font-bold">기록 보기</span>
+                  </div>
+                </button>
+
+                <div className="border-t border-dashed border-surface-100 dark:border-surface-800" />
+
+                {/* 케이스 2: 방문한 적 없음 - 가이드 형태 */}
+                <button
+                  onClick={() => isAuthenticated ? setShowVisitHistoryModal(true) : alert('로그인이 필요합니다.')}
+                  className="w-full flex items-center justify-between py-2.5"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="size-8 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center border-2 border-dashed border-surface-200 dark:border-surface-700">
+                      <MapPin className="size-4 text-surface-400" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-[14px] font-bold text-surface-700 dark:text-surface-200">여기 다녀오셨나요?</span>
+                      <span className="text-[11px] text-surface-400">언제, 누구와 갔는지 기록해보세요</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-surface-900 dark:bg-white rounded-full">
+                    <span className="text-[12px] font-bold text-white dark:text-surface-900">기록하기</span>
+                  </div>
+                </button>
+              </div>
+              
+              {/* TODO: 실제 구현 시 조건부 렌더링으로 교체
+              {details?.experience?.is_visited ? (
+                // 방문한 적 있음 UI
+              ) : (
+                // 방문한 적 없음 UI (가이드 형태)
+              )}
+              */}
 
               {folderFeatures.length > 0 && (
                 <div className="flex items-center gap-2 mt-4 overflow-x-auto scrollbar-hide pb-1">
@@ -865,6 +905,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
       </Dialog>
 
       {showFolderModal && <FolderSelectionModal placeId={placeId!} onClose={() => setShowFolderModal(false)} onCloseAll={handleClose} />}
+      
+      {showVisitHistoryModal && (
+        <VisitHistoryModal 
+          placeId={placeId!} 
+          placeName={details?.name || ""} 
+          onClose={() => setShowVisitHistoryModal(false)} 
+        />
+      )}
     </div>,
     document.body
   );

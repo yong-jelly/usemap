@@ -48,14 +48,14 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 
   // Portal을 사용하여 document.body 하위에 렌더링
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
       {/* 반투명 배경(오버레이) */}
       <div
         className="fixed inset-0 bg-surface-950/60 animate-fade-in"
         onClick={() => onOpenChange(false)}
       />
       {/* 다이얼로그 본체 */}
-      <div className="relative z-50 animate-scale-in">{children}</div>
+      <div className="relative z-[1001] animate-scale-in">{children}</div>
     </div>,
     document.body
   );
