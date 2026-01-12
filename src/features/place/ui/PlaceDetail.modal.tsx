@@ -453,29 +453,75 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             </div>
 
             <div className="px-4 pt-4 pb-6 border-b border-surface-50">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-5">
-                  <button onClick={handleToggleLike}>
-                    <Heart className={cn("size-7", details?.interaction?.is_liked ? "fill-rose-500 text-rose-500" : "text-surface-700 dark:text-surface-300")} />
+              <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-4">
+                  {/* 하트 + 숫자 */}
+                  <button 
+                    onClick={handleToggleLike}
+                    className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
+                  >
+                    <Heart className={cn(
+                      "size-7 transition-colors", 
+                      details?.interaction?.is_liked 
+                        ? "fill-rose-500 text-rose-500" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} />
+                    {(details?.interaction?.place_liked_count ?? 0) > 0 && (
+                      <span className="text-[14px] font-bold text-surface-800 dark:text-surface-200">
+                        {details?.interaction?.place_liked_count}
+                      </span>
+                    )}
                   </button>
-                  <button onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'auto' })}>
-                    <MessageCircle className={cn(
-                      "size-7", 
-                      details?.interaction?.is_reviewed 
-                        ? "fill-primary-500 text-primary-500" 
+
+                  {/* 댓글 + 숫자 (채워지는 컬러 없음) */}
+                  <button 
+                    onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'auto' })}
+                    className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
+                  >
+                    <MessageCircle className="size-7 text-surface-700 dark:text-surface-300" />
+                    {(details?.interaction?.place_comment_count ?? details?.visitor_reviews_total ?? 0) > 0 && (
+                      <span className="text-[14px] font-bold text-surface-800 dark:text-surface-200">
+                        {details?.interaction?.place_comment_count ?? details?.visitor_reviews_total}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* 지도 */}
+                  <a 
+                    href={`https://map.naver.com/p/entry/place/${placeId}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center text-surface-700 dark:text-surface-300 active:opacity-60 transition-opacity"
+                  >
+                    <MapPin className="size-7" />
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {/* 폴더 저장 */}
+                  <button 
+                    onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                    className="flex items-center active:opacity-60 transition-opacity"
+                  >
+                    <Folder className={cn(
+                      "size-7 transition-colors", 
+                      isSavedToAnyFolder 
+                        ? "fill-emerald-500 text-emerald-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
                   </button>
-                  <a href={`https://map.naver.com/p/entry/place/${placeId}`} target="_blank" rel="noopener noreferrer">
-                    <MapPin className="size-7 text-surface-700 dark:text-surface-300" />
-                  </a>
-                </div>
-                <div className="flex items-center gap-5">
-                  <button onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}>
-                    <Folder className={cn("size-7", isSavedToAnyFolder ? "fill-emerald-500 text-emerald-500" : "text-surface-700 dark:text-surface-300")} />
-                  </button>
-                  <button onClick={handleToggleSave}>
-                    <Bookmark className={cn("size-7", details?.interaction?.is_saved ? "fill-surface-900 text-surface-900 dark:fill-white dark:text-white" : "text-surface-700 dark:text-surface-300")} />
+
+                  {/* 북마크 (저장) */}
+                  <button 
+                    onClick={handleToggleSave}
+                    className="flex items-center active:opacity-60 transition-opacity"
+                  >
+                    <Bookmark className={cn(
+                      "size-7 transition-colors", 
+                      details?.interaction?.is_saved 
+                        ? "fill-amber-500 text-amber-500" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} />
                   </button>
                 </div>
               </div>

@@ -52,8 +52,8 @@ export function PlaceCard({
   hideShadow = false
 }: PlaceCardProps) {
   const { show: showPlaceModal } = usePlacePopup();
-  const [isLiked, setIsLiked] = useState(place?.experience?.is_liked || false);
-  const [isSaved, setIsSaved] = useState(place?.experience?.is_saved || false);
+  const [isLiked, setIsLiked] = useState(place?.interaction?.is_liked ?? place?.experience?.is_liked ?? false);
+  const [isSaved, setIsSaved] = useState(place?.interaction?.is_saved ?? place?.experience?.is_saved ?? false);
   const isReviewed = place?.experience?.user_review_id !== null;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFoldersExpanded, setIsFoldersExpanded] = useState(false);
@@ -115,9 +115,9 @@ export function PlaceCard({
   };
 
   useEffect(() => {
-    setIsLiked(place?.experience?.is_liked || false);
-    setIsSaved(place?.experience?.is_saved || false);
-  }, [place?.experience?.is_liked, place?.experience?.is_saved]);
+    setIsLiked(place?.interaction?.is_liked ?? place?.experience?.is_liked ?? false);
+    setIsSaved(place?.interaction?.is_saved ?? place?.experience?.is_saved ?? false);
+  }, [place?.interaction?.is_liked, place?.interaction?.is_saved, place?.experience?.is_liked, place?.experience?.is_saved]);
 
   useEffect(() => {
     const slider = sliderRef.current;
@@ -242,53 +242,62 @@ export function PlaceCard({
 
       {/* 컨텐츠 영역 - Flat & Modern */}
       <div className="px-2 pt-1 pb-5">
-      {/* 인터랙션 버튼 - 모바일 최적화된 심플한 디자인 */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-1.5">
+      {/* 인터랙션 버튼 - 인스타그램 스타일 */}
+      <div className="flex items-center justify-between py-2">
+        <div className="flex items-center gap-4">
+          {/* 하트 + 숫자 */}
           <button 
             onClick={handleLike} 
-            className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+            className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
           >
             <Heart className={cn(
               "size-[26px] transition-colors", 
               isLiked 
                 ? "fill-rose-500 text-rose-500" 
-                : "text-surface-600 dark:text-surface-400"
+                : "text-surface-800 dark:text-surface-200"
             )} />
+            {(place.interaction?.place_liked_count ?? 0) > 0 && (
+              <span className="text-[13px] font-bold text-surface-800 dark:text-surface-200">
+                {place.interaction.place_liked_count}
+              </span>
+            )}
           </button>
 
+          {/* 댓글 + 숫자 (채워지는 컬러 없음) */}
           <button 
             onClick={() => showPopup(place.id)} 
-            className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+            className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
           >
-            <MessageCircle className={cn(
-              "size-[26px] transition-colors", 
-              isReviewed 
-                ? "fill-indigo-500 text-indigo-500" 
-                : "text-surface-600 dark:text-surface-400"
-            )} />
+            <MessageCircle className="size-[26px] text-surface-800 dark:text-surface-200" />
+            {(place.interaction?.place_comment_count ?? place.visitor_reviews_total ?? 0) > 0 && (
+              <span className="text-[13px] font-bold text-surface-800 dark:text-surface-200">
+                {place.interaction?.place_comment_count ?? place.visitor_reviews_total}
+              </span>
+            )}
           </button>
 
+          {/* 지도 */}
           <a 
             href={`https://map.naver.com/p/entry/place/${place.id}`} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="flex items-center justify-center size-10 rounded-full text-surface-600 dark:text-surface-400 transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+            className="flex items-center text-surface-800 dark:text-surface-200 active:opacity-60 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
             <MapPinned className="size-[26px]" />
           </a>
         </div>
 
+        {/* 북마크 */}
         <button 
           onClick={handleSave} 
-          className="flex items-center justify-center size-10 rounded-full transition-colors active:bg-surface-100 dark:active:bg-surface-800"
+          className="flex items-center active:opacity-60 transition-opacity"
         >
           <Bookmark className={cn(
             "size-[26px] transition-colors", 
             isSaved 
               ? "fill-amber-500 text-amber-500" 
-              : "text-surface-600 dark:text-surface-400"
+              : "text-surface-800 dark:text-surface-200"
           )} />
         </button>
       </div>
