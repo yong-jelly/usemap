@@ -673,19 +673,21 @@ export function FolderDetailPage() {
     )}>
       {/* 헤더 */}
       <div className={cn(
-        viewMode === "list" ? "sticky top-0 z-40" : "relative z-40"
+        viewMode === "list" ? "fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950" : "relative z-40"
       )}>
-        <DetailHeader
-          type="folder"
-          title={folderInfo?.title || "맛탐정 폴더"}
-          subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
-          thumbnailUrl={folderInfo?.owner_avatar_url}
-          isOwner={isOwner}
-          isSubscribed={displaySubscribed}
-          isSubscribing={isCurrentlyToggling}
-          onSubscribe={handleToggleSubscription}
-          onSettings={() => setShowMenu(true)}
-        />
+        <div className={cn(viewMode === "list" && "max-w-lg mx-auto")}>
+          <DetailHeader
+            type="folder"
+            title={folderInfo?.title || "맛탐정 폴더"}
+            subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
+            thumbnailUrl={folderInfo?.owner_avatar_url}
+            isOwner={isOwner}
+            isSubscribed={displaySubscribed}
+            isSubscribing={isCurrentlyToggling}
+            onSubscribe={handleToggleSubscription}
+            onSettings={() => setShowMenu(true)}
+          />
+        </div>
       </div>
 
       {/* 폴더 설정 시트 */}
@@ -703,7 +705,7 @@ export function FolderDetailPage() {
       {/* 메인 컨텐츠 */}
       <div className={cn(
         "relative",
-        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full"
+        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full pt-16"
       )}>
         {/* 지도 뷰 */}
         <div 

@@ -46,15 +46,17 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col">
-      {/* 상단 탭 메뉴: 스티키 헤더 적용 */}
-      <Tabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-        className="sticky top-14 z-40 bg-white dark:bg-surface-900"
-      />
+      {/* 상단 탭 메뉴: 고정 헤더 적용 */}
+      <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-900 border-b border-surface-100 dark:border-surface-800">
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          className="max-w-lg mx-auto"
+        />
+      </div>
 
-      <div className="p-4">
+      <div className="p-4 pt-16">
         {/* 현재 탭에 대한 상세 설명 */}
         {currentTab && (
           <div className="mb-4 p-3 rounded-lg bg-surface-100 dark:bg-surface-800/50">

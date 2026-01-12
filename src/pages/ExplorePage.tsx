@@ -255,7 +255,7 @@ export function ExplorePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 1. 고정 통합 헤더 (FeaturePage 스타일) */}
-      <header className="sticky top-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
+      <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto">
           {isSearchMode ? (
             /* 검색 모드 헤더 */
@@ -435,7 +435,11 @@ export function ExplorePage() {
       </header>
 
       {/* 2. 메인 피드 영역 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-surface-300 dark:bg-surface-900 min-h-screen">
+      <main className={cn(
+        "flex-1 w-full max-w-lg mx-auto pb-24 bg-surface-300 dark:bg-surface-900 min-h-screen",
+        isSearchMode ? "pt-14" : 
+        (!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[132px]" : "pt-24"
+      )}>
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */
           <div className="flex flex-col items-center justify-center py-40 gap-4">

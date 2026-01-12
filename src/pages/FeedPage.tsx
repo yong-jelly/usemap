@@ -99,8 +99,8 @@ export function FeedPage() {
       className="flex flex-col min-h-screen bg-white dark:bg-surface-950"
     >
       {/* 상단 헤더 - 타이포 중심 */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
-        <div className="px-5 pt-8 pb-4">
+      <header className="fixed top-0 inset-x-0 z-50 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
+        <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-black text-surface-900 dark:text-white relative">
@@ -159,11 +159,14 @@ export function FeedPage() {
       </header>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center pt-24">
           <Loader2 className="size-8 animate-spin text-surface-300" />
         </div>
       ) : feedItems.length > 0 ? (
-        <div className="flex-1 flex flex-col gap-3 pb-20 bg-surface-300 dark:bg-surface-900">
+        <div className={cn(
+          "flex-1 flex flex-col gap-3 pb-20 bg-surface-300 dark:bg-surface-900",
+          (filters.price_min !== null || filters.price_max !== null) ? "pt-[140px]" : "pt-24"
+        )}>
           {feedItems.map((item: any, idx: number) => {
             const getSourcePath = () => {
               switch (item.source_type) {

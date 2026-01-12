@@ -56,7 +56,7 @@ export function FeaturePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-surface-950">
       {/* 상단 헤더 - 타이포 중심 */}
-      <header className="sticky top-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
+      <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
           <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
             {tabs.map((tab) => (
@@ -81,7 +81,7 @@ export function FeaturePage() {
       </header>
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pb-24 bg-white dark:bg-surface-950 min-h-screen">
+      <main className="flex-1 w-full max-w-lg mx-auto pt-20 pb-24 bg-white dark:bg-surface-950 min-h-screen">
         <div className="pt-2" />
         {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}

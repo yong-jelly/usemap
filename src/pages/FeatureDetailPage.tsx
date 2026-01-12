@@ -439,24 +439,26 @@ export function FeatureDetailPage() {
     )}>
       {/* Header */}
       <div className={cn(
-        viewMode === "list" ? "sticky top-0 z-40" : "relative z-40"
+        viewMode === "list" ? "fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950" : "relative z-40"
       )}>
-        <DetailHeader
-          type="feature"
-          subType={type as any}
-          title={headerTitle}
-          subtitle={headerSubtitle}
-          thumbnailUrl={thumbnailUrl}
-          isSubscribed={displaySubscribed}
-          isSubscribing={isCurrentlyToggling}
-          onSubscribe={handleToggleSubscription}
-        />
+        <div className={cn(viewMode === "list" && "max-w-lg mx-auto")}>
+          <DetailHeader
+            type="feature"
+            subType={type as any}
+            title={headerTitle}
+            subtitle={headerSubtitle}
+            thumbnailUrl={thumbnailUrl}
+            isSubscribed={displaySubscribed}
+            isSubscribing={isCurrentlyToggling}
+            onSubscribe={handleToggleSubscription}
+          />
+        </div>
       </div>
 
       {/* Main Content */}
       <div className={cn(
         "relative",
-        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full"
+        viewMode === "map" ? "flex-1 overflow-hidden" : "flex-1 w-full pt-16"
       )}>
         {/* Map View */}
         <div 
