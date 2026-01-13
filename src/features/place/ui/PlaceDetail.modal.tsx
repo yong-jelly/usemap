@@ -452,147 +452,121 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               )}
             </div>
 
-            <div className="px-4 pt-4 pb-6 border-b border-surface-50">
-              <div className="flex items-center justify-between mb-4 px-1">
-                <div className="flex items-center gap-4">
-                  {/* 하트 + 숫자 */}
-                  <button 
-                    onClick={handleToggleLike}
-                    className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
-                  >
+            <div className="px-4 pt-4 pb-4 border-b border-surface-50">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <h1 className="text-2xl font-black text-surface-900 dark:text-white truncate">{details?.name}</h1>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <span className="font-medium text-surface-500">{details?.group2} {details?.group3}</span>
+                    <span className="text-surface-200">|</span>
+                    <div className="flex items-center gap-0.5 font-bold text-amber-500">
+                      <Star className="size-4 fill-current" />
+                      {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={handleToggleLike} className="p-2 active:opacity-60 transition-opacity">
                     <Heart className={cn(
-                      "size-7 transition-colors", 
+                      "size-6", 
                       details?.interaction?.is_liked 
                         ? "fill-rose-500 text-rose-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
-                    {(details?.interaction?.place_liked_count ?? 0) > 0 && (
-                      <span className="text-[14px] font-bold text-surface-800 dark:text-surface-200">
-                        {details?.interaction?.place_liked_count}
-                      </span>
-                    )}
                   </button>
-
-                  {/* 댓글 + 숫자 (채워지는 컬러 없음) */}
-                  <button 
-                    onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'auto' })}
-                    className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
-                  >
-                    <MessageCircle className="size-7 text-surface-700 dark:text-surface-300" />
-                    {(details?.interaction?.place_reviews_count ?? 0) > 0 && (
-                      <span className="text-[14px] font-bold text-surface-800 dark:text-surface-200">
-                        {details?.interaction?.place_reviews_count}
-                      </span>
-                    )}
-                  </button>
-
-                  {/* 지도 */}
-                  <a 
-                    href={`https://map.naver.com/p/entry/place/${placeId}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center text-surface-700 dark:text-surface-300 active:opacity-60 transition-opacity"
-                  >
-                    <MapPin className="size-7" />
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  {/* 폴더 저장 */}
-                  <button 
-                    onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
-                    className="flex items-center active:opacity-60 transition-opacity"
-                  >
-                    <Folder className={cn(
-                      "size-7 transition-colors", 
-                      isSavedToAnyFolder 
-                        ? "fill-emerald-500 text-emerald-500" 
-                        : "text-surface-700 dark:text-surface-300"
-                    )} />
-                  </button>
-
-                  {/* 북마크 (저장) */}
-                  <button 
-                    onClick={handleToggleSave}
-                    className="flex items-center active:opacity-60 transition-opacity"
-                  >
+                  <button onClick={handleToggleSave} className="p-2 active:opacity-60 transition-opacity">
                     <Bookmark className={cn(
-                      "size-7 transition-colors", 
+                      "size-6", 
                       details?.interaction?.is_saved 
                         ? "fill-amber-500 text-amber-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
                   </button>
+                  <button 
+                    onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                    className="p-2 active:opacity-60 transition-opacity"
+                  >
+                    <Folder className={cn(
+                      "size-6", 
+                      isSavedToAnyFolder 
+                        ? "fill-emerald-500 text-emerald-500" 
+                        : "text-surface-700 dark:text-surface-300"
+                    )} />
+                  </button>
                 </div>
               </div>
 
-              <div className="mb-4">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <h1 className="text-xl font-black text-surface-900 dark:text-white">{details?.name}</h1>
-                  <span className="text-sm font-medium text-surface-400">{details?.group2} {details?.group3}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="flex items-center gap-0.5 font-bold text-amber-500">
-                    <Star className="size-4 fill-current" />
-                    {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
-                  </div>
-                  <span className="text-surface-200">|</span>
-                  <span className="text-surface-500">리뷰 {details?.interaction?.place_reviews_count || 0}</span>
-                </div>
+              <div className="flex items-center gap-4 mb-6 px-1">
+                <a 
+                  href={`https://map.naver.com/p/entry/place/${placeId}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
+                >
+                  <MapPin className="size-4" /> 네이버 지도
+                </a>
+                <button 
+                  onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
+                >
+                  <MessageCircle className="size-4" /> 리뷰 {details?.interaction?.place_reviews_count || 0}
+                </button>
               </div>
 
               {/* 방문 기록 영역 */}
-              {visitStats && visitStats.visit_count > 0 ? (
-                <button
-                  onClick={() => setShowVisitHistoryModal(true)}
-                  className="w-full flex items-center justify-between py-2.5"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="size-8 rounded-full bg-primary-500 flex items-center justify-center">
-                      <MapPinCheck className="size-4 text-white" />
-                    </div>
-                    <div className="flex flex-col items-start text-left">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[15px] font-black text-surface-900 dark:text-white">
-                          {visitStats.visit_count}회
-                        </span>
-                        <span className="text-[13px] text-surface-400">방문했어요</span>
+              <div className="mb-4">
+                {visitStats && visitStats.visit_count > 0 ? (
+                  <button
+                    onClick={() => setShowVisitHistoryModal(true)}
+                    className="w-full flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-full bg-primary-500 flex items-center justify-center shadow-sm shadow-primary-200">
+                        <MapPinCheck className="size-5 text-white" />
                       </div>
-                      <span className="text-[11px] text-surface-400">
-                        마지막 방문 {safeFormatDate(visitStats.last_visited_at, { year: 'numeric', month: 'long', day: 'numeric' })}
-                      </span>
+                      <div className="flex flex-col items-start text-left">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-[16px] font-black text-primary-900 dark:text-primary-100">
+                            {visitStats.visit_count}회 방문
+                          </span>
+                        </div>
+                        <span className="text-[12px] text-primary-600/70 dark:text-primary-400">
+                          마지막 방문 {safeFormatDate(visitStats.last_visited_at)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-950/50 rounded-full text-primary-600">
-                    <span className="text-[12px] font-bold">기록 보기</span>
-                  </div>
-                </button>
-              ) : (
-                <button
-                  onClick={() => isAuthenticated ? setShowVisitHistoryModal(true) : alert('로그인이 필요합니다.')}
-                  className="w-full flex items-center justify-between py-2.5"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="size-8 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center border-2 border-dashed border-surface-200 dark:border-surface-700">
-                      <MapPin className="size-4 text-surface-400" />
+                    <ChevronRight className="size-5 text-primary-400" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => isAuthenticated ? setShowVisitHistoryModal(true) : alert('로그인이 필요합니다.')}
+                    className="w-full flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center border-2 border-dashed border-surface-200 dark:border-surface-700">
+                        <MapPin className="size-5 text-surface-400" />
+                      </div>
+                      <div className="flex flex-col items-start text-left">
+                        <span className="text-[15px] font-bold text-surface-900 dark:text-surface-100">여기 다녀오셨나요?</span>
+                        <span className="text-[12px] text-surface-500">나만의 방문 기록을 남겨보세요</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-start text-left">
-                      <span className="text-[14px] font-bold text-surface-700 dark:text-surface-200">여기 다녀오셨나요?</span>
-                      <span className="text-[11px] text-surface-400">언제, 누구와 갔는지 기록해보세요</span>
+                    <div className="px-4 py-2 bg-surface-900 dark:bg-white rounded-full">
+                      <span className="text-[12px] font-bold text-white dark:text-surface-900">기록</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1 px-3 py-1.5 bg-surface-900 dark:bg-white rounded-full">
-                    <span className="text-[12px] font-bold text-white dark:text-surface-900">기록하기</span>
-                  </div>
-                </button>
-              )}
+                  </button>
+                )}
+              </div>
 
               {folderFeatures.length > 0 && (
-                <div className="flex items-center gap-2 mt-4 overflow-x-auto scrollbar-hide pb-1">
+                <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide pb-1">
                   {folderFeatures.map(folder => (
                     <button 
                       key={folder.id}
-                      className="flex-shrink-0 px-3 py-1.5 bg-surface-50 dark:bg-surface-900 border border-surface-100 text-emerald-600 text-[12px] font-bold rounded-lg"
+                      className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[12px] font-bold rounded-full"
                       onClick={() => navigate(`/folder/${folder.id}`)}
                     >
                       📁 {folder.title}
@@ -609,23 +583,31 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               )} */}
 
-              <section id="review-section">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[16px] font-bold flex items-center gap-2">
-                    <MessageCircle className="size-5" /> 방문 리뷰 <span className="text-primary-500">{publicReviews.length}</span>
+              <section id="review-section" className="py-2">
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    방문 리뷰 <span className="text-primary-500">{publicReviews.length}</span>
                   </h3>
-                  {!showReviewForm && (
+                  <div className="flex items-center gap-3">
                     <button 
-                      onClick={() => isAuthenticated ? setShowReviewForm(true) : alert('로그인이 필요합니다.')}
-                      className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
+                      onClick={() => setShowAllReviews(!showAllReviews)} 
+                      className="text-[13px] font-bold text-primary-600"
                     >
-                      기록하기
+                      {showAllReviews ? "접기" : `전체보기 (${publicReviews.length})`}
                     </button>
-                  )}
+                    {!showReviewForm && (
+                      <button 
+                        onClick={() => isAuthenticated ? setShowReviewForm(true) : alert('로그인이 필요합니다.')}
+                        className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
+                      >
+                        기록하기
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 {showReviewForm && (
-                  <div className="mb-6 p-4 rounded-xl border border-primary-100 bg-primary-50/30 space-y-4">
+                  <div className="mx-4 mb-6 p-4 rounded-xl border border-primary-100 bg-primary-50/30 space-y-4">
                     <div className="flex justify-between px-2">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <button key={s} onClick={() => setRating(s)} className="active:scale-90 transition-transform">
@@ -674,178 +656,259 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 )}
                 
                 {publicReviews.length > 0 ? (
-                  <div className="space-y-3">
-                    {displayedReviews.map(review => (
-                      <article key={review.id} className="p-4 rounded-xl border border-surface-50 bg-white dark:bg-surface-900">
-                        {editingReviewId === review.id ? (
-                          <div className="space-y-4">
-                            <div className="flex justify-between px-2">
-                              {[1, 2, 3, 4, 5].map((s) => (
-                                <button key={s} onClick={() => setEditingRating(s)} className="active:scale-90 transition-transform">
-                                  <Star className={cn("size-8", s <= editingRating ? "text-amber-400 fill-current" : "text-surface-200")} />
-                                </button>
-                              ))}
-                            </div>
-                            <textarea
-                              value={editingComment}
-                              onChange={(e) => setEditingComment(e.target.value)}
-                              className="w-full h-24 p-3 rounded-lg bg-surface-50 border-none resize-none text-[13px] focus:ring-1 focus:ring-primary-500"
-                              maxLength={200}
-                            />
-                            <div className="flex flex-wrap gap-1.5">
-                              {availableTags.map(tag => (
-                                <button
-                                  key={tag.code}
-                                  onClick={() => toggleEditTag(tag.code)}
+                  showAllReviews ? (
+                    <div className="space-y-3 px-4">
+                      {publicReviews.map(review => (
+                        <article key={review.id} className="p-4 rounded-xl border border-surface-100 bg-white dark:bg-surface-900 shadow-sm">
+                          {editingReviewId === review.id ? (
+                            <div className="space-y-4">
+                              <div className="flex justify-between px-2">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <button key={s} onClick={() => setEditingRating(s)} className="active:scale-90 transition-transform">
+                                    <Star className={cn("size-8", s <= editingRating ? "text-amber-400 fill-current" : "text-surface-200")} />
+                                  </button>
+                                ))}
+                              </div>
+                              <textarea
+                                value={editingComment}
+                                onChange={(e) => setEditingComment(e.target.value)}
+                                className="w-full h-24 p-3 rounded-lg bg-surface-50 border-none resize-none text-[13px] focus:ring-1 focus:ring-primary-500"
+                                maxLength={200}
+                              />
+                              <div className="flex flex-wrap gap-1.5">
+                                {availableTags.map(tag => (
+                                  <button
+                                    key={tag.code}
+                                    onClick={() => toggleEditTag(tag.code)}
+                                    className={cn(
+                                      "px-2.5 py-1 rounded-full text-[10px] font-bold",
+                                      editingTagCodes.includes(tag.code) ? "bg-primary-600 text-white" : "bg-white text-surface-400 border border-surface-100"
+                                    )}
+                                  >
+                                    {tag.label}
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="flex items-center justify-between pt-1">
+                                <button 
+                                  onClick={() => setEditingIsPrivate(!editingIsPrivate)}
                                   className={cn(
-                                    "px-2.5 py-1 rounded-full text-[10px] font-bold",
-                                    editingTagCodes.includes(tag.code) ? "bg-primary-600 text-white" : "bg-white text-surface-400 border border-surface-100"
+                                    "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors",
+                                    editingIsPrivate ? "bg-surface-900 text-white" : "text-surface-400 hover:bg-surface-100"
                                   )}
                                 >
-                                  {tag.label}
+                                  {editingIsPrivate ? <Lock className="size-3.5 fill-current" /> : <Lock className="size-3.5" />}
+                                  {editingIsPrivate ? "나만 보기 (비공개)" : "전체 공개"}
                                 </button>
-                              ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="ghost" onClick={() => setEditingReviewId(null)} className="flex-1 h-10 text-[13px] font-bold">취소</Button>
+                                <Button onClick={() => handleSaveEditReview(review.id)} className="flex-1 h-10 text-[13px] font-bold bg-primary-600 text-white">수정 완료</Button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between pt-1">
-                              <button 
-                                onClick={() => setEditingIsPrivate(!editingIsPrivate)}
-                                className={cn(
-                                  "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors",
-                                  editingIsPrivate ? "bg-surface-900 text-white" : "text-surface-400 hover:bg-surface-100"
+                          ) : (
+                            <div className="flex gap-3">
+                              <img 
+                                src={review.user_profile?.profile_image_url || "/default-avatar.png"} 
+                                className="size-8 rounded-full bg-surface-100"
+                                loading="lazy" decoding="async"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="font-bold text-[13px] truncate">{review.user_profile?.nickname || "익명"}</span>
+                                    {review.is_private && <Lock className="size-3 text-surface-400 fill-current" />}
+                                  </div>
+                                  <span className="text-[11px] text-surface-400 shrink-0">{safeFormatDate(review.created_at)}</span>
+                                </div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-0.5 text-amber-400">
+                                    {[...Array(5)].map((_, i) => <Star key={i} className={cn("size-3", i < review.score ? "fill-current" : "text-surface-100")} />)}
+                                  </div>
+                                  {review.is_my_review && (
+                                    <div className="flex items-center gap-2">
+                                      <button onClick={() => handleStartEditReview(review)} className="p-1 text-surface-400 hover:text-primary-500">
+                                        <Pencil className="size-3.5" />
+                                      </button>
+                                      <button onClick={() => setShowDeleteReviewConfirm(review.id)} className="p-1 text-surface-400 hover:text-rose-500">
+                                        <Trash2 className="size-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed">{review.review_content}</p>
+                                {review.tags && review.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-3">
+                                    {review.tags.map(tag => (
+                                      <span key={tag.code} className="text-[10px] text-surface-400 bg-surface-50 px-1.5 py-0.5 rounded">
+                                        {tag.label}
+                                      </span>
+                                    ))}
+                                  </div>
                                 )}
-                              >
-                                {editingIsPrivate ? <Lock className="size-3.5 fill-current" /> : <Lock className="size-3.5" />}
-                                {editingIsPrivate ? "나만 보기 (비공개)" : "전체 공개"}
-                              </button>
+                              </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button variant="ghost" onClick={() => setEditingReviewId(null)} className="flex-1 h-10 text-[13px] font-bold">취소</Button>
-                              <Button onClick={() => handleSaveEditReview(review.id)} className="flex-1 h-10 text-[13px] font-bold bg-primary-600 text-white">수정 완료</Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex gap-3">
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+                      {publicReviews.slice(0, 5).map(review => (
+                        <article key={review.id} className="flex-shrink-0 w-72 p-4 rounded-xl border border-surface-100 bg-white dark:bg-surface-900 shadow-sm">
+                          <div className="flex gap-3 mb-2">
                             <img 
                               src={review.user_profile?.profile_image_url || "/default-avatar.png"} 
                               className="size-8 rounded-full bg-surface-100"
                               loading="lazy" decoding="async"
                             />
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <span className="font-bold text-[13px] truncate">{review.user_profile?.nickname || "익명"}</span>
-                                  {review.is_private && <Lock className="size-3 text-surface-400 fill-current" />}
-                                </div>
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-[13px] truncate">{review.user_profile?.nickname || "익명"}</span>
                                 <span className="text-[11px] text-surface-400 shrink-0">{safeFormatDate(review.created_at)}</span>
                               </div>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-0.5 text-amber-400">
-                                  {[...Array(5)].map((_, i) => <Star key={i} className={cn("size-3", i < review.score ? "fill-current" : "text-surface-100")} />)}
-                                </div>
-                                {review.is_my_review && (
-                                  <div className="flex items-center gap-2">
-                                    <button onClick={() => handleStartEditReview(review)} className="p-1 text-surface-400 hover:text-primary-500">
-                                      <Pencil className="size-3.5" />
-                                    </button>
-                                    <button onClick={() => setShowDeleteReviewConfirm(review.id)} className="p-1 text-surface-400 hover:text-rose-500">
-                                      <Trash2 className="size-3.5" />
-                                    </button>
-                                  </div>
-                                )}
+                              <div className="flex items-center gap-0.5 text-amber-400">
+                                {[...Array(5)].map((_, i) => <Star key={i} className={cn("size-2.5", i < review.score ? "fill-current" : "text-surface-100")} />)}
                               </div>
-                              <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed">{review.review_content}</p>
-                              {review.tags && review.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-3">
-                                  {review.tags.map(tag => (
-                                    <span key={tag.code} className="text-[10px] text-surface-400 bg-surface-50 px-1.5 py-0.5 rounded">
-                                      {tag.label}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
                             </div>
                           </div>
-                        )}
-                      </article>
-                    ))}
-                    {publicReviews.length > 3 && !showAllReviews && (
-                      <button onClick={() => setShowAllReviews(true)} className="w-full py-3 bg-surface-50 text-[13px] font-bold text-surface-500 rounded-xl">리뷰 더보기 +{publicReviews.length - 3}</button>
-                    )}
-                  </div>
+                          <p className="text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed line-clamp-2 h-10">{review.review_content}</p>
+                          {review.tags && review.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {review.tags.slice(0, 2).map(tag => (
+                                <span key={tag.code} className="text-[10px] text-surface-400 bg-surface-50 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                                  {tag.label}
+                                </span>
+                              ))}
+                              {review.tags.length > 2 && <span className="text-[10px] text-surface-300">+{review.tags.length - 2}</span>}
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  )
                 ) : (
-                  <div className="py-10 text-center bg-surface-50 rounded-xl">
+                  <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
                     <p className="text-sm text-surface-400">첫 번째 리뷰를 남겨주세요</p>
                   </div>
                 )}
               </section>
 
               {details?.menus && details.menus.length > 0 && (
-                <section>
-                  <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-50 mb-4">메뉴</h3>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    {visibleMenus.map((menu: any, index: number) => {
-                      const menuImage = menu.image || menu.images?.[0];
-                      const menuName = menu.text || menu.name || '메뉴명 없음';
-                      const menuPrice = menu.price || '';
-                      
-                      return (
-                        <div
-                          key={index}
-                          className="relative flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-900 p-0"
-                        >
-                          <div className="relative h-24 w-full flex-shrink-0 bg-gray-100 dark:bg-surface-800">
-                            {menuImage ? (
-                              <img
-                                src={convertToNaverResizeImageUrl(menuImage)}
-                                alt={menuName}
-                                className="h-full w-full object-cover object-center"
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            ) : (
-                              <div className="bg-surface-200 dark:bg-surface-800 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500 h-full w-full">
-                                <CookingPot className="size-6 mb-1" />
-                                <span className="text-[10px]">이미지 준비중</span>
-                              </div>
-                            )}
-                            {menu.recommend && (
-                              <div className="absolute top-2 left-2 flex items-center rounded bg-yellow-400 px-2 py-0.5 text-xs font-bold text-white shadow">
-                                <Star className="mr-1 h-3 w-3 fill-current" />
-                                대표
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-1 flex-col items-center justify-center p-2">
-                            <h3 className="mb-1 text-center text-xs text-gray-900 dark:text-gray-50 truncate w-full px-1">
-                              {menuName}
-                            </h3>
-                            {menuPrice && menuPrice !== '' && (
-                              <p className="text-xs text-gray-900 dark:text-gray-50">
-                                {typeof menuPrice === 'number' 
-                                  ? formatWithCommas(menuPrice, ',', false) + '원'
-                                  : menuPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'
-                                }
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                <section className="py-2">
+                  <div className="flex items-center justify-between px-4 mb-3">
+                    <h3 className="text-lg font-bold">메뉴</h3>
+                    <button 
+                      onClick={() => setShowAllMenus(!showAllMenus)} 
+                      className="text-[13px] font-bold text-primary-600"
+                    >
+                      {showAllMenus ? "접기" : `전체보기 (${details.menus.length})`}
+                    </button>
                   </div>
                   
-                  {details.menus.length > MAX_VISIBLE_MENUS && !showAllMenus && (
-                    <button
-                      onClick={() => setShowAllMenus(true)}
-                      className="mt-4 w-full rounded-md border border-gray-800 dark:border-gray-600 py-2 text-sm font-medium text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-surface-800 transition-colors"
-                    >
-                      모든 메뉴 보기 ({details.menus.length}개)
-                    </button>
+                  {showAllMenus ? (
+                    <div className="grid grid-cols-3 gap-3 px-4">
+                      {details.menus.map((menu: any, index: number) => {
+                        const menuImage = menu.image || menu.images?.[0];
+                        const menuName = menu.text || menu.name || '메뉴명 없음';
+                        const menuPrice = menu.price || '';
+                        
+                        return (
+                          <div
+                            key={index}
+                            className="flex flex-col rounded-xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900 overflow-hidden"
+                          >
+                            <div className="relative aspect-square w-full bg-surface-50 dark:bg-surface-800">
+                              {menuImage ? (
+                                <img
+                                  src={convertToNaverResizeImageUrl(menuImage)}
+                                  alt={menuName}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy" decoding="async"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-surface-200">
+                                  <CookingPot className="size-5 mb-1" />
+                                  <span className="text-[8px]">NO IMAGE</span>
+                                </div>
+                              )}
+                              {menu.recommend && (
+                                <div className="absolute top-1 left-1 bg-amber-400 px-1 py-0.5 rounded text-[9px] font-bold text-white shadow-sm">
+                                  대표
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-2 flex-1 flex flex-col justify-center">
+                              <h4 className="text-[11px] font-bold text-surface-900 dark:text-surface-100 line-clamp-2 text-center">
+                                {menuName}
+                              </h4>
+                              {menuPrice && (
+                                <p className="text-[10px] text-surface-500 mt-0.5 text-center">
+                                  {typeof menuPrice === 'number' 
+                                    ? formatWithCommas(menuPrice, ',', false) + '원'
+                                    : menuPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'
+                                  }
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+                      {details.menus.map((menu: any, index: number) => {
+                        const menuImage = menu.image || menu.images?.[0];
+                        const menuName = menu.text || menu.name || '메뉴명 없음';
+                        const menuPrice = menu.price || '';
+                        
+                        return (
+                          <div
+                            key={index}
+                            className="flex-shrink-0 w-32 flex flex-col rounded-xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900 overflow-hidden shadow-sm"
+                          >
+                            <div className="relative h-24 w-full bg-surface-50 dark:bg-surface-800">
+                              {menuImage ? (
+                                <img
+                                  src={convertToNaverResizeImageUrl(menuImage)}
+                                  alt={menuName}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy" decoding="async"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-surface-200">
+                                  <CookingPot className="size-6 mb-1" />
+                                  <span className="text-[9px]">NO IMAGE</span>
+                                </div>
+                              )}
+                              {menu.recommend && (
+                                <div className="absolute top-1.5 left-1.5 bg-amber-400 px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-sm">
+                                  대표
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-2 flex-1 flex flex-col justify-between">
+                              <h4 className="text-[12px] font-bold text-surface-900 dark:text-surface-100 line-clamp-1">
+                                {menuName}
+                              </h4>
+                              {menuPrice && (
+                                <p className="text-[11px] text-surface-500 mt-0.5">
+                                  {typeof menuPrice === 'number' 
+                                    ? formatWithCommas(menuPrice, ',', false) + '원'
+                                    : menuPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'
+                                  }
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </section>
               )}
 
-              <section className="bg-surface-50 dark:bg-surface-900 -mx-4 px-4 py-8 relative">
+              <section className="bg-surface-50 dark:bg-surface-950/50 -mx-4 px-4 py-8 relative">
                 {isRequestProcessing && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface-50/80 dark:bg-surface-900/80">
                     <div className="flex flex-col items-center gap-2">
@@ -856,22 +919,30 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     </div>
                   </div>
                 )}
-                <h3 className="text-[16px] font-bold mb-4">🔗 관련 콘텐츠</h3>
-                <div className="flex gap-2 mb-4">
-                  <button 
-                    onClick={() => setActiveContentTab('youtube')}
-                    className={cn("flex-1 py-3 rounded-xl text-[13px] font-bold", activeContentTab === 'youtube' ? "bg-red-600 text-white" : "bg-white text-surface-400 border border-surface-100")}
-                  >유튜브 {youtubeFeatures.length}</button>
-                  <button 
-                    onClick={() => setActiveContentTab('community')}
-                    className={cn("flex-1 py-3 rounded-xl text-[13px] font-bold", activeContentTab === 'community' ? "bg-blue-600 text-white" : "bg-white text-surface-400 border border-surface-100")}
-                  >커뮤니티 {communityFeatures.length}</button>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold">🔗 관련 콘텐츠</h3>
+                  <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
+                    <button 
+                      onClick={() => setActiveContentTab('youtube')}
+                      className={cn(
+                        "px-3 py-1 rounded-md text-[12px] font-bold transition-all", 
+                        activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-red-600 shadow-sm" : "text-surface-400"
+                      )}
+                    >유튜브 {youtubeFeatures.length}</button>
+                    <button 
+                      onClick={() => setActiveContentTab('community')}
+                      className={cn(
+                        "px-3 py-1 rounded-md text-[12px] font-bold transition-all", 
+                        activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-blue-600 shadow-sm" : "text-surface-400"
+                      )}
+                    >커뮤니티 {communityFeatures.length}</button>
+                  </div>
                 </div>
 
                 {isAuthenticated && (
                   <div className="mb-4">
                     {(activeContentTab === 'youtube' ? showYoutubeAddForm : showCommunityAddForm) ? (
-                      <div className="p-4 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 space-y-3">
+                      <div className="p-4 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 space-y-3">
                         <Input 
                           placeholder="링크를 입력하세요" 
                           value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
@@ -885,44 +956,51 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     ) : (
                       <button 
                         onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(true) : setShowCommunityAddForm(true)}
-                        className="w-full py-4 border-2 border-dashed border-surface-200 rounded-xl text-surface-400 text-sm font-bold"
+                        className="w-full py-3 border border-dashed border-surface-300 dark:border-surface-700 rounded-xl text-surface-400 text-[13px] font-bold hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors"
                       >+ 링크 추가</button>
                     )}
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  {/* 조건부 렌더링으로 성능 최적화 */}
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
                   {activeContentTab === 'youtube' ? (
-                    youtubeFeatures.map(feature => (
-                      <a key={feature.id} href={feature.content_url} target="_blank" rel="noreferrer" className="block bg-white dark:bg-surface-800 rounded-xl overflow-hidden border border-surface-100">
-                        <div className="aspect-video relative">
-                          <img src={feature.metadata?.thumbnails?.medium?.url} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                            <div className="size-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-                              <div className="w-0 h-0 border-l-[15px] border-l-white border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent ml-1" />
+                    youtubeFeatures.length > 0 ? (
+                      youtubeFeatures.map(feature => (
+                        <a key={feature.id} href={feature.content_url} target="_blank" rel="noreferrer" className="flex-shrink-0 w-64 bg-white dark:bg-surface-900 rounded-xl overflow-hidden border border-surface-100 dark:border-surface-800 shadow-sm">
+                          <div className="aspect-video relative">
+                            <img src={feature.metadata?.thumbnails?.medium?.url} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                              <div className="size-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+                                <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent ml-1" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="p-3">
-                          <h4 className="text-sm font-bold line-clamp-1">{feature.title}</h4>
-                          <p className="text-xs text-surface-400 mt-1">{feature.metadata?.channelTitle}</p>
-                        </div>
-                      </a>
-                    ))
+                          <div className="p-3">
+                            <h4 className="text-[13px] font-bold line-clamp-1 dark:text-surface-100">{feature.title}</h4>
+                            <p className="text-[11px] text-surface-400 mt-1">{feature.metadata?.channelTitle}</p>
+                          </div>
+                        </a>
+                      ))
+                    ) : (
+                      <div className="w-full py-8 text-center text-surface-400 text-sm">관련 영상이 없습니다.</div>
+                    )
                   ) : (
-                    communityFeatures.map(feature => (
-                      <a key={feature.id} href={feature.content_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-white dark:bg-surface-800 rounded-xl border border-surface-100">
-                        <div className="size-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
-                          <Globe className="size-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-bold truncate">{feature.title}</h4>
-                          <span className="text-[10px] text-blue-500 font-bold">{getPlatformName(feature.metadata?.domain)}</span>
-                        </div>
-                        <ExternalLink className="size-4 text-surface-200" />
-                      </a>
-                    ))
+                    communityFeatures.length > 0 ? (
+                      communityFeatures.map(feature => (
+                        <a key={feature.id} href={feature.content_url} target="_blank" rel="noreferrer" className="flex-shrink-0 w-64 flex items-center gap-3 p-3 bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 shadow-sm">
+                          <div className="size-10 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center shrink-0">
+                            <Globe className="size-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-[13px] font-bold truncate dark:text-surface-100">{feature.title}</h4>
+                            <span className="text-[10px] text-blue-500 font-bold">{getPlatformName(feature.metadata?.domain)}</span>
+                          </div>
+                          <ExternalLink className="size-4 text-surface-200" />
+                        </a>
+                      ))
+                    ) : (
+                      <div className="w-full py-8 text-center text-surface-400 text-sm">관련 커뮤니티 글이 없습니다.</div>
+                    )
                   )}
                 </div>
               </section>
