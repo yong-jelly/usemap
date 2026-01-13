@@ -207,8 +207,8 @@ export function FeedPage() {
                     <LogIn className="size-5 text-white" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-sm font-bold text-surface-900 dark:text-white">나만의 소식을 구독해보세요</h3>
-                    <p className="text-xs text-surface-500">로그인하고 맛집 피드를 받아보세요</p>
+                    <h3 className="text-sm font-bold text-surface-900 dark:text-white">나만의 미식 피드를 완성하세요</h3>
+                    <p className="text-xs text-surface-500">커뮤니티, 유튜브, 네이버의 맛집 소식을 한곳에서</p>
                   </div>
                 </div>
                 <ChevronRight className="size-4 text-surface-300" />
@@ -218,29 +218,29 @@ export function FeedPage() {
             {/* 카테고리별 피드 */}
             <div className="flex flex-col gap-10">
               <CategorySection 
-                title="커뮤니티 인기 맛집" 
-                description="지역 커뮤니티에서 화제가 된 맛집"
+                title="실시간 커뮤니티 픽" 
+                description="다양한 커뮤니티에서 유저들이 직접 검증한 핫플레이스"
                 items={communityFeed} 
                 isLoading={isLoadingCommunity} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="맛탐정 추천 폴더" 
-                description="전문가들이 엄선한 맛집 리스트"
+                title="미식가의 엄선 폴더" 
+                description="맛탐정 사용자들이 정성껏 큐레이션한 맛집 컬렉션"
                 items={detectiveFeed} 
                 isLoading={isLoadingDetective} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="플레이스 핫플레이스" 
-                description="네이버 지도에서 지금 뜨는 곳"
+                title="네이버 플레이스 핫트렌드" 
+                description="지금 네이버 지도에서 가장 주목받는 인기 장소"
                 items={naverFeed} 
                 isLoading={isLoadingNaver} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="유튜브 맛집 가이드" 
-                description="크리에이터들이 추천하는 검증된 맛집"
+                title="크리에이터 미식 가이드" 
+                description="영상 속 화제의 장소, 유튜버들의 생생한 맛집 추천"
                 items={youtubeFeed} 
                 isLoading={isLoadingYoutube} 
                 renderItem={renderFeedItem} 
