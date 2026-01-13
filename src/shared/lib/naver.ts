@@ -6,6 +6,18 @@ export function convertToNaverResizeImageUrl(
   originalUrl: string,
   width: number = 560
 ): string {
+  if (!originalUrl) return "";
+  
+  // 이미 네이버 리사이징 URL이거나, Supabase Storage URL인 경우 그대로 반환
+  if (
+    originalUrl.includes("search.pstatic.net") || 
+    originalUrl.includes("supabase.co") ||
+    originalUrl.startsWith("data:") ||
+    originalUrl.startsWith("blob:")
+  ) {
+    return originalUrl;
+  }
+
   const encodedUrl = encodeURIComponent(originalUrl);
   const resizeBaseUrl = `https://search.pstatic.net/common/?autoRotate=true&type=w${width}_sharpen&src=`;
   return `${resizeBaseUrl}${encodedUrl}`;

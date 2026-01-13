@@ -17,3 +17,8 @@ export type { InputProps } from "./Input";
 // Place 관련 UI
 export * from "./place/PlaceSlider";
 export * from "./place/PlaceSliderCard";
+export * from "./place/PlaceThumbnail";
+export * from "./ImageViewer/ImageViewer";
+export * from "./review";
+export * from "./menu";
+export * from "./feature";

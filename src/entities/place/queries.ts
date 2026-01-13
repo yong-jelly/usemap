@@ -19,6 +19,8 @@ export const placeKeys = {
   myRecent: () => [...placeKeys.all, "myRecent"] as const,
   myLiked: () => [...placeKeys.all, "myLiked"] as const,
   myVisited: () => [...placeKeys.all, "myVisited"] as const,
+  myReviews: (filterType: string = 'public', sortBy: string = 'latest') => [...placeKeys.all, "myReviews", filterType, sortBy] as const,
+  myReviewsCounts: () => [...placeKeys.all, "myReviewsCounts"] as const,
   visitedHistory: (id: string) => [...placeKeys.all, "visitedHistory", id] as const,
   visitStats: (id: string) => [...placeKeys.all, "visitStats", id] as const,
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
@@ -348,6 +350,31 @@ export function useMyVisitedPlaces() {
       if (!lastPage || lastPage.length < 21) return undefined;
       return allPages.length * 21;
     },
+  });
+}
+
+/**
+ * 내가 작성한 리뷰 목록을 무한 스크롤로 조회하는 Hook
+ */
+export function useMyReviews(filterType: string = 'public', sortBy: string = 'latest') {
+  return useInfiniteQuery({
+    queryKey: placeKeys.myReviews(filterType, sortBy),
+    queryFn: ({ pageParam = 0 }) => placeApi.getMyReviews(20, pageParam, filterType, sortBy),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+  });
+}
+
+/**
+ * 내가 작성한 리뷰의 필터별 개수를 조회하는 Hook
+ */
+export function useMyReviewsCounts() {
+  return useQuery({
+    queryKey: placeKeys.myReviewsCounts(),
+    queryFn: () => placeApi.getMyReviewsCounts(),
   });
 }
 

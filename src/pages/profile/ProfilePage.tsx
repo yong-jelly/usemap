@@ -3,6 +3,7 @@ import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
 import { VisitedPlacesTab } from "@/features/profile/ui/VisitedPlacesTab";
+import { MyReviewsTab } from "@/features/profile/ui/MyReviewsTab";
 import { MyFolderList } from "@/features/folder/ui/MyFolderList";
 import { SubscriptionList } from "@/features/folder/ui/SubscriptionList";
 import { SubscriberList } from "@/features/profile/ui/SubscriberList";
@@ -43,6 +44,7 @@ export function ProfilePage() {
     { id: "recent", label: "최근" },
     { id: "liked", label: "좋아요" },
     { id: "visited", label: "방문" },
+    { id: "reviews", label: "리뷰" },
     { id: "folder", label: "맛탐정" },
     { id: "subscription", label: "구독" },
     { id: "subscribers", label: "구독자" },
@@ -110,6 +112,7 @@ export function ProfilePage() {
         {activeTab === "recent" && <RecentPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}
         {activeTab === "visited" && <VisitedPlacesTab />}
+        {activeTab === "reviews" && <MyReviewsTab />}
         {activeTab === "folder" && <MyFolderList />}
         {activeTab === "subscription" && <SubscriptionList />}
         {activeTab === "subscribers" && <SubscriberList />}

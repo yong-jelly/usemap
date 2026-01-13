@@ -71,6 +71,8 @@ export const placeApi = {
     p_age_group_code?: string | null;
     p_tag_codes?: string[];
     p_profile_gender_and_age_by_pass?: boolean;
+    p_image_paths?: string[];
+    p_deleted_image_ids?: string[];
   }) => {
     const response = await apiClient.rpc<any>("v1_upsert_place_user_review", params);
     if (response.meta.code !== 200) throw new Error(response.meta.message);
@@ -414,6 +416,27 @@ export const placeApi = {
       p_offset: offset,
     });
     return response.data;
+  },
+
+  /**
+   * 내가 작성한 리뷰 목록을 조회합니다.
+   */
+  getMyReviews: async (limit: number = 20, offset: number = 0, filterType: string = 'public', sortBy: string = 'latest') => {
+    const response = await apiClient.rpc<any>("v1_list_my_reviews", {
+      p_limit: limit,
+      p_offset: offset,
+      p_filter_type: filterType,
+      p_sort_by: sortBy,
+    });
+    return response.data;
+  },
+
+  /**
+   * 내가 작성한 리뷰의 필터별 개수를 조회합니다.
+   */
+  getMyReviewsCounts: async () => {
+    const response = await apiClient.rpc<any>("v1_get_my_reviews_counts");
+    return response.data[0];
   },
 
   /**

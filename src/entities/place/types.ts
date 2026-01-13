@@ -108,6 +108,11 @@ export interface ReviewTag {
   group: string;
 }
 
+export interface ReviewImage {
+  id: string;
+  image_path: string;
+}
+
 export interface PlaceUserReview {
   id: string;
   user_id: string;
@@ -115,6 +120,8 @@ export interface PlaceUserReview {
   review_content: string;
   score: number;
   media_urls: string[] | null;
+  images?: ReviewImage[] | null;
+  has_images?: boolean;
   gender_code: 'M' | 'F' | null;
   age_group_code: '10s' | '20s' | '30s' | '40s' | '50s+' | null;
   is_private: boolean;
@@ -129,6 +136,18 @@ export interface PlaceUserReview {
     gender_code?: 'M' | 'F' | null;
     age_group_code?: string | null;
   } | null;
+}
+
+export interface MyReview extends PlaceUserReview {
+  place_data: {
+    id: string;
+    name: string;
+    category: string;
+    image_urls: string[];
+    group1?: string;
+    group2?: string;
+    group3?: string;
+  };
 }
 
 export interface Feature {

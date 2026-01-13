@@ -38,7 +38,7 @@ export function ago(date: string | Date | number, defaultValue: string = '-'): s
  */
 export function safeFormatDate(
   date: string | Date | number,
-  options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' },
+  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },
   defaultValue: string = '-'
 ): string {
   if (!date) return defaultValue;
