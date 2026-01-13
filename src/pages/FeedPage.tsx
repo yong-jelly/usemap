@@ -196,47 +196,51 @@ export function FeedPage() {
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
-            {/* 로그인 가이드 */}
-            <div className="px-5 py-6">
+            {/* 로그인 가이드 - 심플 버전 */}
+            <div className="px-5 pt-6">
               <button 
                 onClick={openLogin}
-                className="w-full flex items-center justify-between p-5 rounded-2xl bg-primary-500 text-white shadow-soft-xl active:scale-[0.98] transition-all group"
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 active:scale-[0.98] transition-all"
               >
-                <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-full bg-white/20 flex items-center justify-center">
-                    <LogIn className="size-6 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-primary-500 flex items-center justify-center">
+                    <LogIn className="size-5 text-white" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-lg font-black leading-tight">나만의 소식을 확인하세요</h3>
-                    <p className="text-white/80 text-sm mt-0.5">로그인하고 폴더와 채널을 구독해보세요</p>
+                    <h3 className="text-sm font-bold text-surface-900 dark:text-white">나만의 소식을 구독해보세요</h3>
+                    <p className="text-xs text-surface-500">로그인하고 맛집 피드를 받아보세요</p>
                   </div>
                 </div>
-                <ChevronRight className="size-6 text-white/50 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="size-4 text-surface-300" />
               </button>
             </div>
 
             {/* 카테고리별 피드 */}
             <div className="flex flex-col gap-10">
               <CategorySection 
-                title="커뮤니티 인기 맛집" 
+                title="Community Hot" 
+                description="Hot spots shared in local communities"
                 items={communityFeed} 
                 isLoading={isLoadingCommunity} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="맛탐정 추천 폴더" 
+                title="Expert Picks" 
+                description="Recommended folders by our experts"
                 items={detectiveFeed} 
                 isLoading={isLoadingDetective} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="플레이스 핫플레이스" 
+                title="Trending Now" 
+                description="Trending hot spots from Naver Map"
                 items={naverFeed} 
                 isLoading={isLoadingNaver} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="유튜브 맛집 가이드" 
+                title="Creator's Pick" 
+                description="Delicious guide by your favorite creators"
                 items={youtubeFeed} 
                 isLoading={isLoadingYoutube} 
                 renderItem={renderFeedItem} 
@@ -317,11 +321,13 @@ export function FeedPage() {
 
 function CategorySection({ 
   title, 
+  description,
   items, 
   isLoading, 
   renderItem 
 }: { 
   title: string; 
+  description?: string;
   items?: any[]; 
   isLoading: boolean;
   renderItem: (item: any, idx: number) => ReactNode;
@@ -330,8 +336,11 @@ function CategorySection({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="px-5 flex items-center justify-between">
-        <h2 className="text-xl font-black text-surface-900 dark:text-white">{title}</h2>
+      <div className="px-5 flex flex-col">
+        <h2 className="text-xl font-black text-surface-900 dark:text-white leading-tight">{title}</h2>
+        {description && (
+          <p className="text-[13px] text-surface-500 font-medium mt-0.5">{description}</p>
+        )}
       </div>
       <div className="flex flex-col gap-3 bg-surface-100 dark:bg-surface-900 py-3">
         {isLoading ? (
