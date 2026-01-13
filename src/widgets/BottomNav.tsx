@@ -4,6 +4,7 @@ import { House, Compass, Sparkles, User, Fan } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
+import { trackEvent } from "@/shared/lib/gtm";
 
 /**
  * 하단 네비게이션 바 컴포넌트
@@ -44,6 +45,13 @@ export function BottomNav() {
             (item.href !== "/" && currentPath.startsWith(item.href));
           
           const handleClick = (e: React.MouseEvent) => {
+            // GTM 클릭 이벤트 추적
+            trackEvent("nav_click", {
+              button_name: item.label,
+              href: item.href,
+              location: "bottom_nav"
+            });
+
             if (item.href === "/profile" && !isAuthenticated) {
               e.preventDefault();
               openLogin();

@@ -47,11 +47,11 @@ import { useUIStore } from "@/shared/model/ui-store";
  * 페이지 이동 시 스크롤 위치를 최상단으로 복구하는 컴포넌트
  */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [pathname]);
+  }, [location.pathname, location.search]);
 
   return null;
 }
@@ -90,8 +90,8 @@ function RootLayout() {
   
   return (
     <div className="min-h-dvh bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
-      {/* <ScrollToTop />
-      <PageViewTracker /> */}
+      <ScrollToTop />
+      <PageViewTracker />
       {/* <Header /> */}
       {/* 메인 모바일 뷰 컨테이너 (최대 너비 512px) */}
       {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}

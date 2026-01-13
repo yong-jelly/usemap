@@ -8,6 +8,7 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
+import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 import type { ReactNode } from "react";
 
@@ -145,12 +146,15 @@ export function FeedPage() {
                     variant="ghost" 
                     size="icon" 
                     className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                    onClick={() => setIsFilterOpen(true)}
+                    onClick={() => {
+                      trackEvent("feed_filter_click", { location: "header" });
+                      setIsFilterOpen(true);
+                    }}
                   >
                     <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
                   </Button>
                   {activeExtraFilterCount > 0 && (
-                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
+                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
                       {activeExtraFilterCount}
                     </span>
                   )}
@@ -158,7 +162,10 @@ export function FeedPage() {
               )}
               <button 
                 className="p-2 text-surface-400 hover:text-surface-600 transition-colors"
-                onClick={() => navigate("/feature")}
+                onClick={() => {
+                  trackEvent("feed_settings_click", { location: "header" });
+                  navigate("/feature");
+                }}
               >
                 <Settings className="size-5" />
               </button>

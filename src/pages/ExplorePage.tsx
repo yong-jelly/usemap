@@ -24,6 +24,7 @@ import { searchPlaceService } from "@/shared/api/edge-function";
 import { placeApi } from "@/entities/place/api";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
 import { useUIStore } from "@/shared/model/ui-store";
+import { trackEvent } from "@/shared/lib/gtm";
 
 /**
  * 탐색 페이지 필터 상태 인터페이스
@@ -288,7 +289,10 @@ export function ExplorePage() {
                 )}
               </div>
               <button 
-                onClick={() => handleSearch(searchQuery)}
+                onClick={() => {
+                  trackEvent("explore_search_execute", { query: searchQuery });
+                  handleSearch(searchQuery);
+                }}
                 disabled={!searchQuery.trim() || isSearchLoading}
                 className="ml-1 px-3 py-2 font-bold text-primary-600 disabled:text-surface-300"
               >
@@ -324,7 +328,10 @@ export function ExplorePage() {
                       variant="ghost" 
                       size="icon" 
                       className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
-                      onClick={enterSearchMode}
+                      onClick={() => {
+                        trackEvent("explore_search_mode_enter", { location: "header" });
+                        enterSearchMode();
+                      }}
                     >
                       <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
                     </Button>
@@ -333,7 +340,10 @@ export function ExplorePage() {
                         variant="ghost" 
                         size="icon" 
                         className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
-                        onClick={() => setIsFilterOpen(true)}
+                        onClick={() => {
+                          trackEvent("explore_filter_click", { location: "header" });
+                          setIsFilterOpen(true);
+                        }}
                       >
                         <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
                       </Button>
@@ -347,7 +357,10 @@ export function ExplorePage() {
                     {/* 레이아웃 전환 버튼 */}
                     <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
                       <button 
-                        onClick={() => handleLayoutChange('feed')}
+                        onClick={() => {
+                          trackEvent("explore_layout_change", { layout: "feed" });
+                          handleLayoutChange('feed');
+                        }}
                         className={cn(
                           "p-1.5 rounded-lg", 
                           layout === 'feed' 
@@ -358,7 +371,10 @@ export function ExplorePage() {
                         <ListIcon className="size-4.5" />
                       </button>
                       <button 
-                        onClick={() => handleLayoutChange('grid')}
+                        onClick={() => {
+                          trackEvent("explore_layout_change", { layout: "grid" });
+                          handleLayoutChange('grid');
+                        }}
                         className={cn(
                           "p-1.5 rounded-lg", 
                           layout === 'grid' 

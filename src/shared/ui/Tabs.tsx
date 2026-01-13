@@ -1,4 +1,5 @@
 import { cn } from "@/shared/lib/utils";
+import { trackEvent } from "@/shared/lib/gtm";
 
 /**
  * 개별 탭 아이템 인터페이스
@@ -34,7 +35,10 @@ export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
         return (
           <button
             key={tab.id}
-            onClick={() => onChange(tab.id)}
+            onClick={() => {
+              trackEvent("tab_click", { tab_id: tab.id, tab_label: tab.label });
+              onChange(tab.id);
+            }}
             className={cn(
               "flex-1 min-w-[80px] py-3 text-sm font-medium transition-colors relative whitespace-nowrap",
               isActive 

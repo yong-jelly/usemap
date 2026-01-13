@@ -3,6 +3,7 @@ import { ChevronLeft, Share2, Settings, User, CheckCircle, Heart } from "lucide-
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
+import { trackEvent } from "@/shared/lib/gtm";
 
 /**
  * DetailHeader 컴포넌트 프로퍼티
@@ -61,6 +62,7 @@ export function DetailHeader({
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
   const handleBack = () => {
+    trackEvent("detail_header_back_click", { type, title, location: "detail_header" });
     if (onBack) {
       onBack();
     } else {
@@ -69,6 +71,7 @@ export function DetailHeader({
   };
 
   const handleShare = () => {
+    trackEvent("detail_header_share_click", { type, title, location: "detail_header" });
     if (onShare) {
       onShare();
     } else if (navigator.share) {
@@ -141,7 +144,11 @@ export function DetailHeader({
         {/* 구독 버튼 (feature 타입이거나, 폴더 타입인 경우) */}
         {(type === 'feature' || type === 'folder') && onSubscribe && (
           <button
-            onClick={isOwner && type === 'folder' ? undefined : onSubscribe}
+            onClick={() => {
+              if (isOwner && type === 'folder') return;
+              trackEvent("detail_header_subscribe_click", { type, title, is_subscribed: isSubscribed, location: "detail_header" });
+              onSubscribe();
+            }}
             disabled={isSubscribing}
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-colors duration-150 text-xs",
@@ -174,7 +181,10 @@ export function DetailHeader({
         {type === 'folder' && isOwner && (
           <button 
             className="p-2 text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 rounded-full" 
-            onClick={onSettings}
+            onClick={() => {
+              trackEvent("detail_header_settings_click", { type, title, location: "detail_header" });
+              onSettings?.();
+            }}
             title="폴더 설정"
           >
             <Settings className="size-5" />

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { LogOut, PieChart, ChevronRight } from "lucide-react";
 import { useUserProfile, useLogout } from "@/entities/user/queries";
 import { Button } from "@/shared/ui";
+import { trackEvent } from "@/shared/lib/gtm";
 
 export function ProfileHeader() {
   const navigate = useNavigate();
@@ -50,7 +51,10 @@ export function ProfileHeader() {
         {/* 프로필 액션 버튼 */}
         <div className="mb-12 flex gap-3">
           <Button
-            onClick={() => navigate("/profile/edit")}
+            onClick={() => {
+              trackEvent("profile_edit_click", { location: "header" });
+              navigate("/profile/edit");
+            }}
             variant="secondary"
             className="flex-1 rounded-2xl h-14 text-lg font-black"
           >
@@ -64,7 +68,10 @@ export function ProfileHeader() {
             Account Settings
           </div>
           <button
-            onClick={() => logout()}
+            onClick={() => {
+              trackEvent("logout_click", { location: "profile_header" });
+              logout();
+            }}
             className="w-full flex items-center justify-between p-4 rounded-[24px] bg-surface-50/50 dark:bg-surface-800/30 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-200 group border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30"
           >
             <div className="flex items-center gap-4">
