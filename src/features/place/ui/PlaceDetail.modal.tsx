@@ -554,8 +554,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         <span className="text-[12px] text-surface-500">나만의 방문 기록을 남겨보세요</span>
                       </div>
                     </div>
-                    <div className="px-4 py-2 bg-surface-900 dark:bg-white rounded-full">
-                      <span className="text-[12px] font-bold text-white dark:text-surface-900">기록</span>
+                    <div className="px-4 py-2 bg-surface-900 dark:bg-white rounded-xl">
+                      <span className="text-[12px] font-bold text-white dark:text-surface-900">다녀왔어요!</span>
                     </div>
                   </button>
                 )}
@@ -600,7 +600,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         onClick={() => isAuthenticated ? setShowReviewForm(true) : alert('로그인이 필요합니다.')}
                         className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
                       >
-                        기록하기
+                        리뷰쓰기
                       </button>
                     )}
                   </div>
