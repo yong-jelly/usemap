@@ -171,6 +171,18 @@ export const folderApi = {
   },
 
   /**
+   * 공개 피드 조회 (로그인 불필요)
+   */
+  getPublicFeed: async (params: { sourceType?: string | null; limit?: number; offset?: number } = {}) => {
+    const response = await apiClient.rpc<any>("v1_get_public_feed", {
+      p_source_type: params.sourceType || null,
+      p_limit: params.limit || 10,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 기본 폴더 생성 (필요시)
    */
   ensureDefaultFolder: async () => {

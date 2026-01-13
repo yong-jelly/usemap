@@ -1,14 +1,15 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { useMyFeed } from "@/entities/folder/queries";
+import { useMyFeed, usePublicFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
-import { Loader2, Bell, Settings, Filter, X, RotateCcw } from "lucide-react";
+import { Loader2, Bell, Settings, Filter, X, RotateCcw, ChevronRight, LogIn } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
+import type { ReactNode } from "react";
 
 export function FeedPage() {
   const navigate = useNavigate();
@@ -30,7 +31,65 @@ export function FeedPage() {
     isLoading 
   } = useMyFeed(filters);
 
+  // 공개 피드 데이터 (비로그인용)
+  const { data: communityFeed, isLoading: isLoadingCommunity } = usePublicFeed({ sourceType: 'community_region', limit: 10 });
+  const { data: detectiveFeed, isLoading: isLoadingDetective } = usePublicFeed({ sourceType: 'folder', limit: 10 });
+  const { data: naverFeed, isLoading: isLoadingNaver } = usePublicFeed({ sourceType: 'naver_folder', limit: 10 });
+  const { data: youtubeFeed, isLoading: isLoadingYoutube } = usePublicFeed({ sourceType: 'youtube_channel', limit: 10 });
+
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const communityMap: Record<string, string> = {
+    'clien.net': '클리앙',
+    'm': '클리앙',
+    'damoang.net': '다모앙',
+    'bobaedream.co.kr': '보배드림',
+    'co.kr': '보배드림',
+    'bluer': '블루리본',
+  };
+
+  const renderFeedItem = (item: any, idx: number) => {
+    const getSourcePath = () => {
+      switch (item.source_type) {
+        case 'folder': return `/folder/${item.source_id}`;
+        case 'naver_folder': return `/feature/detail/folder/${item.source_id}`;
+        case 'youtube_channel': return `/feature/detail/youtube/${item.source_id}`;
+        case 'community_region': return `/feature/detail/community/${item.source_id}`;
+        default: return null;
+      }
+    };
+
+    const sourcePath = getSourcePath();
+    let sourceLabel = item.source_type === 'folder' ? '맛탐정 폴더' : 
+                       item.source_type === 'naver_folder' ? '플레이스 폴더' :
+                       item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
+    let sourceTitle = item.source_title;
+    let sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
+
+    if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
+      const [domain, region] = sourceTitle.split('|');
+      const communityName = communityMap[domain] || domain;
+      sourceLabel = `커뮤니티 > ${communityName}`;
+      sourceTitle = region;
+      sourceImage = undefined;
+    } else if (item.source_type === 'community_region') {
+      sourceImage = undefined;
+    }
+
+    return (
+      <PlaceCard 
+        key={`${item.source_id}-${item.place_id}-${idx}`}
+        place={item.place_data}
+        sourceLabel={sourceLabel}
+        sourceTitle={sourceTitle}
+        sourceImage={sourceImage}
+        sourcePath={sourcePath || undefined}
+        addedAt={formatRelativeTime(item.added_at)}
+        showPrice={true}
+        comment={item.comment}
+      />
+    );
+  };
 
   // 페이지 마운트 시 window 스크롤 초기화
   useEffect(() => {
@@ -38,7 +97,7 @@ export function FeedPage() {
   }, []);
 
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    if (!isAuthenticated || !hasNextPage || isFetchingNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -55,27 +114,7 @@ export function FeedPage() {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-56px)] p-6 text-center gap-6 bg-white dark:bg-surface-950">
-        <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
-          <Bell className="size-12 text-surface-200" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-black text-surface-900 dark:text-white">나만의 소식을 확인하세요</h2>
-          <p className="text-surface-500 mt-2">구독한 폴더와 채널의 새로운 맛집 소식을<br />피드에서 받아볼 수 있습니다.</p>
-        </div>
-        <button 
-          onClick={openLogin}
-          className="w-full max-w-xs h-14 rounded-2xl bg-primary-500 text-white font-black text-lg shadow-soft-lg active:scale-95 transition-all"
-        >
-          로그인하고 시작하기
-        </button>
-      </div>
-    );
-  }
+  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const feedItems = data?.pages.flatMap(page => page) || [];
 
@@ -84,15 +123,6 @@ export function FeedPage() {
     if (filters.price_min !== null || filters.price_max !== null) count++;
     return count;
   }, [filters]);
-
-  const communityMap: Record<string, string> = {
-    'clien.net': '클리앙',
-    'm': '클리앙',
-    'damoang.net': '다모앙',
-    'bobaedream.co.kr': '보배드림',
-    'co.kr': '보배드림',
-    'bluer': '블루리본',
-  };
 
   return (
     <div 
@@ -109,32 +139,34 @@ export function FeedPage() {
               </h1>
             </div>
             <div className="flex items-center gap-1">
-              <div className="relative">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                  onClick={() => setIsFilterOpen(true)}
-                >
-                  <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
-                </Button>
-                {activeExtraFilterCount > 0 && (
-                  <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
-                    {activeExtraFilterCount}
-                  </span>
-                )}
-              </div>
-            <button 
-              className="p-2 text-surface-400 hover:text-surface-600 transition-colors"
-              onClick={() => navigate("/feature")}
-            >
-              <Settings className="size-5" />
-            </button>
+              {isAuthenticated && (
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
+                    onClick={() => setIsFilterOpen(true)}
+                  >
+                    <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
+                  </Button>
+                  {activeExtraFilterCount > 0 && (
+                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
+                      {activeExtraFilterCount}
+                    </span>
+                  )}
+                </div>
+              )}
+              <button 
+                className="p-2 text-surface-400 hover:text-surface-600 transition-colors"
+                onClick={() => navigate("/feature")}
+              >
+                <Settings className="size-5" />
+              </button>
             </div>
           </div>
 
-          {/* 활성 필터 태그 */}
-          {(filters.price_min !== null || filters.price_max !== null) && (
+          {/* 활성 필터 태그 (로그인 시에만) */}
+          {isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && (
             <div className="flex items-center gap-2 mt-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
               <button 
                 onClick={() => setFilters({ price_min: null, price_max: null })}
@@ -158,83 +190,110 @@ export function FeedPage() {
         </div>
       </header>
 
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center pt-[110px]">
-          <Loader2 className="size-8 animate-spin text-surface-300" />
-        </div>
-      ) : feedItems.length > 0 ? (
-        <div className={cn(
-          "flex-1 flex flex-col gap-3 pb-20 bg-surface-300 dark:bg-surface-900",
-          (filters.price_min !== null || filters.price_max !== null) ? "pt-[125px]" : "pt-[88px]"
-        )}>
-          {feedItems.map((item: any, idx: number) => {
-            const getSourcePath = () => {
-              switch (item.source_type) {
-                case 'folder': return `/folder/${item.source_id}`;
-                case 'naver_folder': return `/feature/detail/folder/${item.source_id}`;
-                case 'youtube_channel': return `/feature/detail/youtube/${item.source_id}`;
-                case 'community_region': return `/feature/detail/community/${item.source_id}`;
-                default: return null;
-              }
-            };
-
-            const sourcePath = getSourcePath();
-            let sourceLabel = item.source_type === 'folder' ? '맛탐정 폴더' : 
-                               item.source_type === 'naver_folder' ? '플레이스 폴더' :
-                               item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
-            let sourceTitle = item.source_title;
-            let sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
-
-            if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
-              const [domain, region] = sourceTitle.split('|');
-              const communityName = communityMap[domain] || domain;
-              sourceLabel = `커뮤니티 > ${communityName}`;
-              sourceTitle = region;
-              // 커뮤니티인 경우 이미지를 undefined로 설정하여 아이콘 표시
-              sourceImage = undefined;
-            } else if (item.source_type === 'community_region') {
-              // 커뮤니티인 경우 이미지를 undefined로 설정하여 아이콘 표시
-              sourceImage = undefined;
-            }
-
-            return (
-              <PlaceCard 
-                key={`${item.source_id}-${item.place_id}-${idx}`}
-                place={item.place_data}
-                sourceLabel={sourceLabel}
-                sourceTitle={sourceTitle}
-                sourceImage={sourceImage}
-                sourcePath={sourcePath || undefined}
-                addedAt={formatRelativeTime(item.added_at)}
-                showPrice={true}
-                comment={item.comment}
-              />
-            );
-          })}
-          
-          {hasNextPage && (
-            <div ref={observerTarget} className="py-12 flex justify-center">
-              <Loader2 className="size-6 text-surface-300 animate-spin" />
+      <main className={cn(
+        "flex-1 flex flex-col pt-[88px]",
+        isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && "pt-[125px]"
+      )}>
+        {!isAuthenticated && (
+          <div className="flex flex-col gap-8 pb-20">
+            {/* 로그인 가이드 */}
+            <div className="px-5 py-6">
+              <button 
+                onClick={openLogin}
+                className="w-full flex items-center justify-between p-5 rounded-2xl bg-primary-500 text-white shadow-soft-xl active:scale-[0.98] transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="size-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <LogIn className="size-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-black leading-tight">나만의 소식을 확인하세요</h3>
+                    <p className="text-white/80 text-sm mt-0.5">로그인하고 폴더와 채널을 구독해보세요</p>
+                  </div>
+                </div>
+                <ChevronRight className="size-6 text-white/50 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4">
-          <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
-            <Bell className="size-10 text-surface-200" />
+
+            {/* 카테고리별 피드 */}
+            <div className="flex flex-col gap-10">
+              <CategorySection 
+                title="커뮤니티 인기 맛집" 
+                items={communityFeed} 
+                isLoading={isLoadingCommunity} 
+                renderItem={renderFeedItem} 
+              />
+              <CategorySection 
+                title="맛탐정 추천 폴더" 
+                items={detectiveFeed} 
+                isLoading={isLoadingDetective} 
+                renderItem={renderFeedItem} 
+              />
+              <CategorySection 
+                title="플레이스 핫플레이스" 
+                items={naverFeed} 
+                isLoading={isLoadingNaver} 
+                renderItem={renderFeedItem} 
+              />
+              <CategorySection 
+                title="유튜브 맛집 가이드" 
+                items={youtubeFeed} 
+                isLoading={isLoadingYoutube} 
+                renderItem={renderFeedItem} 
+              />
+            </div>
+
+            {/* 하단 탐색 가이드 */}
+            <div className="px-5 mt-4">
+              <button 
+                onClick={() => navigate("/feature")}
+                className="w-full py-8 px-6 rounded-3xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 text-center group active:scale-[0.98] transition-all"
+              >
+                <h4 className="text-xl font-black text-surface-900 dark:text-white">더 많은 맛집을 찾고 계신가요?</h4>
+                <p className="text-surface-500 mt-2 mb-6">다양한 테마와 지역별 맛집을 탐색 탭에서 확인해보세요.</p>
+                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-900 dark:bg-white text-white dark:text-black font-bold text-sm group-hover:gap-3 transition-all">
+                  탐색하러 가기
+                  <ChevronRight className="size-4" />
+                </div>
+              </button>
+            </div>
           </div>
-          <div>
-            <p className="text-lg font-bold text-surface-900 dark:text-white">아직 새로운 소식이 없습니다</p>
-            <p className="text-sm text-surface-500 mt-1">맛탐정 탭에서 관심 있는 폴더를 구독해보세요!</p>
-          </div>
-          <button 
-            onClick={() => navigate("/feature/detective")}
-            className="mt-2 px-6 py-3 rounded-xl bg-surface-900 text-white dark:bg-white dark:text-black font-bold text-sm"
-          >
-            맛탐정 보러가기
-          </button>
-        </div>
-      )}
+        )}
+
+        {isAuthenticated && (
+          isLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Loader2 className="size-8 animate-spin text-surface-300" />
+            </div>
+          ) : feedItems.length > 0 ? (
+            <div className="flex-1 flex flex-col gap-3 pb-20 bg-surface-100 dark:bg-surface-900">
+              {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
+              
+              {hasNextPage && (
+                <div ref={observerTarget} className="py-12 flex justify-center">
+                  <Loader2 className="size-6 text-surface-300 animate-spin" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4">
+              <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                <Bell className="size-10 text-surface-200" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-surface-900 dark:text-white">아직 새로운 소식이 없습니다</p>
+                <p className="text-sm text-surface-500 mt-1">맛탐정 탭에서 관심 있는 폴더를 구독해보세요!</p>
+              </div>
+              <button 
+                onClick={() => navigate("/feature/detective")}
+                className="mt-2 px-6 py-3 rounded-xl bg-surface-900 text-white dark:bg-white dark:text-black font-bold text-sm"
+              >
+                맛탐정 보러가기
+              </button>
+            </div>
+          )
+        )}
+      </main>
       
       {/* 바텀 내비게이션 여백 */}
       <div className="h-14" />
@@ -252,6 +311,37 @@ export function FeedPage() {
         totalCount={feedItems.length}
         visibleTabs={["price"]}
       />
+    </div>
+  );
+}
+
+function CategorySection({ 
+  title, 
+  items, 
+  isLoading, 
+  renderItem 
+}: { 
+  title: string; 
+  items?: any[]; 
+  isLoading: boolean;
+  renderItem: (item: any, idx: number) => ReactNode;
+}) {
+  if (!isLoading && (!items || items.length === 0)) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="px-5 flex items-center justify-between">
+        <h2 className="text-xl font-black text-surface-900 dark:text-white">{title}</h2>
+      </div>
+      <div className="flex flex-col gap-3 bg-surface-100 dark:bg-surface-900 py-3">
+        {isLoading ? (
+          <div className="py-10 flex justify-center">
+            <Loader2 className="size-6 text-surface-300 animate-spin" />
+          </div>
+        ) : (
+          items?.map((item, idx) => renderItem(item, idx))
+        )}
+      </div>
     </div>
   );
 }

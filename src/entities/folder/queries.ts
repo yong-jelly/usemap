@@ -82,6 +82,19 @@ export function useMyFeed(filters: { price_min?: number | null; price_max?: numb
 }
 
 /**
+ * 공개 피드 조회 (타입별)
+ */
+export function usePublicFeed(params: { sourceType?: string | null; limit?: number } = {}) {
+  return useQuery({
+    queryKey: [...folderKeys.all, "publicFeed", params.sourceType, params.limit],
+    queryFn: () => folderApi.getPublicFeed({ 
+      sourceType: params.sourceType, 
+      limit: params.limit || 10 
+    }),
+  });
+}
+
+/**
  * 폴더 정보 조회 (단건)
  */
 export function useFolderInfo(folderId: string) {
