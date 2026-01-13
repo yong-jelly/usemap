@@ -191,13 +191,13 @@ export function FeedPage() {
       </header>
 
       <main className={cn(
-        "flex-1 flex flex-col pt-[88px]",
-        isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && "pt-[125px]"
+        "flex-1 flex flex-col pt-[72px]",
+        isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && "pt-[110px]"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
             {/* 로그인 가이드 - 심플 버전 */}
-            <div className="px-5 pt-6">
+            <div className="px-5 pt-4">
               <button 
                 onClick={openLogin}
                 className="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 active:scale-[0.98] transition-all"
@@ -218,29 +218,29 @@ export function FeedPage() {
             {/* 카테고리별 피드 */}
             <div className="flex flex-col gap-10">
               <CategorySection 
-                title="Community Hot" 
-                description="Hot spots shared in local communities"
+                title="커뮤니티 인기 맛집" 
+                description="지역 커뮤니티에서 화제가 된 맛집"
                 items={communityFeed} 
                 isLoading={isLoadingCommunity} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="Expert Picks" 
-                description="Recommended folders by our experts"
+                title="맛탐정 추천 폴더" 
+                description="전문가들이 엄선한 맛집 리스트"
                 items={detectiveFeed} 
                 isLoading={isLoadingDetective} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="Trending Now" 
-                description="Trending hot spots from Naver Map"
+                title="플레이스 핫플레이스" 
+                description="네이버 지도에서 지금 뜨는 곳"
                 items={naverFeed} 
                 isLoading={isLoadingNaver} 
                 renderItem={renderFeedItem} 
               />
               <CategorySection 
-                title="Creator's Pick" 
-                description="Delicious guide by your favorite creators"
+                title="유튜브 맛집 가이드" 
+                description="크리에이터들이 추천하는 검증된 맛집"
                 items={youtubeFeed} 
                 isLoading={isLoadingYoutube} 
                 renderItem={renderFeedItem} 
