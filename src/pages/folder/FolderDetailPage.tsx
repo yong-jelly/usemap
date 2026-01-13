@@ -750,7 +750,7 @@ export function FolderDetailPage() {
             <div className="flex flex-col items-center justify-center py-40 p-6 text-center">
               <h2 className="text-2xl font-bold mb-2">폴더를 찾을 수 없습니다</h2>
               <p className="text-surface-500 mb-8">존재하지 않거나 비공개된 폴더입니다.</p>
-              <Button onClick={() => navigate("/feature?tab=detective")} className="font-bold">
+              <Button onClick={() => navigate("/feature/detective")} className="font-bold">
                 맛탐정 목록으로 이동
               </Button>
             </div>

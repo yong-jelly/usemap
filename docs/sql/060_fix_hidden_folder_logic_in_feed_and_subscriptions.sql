@@ -49,6 +49,7 @@ BEGIN
             WHEN fts.feature_type = 'naver_folder' THEN (SELECT name::text FROM public.tbl_naver_folder WHERE folder_id::varchar = fts.feature_id)
             WHEN fts.feature_type = 'youtube_channel' THEN (SELECT metadata->>'channelTitle' FROM public.tbl_place_features WHERE metadata->>'channelId' = fts.feature_id LIMIT 1)
             WHEN fts.feature_type = 'community_region' THEN fts.feature_id -- 지역명 자체가 제목
+            WHEN fts.feature_type = 'region_recommend' THEN fts.feature_id -- 지역명 자체가 제목
             ELSE 'Unknown'
         END as title,
         NULL::VARCHAR as description,
@@ -117,10 +118,31 @@ BEGIN
     )
     SELECT 
         s.s_type::VARCHAR as source_type, s.s_id::VARCHAR as source_id,
-        (CASE WHEN s.s_type = 'folder' THEN (SELECT f_inner.title FROM public.tbl_folder f_inner WHERE f_inner.id = s.s_id) ELSE 'Unknown' END)::VARCHAR as source_title,
-        (CASE WHEN s.s_type = 'folder' THEN (SELECT up_inner.profile_image_url FROM public.tbl_folder f_inner JOIN public.tbl_user_profile up_inner ON f_inner.owner_id::uuid = up_inner.auth_user_id WHERE f_inner.id = s.s_id) ELSE NULL END)::VARCHAR as source_image,
+        (CASE 
+            WHEN s.s_type = 'folder' THEN (SELECT f_inner.title FROM public.tbl_folder f_inner WHERE f_inner.id = s.s_id)
+            WHEN s.s_type = 'naver_folder' THEN (SELECT nf_inner.name::text FROM public.tbl_naver_folder nf_inner WHERE nf_inner.folder_id::varchar = s.s_id)
+            WHEN s.s_type = 'youtube_channel' THEN (SELECT pf_inner.metadata->>'channelTitle' FROM public.tbl_place_features pf_inner WHERE pf_inner.metadata->>'channelId' = s.s_id LIMIT 1)
+            WHEN s.s_type = 'community_region' THEN s.s_id
+            WHEN s.s_type = 'region_recommend' THEN s.s_id
+            ELSE 'Unknown' 
+        END)::VARCHAR as source_title,
+        (CASE 
+            WHEN s.s_type = 'folder' THEN (
+                SELECT up_inner.profile_image_url 
+                FROM public.tbl_folder f_inner 
+                JOIN public.tbl_user_profile up_inner ON f_inner.owner_id::uuid = up_inner.auth_user_id 
+                WHERE f_inner.id = s.s_id
+            )
+            WHEN s.s_type = 'youtube_channel' THEN (
+                SELECT pf_inner.metadata->'thumbnails'->'default'->>'url' 
+                FROM public.tbl_place_features pf_inner 
+                WHERE pf_inner.metadata->>'channelId' = s.s_id 
+                LIMIT 1
+            )
+            ELSE NULL 
+        END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
-        (to_jsonb(p) || jsonb_build_object(
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
             'image_urls', p.images, 
             'avg_price', calculate_menu_avg_price(p.menus),
             'interaction', public.v1_common_place_interaction(p.id),
@@ -131,7 +153,21 @@ BEGIN
         feed_data.comment::TEXT as comment
     FROM (
         -- 각 소스별 장소 데이터 결합
-        SELECT 'folder' as type, fp.folder_id as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, fp.comment FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
+        SELECT 'folder' as type, fp.folder_id::varchar as sid, fp.place_id as pid, fp.created_at::TIMESTAMPTZ as added_time, fp.comment FROM public.tbl_folder_place fp WHERE fp.deleted_at IS NULL
+        UNION ALL
+        SELECT 'naver_folder' as type, nfp.folder_id::varchar as sid, nfp.place_id as pid, nf.created_at::TIMESTAMPTZ as added_time, NULL::text as comment FROM public.tbl_naver_folder_place nfp JOIN public.tbl_naver_folder nf ON nfp.folder_id = nf.folder_id
+        UNION ALL
+        SELECT CASE 
+                 WHEN pf.platform_type = 'youtube' THEN 'youtube_channel'::text
+                 WHEN pf.platform_type = 'community' THEN 'community_region'::text
+                 ELSE pf.platform_type::text
+               END as type, 
+               CASE WHEN pf.platform_type = 'youtube' THEN pf.metadata->>'channelId' ELSE (SELECT p_inner.group1 FROM public.tbl_place p_inner WHERE p_inner.id = pf.place_id) END as sid,
+               pf.place_id as pid, 
+               pf.published_at::TIMESTAMPTZ as added_time,
+               NULL::text as comment
+        FROM public.tbl_place_features pf
+        WHERE pf.status = 'active'
     ) feed_data
     JOIN all_sources s ON s.s_type = feed_data.type AND s.s_id = feed_data.sid
     JOIN public.tbl_place p ON feed_data.pid = p.id

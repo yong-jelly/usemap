@@ -69,7 +69,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         pl.id,
-        (to_jsonb(pl) || jsonb_build_object('image_urls', pl.images)) AS p_data,
+        (to_jsonb(pl) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object('image_urls', pl.images)) AS p_data,
         fp.created_at::TIMESTAMPTZ AS a_at,
         fp.comment
     FROM public.tbl_folder_place fp

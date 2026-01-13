@@ -18,6 +18,7 @@ export function FeatureDetailPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const [searchParams] = useSearchParams();
   const domain = searchParams.get("domain");
+  const source = searchParams.get("source");
   const navigate = useNavigate();
   const location = useLocation();
   const { show: showPlaceModal } = usePlacePopup();
@@ -45,7 +46,8 @@ export function FeatureDetailPage() {
   } = useFeaturePlaces({ 
     type: type as any, 
     id: id || "", 
-    domain 
+    domain,
+    source
   });
 
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -91,13 +93,19 @@ export function FeatureDetailPage() {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, viewMode]);
 
-  const { data: info } = useFeatureInfo({ type: type as any, id: id || "" });
+    const { data: info } = useFeatureInfo({ 
+    type: type as any, 
+    id: id || "",
+    domain,
+    source
+  });
   
   // URL type을 subscription_type으로 변환
   const subscriptionType = useMemo(() => {
     if (type === 'folder') return 'naver_folder';
     if (type === 'youtube') return 'youtube_channel';
     if (type === 'community') return 'community_region';
+    if (type === 'region') return 'region_recommend';
     return type;
   }, [type]);
   
@@ -130,6 +138,7 @@ export function FeatureDetailPage() {
     type: type as any, 
     id: id || "",
     domain,
+    source,
     enabled: mapDataRequested
   });
 
@@ -425,12 +434,12 @@ export function FeatureDetailPage() {
     if (!typedInfo) return id || "";
     if (type === 'folder') return typedInfo.name;
     if (type === 'youtube') return typedInfo.channel_title;
-    if (type === 'community') return `${id}지역`;
+    if (type === 'community' || type === 'region') return `${id}지역`;
     return id || "";
   }, [typedInfo, type, id]);
 
   const headerSubtitle = useMemo(() => {
-    if (type === 'youtube' || type === 'folder') return `${typedInfo?.place_count || places.length}개의 매장`;
+    if (type === 'youtube' || type === 'folder' || type === 'region') return `${(typedInfo?.place_count || places.length).toLocaleString()}개의 매장`;
     if (type === 'community') return "커뮤니티";
     return "";
   }, [type, typedInfo, places.length]);
@@ -507,7 +516,7 @@ export function FeatureDetailPage() {
                     <div className="flex flex-col gap-0.5">
                       <span className="text-xs text-surface-400 font-bold uppercase tracking-wider">매장</span>
                       <span className="text-lg font-black text-surface-900 dark:text-white">
-                        {typedInfo?.place_count || places.length}
+                        {(typedInfo?.place_count || places.length).toLocaleString()}
                       </span>
                     </div>
                     <div className="w-px h-8 bg-surface-100 dark:border-surface-800" />

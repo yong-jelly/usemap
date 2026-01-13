@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { useFeaturePageStore } from "@/shared/lib/feature-page-store";
-import { useNaverFolders, useYoutubeChannels, useCommunityContents } from "@/entities/place/queries";
+import { useNaverFolders, useYoutubeChannels, useCommunityContents, useRegionContents } from "@/entities/place/queries";
 import { useToggleFeatureSubscription, useMySubscriptions } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
@@ -18,15 +18,16 @@ import naverIcon from "@/assets/images/naver-map-logo.png";
 export function FeaturePage() {
   const navigate = useNavigate();
   const { tab } = useParams();
-  const activeTab = tab || "community";
+  const activeTab = tab || "detective";
   
   const { scrollPositions, setScrollPosition } = useFeaturePageStore();
 
   const tabs = [
-    { id: "community", label: "커뮤니티" },
     { id: "detective", label: "맛탐정" },
+    { id: "community", label: "커뮤니티" },
     { id: "folder", label: "플레이스" },
     { id: "youtube", label: "유튜브" },
+    { id: "region", label: "지역" },
   ];
 
   // 페이지 마운트 시 window 스크롤 초기화 (다른 페이지에서 스크롤 후 진입 시 헤더가 밀리는 문제 방지)
@@ -83,10 +84,11 @@ export function FeaturePage() {
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
       <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-32 bg-white dark:bg-surface-950 min-h-dvh">
         <div className="pt-2" />
-        {activeTab === "community" && <CommunityList />}
         {activeTab === "detective" && <DetectiveList />}
+        {activeTab === "community" && <CommunityList />}
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
+        {activeTab === "region" && <RegionList />}
       </main>
     </div>
   );
@@ -151,7 +153,7 @@ function FeatureRowHeader({
             {title}
           </h3>
           <span className="text-xs font-medium text-surface-400">
-            {count}개 매장
+            {count.toLocaleString()}개 매장
           </span>
         </div>
         <FeatureSubscribeButton type={subscribeType} id={subscribeId} />
@@ -233,6 +235,119 @@ function NaverFolderList() {
         <div ref={observerTarget} className="p-12 flex justify-center">
           <Loader2 className="size-6 text-surface-300 animate-spin" />
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 지역별 통합 목록 렌더링 컴포넌트
+ */
+function RegionList() {
+  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
+  const { regionSource: selectedSource, setRegionSource: setSelectedSource } = useFeaturePageStore();
+  
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useRegionContents({ 
+    source: selectedSource,
+  });
+  
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0, rootMargin: '200px' }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const sources = [
+    { id: null, label: "전체" },
+    { id: "community", label: "커뮤니티" },
+    { id: "detective", label: "맛탐정" },
+    { id: "folder", label: "플레이스" },
+    { id: "youtube", label: "유튜브" },
+  ];
+
+  const regions = data?.pages.flatMap((page) => page) || [];
+
+  return (
+    <div className="py-4 flex flex-col gap-4">
+      <FeatureInfoNotice 
+        icon={MapPin} 
+        title="지역 추천" 
+        description="다양한 소스에서 엄선된 지역별 맛집 리스트입니다." 
+      />
+      {/* 소스 필터 */}
+      <div className="flex items-center gap-2 px-4 mb-2 overflow-x-auto overflow-y-hidden scrollbar-hide">
+        {sources.map((source) => (
+          <button
+            key={source.id || 'all'}
+            onClick={() => setSelectedSource(source.id)}
+            disabled={isLoading}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-sm font-bold transition-colors border shrink-0",
+              selectedSource === source.id
+                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
+                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+              isLoading && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {source.label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          {/* 지역별 섹션 */}
+          {regions.map(region => (
+            <section key={region.region_name} className="flex flex-col gap-2 px-4">
+              <FeatureRowHeader 
+                title={`${region.region_name}지역`}
+                count={region.place_count}
+                onTitleClick={() => navigate(`/feature/detail/region/${region.region_name}${selectedSource ? `?source=${selectedSource}` : ''}`)}
+                subscribeType="region_recommend"
+                subscribeId={region.region_name}
+              />
+              <div className="-mx-4">
+                <PlaceSlider
+                  title=""
+                  items={region.preview_contents}
+                  onItemClick={showPopup}
+                  onMoreClick={() => navigate(`/feature/detail/region/${region.region_name}${selectedSource ? `?source=${selectedSource}` : ''}`)}
+                  showMoreThreshold={10}
+                  showRating={false}
+                  snap={false}
+                />
+              </div>
+            </section>
+          ))}
+
+          {hasNextPage && (
+            <div ref={observerTarget} className="p-12 flex justify-center">
+              <Loader2 className="size-6 text-surface-300 animate-spin" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

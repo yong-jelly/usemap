@@ -96,7 +96,7 @@ BEGIN
             ELSE NULL
         END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
-        (to_jsonb(p) || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
         d.added_time as added_at
     FROM latest_data d
     JOIN public.tbl_place p ON d.pid = p.id

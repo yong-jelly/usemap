@@ -36,6 +36,7 @@ $function$;
 -- 이들은 common_place_interaction을 쓰거나 직접 experience를 구축함.
 
 -- v1_get_folder_places 업데이트
+DROP FUNCTION IF EXISTS public.v1_get_folder_places(VARCHAR, integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_get_folder_places(
     p_folder_id VARCHAR,
     p_limit INT DEFAULT 20,
@@ -73,7 +74,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         pl.id,
-        (to_jsonb(pl) || jsonb_build_object(
+        (to_jsonb(pl) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
             'image_urls', pl.images,
             'interaction', public.v1_common_place_interaction(pl.id),
             'features', public.v1_common_place_features(pl.id),
@@ -88,6 +89,7 @@ END;
 $$;
 
 -- v1_get_my_feed 업데이트
+DROP FUNCTION IF EXISTS public.v1_get_my_feed(integer, integer, integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(
     p_limit INT DEFAULT 20,
     p_offset INT DEFAULT 0,
@@ -122,7 +124,7 @@ BEGIN
         (CASE WHEN s.s_type = 'folder' THEN (SELECT f_inner.title FROM public.tbl_folder f_inner WHERE f_inner.id = s.s_id) ELSE 'Unknown' END)::VARCHAR as source_title,
         (CASE WHEN s.s_type = 'folder' THEN (SELECT up_inner.profile_image_url FROM public.tbl_folder f_inner JOIN public.tbl_user_profile up_inner ON f_inner.owner_id::uuid = up_inner.auth_user_id WHERE f_inner.id = s.s_id) ELSE NULL END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
-        (to_jsonb(p) || jsonb_build_object(
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
             'image_urls', p.images, 
             'avg_price', calculate_menu_avg_price(p.menus),
             'interaction', public.v1_common_place_interaction(p.id),
@@ -195,10 +197,10 @@ BEGIN
             )
             SELECT jsonb_build_object(
                 'is_franchise', p.is_franchise, 'id', p.id, 'name', p.name, 'group1', p.group1, 'group2', p.group2, 'group3', p.group3, 'road', p.road, 'category', p.category, 'category_code', null, 'category_code_list', null, 'road_address', p.road_address, 'payment_info', null, 'conveniences', null, 'address', p.address, 'phone', p.phone, 'visitor_reviews_total', p.visitor_reviews_total, 'visitor_reviews_score', p.visitor_reviews_score, 'x', p.x, 'y', p.y, 'homepage', null, 'keyword_list', p.keyword_list, 'images', CASE WHEN p.images IS NOT NULL THEN to_jsonb(p.images[1:LEAST(array_length(p.images, 1), $4)]) ELSE '[]'::jsonb END, 'static_map_url', p.static_map_url,
-                'themes', CASE WHEN $3 IS NOT NULL AND array_length($3, 1) > 0 THEN (SELECT jsonb_agg(jsonb_build_object('code', d->>'code', 'name', d->>'displayName', 'count', (d->>'count')::int)) FROM jsonb_array_elements(p.visitor_review_stats->'analysis'->'votedKeyword'->'details') AS d WHERE d->>'code' = ANY($3)) ELSE NULL END,
+                'themes', null,
                 'visitor_review_medias_total', p.visitor_review_medias_total, 'visitor_review_stats', null, 'voted_keyword_count', s.voted_keyword_count, 'menus', null, 'avg_price', calculate_menu_avg_price(p.menus),
                 'voted_summary_text', (SELECT (v->>'description')::text FROM tbl_place_analysis a, jsonb_array_elements(a.voted) v WHERE a.business_id = p.id LIMIT 1),
-                'street_panorama', p.street_panorama, 'place_images', p.place_images, 'updated_at', p.updated_at, 'created_at', p.created_at,
+                'street_panorama', null, 'place_images', p.place_images, 'updated_at', p.updated_at, 'created_at', p.created_at,
                 'interaction', public.v1_common_place_interaction(p.id),
                 'features', public.v1_common_place_features(p.id),
                 'experience', public.v1_get_place_experience(p.id)

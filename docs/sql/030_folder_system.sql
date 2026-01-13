@@ -976,7 +976,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         pl.id,
-        (to_jsonb(pl) || jsonb_build_object(
+        (to_jsonb(pl) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
             'image_urls', pl.images,
             'interaction', public.v1_common_place_interaction(pl.id),
             'features', public.v1_common_place_features(pl.id),
@@ -1207,7 +1207,7 @@ BEGIN
             ELSE 'Unknown'
         END as source_title,
         p.id as place_id,
-        (to_jsonb(p) || jsonb_build_object('image_urls', p.images)) as place_data,
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object('image_urls', p.images)) as place_data,
         feed_data.added_time::TIMESTAMPTZ as added_at
     FROM (
         -- 각 소스별 장소 데이터 결합
@@ -1266,18 +1266,3 @@ GRANT ALL ON TABLE public.tbl_folder_review TO authenticated;
 COMMENT ON TABLE public.tbl_folder IS '사용자 정의 맛탐정 폴더';
 COMMENT ON TABLE public.tbl_folder_invite_history IS '폴더 초대 코드 히스토리';
 COMMENT ON TABLE public.tbl_folder_review IS '비공개 폴더 전용 리뷰';
-COMMENT ON FUNCTION public.v1_list_public_folders IS '공개 맛탐정 폴더 목록 조회';
-COMMENT ON FUNCTION public.v1_list_my_folders IS '내 맛탐정 폴더 목록 조회';
-COMMENT ON FUNCTION public.v1_get_folder_info IS '맛탐정 폴더 단건 정보 조회';
-COMMENT ON FUNCTION public.v1_create_folder IS '신규 맛탐정 폴더 생성';
-COMMENT ON FUNCTION public.v1_add_place_to_folder IS '폴더에 장소 추가';
-COMMENT ON FUNCTION public.v1_remove_place_from_folder IS '폴더에서 장소 제거';
-COMMENT ON FUNCTION public.v1_get_folder_places IS '폴더 내 장소 목록 조회';
-COMMENT ON FUNCTION public.v1_check_folder_access IS '폴더 접근 권한 체크';
-COMMENT ON FUNCTION public.v1_regenerate_invite_code IS '초대 코드 재생성';
-COMMENT ON FUNCTION public.v1_verify_invite_code IS '초대 코드 검증';
-COMMENT ON FUNCTION public.v1_get_invite_history IS '초대 히스토리 조회';
-COMMENT ON FUNCTION public.v1_hide_folder IS '폴더 숨김';
-COMMENT ON FUNCTION public.v1_update_folder IS '폴더 정보 수정';
-COMMENT ON FUNCTION public.v1_upsert_folder_review IS '비공개 폴더 리뷰 작성';
-COMMENT ON FUNCTION public.v1_get_folder_reviews IS '비공개 폴더 리뷰 조회';

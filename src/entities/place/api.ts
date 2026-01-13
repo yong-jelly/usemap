@@ -308,6 +308,22 @@ export const placeApi = {
   },
 
   /**
+   * 지역별 통합 컨텐츠 목록을 조회합니다 (v2).
+   */
+  getRegionContents: async (params: {
+    source?: string | null;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await apiClient.rpc<CommunityRegion>("v2_get_region_contents", {
+      p_source: params.source || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 네이버 폴더 상세 장소 목록을 조회합니다.
    */
   getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number }) => {
@@ -345,6 +361,19 @@ export const placeApi = {
   },
 
   /**
+   * 통합 지역 상세 장소 목록을 조회합니다.
+   */
+  getPlacesByRegion: async (params: { regionName: string; source?: string | null; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; src: string }>("v2_get_places_by_region", {
+      p_region_name: params.regionName,
+      p_source: params.source || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 네이버 폴더 정보를 조회합니다.
    */
   getNaverFolderInfo: async (folderId: string) => {
@@ -370,6 +399,17 @@ export const placeApi = {
   getCommunityRegionInfo: async (regionName: string) => {
     const response = await apiClient.rpc<CommunityRegionInfo>("v2_get_community_region_info", {
       p_region_name: regionName,
+    });
+    return response.data[0];
+  },
+
+  /**
+   * 지역 정보를 조회합니다.
+   */
+  getRegionInfo: async (regionName: string, source?: string | null) => {
+    const response = await apiClient.rpc<any>("v2_get_region_info", {
+      p_region_name: regionName,
+      p_source: source || null,
     });
     return response.data[0];
   },
@@ -496,6 +536,22 @@ export const placeApi = {
     }>("v2_get_places_by_community_region_for_map", {
       p_region_name: params.regionName,
       p_domain: params.domain || null,
+    });
+    return response.data;
+  },
+
+  /**
+   * 지역 지도용 전체 장소 목록을 조회합니다.
+   */
+  getPlacesByRegionForMap: async (params: { regionName: string; source?: string | null }) => {
+    const response = await apiClient.rpc<{
+      place_id: string;
+      name: string;
+      x: string;
+      y: string;
+    }>("v2_get_places_by_region_for_map", {
+      p_region_name: params.regionName,
+      p_source: params.source || null,
     });
     return response.data;
   },

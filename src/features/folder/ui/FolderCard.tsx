@@ -133,7 +133,7 @@ export function FolderCard({
                 </>
               )}
               <span className="text-xs font-medium text-surface-400">
-                {folder.place_count}개 매장
+                {folder.place_count.toLocaleString()}개 매장
               </span>
               <span className="text-[10px] text-surface-300">•</span>
               <span className="text-[11px] text-surface-400 flex items-center gap-1">

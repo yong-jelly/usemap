@@ -24,9 +24,10 @@ export const placeKeys = {
   visitedHistory: (id: string) => [...placeKeys.all, "visitedHistory", id] as const,
   visitStats: (id: string) => [...placeKeys.all, "visitStats", id] as const,
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
-  featurePlaces: (type: string, id: string, domain?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domain] as const,
-  featureInfo: (type: string, id: string) => [...placeKeys.all, "featureInfo", type, id] as const,
-  featurePlacesForMap: (type: string, id: string, domain?: string | null) => [...placeKeys.all, "featurePlacesForMap", type, id, domain] as const,
+  regionContents: (filters: any) => [...placeKeys.all, "regionContents", filters] as const,
+  featurePlaces: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domainOrSource] as const,
+  featureInfo: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featureInfo", type, id, domainOrSource] as const,
+  featurePlacesForMap: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featurePlacesForMap", type, id, domainOrSource] as const,
 };
 
 /**
@@ -398,15 +399,35 @@ export function useCommunityContents(filters: { domain?: string | null }) {
 }
 
 /**
+ * 지역별 통합 컨텐츠 목록을 무한 스크롤 조회하는 Hook
+ */
+export function useRegionContents(filters: { source?: string | null }) {
+  return useInfiniteQuery({
+    queryKey: placeKeys.regionContents(filters),
+    queryFn: ({ pageParam = 0 }) => placeApi.getRegionContents({
+      source: filters.source,
+      limit: 20,
+      offset: pageParam,
+    }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+  });
+}
+
+/**
  * 피쳐별 상세 장소 목록을 무한 스크롤로 조회하는 Hook
  */
 export function useFeaturePlaces(params: { 
-  type: 'folder' | 'youtube' | 'community';
+  type: 'folder' | 'youtube' | 'community' | 'region';
   id: string;
   domain?: string | null;
+  source?: string | null;
 }) {
   return useInfiniteQuery({
-    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain),
+    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain || params.source),
     queryFn: ({ pageParam = 0 }) => {
       const limit = 20;
       switch (params.type) {
@@ -416,6 +437,8 @@ export function useFeaturePlaces(params: {
           return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam });
         case 'community':
           return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam });
+        case 'region':
+          return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam });
       }
     },
     initialPageParam: 0,
@@ -430,9 +453,14 @@ export function useFeaturePlaces(params: {
 /**
  * 피쳐 정보(폴더명, 채널명 등)를 조회하는 Hook
  */
-export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community'; id: string }) {
+export function useFeatureInfo(params: { 
+  type: 'folder' | 'youtube' | 'community' | 'region'; 
+  id: string;
+  domain?: string | null;
+  source?: string | null;
+}) {
   return useQuery({
-    queryKey: placeKeys.featureInfo(params.type, params.id),
+    queryKey: placeKeys.featureInfo(params.type, params.id, params.domain || params.source),
     queryFn: () => {
       switch (params.type) {
         case 'folder':
@@ -441,6 +469,8 @@ export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community
           return placeApi.getYoutubeChannelInfo(params.id);
         case 'community':
           return placeApi.getCommunityRegionInfo(params.id);
+        case 'region':
+          return placeApi.getRegionInfo(params.id, params.source);
       }
     },
     enabled: !!params.id,
@@ -451,13 +481,14 @@ export function useFeatureInfo(params: { type: 'folder' | 'youtube' | 'community
  * 피쳐별 지도용 전체 장소 목록을 조회하는 Hook (버튼 클릭 시 수동 조회)
  */
 export function useFeaturePlacesForMap(params: { 
-  type: 'folder' | 'youtube' | 'community';
+  type: 'folder' | 'youtube' | 'community' | 'region';
   id: string;
   domain?: string | null;
+  source?: string | null;
   enabled?: boolean;
 }) {
   return useQuery({
-    queryKey: placeKeys.featurePlacesForMap(params.type, params.id, params.domain),
+    queryKey: placeKeys.featurePlacesForMap(params.type, params.id, params.domain || params.source),
     queryFn: () => {
       switch (params.type) {
         case 'folder':
@@ -466,6 +497,8 @@ export function useFeaturePlacesForMap(params: {
           return placeApi.getPlacesByYoutubeChannelForMap(params.id);
         case 'community':
           return placeApi.getPlacesByCommunityRegionForMap({ regionName: params.id, domain: params.domain });
+        case 'region':
+          return placeApi.getPlacesByRegionForMap({ regionName: params.id, source: params.source });
       }
     },
     enabled: !!params.id && (params.enabled ?? false),

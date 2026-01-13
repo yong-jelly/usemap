@@ -85,7 +85,7 @@ BEGIN
             ELSE NULL
         END)::VARCHAR as source_image,
         p.id::VARCHAR as place_id,
-        (to_jsonb(p) || jsonb_build_object(
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
             'image_urls', p.images, 
             'avg_price', calculate_menu_avg_price(p.menus),
             'interaction', public.v1_common_place_interaction(p.id),
@@ -123,5 +123,5 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION public.v1_get_my_feed IS '내가 구독하거나 소유한 폴더/채널의 장소 피드를 조회합니다. (코멘트 포함)';
-GRANT EXECUTE ON FUNCTION public.v1_get_my_feed TO authenticated;
+COMMENT ON FUNCTION public.v1_get_my_feed(INT, INT, INT, INT) IS '내가 구독하거나 소유한 폴더/채널의 장소 피드를 조회합니다. (코멘트 포함)';
+GRANT EXECUTE ON FUNCTION public.v1_get_my_feed(INT, INT, INT, INT) TO authenticated;

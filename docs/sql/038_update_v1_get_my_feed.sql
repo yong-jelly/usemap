@@ -6,6 +6,7 @@
 --   psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -f docs/sql/038_update_v1_get_my_feed.sql
 -- =====================================================
 
+DROP FUNCTION IF EXISTS public.v1_get_my_feed(integer, integer, integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_get_my_feed(
     p_limit INT DEFAULT 20,
     p_offset INT DEFAULT 0,
@@ -65,7 +66,7 @@ BEGIN
             ELSE 'Unknown'
         END as source_title,
         p.id as place_id,
-        (to_jsonb(p) || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
+        (to_jsonb(p) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object('image_urls', p.images, 'avg_price', calculate_menu_avg_price(p.menus))) as place_data,
         feed_data.added_time::TIMESTAMPTZ as added_at
     FROM (
         -- 각 소스별 장소 데이터 결합

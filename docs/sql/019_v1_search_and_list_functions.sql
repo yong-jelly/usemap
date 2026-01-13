@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION public.v1_list_places_search_for_name(p_name text, p_
 AS $function$
 BEGIN
     RETURN QUERY
-    SELECT to_jsonb(p.*) || jsonb_build_object('interaction', public.v1_common_place_interaction(p.id))
+    SELECT (to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[]) || jsonb_build_object('interaction', public.v1_common_place_interaction(p.id))
     FROM public.tbl_place p
     WHERE p.name ILIKE '%' || p_name || '%'
       AND (p_group1 IS NULL OR p.group1 = p_group1)
@@ -23,6 +23,7 @@ END;
 $function$;
 
 -- 2. 내가 북마크(저장)한 장소 목록 조회 함수
+DROP FUNCTION IF EXISTS public.v1_get_my_bookmarked_places(integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_get_my_bookmarked_places(p_limit integer DEFAULT 20, p_offset integer DEFAULT 0)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -30,7 +31,7 @@ CREATE OR REPLACE FUNCTION public.v1_get_my_bookmarked_places(p_limit integer DE
 AS $function$
 BEGIN
     RETURN (
-        SELECT jsonb_agg(to_jsonb(p.*))
+        SELECT jsonb_agg(to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[])
         FROM public.tbl_save s
         JOIN public.tbl_place p ON s.saved_id = p.id
         WHERE s.user_id = auth.uid() AND s.saved_type = 'place' AND s.saved = true
@@ -40,6 +41,7 @@ END;
 $function$;
 
 -- 3. 내가 좋아요 누른 장소 목록 조회 함수
+DROP FUNCTION IF EXISTS public.v1_get_my_liked_places(integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_get_my_liked_places(p_limit integer DEFAULT 20, p_offset integer DEFAULT 0)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -47,7 +49,7 @@ CREATE OR REPLACE FUNCTION public.v1_get_my_liked_places(p_limit integer DEFAULT
 AS $function$
 BEGIN
     RETURN (
-        SELECT jsonb_agg(to_jsonb(p.*))
+        SELECT jsonb_agg(to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[])
         FROM public.tbl_like l
         JOIN public.tbl_place p ON l.liked_id = p.id
         WHERE l.user_id = auth.uid() AND l.liked_type = 'place' AND l.liked = true

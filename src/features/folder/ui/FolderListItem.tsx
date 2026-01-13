@@ -100,7 +100,7 @@ export function FolderListItem({
             </span>
             <span className="size-1 rounded-full bg-surface-200 dark:bg-surface-700 shrink-0" />
             <span className="text-xs font-medium text-surface-400 shrink-0">
-              장소 {folder.place_count}개
+              장소 {folder.place_count.toLocaleString()}개
             </span>
           </div>
         </div>

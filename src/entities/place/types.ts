@@ -255,6 +255,7 @@ export interface CommunityContent {
   content_url: string;
   domain: string;
   published_at: string;
+  src?: string;
   place_liked_count?: number;
   place_reviews_count?: number;
   features?: any[];

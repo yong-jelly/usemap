@@ -105,7 +105,7 @@ BEGIN
                     'voted_keyword_count', p.voted_keyword_count,
                     'menus', null,
                     'avg_price', calculate_menu_avg_price(p.menus),
-                    'street_panorama', p.street_panorama,
+                    'street_panorama', null,
                     'place_images', p.place_images,
                     'updated_at', p.updated_at,
                     'created_at', p.created_at,

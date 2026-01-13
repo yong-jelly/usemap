@@ -74,7 +74,7 @@ CREATE OR REPLACE FUNCTION public.v1_get_place_by_id(p_business_id text)
 AS $function$
 BEGIN
     RETURN (
-        SELECT to_jsonb(p.*) || jsonb_build_object(
+        SELECT (to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[]) || jsonb_build_object(
             'interaction', public.v1_common_place_interaction(p.id),
             'features', public.v1_common_place_features(p.id)
         )

@@ -157,22 +157,7 @@ BEGIN
                                 '[]'::jsonb
                         END,
                     'static_map_url', p.static_map_url,
-                    'themes', 
-                        CASE 
-                            WHEN $3 IS NOT NULL AND array_length($3, 1) > 0 THEN
-                                (
-                                    SELECT jsonb_agg(
-                                        jsonb_build_object(
-                                            'code', d->>'code',
-                                            'name', d->>'displayName',
-                                            'count', (d->>'count')::int
-                                        )
-                                    )
-                                    FROM jsonb_array_elements(p.visitor_review_stats->'analysis'->'votedKeyword'->'details') AS d
-                                    WHERE d->>'code' = ANY($3)
-                                )
-                            ELSE NULL
-                        END,
+                    'themes', null,
                     'visitor_review_medias_total', p.visitor_review_medias_total,
                     'visitor_review_stats', null,
                     'voted_keyword_count', s.voted_keyword_count,
@@ -184,7 +169,7 @@ BEGIN
                         WHERE a.business_id = p.id
                         LIMIT 1
                     ),
-                    'street_panorama', p.street_panorama,
+                    'street_panorama', null,
                     'place_images', p.place_images,
                     'updated_at', p.updated_at,
                     'created_at', p.created_at,

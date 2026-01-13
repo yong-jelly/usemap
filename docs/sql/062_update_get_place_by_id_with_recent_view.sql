@@ -27,7 +27,7 @@ BEGIN
     -- 2. 장소 데이터 반환 (interaction, features, experience 포함)
     -- v1_common_place_interaction은 이미 061 마이그레이션에서 place_reviews_count를 포함하도록 업데이트됨
     RETURN (
-        SELECT to_jsonb(p.*) || jsonb_build_object(
+        SELECT (to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[]) || jsonb_build_object(
             'interaction', public.v1_common_place_interaction(p.id),
             'features', public.v1_common_place_features(p.id),
             'experience', public.v1_get_place_experience(p.id)
