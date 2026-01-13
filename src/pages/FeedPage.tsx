@@ -191,13 +191,13 @@ export function FeedPage() {
       </header>
 
       <main className={cn(
-        "flex-1 flex flex-col pt-[72px]",
+        "flex-1 flex flex-col pt-[80px]",
         isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && "pt-[110px]"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
             {/* 로그인 가이드 - 심플 버전 */}
-            <div className="px-5 pt-4">
+            <div className="px-5 pt-6">
               <button 
                 onClick={openLogin}
                 className="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 active:scale-[0.98] transition-all"
