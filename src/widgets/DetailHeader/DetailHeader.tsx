@@ -32,6 +32,8 @@ interface DetailHeaderProps {
   onSettings?: () => void;
   /** 뒤로가기 버튼 클릭 핸들러 */
   onBack?: () => void;
+  /** 소유자 ID (사용자 프로필 이동용) */
+  ownerId?: string;
 }
 
 /**
@@ -53,6 +55,7 @@ export function DetailHeader({
   onShare,
   onSettings,
   onBack,
+  ownerId,
 }: DetailHeaderProps) {
   const navigate = useNavigate();
   const [isLinkCopied, setIsLinkCopied] = useState(false);
@@ -99,7 +102,13 @@ export function DetailHeader({
       </button>
       
       {/* 타이틀 영역 */}
-      <div className="flex-1 flex items-center gap-2 min-w-0">
+      <div 
+        className={cn(
+          "flex-1 flex items-center gap-2 min-w-0",
+          ownerId && "cursor-pointer hover:opacity-70 transition-opacity"
+        )}
+        onClick={() => ownerId && navigate(`/p/user/${ownerId}`)}
+      >
         {/* 썸네일 (아이콘/이미지) */}
         {thumbnailUrl ? (
           <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-surface-100 dark:border-surface-800">

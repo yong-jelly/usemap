@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useLocation } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { 
@@ -254,6 +254,7 @@ function InviteHistoryModal({
 export function FolderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { show: showPlaceModal } = usePlacePopup();
   const { isAuthenticated } = useUserStore();
   const { openLogin } = useAuthModalStore();
@@ -359,6 +360,14 @@ export function FolderDetailPage() {
     if (isOwner) return;
     if (!id) return;
     toggleSubscription(id);
+  };
+
+  const handleBack = () => {
+    if (location.key === "default") {
+      navigate("/feed");
+    } else {
+      navigate(-1);
+    }
   };
 
   // 지도용 데이터 조회
@@ -679,10 +688,12 @@ export function FolderDetailPage() {
             title={folderInfo?.title || "맛탐정 폴더"}
             subtitle={folderInfo?.description || (folderInfo?.owner_nickname ? `@${folderInfo.owner_nickname}` : "익명")}
             thumbnailUrl={folderInfo?.owner_avatar_url}
+            ownerId={folderInfo?.owner_id}
             isOwner={isOwner}
             isSubscribed={displaySubscribed}
             isSubscribing={isCurrentlyToggling}
             onSubscribe={handleToggleSubscription}
+            onBack={handleBack}
             onSettings={() => setShowMenu(true)}
           />
         </div>
