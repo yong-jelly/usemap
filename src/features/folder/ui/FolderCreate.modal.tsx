@@ -119,7 +119,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
       title,
       description,
       permission,
-      permissionWriteType: permission === 'invite' ? permissionWriteType : 0,
+      permissionWriteType: (permission === 'invite' || permission === 'public' || permission === 'hidden') ? permissionWriteType : 0,
     }, {
       onSuccess: (data) => {
         if (data.invite_code) {
@@ -283,17 +283,19 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
           </div>
 
           {/* 초대 폴더 안내 및 추가 옵션 */}
-          {permission === 'invite' && (
+          {(permission === 'invite' || permission === 'public' || permission === 'hidden') && (
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <Key className="size-4 text-primary-500" />
-                  <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 안내</span>
+              {permission === 'invite' && (
+                <div className="p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Key className="size-4 text-primary-500" />
+                    <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 안내</span>
+                  </div>
+                  <p className="text-xs text-primary-600 dark:text-primary-300 leading-relaxed font-medium">
+                    생성 시 5자리의 초대 코드가 자동으로 생성됩니다. 초대 코드는 생성 후 <span className="underline decoration-primary-300 underline-offset-2">24시간 동안만 유효</span>하며, 소유자는 언제든 새로운 코드를 발급할 수 있습니다.
+                  </p>
                 </div>
-                <p className="text-xs text-primary-600 dark:text-primary-300 leading-relaxed font-medium">
-                  생성 시 5자리의 초대 코드가 자동으로 생성됩니다. 초대 코드는 생성 후 <span className="underline decoration-primary-300 underline-offset-2">24시간 동안만 유효</span>하며, 소유자는 언제든 새로운 코드를 발급할 수 있습니다.
-                </p>
-              </div>
+              )}
 
               <div className="flex flex-col gap-4">
                 <label className="text-sm font-bold text-surface-900 dark:text-white">
@@ -325,7 +327,9 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                       )}>
                         관리자만 편집
                       </span>
-                      <span className="text-[11px] text-surface-500">초대된 사용자는 보기만 가능합니다.</span>
+                      <span className="text-[11px] text-surface-500">
+                        {permission === 'public' ? '모든 사용자는 보기만 가능하며, 관리자만 장소를 관리합니다.' : '초대된 사용자는 보기만 가능합니다.'}
+                      </span>
                     </div>
                   </button>
                   <button
@@ -353,7 +357,9 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                       )}>
                         함께 편집
                       </span>
-                      <span className="text-[11px] text-surface-500">초대된 사용자도 장소를 추가할 수 있습니다.</span>
+                      <span className="text-[11px] text-surface-500">
+                        {permission === 'public' ? '구독한 사용자라면 누구나 함께 장소를 추가할 수 있습니다.' : '초대된 사용자도 장소를 추가할 수 있습니다.'}
+                      </span>
                     </div>
                   </button>
                 </div>

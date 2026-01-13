@@ -1,6 +1,7 @@
-import { Globe, Lock, Link as LinkIcon, Ghost, User, Users, Check, MoreVertical } from "lucide-react";
+import { Globe, Lock, Link as LinkIcon, Ghost, User, Users, Check, MoreVertical, ShieldCheck, UserPlus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Folder, FolderPermission } from "@/entities/folder/types";
+import { useUserStore } from "@/entities/user";
 
 export const PERMISSION_INFO: Record<FolderPermission, { label: string; icon: any }> = {
   public: { 
@@ -42,9 +43,11 @@ export function FolderListItem({
   onClick,
   onMoreClick
 }: FolderListItemProps) {
+  const { user } = useUserStore();
   const info = PERMISSION_INFO[folder.permission] || PERMISSION_INFO.public;
   const Icon = info.icon;
-  const isCollaborative = folder.permission === 'invite' && folder.permission_write_type === 1;
+  const isCollaborative = folder.permission_write_type === 1;
+  const isOwner = user?.id === folder.owner_id;
 
   return (
     <div
@@ -73,8 +76,19 @@ export function FolderListItem({
             )}>
               {folder.title}
             </p>
-            {isCollaborative && (
+            {isOwner ? (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-[10px] font-bold text-primary-600 dark:text-primary-400 shrink-0">
+                <ShieldCheck className="size-3" />
+                관리자
+              </div>
+            ) : isCollaborative && (
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-[10px] font-bold text-green-600 dark:text-green-400 shrink-0">
+                <UserPlus className="size-3" />
+                참여 중
+              </div>
+            )}
+            {isCollaborative && isOwner && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-100 dark:bg-surface-800 text-[10px] font-bold text-surface-500 shrink-0">
                 <Users className="size-3" />
                 함께 편집
               </div>

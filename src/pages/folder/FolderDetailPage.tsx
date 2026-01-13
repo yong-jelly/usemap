@@ -677,8 +677,8 @@ export function FolderDetailPage() {
 
   return (
     <div className={cn(
-      "flex flex-col relative",
-      viewMode === "map" ? "h-dvh overflow-hidden bg-white dark:bg-surface-950" : "min-h-dvh bg-surface-300 dark:bg-surface-900"
+      "flex flex-col relative bg-white dark:bg-surface-950",
+      viewMode === "map" ? "h-dvh overflow-hidden" : "min-h-dvh"
     )}>
       {/* 헤더 */}
       <div className="fixed top-0 inset-x-0 z-40 bg-white dark:bg-surface-950">
@@ -808,10 +808,31 @@ export function FolderDetailPage() {
                     </Button>
                   )}
                 </div>
+
+                {/* 함께 편집 가이드 (참여형 폴더) */}
+                {folderInfo?.permission_write_type === 1 && !isOwner && !displaySubscribed && (
+                  <div className="mt-2 p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3 animate-in fade-in slide-in-from-top-1 duration-500">
+                    <div className="flex items-center gap-2">
+                      <Users className="size-4 text-primary-500" />
+                      <span className="text-sm font-bold text-primary-700 dark:text-primary-400">함께 만드는 맛집 폴더</span>
+                    </div>
+                    <p className="text-xs text-primary-600 dark:text-primary-300 leading-relaxed font-medium">
+                      이 폴더는 참여형 폴더입니다. <span className="underline underline-offset-2 font-bold text-primary-700 dark:text-primary-400">구독</span>을 하시면 여러분도 직접 맛집을 추가하고 함께 폴더를 완성해나갈 수 있습니다!
+                    </p>
+                    <Button 
+                      size="sm" 
+                      onClick={handleToggleSubscription}
+                      disabled={isCurrentlyToggling}
+                      className="w-full mt-1 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl h-10"
+                    >
+                      {isCurrentlyToggling ? <Loader2 className="size-4 animate-spin" /> : "구독하고 맛집 추가하기"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* 장소 목록 */}
-              <div className="flex flex-col gap-3 pb-20">
+              <div className="flex flex-col pb-20">
                 {places.length > 0 ? (
                   <>
                     {places.map((item: any) => (
