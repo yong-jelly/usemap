@@ -21,6 +21,7 @@ RETURNS TABLE (
     place_count INT,
     subscriber_count INT,
     created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
     is_place_in_folder BOOLEAN
 )
 LANGUAGE plpgsql
@@ -39,6 +40,7 @@ BEGIN
         f.place_count,
         f.subscriber_count,
         f.created_at::TIMESTAMPTZ,
+        f.updated_at::TIMESTAMPTZ,
         CASE 
             WHEN p_place_id IS NOT NULL THEN
                 EXISTS (
@@ -50,7 +52,7 @@ BEGIN
     FROM public.tbl_folder f
     WHERE f.owner_id = auth.uid()
       AND f.is_hidden = FALSE
-    ORDER BY (f.permission = 'default') DESC, f.created_at DESC;
+    ORDER BY (f.permission = 'default') DESC, COALESCE(f.updated_at, f.created_at) DESC;
 END;
 $$;
 

@@ -63,7 +63,7 @@ export function UserSharedFolderPage() {
           <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
         </button>
         <h1 className="ml-3 text-lg font-bold text-surface-900 dark:text-surface-50 flex-1 truncate">
-          {folders[0]?.owner_nickname || '사용자'}맛탐정의 폴더
+          {folders[0]?.owner_nickname || '사용자'}님의 공개 폴더
         </h1>
       </header>
 

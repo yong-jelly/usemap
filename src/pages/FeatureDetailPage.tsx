@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router";
+import { useParams, useSearchParams, useNavigate, useLocation } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap } from "@/entities/place/queries";
@@ -19,7 +19,16 @@ export function FeatureDetailPage() {
   const [searchParams] = useSearchParams();
   const domain = searchParams.get("domain");
   const navigate = useNavigate();
+  const location = useLocation();
   const { show: showPlaceModal } = usePlacePopup();
+
+  const handleBack = () => {
+    if (location.key === "default") {
+      navigate("/feed", { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
 
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [mapDataRequested, setMapDataRequested] = useState(false);
@@ -449,6 +458,7 @@ export function FeatureDetailPage() {
             isSubscribed={displaySubscribed}
             isSubscribing={isCurrentlyToggling}
             onSubscribe={handleToggleSubscription}
+            onBack={handleBack}
           />
         </div>
       </div>

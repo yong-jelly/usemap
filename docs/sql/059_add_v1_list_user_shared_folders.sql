@@ -24,6 +24,7 @@ RETURNS TABLE (
     subscriber_count INT,
     place_count INT,
     created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
     preview_places JSONB
 )
 LANGUAGE plpgsql
@@ -44,6 +45,7 @@ BEGIN
         f.subscriber_count,
         f.place_count,
         f.created_at::TIMESTAMPTZ,
+        f.updated_at::TIMESTAMPTZ,
         (
             SELECT jsonb_agg(sub.place_info)
             FROM (
@@ -65,7 +67,7 @@ BEGIN
     WHERE f.owner_id = p_user_id 
       AND f.permission = 'public' 
       AND f.is_hidden = FALSE
-    ORDER BY f.created_at DESC
+    ORDER BY COALESCE(f.updated_at, f.created_at) DESC
     LIMIT p_limit
     OFFSET p_offset;
 END;

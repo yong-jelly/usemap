@@ -68,16 +68,17 @@ export function FolderCard({
     }
   }, [isOwner, folder.permission]);
 
-  const creationDateLabel = React.useMemo(() => {
-    const date = new Date(folder.created_at);
+  const updateDateLabel = React.useMemo(() => {
+    const displayDate = folder.updated_at || folder.created_at;
+    const date = new Date(displayDate);
     const now = new Date();
     const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
     
     if (diffDays > 7) {
-      return safeFormatDate(folder.created_at, { year: '2-digit', month: 'numeric', day: 'numeric' });
+      return safeFormatDate(displayDate, { year: '2-digit', month: 'numeric', day: 'numeric' });
     }
-    return ago(folder.created_at);
-  }, [folder.created_at]);
+    return ago(displayDate);
+  }, [folder.updated_at, folder.created_at]);
 
   return (
     <section className="flex flex-col gap-3 px-4 py-2">
@@ -137,7 +138,7 @@ export function FolderCard({
               <span className="text-[10px] text-surface-300">•</span>
               <span className="text-[11px] text-surface-400 flex items-center gap-1">
                 <Clock className="size-3" />
-                {creationDateLabel}
+                {updateDateLabel}
               </span>
             </div>
           </div>

@@ -213,6 +213,7 @@ END;
 $$;
 
 -- 4. 공개 폴더 목록 조회 함수 수정
+DROP FUNCTION IF EXISTS public.v1_list_public_folders(integer, integer);
 CREATE OR REPLACE FUNCTION public.v1_list_public_folders(
     p_limit INT DEFAULT 20,
     p_offset INT DEFAULT 0
@@ -228,6 +229,7 @@ RETURNS TABLE (
     subscriber_count INT,
     place_count INT,
     created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
     preview_places JSONB
 )
 LANGUAGE plpgsql
@@ -248,6 +250,7 @@ BEGIN
         f.subscriber_count,
         f.place_count,
         f.created_at::TIMESTAMPTZ,
+        f.updated_at::TIMESTAMPTZ,
         (
             SELECT jsonb_agg(sub.place_info)
             FROM (
@@ -271,7 +274,7 @@ BEGIN
     LEFT JOIN public.tbl_user_profile p ON f.owner_id = p.auth_user_id
     WHERE f.permission = 'public'
       AND f.is_hidden = FALSE
-    ORDER BY f.subscriber_count DESC, f.created_at DESC
+    ORDER BY COALESCE(f.updated_at, f.created_at) DESC
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;
