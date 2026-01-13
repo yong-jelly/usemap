@@ -490,7 +490,7 @@ export function FeatureDetailPage() {
         {/* List View */}
         <div 
           className={cn(
-            "bg-surface-300 dark:bg-surface-900 transition-opacity duration-300",
+            "bg-white dark:bg-surface-950 transition-opacity duration-300",
             viewMode === "list" ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 -z-10 pointer-events-none hidden"
           )}
         >
@@ -524,7 +524,7 @@ export function FeatureDetailPage() {
                         const naverMapUrl = `https://map.naver.com/p/favorite/myPlace/folder/${typedInfo.share_id}?c=6.00,0,0,0,dh`;
                         window.open(naverMapUrl, '_blank', 'noopener,noreferrer');
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-50 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
                       title="네이버 지도에서 보기"
                     >
                       <ExternalLink className="size-4" />
@@ -537,7 +537,7 @@ export function FeatureDetailPage() {
                         const youtubeUrl = `https://www.youtube.com/channel/${id}`;
                         window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-50 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
                       title="YouTube 채널에서 보기"
                     >
                       <ExternalLink className="size-4" />
@@ -547,7 +547,7 @@ export function FeatureDetailPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col">
                 {places.map((item: any) => (
                   <PlaceCard 
                     key={item.place_id} 

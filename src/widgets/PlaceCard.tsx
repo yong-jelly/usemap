@@ -136,8 +136,7 @@ export function PlaceCard({
 
   return (
     <article className={cn(
-      "bg-white dark:bg-surface-950",
-      !hideShadow && "shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
+      "bg-white dark:bg-surface-950 border-b-[12px] border-surface-200/60 dark:border-black",
       className
     )}>
       {/* 소스 정보 - 플랫한 스타일 */}

@@ -657,7 +657,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     </div>
                   </div>
                   
-                  {isAuthenticated && (
+                  {isAuthenticated && myReview && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
@@ -816,6 +816,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       <div className="p-4 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 space-y-3">
                         <Input 
                           placeholder="링크를 입력하세요" 
+                          className="text-base"
                           value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
                           onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
                         />

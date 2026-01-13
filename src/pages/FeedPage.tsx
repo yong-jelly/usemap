@@ -270,7 +270,7 @@ export function FeedPage() {
               <Loader2 className="size-8 animate-spin text-surface-300" />
             </div>
           ) : feedItems.length > 0 ? (
-            <div className="flex-1 flex flex-col gap-3 pb-20 bg-surface-100 dark:bg-surface-900">
+            <div className="flex-1 flex flex-col pb-20 bg-white dark:bg-surface-950">
               {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
               
               {hasNextPage && (
@@ -342,7 +342,7 @@ function CategorySection({
           <p className="text-[13px] text-surface-500 font-medium mt-0.5">{description}</p>
         )}
       </div>
-      <div className="flex flex-col gap-3 bg-surface-100 dark:bg-surface-900 py-3">
+      <div className="flex flex-col bg-white dark:bg-surface-950 py-0">
         {isLoading ? (
           <div className="py-10 flex justify-center">
             <Loader2 className="size-6 text-surface-300 animate-spin" />

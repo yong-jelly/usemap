@@ -436,10 +436,9 @@ export function ExplorePage() {
 
       {/* 2. 메인 피드 영역 */}
       <main className={cn(
-        "flex-1 w-full max-w-lg mx-auto pb-24 min-h-dvh",
-        isSearchMode ? "pt-16 bg-white dark:bg-surface-950" : "bg-surface-300 dark:bg-surface-900",
+        "flex-1 w-full max-w-lg mx-auto pb-32 min-h-dvh bg-white dark:bg-surface-950",
         (!isSearchMode && !isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : 
-        (!isSearchMode ? "pt-[110px]" : "")
+        (!isSearchMode && !isSearching ? "pt-[110px]" : "pt-16")
       )}>
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */
@@ -498,53 +497,27 @@ export function ExplorePage() {
           <>
             {/* 검색 키워드 및 종료 버튼 표시 - 검색 결과가 있을 때만 */}
             {searchResults.length > 0 && (
-              <div className="relative mx-4 mb-3 mt-4 overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50 via-white to-surface-50 dark:from-primary-950/30 dark:via-surface-900 dark:to-surface-950 border border-primary-100/50 dark:border-surface-800 shadow-sm">
-                {/* 배경 장식 */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100/20 dark:bg-primary-900/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                
-                <div className="relative p-4 flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {/* 아이콘 영역 */}
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-surface-800 shadow-sm flex-shrink-0 border border-primary-100/50 dark:border-surface-700">
-                      <Search className="size-5 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    
-                    {/* 텍스트 영역 */}
-                    <div className="flex flex-col gap-2 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-surface-500 dark:text-surface-400 uppercase tracking-wide">
-                          검색 결과
-                        </span>
-                        <span className="px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-[10px] font-black">
-                          {searchResults.length}개
-                        </span>
-                      </div>
-                      
-                      {/* 검색 키워드 - 배지 형태로 강조 */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-surface-800 border border-primary-200/50 dark:border-primary-800/50 shadow-sm">
-                          <span className="text-sm font-black text-surface-900 dark:text-white leading-tight">
-                            "{searchQueryDisplay}"
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* 종료 버튼 - 우측 상단 */}
-                  <button
-                    onClick={exitSearchMode}
-                    className="flex items-center justify-center size-9 rounded-xl bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-white dark:hover:bg-surface-800 active:opacity-60 flex-shrink-0 shadow-sm"
-                    aria-label="검색 종료"
-                  >
-                    <X className="size-4.5" />
-                  </button>
+              <div className="w-full px-5 py-8 bg-white dark:bg-surface-950 border-b-[8px] border-surface-100 dark:border-black flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-base font-black text-surface-900 dark:text-white truncate">
+                    "{searchQueryDisplay}"
+                  </span>
+                  <span className="text-xs font-bold text-surface-400 dark:text-surface-500 shrink-0">
+                    {searchResults.length}개의 장소
+                  </span>
                 </div>
+                
+                <button
+                  onClick={exitSearchMode}
+                  className="px-3 py-1.5 rounded-lg bg-surface-50 dark:bg-surface-900 text-[13px] font-black text-surface-600 dark:text-surface-400 active:bg-surface-100 dark:active:bg-surface-800 transition-colors"
+                >
+                  종료
+                </button>
               </div>
             )}
             {searchResults.length > 0 ? (
               <div className={cn(
-                layout === 'feed' ? "flex flex-col gap-3" : "grid grid-cols-3 gap-0.5 pt-0.5"
+                layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
               )}>
                 {searchResults.map((place) => {
                   if (layout === 'feed') {
@@ -681,7 +654,7 @@ export function ExplorePage() {
           </div>
         ) : (
           <div className={cn(
-            layout === 'feed' ? "flex flex-col gap-3" : "grid grid-cols-3 gap-0.5 pt-0.5"
+            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
           )}>
             {places.map((place) => {
               if (layout === 'feed') {

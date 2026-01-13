@@ -67,6 +67,7 @@ BEGIN
     WHERE f.owner_id = p_user_id 
       AND f.permission = 'public' 
       AND f.is_hidden = FALSE
+      AND f.place_count > 0
     ORDER BY COALESCE(f.updated_at, f.created_at) DESC
     LIMIT p_limit
     OFFSET p_offset;
