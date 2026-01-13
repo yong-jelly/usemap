@@ -306,9 +306,6 @@ export function FeedPage() {
         )}
       </main>
       
-      {/* 바텀 내비게이션 여백 */}
-      <div className="h-14" />
-
       {/* 필터 바텀 시트 */}
       <ExploreFilterSheet
         isOpen={isFilterOpen}

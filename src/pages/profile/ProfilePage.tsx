@@ -106,7 +106,7 @@ export function ProfilePage() {
 
       {/* 컨텐츠 영역 */}
       <div 
-        className="flex-1 w-full max-w-lg mx-auto pt-24 pb-14"
+        className="flex-1 w-full max-w-lg mx-auto pt-24 pb-32"
       >
         {activeTab === "profile" && <ProfileHeader />}
         {activeTab === "recent" && <RecentPlacesTab />}

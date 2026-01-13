@@ -97,7 +97,7 @@ function RootLayout() {
       {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
       <main className={cn(
         "max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
-        showBottomNav ? "pb-14" : "pb-0"
+        showBottomNav ? "pb-32" : "pb-0"
       )}>
         <Outlet />
       </main>
