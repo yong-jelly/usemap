@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { LogOut, PieChart } from "lucide-react";
+import { LogOut, PieChart, ChevronRight } from "lucide-react";
 import { useUserProfile, useLogout } from "@/entities/user/queries";
 import { Button } from "@/shared/ui";
 
@@ -56,32 +56,26 @@ export function ProfileHeader() {
           >
             프로필 편집
           </Button>
-          <Button
-            onClick={() => navigate("/sub-stat/user/me")}
-            className="w-[30%] rounded-2xl h-14 text-lg font-black bg-surface-900 text-white dark:bg-white dark:text-black shadow-lg shadow-surface-900/10"
-          >
-            {/* <PieChart className="mr-2 h-5 w-5 fill-current" /> */}
-            분석
-          </Button>
         </div>
 
         {/* 설정 메뉴 (로그아웃 포함) */}
-        <div className="space-y-1">
-          <div className="text-xs font-black text-surface-300 dark:text-surface-700 uppercase tracking-widest mb-4 px-1">
-            Account
+        <div className="space-y-2">
+          <div className="text-[11px] font-black text-surface-400 dark:text-surface-600 uppercase tracking-[0.2em] mb-3 px-1">
+            Account Settings
           </div>
           <button
             onClick={() => logout()}
-            className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group"
+            className="w-full flex items-center justify-between p-4 rounded-[24px] bg-surface-50/50 dark:bg-surface-800/30 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-200 group border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-surface-50 dark:bg-surface-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-surface-700 transition-colors shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-white dark:bg-surface-800 flex items-center justify-center group-hover:bg-rose-100 dark:group-hover:bg-rose-900/30 transition-colors shadow-sm">
                 <LogOut className="h-5 w-5 text-surface-400 dark:text-surface-500 group-hover:text-accent-rose transition-colors" />
               </div>
-              <span className="text-lg font-bold text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
+              <span className="text-[17px] font-bold text-surface-700 dark:text-surface-300 group-hover:text-accent-rose dark:group-hover:text-rose-400 transition-colors">
                 로그아웃
               </span>
             </div>
+            <ChevronRight className="h-5 w-5 text-surface-300 dark:text-surface-600 group-hover:text-accent-rose/50 transition-colors" />
           </button>
         </div>
       </div>

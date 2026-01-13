@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { House, Copy, TvMinimalPlay, User, Rss } from "lucide-react";
+import { House, Compass, Sparkles, User, Fan } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
@@ -18,11 +18,12 @@ export function BottomNav() {
 
   /**
    * 네비게이션 아이템 정의
+   * 주제에 맞는 직관적인 아이콘으로 변경 (House, Compass, Sparkles, User)
    */
   const navItems = [
-    { href: "/feed", icon: Rss, label: "피드" },
-    { href: "/explore", icon: Copy, label: "둘러보기" },
-    { href: "/feature", icon: TvMinimalPlay, label: "트렌드" },
+    { href: "/feed", icon: House, label: "피드" },
+    { href: "/explore", icon: Compass, label: "탐색" },
+    { href: "/feature", icon: Fan, label: "맛탐정" },
     { href: "/profile", icon: User, label: "프로필" },
   ];
 
@@ -65,10 +66,6 @@ export function BottomNav() {
             >
               <div className="relative">
                 <item.icon className="h-6 w-6" />
-                {/* 활성화 상태일 때 작은 점 표시 */}
-                {isActive && (
-                  <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
-                )}
               </div>
             </Link>
           );

@@ -219,7 +219,7 @@ export function FeedPage() {
             <div className="flex flex-col gap-10">
               <CategorySection 
                 title="실시간 커뮤니티 픽" 
-                description="다양한 커뮤니티에서 유저들이 직접 검증한 핫플레이스"
+                description="다양한 커뮤니티에서 유저들이 직접 추천한 맛집"
                 items={communityFeed} 
                 isLoading={isLoadingCommunity} 
                 renderItem={renderFeedItem} 

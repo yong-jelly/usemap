@@ -210,7 +210,7 @@ export function VisitHistoryModal({ placeId, placeName, onClose }: VisitHistoryM
                         type="date" 
                         value={date} 
                         onChange={(e) => setDate(e.target.value)}
-                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
+                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800 text-base"
                       />
                     </div>
                     
@@ -222,7 +222,7 @@ export function VisitHistoryModal({ placeId, placeName, onClose }: VisitHistoryM
                         placeholder="예: 친구, 가족, 연인, 동료" 
                         value={companion}
                         onChange={(e) => setCompanion(e.target.value)}
-                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800"
+                        className="h-12 rounded-xl border-surface-200 dark:border-surface-800 text-base"
                       />
                     </div>
 
@@ -238,7 +238,7 @@ export function VisitHistoryModal({ placeId, placeName, onClose }: VisitHistoryM
                           "w-full min-h-[120px] p-4 rounded-xl",
                           "bg-white dark:bg-surface-900",
                           "border border-surface-200 dark:border-surface-800",
-                          "text-surface-900 dark:text-surface-50 text-[14px]",
+                          "text-surface-900 dark:text-surface-50 text-base",
                           "placeholder:text-surface-400",
                           "resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                         )}
