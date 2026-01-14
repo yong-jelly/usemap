@@ -11,6 +11,7 @@ export * from "./Tabs";
 export * from "./Dialog";
 export * from "./ConfirmDialog";
 export * from "./Skeleton";
+export * from "./FloatingViewToggleButton";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";
 

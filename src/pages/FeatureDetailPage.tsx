@@ -10,7 +10,7 @@ import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink } from "lucide-r
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 import { useUserStore, isAdmin } from "@/entities/user";
-import { Dialog, DialogContent, DialogTitle, Button } from "@/shared/ui";
+import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
@@ -614,24 +614,20 @@ export function FeatureDetailPage() {
 
       {/* View Toggle Button & Reset Button */}
       {!isLoading && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30">
-          <button
-            onClick={() => {
-              if (viewMode === "list") {
-                setMapDataRequested(true);
-                setViewMode("map");
-              } else {
-                setViewMode("list");
-              }
-            }}
-            className="bg-surface-900 text-white dark:bg-white dark:text-black px-6 py-3 rounded-full font-black shadow-2xl flex items-center gap-2 transition-all active:scale-95 hover:scale-105 whitespace-nowrap min-w-[100px]"
-          >
-            {viewMode === "list" ? (
-              <><MapIcon className="size-5" /> 지도</>
-            ) : (
-              <><List className="size-5" /> 목록</>
-            )}
-          </button>
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30 pointer-events-none">
+          <div className="pointer-events-auto">
+            <FloatingViewToggleButton
+              viewMode={viewMode}
+              onClick={() => {
+                if (viewMode === "list") {
+                  setMapDataRequested(true);
+                  setViewMode("map");
+                } else {
+                  setViewMode("list");
+                }
+              }}
+            />
+          </div>
           
           {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
             <button
@@ -644,7 +640,7 @@ export function FeatureDetailPage() {
                   setShowResetButton(false);
                 }
               }}
-              className="bg-primary-500 text-white px-4 py-3 rounded-full font-black shadow-2xl flex items-center gap-2 transition-all active:scale-95 hover:scale-105 whitespace-nowrap min-w-[100px]"
+              className="bg-primary-500 text-white px-4 py-3 rounded-full font-black shadow-2xl flex items-center gap-2 transition-all active:scale-95 hover:scale-105 whitespace-nowrap min-w-[100px] pointer-events-auto"
             >
               <RotateCcw className="size-4" />
               <span>초기화</span>
