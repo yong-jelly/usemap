@@ -1,7 +1,10 @@
+export type UserRole = 'user' | 'admin';
+
 export interface UserProfile {
   auth_user_id: string;
   public_profile_id: string;
   nickname: string;
+  role?: UserRole;
   bio?: string;
   profile_image_url?: string;
   gender_code?: 'M' | 'F' | null;

@@ -2,13 +2,15 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate, useLocation } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap } from "@/entities/place/queries";
+import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap, useDeleteNaverFolder } from "@/entities/place/queries";
 import { useMySubscriptions, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets/PlaceCard";
 import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
+import { useUserStore, isAdmin } from "@/entities/user";
+import { Dialog, DialogContent, DialogTitle, Button } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
@@ -22,6 +24,8 @@ export function FeatureDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { show: showPlaceModal } = usePlacePopup();
+  const { profile: currentUser } = useUserStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleBack = () => {
     if (location.key === "default") {
@@ -116,6 +120,19 @@ export function FeatureDetailPage() {
     isPending: isTogglePending, 
     variables: toggledFeature 
   } = useToggleFeatureSubscription();
+
+  const deleteNaverFolderMutation = useDeleteNaverFolder();
+
+  const handleDeleteFeature = async () => {
+    if (type !== 'folder' || !id) return;
+    try {
+      await deleteNaverFolderMutation.mutateAsync(id);
+      setShowDeleteConfirm(false);
+      navigate('/feed', { replace: true });
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
 
   const isSubscribed = useMemo(() => {
     if (!subscriptions || !subscriptionType || !id) return false;
@@ -467,10 +484,22 @@ export function FeatureDetailPage() {
             isSubscribed={displaySubscribed}
             isSubscribing={isCurrentlyToggling}
             onSubscribe={handleToggleSubscription}
+            onDelete={isAdmin(currentUser) && type === 'folder' ? () => setShowDeleteConfirm(true) : undefined}
             onBack={handleBack}
           />
         </div>
       </div>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="rounded-2xl max-w-[320px]">
+          <DialogTitle className="text-center font-bold">폴더 삭제</DialogTitle>
+          <p className="text-center text-sm text-surface-500">이 폴더를 정말로 삭제하시겠습니까?<br/>삭제된 데이터는 복구할 수 없습니다.</p>
+          <div className="flex gap-2 mt-4">
+            <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>취소</Button>
+            <Button className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" onClick={handleDeleteFeature}>폴더 삭제</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
       <div className={cn(

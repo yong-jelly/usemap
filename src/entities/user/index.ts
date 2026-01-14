@@ -131,3 +131,4 @@ export const useUserStore = create<UserState>()(
 );
 
 export * from "./types";
+export * from "./lib/auth";

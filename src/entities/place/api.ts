@@ -118,6 +118,30 @@ export const placeApi = {
   },
 
   /**
+   * 장소를 삭제합니다 (관리자 전용).
+   */
+  deletePlace: async (placeId: string) => {
+    const response = await apiClient.rpc<any>("v1_delete_place", {
+      p_place_id: placeId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    if (!response.data[0].success) throw new Error(response.data[0].message);
+    return response.data[0];
+  },
+
+  /**
+   * 네이버 폴더를 삭제합니다 (관리자 전용).
+   */
+  deleteNaverFolder: async (folderId: string) => {
+    const response = await apiClient.rpc<any>("v1_delete_naver_folder", {
+      p_folder_id: parseInt(folderId),
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    if (!response.data[0].success) throw new Error(response.data[0].message);
+    return response.data[0];
+  },
+
+  /**
    * 좋아요 상태를 토글합니다.
    */
   toggleLike: async (params: { likedId: string; likedType: string; refId: string }) => {

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, Share2, Settings, User, CheckCircle, Heart } from "lucide-react";
+import { ChevronLeft, Share2, Settings, User, CheckCircle, Heart, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { trackEvent } from "@/shared/lib/gtm";
  */
 interface DetailHeaderProps {
   /** 헤더 타입 */
-  type: 'feature' | 'folder';
+  type: 'feature' | 'folder' | 'place';
   /** 상세 타입 (유튜브, 커뮤니티, 폴더 등) */
   subType?: 'youtube' | 'community' | 'folder' | 'naver';
   /** 제목 */
@@ -31,6 +31,8 @@ interface DetailHeaderProps {
   onShare?: () => void;
   /** 설정 버튼 클릭 핸들러 */
   onSettings?: () => void;
+  /** 삭제 버튼 클릭 핸들러 (관리자용) */
+  onDelete?: () => void;
   /** 뒤로가기 버튼 클릭 핸들러 */
   onBack?: () => void;
   /** 소유자 ID (사용자 프로필 이동용) */
@@ -55,6 +57,7 @@ export function DetailHeader({
   onSubscribe,
   onShare,
   onSettings,
+  onDelete,
   onBack,
   ownerId,
 }: DetailHeaderProps) {
@@ -176,6 +179,20 @@ export function DetailHeader({
         >
           {isLinkCopied ? <CheckCircle className="size-5" /> : <Share2 className="size-5" />}
         </button>
+
+        {/* 삭제 버튼 (관리자용) */}
+        {onDelete && (
+          <button 
+            className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors" 
+            onClick={() => {
+              trackEvent("detail_header_delete_click", { type, title, location: "detail_header" });
+              onDelete();
+            }}
+            title="삭제하기"
+          >
+            <Trash2 className="size-5" />
+          </button>
+        )}
 
         {/* 설정 버튼 (폴더 소유자인 경우에만 노출) */}
         {type === 'folder' && isOwner && (

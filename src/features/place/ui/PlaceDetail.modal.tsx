@@ -13,6 +13,7 @@ import {
   MapPin,
   MapPinCheck,
   Share2,
+  Trash2,
   Heart,
   Bookmark,
   ChevronRight,
@@ -27,6 +28,7 @@ import {
   useDeleteUserReview,
   useUpsertPlaceFeature,
   useDeletePlaceFeature,
+  useDeletePlace,
   useToggleLike,
   useToggleSave,
   useVisitStats
@@ -34,7 +36,7 @@ import {
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
 import { VisitHistoryModal } from "./VisitHistory.modal";
-import { useUserStore } from "@/entities/user";
+import { useUserStore, isAdmin } from "@/entities/user";
 import { 
   Button, 
   Input, 
@@ -85,6 +87,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const deleteReviewMutation = useDeleteUserReview(placeId!);
   const upsertPlaceFeatureMutation = useUpsertPlaceFeature();
   const deletePlaceFeatureMutation = useDeletePlaceFeature(placeId!);
+  const deletePlaceMutation = useDeletePlace();
   const toggleLikeMutation = useToggleLike();
   const toggleSaveMutation = useToggleSave();
 
@@ -103,6 +106,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
   const [showDeleteReviewConfirm, setShowDeleteReviewConfirm] = useState<string | null>(null);
   const [showDeleteFeatureConfirm, setShowDeleteFeatureConfirm] = useState<string | null>(null);
+  const [showDeletePlaceConfirm, setShowDeletePlaceConfirm] = useState(false);
 
   const [gender, setGender] = useState<'M' | 'F' | null>(null);
   const [ageGroup, setAgeGroup] = useState<string | null>(null);
@@ -407,6 +411,15 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     } catch (e: any) { alert(e.message); }
   };
 
+  const handleDeletePlace = async () => {
+    if (!placeId) return;
+    try {
+      await deletePlaceMutation.mutateAsync(placeId);
+      setShowDeletePlaceConfirm(false);
+      handleClose();
+    } catch (e: any) { alert(e.message); }
+  };
+
   const getPlatformName = (domain: string) => {
     const names: Record<string, string> = { 'damoang.net': '다모앙', 'clien.net': '클리앙', 'bobaedream.co.kr': '보배드림', 'youtube': '유튜브' };
     return names[domain] || domain;
@@ -427,6 +440,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           <h1 className="ml-3 text-lg font-bold text-surface-900 dark:text-surface-50 truncate flex-1">
             {details?.name || "장소 상세"}
           </h1>
+          {isAdmin(currentUser) && (
+            <button 
+              onClick={() => setShowDeletePlaceConfirm(true)}
+              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+            >
+              <Trash2 className="size-5" />
+            </button>
+          )}
           <button 
             onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
             className="p-2 text-surface-400"
@@ -871,6 +892,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           <div className="flex gap-2 mt-4">
             <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteReviewConfirm(null)}>취소</Button>
             <Button className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" onClick={handleDeleteReview}>삭제</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeletePlaceConfirm} onOpenChange={setShowDeletePlaceConfirm}>
+        <DialogContent className="rounded-2xl max-w-[320px]">
+          <DialogTitle className="text-center font-bold">장소 삭제</DialogTitle>
+          <p className="text-center text-sm text-surface-500">이 장소를 정말로 삭제하시겠습니까?<br/>삭제된 데이터는 복구할 수 없습니다.</p>
+          <div className="flex gap-2 mt-4">
+            <Button variant="ghost" className="flex-1" onClick={() => setShowDeletePlaceConfirm(false)}>취소</Button>
+            <Button className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" onClick={handleDeletePlace}>장소 삭제</Button>
           </div>
         </DialogContent>
       </Dialog>

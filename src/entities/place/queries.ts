@@ -141,6 +141,32 @@ export function useDeletePlaceFeature(placeId: string) {
 }
 
 /**
+ * 장소 삭제 Mutation Hook (관리자 전용)
+ */
+export function useDeletePlace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.deletePlace,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.all });
+    },
+  });
+}
+
+/**
+ * 네이버 폴더 삭제 Mutation Hook (관리자 전용)
+ */
+export function useDeleteNaverFolder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: placeApi.deleteNaverFolder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.all });
+    },
+  });
+}
+
+/**
  * 좋아요 상태 토글 Mutation Hook
  */
 export function useToggleLike() {
