@@ -65,6 +65,7 @@ export async function searchPlaceService(query: string) {
     error: false, 
     rows: result.results?.rows || [],
     count: result.results?.count || 0,
+    queued_count: result.results?.queued_count || 0,
     code: result.results?.code || 500
   };
 }

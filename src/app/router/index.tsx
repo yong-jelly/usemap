@@ -40,6 +40,7 @@ import { FolderDetailPage } from "@/pages/folder/FolderDetailPage";
 // Place Pages
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
 import { PlaceDetailModal } from "@/features/place/ui/PlaceDetail.modal";
+import { InstagramParserPage } from "@/pages/tool/InstagramParserPage";
 
 import { useUIStore } from "@/shared/model/ui-store";
 
@@ -85,7 +86,8 @@ function RootLayout() {
 
   const isFeatureDetailPage = pathname.includes("/feature/detail/") || 
     (pathname.startsWith("/folder/") && !pathname.includes("/folder/create")) ||
-    pathname.startsWith("/p/user/");
+    pathname.startsWith("/p/user/") ||
+    pathname.startsWith("/tool/");
   const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
   return (
@@ -207,6 +209,13 @@ const router = createBrowserRouter([
       {
         path: "p/user/:userId",
         element: <UserSharedFolderPage />,
+      },
+      // 도구 관련 라우트
+      {
+        path: "tool",
+        children: [
+          { path: "insta-gram", element: <InstagramParserPage /> },
+        ],
       },
       // 정의되지 않은 모든 경로에 대한 404 처리
       {

@@ -117,12 +117,18 @@ function getPlaceDetailQuery(businessId: string) {
 
 // ---------- [크롤링 핵심 로직] ----------
 
-export async function crawlForPlace(businessIds: string[]): Promise<PlaceDetail[]> {
+export interface CrawlProgress {
+    current: number;
+    total: number;
+}
+
+export async function crawlForPlace(businessIds: string[], progress?: CrawlProgress): Promise<PlaceDetail[]> {
     const CHUNKS = chunkArray(businessIds, 10);
     const allDetails: PlaceDetail[] = [];
 
     for (const [idx, chunk] of CHUNKS.entries()) {
-        console.log(`[크롤러] 청크 ${idx + 1}/${CHUNKS.length} 처리 중...`);
+        const progressInfo = progress ? ` (${progress.current}/${progress.total})` : '';
+        console.log(`[크롤러]${progressInfo} 청크 ${idx + 1}/${CHUNKS.length} 처리 중...`);
         
         try {
             const requests = chunk.map(id => getPlaceDetailQuery(id));
@@ -218,10 +224,10 @@ async function upsertToDb(details: any[]) {
 /**
  * 다른 모듈(예: folder.ts)에서 호출하기 위한 익스포트 함수
  */
-export async function crawlAndSyncPlaces(placeIds: string[]) {
+export async function crawlAndSyncPlaces(placeIds: string[], progress?: CrawlProgress) {
     if (placeIds.length === 0) return [];
     
-    const details = await crawlForPlace(placeIds);
+    const details = await crawlForPlace(placeIds, progress);
     await upsertToDb(details);
     
     return details
