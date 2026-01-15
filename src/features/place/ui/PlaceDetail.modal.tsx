@@ -229,7 +229,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   
   const MAX_VISIBLE_MENUS = 6;
   const visibleMenus = useMemo(() => {
-    if (!details?.menus) return [];
+    if (!Array.isArray(details?.menus)) return [];
     return showAllMenus ? details.menus : details.menus.slice(0, MAX_VISIBLE_MENUS);
   }, [details?.menus, showAllMenus]);
 
@@ -808,7 +808,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 )}
               </section>
 
-              {details?.menus && details.menus.length > 0 && (
+              {Array.isArray(details?.menus) && details.menus.length > 0 && (
                 <section className="py-2">
                   <div className="flex items-center justify-between px-4 mb-3">
                     <h3 className="text-lg font-bold">메뉴</h3>
@@ -822,13 +822,13 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   
                   {showAllMenus ? (
                     <div className="grid grid-cols-3 gap-3 px-4">
-                      {details.menus.map((menu: any, index: number) => (
+                      {visibleMenus.map((menu: any, index: number) => (
                         <MenuCard key={index} menu={menu} variant="grid" />
                       ))}
                     </div>
                   ) : (
                     <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                      {details.menus.map((menu: any, index: number) => (
+                      {visibleMenus.map((menu: any, index: number) => (
                         <MenuCard key={index} menu={menu} variant="compact" />
                       ))}
                     </div>
