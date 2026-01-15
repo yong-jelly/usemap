@@ -123,6 +123,7 @@ export function useUpsertPlaceFeature() {
     mutationFn: placeApi.upsertPlaceFeature,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: placeKeys.features(variables.p_business_id) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(variables.p_business_id) });
     },
   });
 }
@@ -136,6 +137,7 @@ export function useDeletePlaceFeature(placeId: string) {
     mutationFn: placeApi.deletePlaceFeature,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: placeKeys.features(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(placeId) });
     },
   });
 }

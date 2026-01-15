@@ -17,6 +17,8 @@ import {
   Heart,
   Bookmark,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Folder,
   MessageCircle,
   Users
@@ -625,9 +627,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         <span className="text-[12px] text-surface-500">나만의 방문 기록을 남겨보세요</span>
                       </div>
                     </div>
-                    <div className="px-4 py-2 bg-surface-900 dark:bg-white rounded-xl">
-                      <span className="text-[12px] font-bold text-white dark:text-surface-900">다녀왔어요!</span>
-                    </div>
+                    <ChevronRight className="size-5 text-surface-300" />
                   </button>
                 )}
               </div>
@@ -811,12 +811,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               {Array.isArray(details?.menus) && details.menus.length > 0 && (
                 <section className="py-2">
                   <div className="flex items-center justify-between px-4 mb-3">
-                    <h3 className="text-lg font-bold">메뉴</h3>
+                    <h3 className="text-lg font-semibold">메뉴</h3>
                     <button 
                       onClick={() => setShowAllMenus(!showAllMenus)} 
-                      className="text-[13px] font-bold text-primary-600"
+                      className="text-surface-400 p-1"
                     >
-                      {showAllMenus ? "접기" : `전체보기 (${details.menus.length})`}
+                      {showAllMenus ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
                     </button>
                   </div>
                   
@@ -836,32 +836,29 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </section>
               )}
 
-              <section className="bg-surface-50 dark:bg-surface-950/50 -mx-4 px-4 py-8 relative">
+              <section className="px-4 py-6 relative">
                 {isRequestProcessing && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface-50/80 dark:bg-surface-900/80">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-surface-950/60 backdrop-blur-[1px]">
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="size-6 animate-spin text-primary-600" />
-                      <span className="text-sm font-semibold text-surface-800 dark:text-surface-200">
-                        {retryCount > 0 ? `처리중... ${retryCount}/${maxRetries}` : '처리중...'}
-                      </span>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">🔗 관련 콘텐츠</h3>
+                  <h3 className="text-lg font-semibold">관련 콘텐츠</h3>
                   <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
                     <button 
                       onClick={() => setActiveContentTab('youtube')}
                       className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-bold transition-all", 
-                        activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-red-600 shadow-sm" : "text-surface-400"
+                        "px-3 py-1 rounded-md text-[12px] font-semibold transition-all", 
+                        activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
                       )}
                     >유튜브 {youtubeFeatures.length}</button>
                     <button 
                       onClick={() => setActiveContentTab('community')}
                       className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-bold transition-all", 
-                        activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-blue-600 shadow-sm" : "text-surface-400"
+                        "px-3 py-1 rounded-md text-[12px] font-semibold transition-all", 
+                        activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
                       )}
                     >커뮤니티 {communityFeatures.length}</button>
                   </div>
@@ -891,11 +888,20 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   </div>
                 )}
 
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+                <div className="flex flex-col gap-1">
                   {activeContentTab === 'youtube' ? (
                     youtubeFeatures.length > 0 ? (
                       youtubeFeatures.map(feature => (
-                        <FeatureCard key={feature.id} feature={feature} />
+                        <FeatureCard 
+                          key={feature.id} 
+                          feature={feature} 
+                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.id}
+                          onDelete={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowDeleteFeatureConfirm(feature.id);
+                          }}
+                        />
                       ))
                     ) : (
                       <div className="w-full py-8 text-center text-surface-400 text-sm">관련 영상이 없습니다.</div>
@@ -907,6 +913,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                           key={feature.id} 
                           feature={feature} 
                           getPlatformName={getPlatformName}
+                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.id}
+                          onDelete={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowDeleteFeatureConfirm(feature.id);
+                          }}
                         />
                       ))
                     ) : (
@@ -939,6 +951,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           <div className="flex gap-2 mt-4">
             <Button variant="ghost" className="flex-1" onClick={() => setShowDeletePlaceConfirm(false)}>취소</Button>
             <Button className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" onClick={handleDeletePlace}>장소 삭제</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!showDeleteFeatureConfirm} onOpenChange={(open) => !open && setShowDeleteFeatureConfirm(null)}>
+        <DialogContent className="rounded-2xl max-w-[320px]">
+          <DialogTitle className="text-center font-bold">콘텐츠 삭제</DialogTitle>
+          <p className="text-center text-sm text-surface-500">정말로 삭제하시겠습니까?</p>
+          <div className="flex gap-2 mt-4">
+            <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteFeatureConfirm(null)}>취소</Button>
+            <Button className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" onClick={handleDeleteFeature}>삭제</Button>
           </div>
         </DialogContent>
       </Dialog>
