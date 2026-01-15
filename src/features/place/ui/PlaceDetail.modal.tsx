@@ -533,7 +533,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <h1 className="text-2xl font-medium text-surface-900 dark:text-white truncate">{details?.name}</h1>
                   </div>
                   <div className="flex items-center gap-2 text-sm mb-2">
-                    <span className="font-medium text-surface-500">{details?.group2} {details?.group3}</span>
+                    <span className="font-medium text-surface-500">{details?.group1} {details?.group2} {details?.group3}</span>
                     <span className="text-surface-200">|</span>
                     <div className="flex items-center gap-0.5 font-medium text-amber-500">
                       <Star className="size-4 fill-current" />

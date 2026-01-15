@@ -71,19 +71,19 @@ export function FolderListItem({
         <div className="flex flex-col gap-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className={cn(
-              "text-base font-bold truncate",
+              "text-base truncate",
               isSelected ? "text-primary-900 dark:text-primary-100" : "text-surface-900 dark:text-white"
             )}>
               {folder.title}
             </p>
             {isCollaborative && (
               isOwner ? (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-[10px] font-bold text-primary-600 dark:text-primary-400 shrink-0">
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-[10px] text-primary-600 dark:text-primary-400 shrink-0">
                   <ShieldCheck className="size-3" />
                   관리자
                 </div>
               ) : (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-[10px] font-bold text-green-600 dark:text-green-400 shrink-0">
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-[10px] text-green-600 dark:text-green-400 shrink-0">
                   <UserPlus className="size-3" />
                   참여자
                 </div>
@@ -91,7 +91,7 @@ export function FolderListItem({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-surface-500">
+            <span className="text-xs text-surface-500">
               {info.label}
             </span>
             <span className="size-1 rounded-full bg-surface-200 dark:bg-surface-700 shrink-0" />

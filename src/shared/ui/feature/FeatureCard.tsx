@@ -49,7 +49,7 @@ export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: Fea
         {isOwner && onDelete && (
           <button
             onClick={onDelete}
-            className="absolute top-1/2 -right-1 -translate-y-1/2 p-2 text-surface-300 hover:text-rose-500 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute top-1/2 -right-1 -translate-y-1/2 p-2 text-surface-300 hover:text-rose-500 transition-all"
           >
             <Trash2 className="size-4" />
           </button>
@@ -79,7 +79,7 @@ export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: Fea
       {isOwner && onDelete && (
         <button
           onClick={onDelete}
-          className="absolute top-1/2 -right-1 -translate-y-1/2 p-2 text-surface-300 hover:text-rose-500 transition-all opacity-0 group-hover:opacity-100"
+          className="absolute top-1/2 -right-1 -translate-y-1/2 p-2 text-surface-300 hover:text-rose-500 transition-all"
         >
           <Trash2 className="size-4" />
         </button>

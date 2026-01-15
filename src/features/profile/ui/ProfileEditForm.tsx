@@ -103,7 +103,7 @@ export function ProfileEditForm() {
             ) : imagePreview ? (
               <img src={imagePreview} alt={nickname} className="w-full h-full object-cover" />
             ) : (
-              <div className="text-4xl font-bold text-surface-200 dark:text-surface-600">
+              <div className="text-4xl font-medium text-surface-200 dark:text-surface-600">
                 {nickname.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -140,14 +140,14 @@ export function ProfileEditForm() {
         <button 
           type="button"
           onClick={handleRandomAvatar}
-          className="flex items-center gap-1.5 text-[11px] font-black text-primary-600 uppercase tracking-wider hover:underline bg-primary-50 px-3 py-1.5 rounded-full transition-colors"
+          className="flex items-center gap-1.5 text-[11px] font-medium text-primary-600 uppercase tracking-wider hover:underline bg-primary-50 px-3 py-1.5 rounded-full transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           랜덤 아바타
         </button>
         
         <div className="text-center">
-          <p className="text-[11px] font-bold text-surface-400 uppercase tracking-widest leading-none">
+          <p className="text-[11px] font-medium text-surface-400 uppercase tracking-widest leading-none">
             {authUser?.email || "이메일 정보 없음"}
           </p>
         </div>
@@ -155,7 +155,7 @@ export function ProfileEditForm() {
 
       {/* 닉네임 입력 */}
       <div className="space-y-3">
-        <label className="block text-[14px] font-bold text-surface-900 dark:text-white ml-1">
+        <label className="block text-[14px] font-medium text-surface-900 dark:text-white ml-1">
           표시 이름
         </label>
         <Input
@@ -164,20 +164,20 @@ export function ProfileEditForm() {
           placeholder="닉네임을 입력하세요 (2~30자)"
           required
           maxLength={30}
-          className="h-14 px-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border-none ring-1 ring-surface-200 dark:ring-surface-700 focus:ring-2 focus:ring-primary-500 transition-all text-[17px] font-bold"
+          className="h-14 px-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border-none ring-1 ring-surface-200 dark:ring-surface-700 focus:ring-2 focus:ring-primary-500 transition-all text-[17px] font-medium"
         />
         <p className="text-xs text-surface-400 ml-1">2~30자 사이로 입력해주세요</p>
       </div>
 
       {/* 소개 입력 */}
       <div className="space-y-3">
-        <label className="block text-[14px] font-bold text-surface-900 dark:text-white ml-1">
+        <label className="block text-[14px] font-medium text-surface-900 dark:text-white ml-1">
           소개
         </label>
         <textarea
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          className="w-full min-h-[120px] p-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border-none ring-1 ring-surface-200 dark:ring-surface-700 focus:ring-2 focus:ring-primary-500 transition-all text-[17px] font-bold resize-none leading-relaxed"
+          className="w-full min-h-[120px] p-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border-none ring-1 ring-surface-200 dark:ring-surface-700 focus:ring-2 focus:ring-primary-500 transition-all text-[17px] font-medium resize-none leading-relaxed"
           placeholder="자신을 소개해주세요 (최대 200자)"
           maxLength={200}
         />
@@ -199,14 +199,14 @@ export function ProfileEditForm() {
           type="button"
           variant="secondary"
           onClick={() => navigate("/profile")}
-          className="flex-1 h-14 rounded-2xl font-bold text-[16px] bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:hover:bg-surface-700"
+          className="flex-1 h-14 rounded-2xl font-medium text-[16px] bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:hover:bg-surface-700"
           disabled={isSaving || isUploading}
         >
           취소
         </Button>
         <Button
           type="submit"
-          className="flex-1 h-14 rounded-2xl font-bold text-[16px] shadow-soft-lg active:scale-[0.98]"
+          className="flex-1 h-14 rounded-2xl font-medium text-[16px] shadow-soft-lg active:scale-[0.98]"
           disabled={isSaving || isUploading || !nickname.trim()}
         >
           {isSaving ? (

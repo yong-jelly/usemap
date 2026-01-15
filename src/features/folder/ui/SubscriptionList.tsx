@@ -75,14 +75,14 @@ export function SubscriptionList() {
         {/* 정보 */}
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleNavigate(sub)}>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-primary-500 uppercase">
+            <span className="text-[10px] text-primary-500 uppercase">
               {sub.subscription_type === 'folder' ? '맛탐정' : 
                sub.subscription_type === 'naver_folder' ? '플레이스' :
                sub.subscription_type === 'youtube_channel' ? '유튜브' : 
                sub.subscription_type === 'region_recommend' ? '지역추천' : '커뮤니티'}
             </span>
           </div>
-          <h4 className="font-bold text-surface-900 dark:text-white truncate">{sub.title}</h4>
+          <h4 className="text-surface-900 dark:text-white truncate">{sub.title}</h4>
           {sub.description && (
             <p className="text-xs text-surface-500 truncate mt-0.5">{sub.description}</p>
           )}
@@ -119,7 +119,7 @@ export function SubscriptionList() {
       {regionRecommendations.length > 0 && (
         <div className="flex flex-col gap-4">
           <div className="px-4">
-            <h2 className="text-xl font-black text-surface-900 dark:text-white">지역 추천</h2>
+            <h2 className="text-xl text-surface-900 dark:text-white">지역 추천</h2>
             <p className="text-sm text-surface-500">구독 중인 지역별 맛집 소식입니다.</p>
           </div>
           <div className="flex flex-col divide-y divide-surface-50 dark:divide-surface-900 border-t border-surface-50 dark:border-surface-900">
@@ -131,7 +131,7 @@ export function SubscriptionList() {
       {/* 구독 섹션 */}
       <div className="flex flex-col gap-4">
         <div className="px-4">
-          <h2 className="text-xl font-black text-surface-900 dark:text-white">내가 구독중인 맛탐정</h2>
+          <h2 className="text-xl text-surface-900 dark:text-white">내가 구독중인 맛탐정</h2>
           <p className="text-sm text-surface-500">관심 있는 채널이나 폴더에서 업데이트를 받아보고 있습니다.</p>
         </div>
 
@@ -143,10 +143,10 @@ export function SubscriptionList() {
           <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center">
             <Heart className="size-12 text-surface-200" />
             <div>
-              <p className="text-sm font-bold text-surface-900 dark:text-white">구독 중인 폴더가 없습니다</p>
+              <p className="text-sm text-surface-900 dark:text-white">구독 중인 폴더가 없습니다</p>
               <p className="text-xs text-surface-500 mt-1">트렌드 탭에서 마음에 드는 폴더를 구독해보세요!</p>
             </div>
-            <Button onClick={() => navigate("/feature")} variant="outline" size="sm" className="mt-2 font-bold rounded-full px-6">
+            <Button onClick={() => navigate("/feature")} variant="outline" size="sm" className="mt-2 rounded-full px-6">
               구독하러 가기
             </Button>
           </div>

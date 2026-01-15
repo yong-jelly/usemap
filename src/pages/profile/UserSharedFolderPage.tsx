@@ -62,13 +62,13 @@ export function UserSharedFolderPage() {
             {ownerAvatar ? (
               <img src={ownerAvatar} alt={ownerNickname} className="size-full object-cover" />
             ) : (
-              <div className="size-full flex items-center justify-center text-xs font-bold text-surface-400">
+              <div className="size-full flex items-center justify-center text-xs font-medium text-surface-400">
                 {ownerNickname.charAt(0)}
               </div>
             )}
           </div>
           <div className="flex flex-col min-w-0">
-            <h1 className="text-base font-bold text-surface-900 dark:text-surface-50 truncate">
+            <h1 className="text-base font-medium text-surface-900 dark:text-surface-50 truncate">
               {ownerNickname}님의 공개 목록
             </h1>
             <p className="text-[11px] font-medium text-surface-500 dark:text-surface-500 uppercase tracking-tight">
@@ -94,7 +94,7 @@ export function UserSharedFolderPage() {
                   variant="ghost" 
                   onClick={() => fetchNextPage()} 
                   disabled={isFetchingNextPage}
-                  className="font-bold text-surface-500"
+                  className="font-medium text-surface-500"
                 >
                   {isFetchingNextPage ? <Loader2 className="size-5 animate-spin mr-2" /> : null}
                   더 보기
@@ -108,13 +108,13 @@ export function UserSharedFolderPage() {
               <FolderHeart className="size-8 text-surface-200" />
             </div>
             <div>
-              <p className="text-lg font-bold text-surface-900 dark:text-white">공유 중인 폴더가 없습니다</p>
+              <p className="text-lg font-medium text-surface-900 dark:text-white">공유 중인 폴더가 없습니다</p>
               <p className="text-sm text-surface-500 mt-1">이 사용자가 공개로 설정한 폴더가 아직 없습니다.</p>
             </div>
             <Button 
               onClick={handleBack} 
               variant="outline" 
-              className="mt-2 rounded-full font-bold px-8"
+              className="mt-2 rounded-full font-medium px-8"
             >
               돌아가기
             </Button>

@@ -270,7 +270,7 @@ export function ReviewCard({
                 {place_data.name}
               </span>
               <span className="text-[11px] text-surface-400 font-medium">
-                {place_data.group2}
+                {place_data.group1} {place_data.group2}
               </span>
             </div>
           </div>

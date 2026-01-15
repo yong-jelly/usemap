@@ -108,7 +108,7 @@ export function FolderCard({
           <div className="flex flex-col gap-0.5 overflow-hidden">
             <div className="flex items-center gap-1.5 overflow-hidden">
               <h3 
-                className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+                className="text-lg font-medium text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
                 onClick={() => navigate(`/folder/${folder.id}`)}
               >
                 {folder.title}
@@ -119,7 +119,7 @@ export function FolderCard({
                   statusInfo.className
                 )}>
                   <statusInfo.icon className="size-2.5" />
-                  <span className="text-[10px] font-bold leading-none">{statusInfo.text}</span>
+                  <span className="text-[10px] font-medium leading-none">{statusInfo.text}</span>
                 </div>
               )}
             </div>
@@ -150,7 +150,7 @@ export function FolderCard({
               onClick={handleSubscribe}
               disabled={isCurrentlyToggling}
               className={cn(
-                "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors duration-150 px-3",
+                "flex-shrink-0 rounded-full h-8 gap-1.5 font-medium transition-colors duration-150 px-3",
                 displaySubscribed 
                   ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
                   : "border-surface-200 dark:border-surface-700"

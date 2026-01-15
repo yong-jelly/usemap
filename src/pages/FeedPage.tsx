@@ -134,7 +134,7 @@ export function FeedPage() {
         <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <h1 className="text-xl font-black text-surface-900 dark:text-white relative">
+              <h1 className="text-xl font-medium text-surface-900 dark:text-white relative">
                 피드
                 <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
               </h1>
@@ -154,7 +154,7 @@ export function FeedPage() {
                     <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
                   </Button>
                   {activeExtraFilterCount > 0 && (
-                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-bold animate-in zoom-in">
+                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-medium animate-in zoom-in">
                       {activeExtraFilterCount}
                     </span>
                   )}
@@ -177,12 +177,12 @@ export function FeedPage() {
             <div className="flex items-center gap-2 mt-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
               <button 
                 onClick={() => setFilters({ price_min: null, price_max: null })}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-bold shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-medium shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
               >
                 <RotateCcw className="size-3" />
                 초기화
               </button>
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-100 dark:border-orange-800/50 shrink-0">
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-medium border border-orange-100 dark:border-orange-800/50 shrink-0">
                 <span>
                   💰 {filters.price_min === null ? `${filters.price_max! / 10000}만원 이하` : 
                       filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
@@ -214,7 +214,7 @@ export function FeedPage() {
                     <LogIn className="size-5 text-white" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-sm font-bold text-surface-900 dark:text-white">나만의 미식 피드를 완성하세요</h3>
+                    <h3 className="text-sm font-medium text-surface-900 dark:text-white">나만의 미식 피드를 완성하세요</h3>
                     <p className="text-xs text-surface-500">커뮤니티, 유튜브, 네이버의 맛집 소식을 한곳에서</p>
                   </div>
                 </div>
@@ -260,9 +260,9 @@ export function FeedPage() {
                 onClick={() => navigate("/feature")}
                 className="w-full py-8 px-6 rounded-3xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 text-center group active:scale-[0.98] transition-all"
               >
-                <h4 className="text-xl font-black text-surface-900 dark:text-white">더 많은 맛집을 찾고 계신가요?</h4>
+                <h4 className="text-xl font-medium text-surface-900 dark:text-white">더 많은 맛집을 찾고 계신가요?</h4>
                 <p className="text-surface-500 mt-2 mb-6">다양한 테마와 지역별 맛집을 탐색 탭에서 확인해보세요.</p>
-                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-900 dark:bg-white text-white dark:text-black font-bold text-sm group-hover:gap-3 transition-all">
+                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface-900 dark:bg-white text-white dark:text-black font-medium text-sm group-hover:gap-3 transition-all">
                   탐색하러 가기
                   <ChevronRight className="size-4" />
                 </div>
@@ -292,12 +292,12 @@ export function FeedPage() {
                 <Bell className="size-10 text-surface-200" />
               </div>
               <div>
-                <p className="text-lg font-bold text-surface-900 dark:text-white">아직 새로운 소식이 없습니다</p>
+                <p className="text-lg font-medium text-surface-900 dark:text-white">아직 새로운 소식이 없습니다</p>
                 <p className="text-sm text-surface-500 mt-1">맛탐정 탭에서 관심 있는 폴더를 구독해보세요!</p>
               </div>
               <button 
                 onClick={() => navigate("/feature/detective")}
-                className="mt-2 px-6 py-3 rounded-xl bg-surface-900 text-white dark:bg-white dark:text-black font-bold text-sm"
+                className="mt-2 px-6 py-3 rounded-xl bg-surface-900 text-white dark:bg-white dark:text-black font-medium text-sm"
               >
                 맛탐정 보러가기
               </button>
@@ -341,7 +341,7 @@ function CategorySection({
   return (
     <div className="flex flex-col gap-4">
       <div className="px-5 flex flex-col">
-        <h2 className="text-xl font-black text-surface-900 dark:text-white leading-tight">{title}</h2>
+        <h2 className="text-xl font-medium text-surface-900 dark:text-white leading-tight">{title}</h2>
         {description && (
           <p className="text-[13px] text-surface-500 font-medium mt-0.5">{description}</p>
         )}

@@ -86,7 +86,7 @@ export function MyReviewsTab() {
               key={filter.id}
               onClick={() => setFilterType(filter.id)}
               className={cn(
-                "px-3.5 py-1.5 rounded-full text-[12px] font-bold transition-all flex items-center gap-1.5 border shrink-0",
+                "px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all flex items-center gap-1.5 border shrink-0",
                 filterType === filter.id
                   ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white shadow-sm"
                   : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800"
@@ -111,7 +111,7 @@ export function MyReviewsTab() {
           <button
             onClick={() => setSortBy('latest')}
             className={cn(
-              "px-2.5 py-1 rounded-md text-[11px] font-bold transition-all",
+              "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all",
               sortBy === 'latest' 
                 ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-white shadow-sm" 
                 : "text-surface-400"
@@ -122,7 +122,7 @@ export function MyReviewsTab() {
           <button
             onClick={() => setSortBy('score')}
             className={cn(
-              "px-2.5 py-1 rounded-md text-[11px] font-bold transition-all",
+              "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all",
               sortBy === 'score' 
                 ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-white shadow-sm" 
                 : "text-surface-400"
@@ -198,7 +198,7 @@ export function MyReviewsTab() {
           <div className="mb-4 text-surface-300 dark:text-surface-700">
             <MessageCircle className="h-16 w-16 opacity-10" />
           </div>
-          <p className="text-lg font-bold text-surface-900 dark:text-white">리뷰가 없습니다</p>
+          <p className="text-lg font-medium text-surface-900 dark:text-white">리뷰가 없습니다</p>
           <p className="text-sm text-surface-500 mt-1">방문한 장소에 대한 첫 리뷰를 남겨보세요!</p>
         </div>
       )}

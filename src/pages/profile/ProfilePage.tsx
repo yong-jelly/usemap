@@ -70,7 +70,7 @@ export function ProfilePage() {
   if (!profile && !isProfileLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-2xl font-bold mb-4">프로필 설정이 필요합니다</h2>
+        <h2 className="text-2xl font-medium mb-4">프로필 설정이 필요합니다</h2>
         <p className="text-surface-500 mb-8">서비스 이용을 위해 프로필을 먼저 설정해주세요.</p>
         <Navigate to="/profile/edit" replace />
       </div>
@@ -88,7 +88,7 @@ export function ProfilePage() {
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
-                  "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
+                  "text-xl font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
                   activeTab === tab.id 
                     ? "text-surface-900 dark:text-white" 
                     : "text-surface-300 dark:text-surface-700"

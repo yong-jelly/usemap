@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { 
-  MapPinned, 
+  MapPin, 
   Star, 
   CheckCircle, 
   TvMinimalPlay, 
@@ -164,8 +164,8 @@ export function PlaceCard({
               )}
             </div>
             <div className="flex flex-col">
-              {sourceLabel && <span className="text-[10px] font-bold text-primary-500 uppercase">{sourceLabel}</span>}
-              {sourceTitle && <span className="text-[13px] font-bold text-surface-700">{sourceTitle}</span>}
+              {sourceLabel && <span className="text-[10px] font-medium text-primary-500 uppercase">{sourceLabel}</span>}
+              {sourceTitle && <span className="text-[13px] font-medium text-surface-700">{sourceTitle}</span>}
             </div>
           </div>
           {addedAt && <span className="text-[11px] text-surface-400">{addedAt}</span>}
@@ -199,7 +199,7 @@ export function PlaceCard({
             <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
               {showPrice && place.avg_price > 0 && (
                 <div className="bg-black/70 px-3 py-1.5 rounded-full">
-                  <span className="text-[12px] font-bold text-white">
+                  <span className="text-[12px] font-medium text-white">
                     {formatWithCommas(place.avg_price, '-', true)}원대
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export function PlaceCard({
             {/* 폴더 뱃지 - 플랫한 색상 */}
             {folders.length > 0 && (
               <div className="absolute top-3 right-3 pointer-events-none">
-                <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-bold">
+                <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
                   {folders.length} 폴더
                 </div>
               </div>
@@ -226,7 +226,7 @@ export function PlaceCard({
 
             {/* 방문 뱃지 */}
             {place.experience?.is_visited && (
-              <div className="absolute bottom-3 right-3 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-bold">
+              <div className="absolute bottom-3 right-3 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
                 방문
               </div>
             )}
@@ -256,7 +256,7 @@ export function PlaceCard({
                 : "text-surface-800 dark:text-surface-200"
             )} />
             {(place.interaction?.place_liked_count ?? 0) > 0 && (
-              <span className="text-[13px] font-bold text-surface-800 dark:text-surface-200">
+              <span className="text-[13px] font-medium text-surface-800 dark:text-surface-200">
                 {place.interaction.place_liked_count}
               </span>
             )}
@@ -269,7 +269,7 @@ export function PlaceCard({
           >
             <MessageCircle className="size-[26px] text-surface-800 dark:text-surface-200" />
             {(place.interaction ? (place.interaction.place_reviews_count ?? 0) : (place.visitor_reviews_total ?? 0)) > 0 && (
-              <span className="text-[13px] font-bold text-surface-800 dark:text-surface-200">
+              <span className="text-[13px] font-medium text-surface-800 dark:text-surface-200">
                 {place.interaction ? place.interaction.place_reviews_count : place.visitor_reviews_total}
               </span>
             )}
@@ -283,7 +283,7 @@ export function PlaceCard({
             className="flex items-center text-surface-800 dark:text-surface-200 active:opacity-60 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
-            <MapPinned className="size-[26px]" />
+            <MapPin className="size-[26px]" />
           </a>
         </div>
 
@@ -303,11 +303,12 @@ export function PlaceCard({
 
         <div className="cursor-pointer" onClick={() => showPopup(place.id)}>
           <div className="flex items-baseline gap-2 mb-1">
-            <h3 className="text-[17px] font-black text-surface-900 dark:text-white leading-tight">{place.name}</h3>
-            <span className="text-[13px] text-surface-400 font-medium">{place.group2} {place.group3}</span>
+            <h3 className="text-[17px] font-medium text-surface-900 dark:text-white leading-tight">{place.name}</h3>
           </div>
-          <div className="flex items-center gap-1.5 text-[13px]">
-            <div className="flex items-center gap-0.5 font-bold text-amber-500">
+          <div className="flex items-center gap-2 text-[13px] mb-1">
+            <span className="font-medium text-surface-500">{place.group1} {place.group2} {place.group3}</span>
+            <span className="text-surface-200">|</span>
+            <div className="flex items-center gap-0.5 font-medium text-amber-500">
               <Star className="size-3.5 fill-current" />
               {place.visitor_reviews_score}
             </div>
@@ -324,7 +325,7 @@ export function PlaceCard({
         {comment && (
           <div className="mt-3">
             <p className="text-[14px] text-surface-800 dark:text-surface-200 leading-relaxed whitespace-pre-wrap">
-              <span className="font-black mr-2 text-surface-900 dark:text-white">{sourceTitle || "작성자"}</span>
+              <span className="font-medium mr-2 text-surface-900 dark:text-white">{sourceTitle || "작성자"}</span>
               {displayComment}
               {isLongComment && !isCommentExpanded && (
                 <button 
@@ -332,7 +333,7 @@ export function PlaceCard({
                     e.stopPropagation();
                     setIsCommentExpanded(true);
                   }}
-                  className="ml-1 text-surface-400 font-bold hover:text-surface-600 transition-colors"
+                  className="ml-1 text-surface-400 font-medium hover:text-surface-600 transition-colors"
                 >
                   더 보기
                 </button>
@@ -342,9 +343,9 @@ export function PlaceCard({
         )}
 
         <div className="flex flex-wrap gap-1.5 mt-4">
-          <span className="text-[12px] font-bold text-primary-500 bg-primary-50 px-2 py-0.5 rounded">#{place.category}</span>
+          <span className="text-[12px] font-medium text-primary-500 bg-primary-50 px-2 py-0.5 rounded">#{place.category}</span>
           {place.keyword_list?.slice(0, 3).map((tag: string, i: number) => (
-            <span key={i} className="text-[12px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">#{tag}</span>
+            <span key={i} className="text-[12px] font-medium text-blue-500 bg-blue-50 px-2 py-0.5 rounded">#{tag}</span>
           ))}
           {folders.length > 0 && (
             <>
@@ -353,7 +354,7 @@ export function PlaceCard({
                   <button
                     key={folder.id || i}
                     onClick={(e) => handleFolderClick(e, folder)}
-                    className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+                    className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
                   >
                     {folder.title || `폴더 ${i + 1}`}
                   </button>
@@ -361,7 +362,7 @@ export function PlaceCard({
               ) : (
                 <button
                   onClick={handleFoldersToggle}
-                  className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+                  className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
                 >
                   {folders[0]?.title || '폴더 1'}
                   {folders.length > 1 && (

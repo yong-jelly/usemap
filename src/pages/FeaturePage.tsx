@@ -65,7 +65,7 @@ export function FeaturePage() {
                 key={tab.id}
                 onClick={() => navigate(`/feature/${tab.id}`)}
                 className={cn(
-                  "text-xl font-black transition-colors relative whitespace-nowrap flex-shrink-0",
+                  "text-xl font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
                   activeTab === tab.id 
                     ? "text-surface-900 dark:text-white" 
                     : "text-surface-300 dark:text-surface-700"
@@ -104,7 +104,7 @@ function FeatureInfoNotice({ icon: Icon, title, description }: { icon: any, titl
         <Icon className="size-5 text-surface-600 dark:text-surface-400" />
       </div>
       <div className="flex flex-col gap-0.5 pt-0.5">
-        <h4 className="text-sm font-bold text-surface-900 dark:text-white leading-tight">{title}</h4>
+        <h4 className="text-sm font-medium text-surface-900 dark:text-white leading-tight">{title}</h4>
         <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">{description}</p>
       </div>
     </div>
@@ -147,7 +147,7 @@ function FeatureRowHeader({
       <div className="flex items-start justify-between flex-1 gap-2 overflow-hidden">
         <div className="flex flex-col gap-0.5 overflow-hidden">
           <h3 
-            className="text-lg font-black text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
+            className="text-lg font-medium text-surface-900 dark:text-white leading-tight truncate cursor-pointer hover:underline underline-offset-4"
             onClick={onTitleClick}
           >
             {title}
@@ -302,7 +302,7 @@ function RegionList() {
             onClick={() => setSelectedSource(source.id)}
             disabled={isLoading}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-bold transition-colors border shrink-0",
+              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
               selectedSource === source.id
                 ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
                 : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
@@ -492,9 +492,9 @@ function CommunityList() {
             onClick={() => setSelectedDomain(domain.id)}
             disabled={isLoading}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-bold transition-colors border shrink-0",
-              selectedDomain === domain.id
-                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
+              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
+              selectedDomain === domain.id 
+                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
                 : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
               isLoading && "opacity-50 cursor-not-allowed"
             )}
@@ -610,7 +610,7 @@ function FeatureSubscribeButton({ type, id }: { type: string; id: string }) {
       onClick={handleToggle}
       disabled={isCurrentlyToggling}
       className={cn(
-        "flex-shrink-0 rounded-full h-8 gap-1.5 font-bold transition-colors px-3",
+        "flex-shrink-0 rounded-full h-8 gap-1.5 font-medium transition-colors px-3",
         displaySubscribed 
           ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
           : "border-surface-200 dark:border-surface-700"

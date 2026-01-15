@@ -25,7 +25,7 @@ export function ProfileHeader() {
                 className="h-full w-full rounded-full object-cover border-4 border-surface-50 dark:border-surface-800 shadow-sm"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-surface-100 text-3xl font-black text-surface-300 dark:bg-surface-800 dark:text-surface-600">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-surface-100 text-3xl font-medium text-surface-300 dark:bg-surface-800 dark:text-surface-600">
                 {profile.nickname.charAt(0).toUpperCase()}
               </div>
             )}
@@ -33,7 +33,7 @@ export function ProfileHeader() {
 
           {/* 사용자 텍스트 정보 */}
           <div className="flex-1 overflow-hidden">
-            <h2 className="text-2xl font-black text-surface-900 dark:text-white truncate mb-1">
+            <h2 className="text-2xl font-medium text-surface-900 dark:text-white truncate mb-1">
               {profile.nickname}
             </h2>
             {profile.bio ? (
@@ -56,7 +56,7 @@ export function ProfileHeader() {
               navigate("/profile/edit");
             }}
             variant="secondary"
-            className="flex-1 rounded-2xl h-14 text-lg font-black"
+            className="flex-1 rounded-2xl h-14 text-lg font-medium"
           >
             프로필 편집
           </Button>
@@ -64,7 +64,7 @@ export function ProfileHeader() {
 
         {/* 설정 메뉴 (로그아웃 포함) */}
         <div className="space-y-2">
-          <div className="text-[11px] font-black text-surface-400 dark:text-surface-600 uppercase tracking-[0.2em] mb-3 px-1">
+          <div className="text-[11px] font-medium text-surface-400 dark:text-surface-600 uppercase tracking-[0.2em] mb-3 px-1">
             Account Settings
           </div>
           <button
@@ -78,7 +78,7 @@ export function ProfileHeader() {
               <div className="w-11 h-11 rounded-2xl bg-white dark:bg-surface-800 flex items-center justify-center group-hover:bg-rose-100 dark:group-hover:bg-rose-900/30 transition-colors shadow-sm">
                 <LogOut className="h-5 w-5 text-surface-400 dark:text-surface-500 group-hover:text-accent-rose transition-colors" />
               </div>
-              <span className="text-[17px] font-bold text-surface-700 dark:text-surface-300 group-hover:text-accent-rose dark:group-hover:text-rose-400 transition-colors">
+              <span className="text-[17px] font-medium text-surface-700 dark:text-surface-300 group-hover:text-accent-rose dark:group-hover:text-rose-400 transition-colors">
                 로그아웃
               </span>
             </div>

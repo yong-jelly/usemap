@@ -56,13 +56,13 @@ function InviteCodeSuccessModal({
         </div>
         
         <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">폴더가 생성되었습니다!</h2>
+          <h2 className="text-xl font-medium mb-2">폴더가 생성되었습니다!</h2>
           <p className="text-sm text-surface-500">초대 코드를 복사해서 친구들에게 공유하세요.</p>
         </div>
 
         <div className="w-full flex flex-col gap-2">
           <div className="flex items-center justify-center gap-3 p-4 bg-surface-50 dark:bg-surface-800 rounded-2xl">
-            <span className="text-3xl font-mono font-black tracking-[0.3em] text-primary-600 dark:text-primary-400">
+            <span className="text-3xl font-mono font-medium tracking-[0.3em] text-primary-600 dark:text-primary-400">
               {data.invite_code}
             </span>
             <button 
@@ -84,7 +84,7 @@ function InviteCodeSuccessModal({
         </div>
 
         <div className="w-full flex flex-col gap-2">
-          <Button onClick={handleGoToFolder} className="w-full font-bold">
+          <Button onClick={handleGoToFolder} className="w-full font-medium">
             폴더로 이동
           </Button>
           <Button variant="ghost" onClick={onClose} className="w-full">
@@ -178,14 +178,14 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
           <button onClick={onClose} className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-50">
             <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
           </button>
-          <h1 className="ml-3 text-lg font-bold text-surface-900 dark:text-surface-50 flex-1">
+          <h1 className="ml-3 text-lg font-medium text-surface-900 dark:text-surface-50 flex-1">
             새 맛탐정 폴더
           </h1>
           <Button 
             variant="ghost" 
             onClick={handleCreate}
             disabled={!title.trim() || isPending}
-            className="text-primary-600 dark:text-primary-400 font-bold px-2 hover:bg-transparent active:opacity-50 h-auto"
+            className="text-primary-600 dark:text-primary-400 font-medium px-2 hover:bg-transparent active:opacity-50 h-auto"
           >
             {isPending ? <Loader2 className="size-5 animate-spin" /> : "생성"}
           </Button>
@@ -199,7 +199,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
           {/* 기본 정보 */}
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-surface-900 dark:text-white">
+              <label className="text-sm font-medium text-surface-900 dark:text-white">
                 폴더 제목 (필수)
               </label>
               <Input 
@@ -208,7 +208,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                 placeholder="예: 서울 냉면 맛집 지도"
                 maxLength={20}
                 autoFocus
-                className="text-lg font-bold"
+                className="text-lg font-medium"
               />
               <div className="flex justify-end">
                 <span className={cn(
@@ -221,7 +221,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-surface-900 dark:text-white">
+              <label className="text-sm font-medium text-surface-900 dark:text-white">
                 설명
               </label>
               <textarea 
@@ -244,7 +244,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
 
           {/* 공개 여부 설정 */}
           <div className="flex flex-col gap-4">
-            <label className="text-sm font-bold text-surface-900 dark:text-white">
+            <label className="text-sm font-medium text-surface-900 dark:text-white">
               공개 범위
             </label>
             <div className="grid grid-cols-1 gap-3">
@@ -270,7 +270,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <span className={cn(
-                      "font-bold text-sm",
+                      "font-medium text-sm",
                       permission === p.id ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
                     )}>
                       {p.label}
@@ -289,7 +289,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                 <div className="p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/20 flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <Key className="size-4 text-primary-500" />
-                    <span className="text-sm font-bold text-primary-700 dark:text-primary-400">초대 코드 안내</span>
+                    <span className="text-sm font-medium text-primary-700 dark:text-primary-400">초대 코드 안내</span>
                   </div>
                   <p className="text-xs text-primary-600 dark:text-primary-300 leading-relaxed font-medium">
                     생성 시 5자리의 초대 코드가 자동으로 생성됩니다. 초대 코드는 생성 후 <span className="underline decoration-primary-300 underline-offset-2">24시간 동안만 유효</span>하며, 소유자는 언제든 새로운 코드를 발급할 수 있습니다.
@@ -298,7 +298,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
               )}
 
               <div className="flex flex-col gap-4">
-                <label className="text-sm font-bold text-surface-900 dark:text-white">
+                <label className="text-sm font-medium text-surface-900 dark:text-white">
                   편집 권한
                 </label>
                 <div className="grid grid-cols-1 gap-3">
@@ -322,7 +322,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className={cn(
-                        "font-bold text-sm",
+                        "font-medium text-sm",
                         permissionWriteType === 0 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
                       )}>
                         관리자만 편집
@@ -352,7 +352,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className={cn(
-                        "font-bold text-sm",
+                        "font-medium text-sm",
                         permissionWriteType === 1 ? "text-primary-700 dark:text-primary-400" : "text-surface-900 dark:text-white"
                       )}>
                         함께 편집

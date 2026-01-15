@@ -20,7 +20,7 @@ export function SubscriberList() {
       {/* 구독자 섹션 */}
       <div className="flex flex-col gap-4">
         <div className="px-4">
-          <h2 className="text-xl font-black text-surface-900 dark:text-white">나를 구독중인 사람들</h2>
+          <h2 className="text-xl font-medium text-surface-900 dark:text-white">나를 구독중인 사람들</h2>
           <p className="text-sm text-surface-500">내 맛탐정 폴더를 구독하고 있는 사용자들입니다.</p>
         </div>
 
@@ -52,7 +52,7 @@ export function SubscriberList() {
 
                   {/* 정보 */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-surface-900 dark:text-white truncate">{sub.nickname}</h4>
+                    <h4 className="font-medium text-surface-900 dark:text-white truncate">{sub.nickname}</h4>
                     <p className="text-xs text-surface-500 truncate mt-0.5">
                       <span className="text-primary-500 font-medium">{folderDisplay}</span>
                       <span className="ml-1">구독 중</span>
@@ -66,7 +66,7 @@ export function SubscriberList() {
           <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center">
             <Users className="size-12 text-surface-200" />
             <div>
-              <p className="text-sm font-bold text-surface-900 dark:text-white">구독자가 아직 없습니다</p>
+              <p className="text-sm font-medium text-surface-900 dark:text-white">구독자가 아직 없습니다</p>
               <p className="text-xs text-surface-500 mt-1">멋진 맛탐정 폴더를 만들어 공유해보세요!</p>
             </div>
           </div>
