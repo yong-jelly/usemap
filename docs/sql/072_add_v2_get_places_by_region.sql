@@ -103,7 +103,8 @@ BEGIN
     SELECT 
         p.id as place_id,
         (to_jsonb(p.*) - '{themes, street_panorama, category_code_list, visitor_review_stats, algo_avg_len, algo_stdev_len, algo_revisit_rate, algo_media_ratio, algo_avg_views, algo_recency_score, algo_engagement_score, algo_length_variation_index, algo_loyalty_index, algo_growth_rate_1m, algo_growth_rate_2m, algo_growth_rate_3m}'::text[] || jsonb_build_object(
-            'image_urls', p.images, 
+            'image_urls', COALESCE(NULLIF(p.images, '{}'), ARRAY_REMOVE(ARRAY[p.place_images[1]], NULL), '{}'),
+            'images', COALESCE(NULLIF(p.images, '{}'), ARRAY_REMOVE(ARRAY[p.place_images[1]], NULL), '{}'),
             'avg_price', calculate_menu_avg_price(p.menus),
             'interaction', public.v1_common_place_interaction(p.id),
             'features', public.v1_common_place_features(p.id),

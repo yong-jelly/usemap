@@ -153,7 +153,7 @@ export interface MyReview extends PlaceUserReview {
 export interface Feature {
   id: string;
   user_id: string;
-  platform_type: 'youtube' | 'community' | 'folder';
+  platform_type: 'youtube' | 'community' | 'folder' | 'public_user';
   content_url: string;
   title: string;
   metadata: any;

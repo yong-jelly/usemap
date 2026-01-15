@@ -19,6 +19,7 @@ export type { InputProps } from "./Input";
 export * from "./place/PlaceSlider";
 export * from "./place/PlaceSliderCard";
 export * from "./place/PlaceThumbnail";
+export * from "./place/PlaceActionRow";
 export * from "./ImageViewer/ImageViewer";
 export * from "./review";
 export * from "./menu";

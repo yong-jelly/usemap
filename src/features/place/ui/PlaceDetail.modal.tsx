@@ -18,7 +18,8 @@ import {
   Bookmark,
   ChevronRight,
   Folder,
-  MessageCircle
+  MessageCircle,
+  Users
 } from "lucide-react";
 import { 
   usePlaceByIdWithRecentView, 
@@ -48,7 +49,8 @@ import {
   ImageViewer,
   ReviewCard,
   MenuCard,
-  FeatureCard
+  FeatureCard,
+  PlaceActionRow
 } from "@/shared/ui";
 import { ReviewForm } from "./ReviewForm";
 import { cn } from "@/shared/lib/utils";
@@ -77,6 +79,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const { data: details, isLoading: isDetailsLoading } = usePlaceByIdWithRecentView(placeId!);
   const { data: reviews = [] } = usePlaceUserReviews(placeId!);
   const { data: placeFeaturesData = [] } = usePlaceFeatures(placeId!);
+  
+  // details 데이터에 포함된 features를 우선 사용하고, 없으면 placeFeaturesData 사용
+  const allFeatures = useMemo(() => {
+    // details 자체에 features가 있는 경우, 또는 details.place_data.features에 있는 경우 모두 확인
+    const featuresFromDetails = details?.features || (details as any)?.place_data?.features;
+    return featuresFromDetails || placeFeaturesData || [];
+  }, [details, placeFeaturesData]);
+
   const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
   const { data: visitStats } = useVisitStats(placeId!);
   
@@ -200,9 +210,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     imageSliderRef.current.scrollTo({ left: itemWidth * index, behavior: 'auto' });
   };
 
-  const youtubeFeatures = useMemo(() => placeFeaturesData.filter(f => f.platform_type === 'youtube'), [placeFeaturesData]);
-  const communityFeatures = useMemo(() => placeFeaturesData.filter(f => f.platform_type === 'community'), [placeFeaturesData]);
-  const folderFeatures = useMemo(() => placeFeaturesData.filter(f => f.platform_type === 'folder'), [placeFeaturesData]);
+  const youtubeFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'youtube'), [allFeatures]);
+  const communityFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'community'), [allFeatures]);
+  const folderFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'folder'), [allFeatures]);
+  const publicUserFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'public_user'), [allFeatures]);
   
   const filteredReviews = useMemo(() => {
     const publicReviews = reviews.filter(r => !r.is_private || r.is_my_review);
@@ -565,22 +576,16 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 mb-6 px-1">
-                <a 
-                  href={`https://map.naver.com/p/entry/place/${placeId}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
-                >
-                  <MapPin className="size-4" /> 네이버 지도
-                </a>
-                <button 
-                  onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
-                >
-                  <MessageCircle className="size-4" /> 리뷰 {details?.interaction?.place_reviews_count || 0}
-                </button>
-              </div>
+              <PlaceActionRow 
+                placeId={placeId!}
+                reviewsCount={details?.interaction?.place_reviews_count || 0}
+                onReviewClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
+                youtubeCount={youtubeFeatures.length}
+                placeCount={folderFeatures.length}
+                detectiveCount={publicUserFeatures.length}
+                communityCount={communityFeatures.length}
+                showStats={false}
+              />
 
               {/* 방문 기록 영역 */}
               <div className="mb-4">
@@ -650,84 +655,110 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               )} */}
 
               <section id="review-section" className="py-2">
-                <div className="flex flex-col gap-3 px-4 mb-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      방문 리뷰 <span className="text-primary-500">{publicReviewsCount}</span>
-                    </h3>
-                    <div className="flex items-center gap-3">
-                      {publicReviewsCount > 5 && (
-                        <button 
-                          onClick={() => setShowAllReviews(!showAllReviews)} 
-                          className="text-[13px] font-bold text-primary-600"
-                        >
-                          {showAllReviews ? "접기" : `전체보기 (${publicReviewsCount})`}
-                        </button>
-                      )}
-                      {!showReviewForm && (
-                        <button 
-                          onClick={() => {
-                            if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                            setShowReviewForm(true);
-                          }}
-                          className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
-                        >
-                          리뷰쓰기
-                        </button>
+                {publicReviewsCount > 0 ? (
+                  <>
+                    <div className="flex flex-col gap-3 px-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                          방문 리뷰 <span className="text-primary-500">{publicReviewsCount}</span>
+                        </h3>
+                        <div className="flex items-center gap-3">
+                          {publicReviewsCount > 5 && (
+                            <button 
+                              onClick={() => setShowAllReviews(!showAllReviews)} 
+                              className="text-[13px] font-bold text-primary-600"
+                            >
+                              {showAllReviews ? "접기" : `전체보기 (${publicReviewsCount})`}
+                            </button>
+                          )}
+                          {!showReviewForm && (
+                            <button 
+                              onClick={() => {
+                                if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                                setShowReviewForm(true);
+                              }}
+                              className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
+                            >
+                              리뷰쓰기
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {isAuthenticated && myReview && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-full text-[12px] font-bold transition-all border",
+                              showOnlyMyReviews 
+                                ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
+                                : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
+                            )}
+                          >
+                            내 리뷰만 보기
+                          </button>
+                        </div>
                       )}
                     </div>
-                  </div>
-                  
-                  {isAuthenticated && myReview && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-full text-[12px] font-bold transition-all border",
-                          showOnlyMyReviews 
-                            ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
-                            : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
-                        )}
-                      >
-                        내 리뷰만 보기
-                      </button>
-                    </div>
-                  )}
-                </div>
-                
-                {showReviewForm && (
-                  <div className="mx-4 mb-6">
-                    <ReviewForm
-                      availableTags={availableTags}
-                      isUploading={isUploading}
-                      onSubmit={handleSaveReview}
-                      onCancel={resetReviewForm}
-                    />
-                  </div>
-                )}
-                
-                {filteredReviews.length > 0 ? (
-                  showAllReviews ? (
-                    <div className="space-y-3 px-4">
-                      {filteredReviews.map(review => (
-                        <div key={review.id} id={`review-${review.id}`}>
-                          {editingReviewId === review.id ? (
-                            <ReviewForm
-                              initialRating={review.score}
-                              initialComment={review.review_content}
-                              initialTagCodes={review.tags.map(t => t.code)}
-                              initialIsPrivate={review.is_private}
-                              initialImages={review.images || []}
-                              availableTags={availableTags}
-                              isUploading={isUploading}
-                              onSubmit={(data) => handleSaveEditReview(review.id, data)}
-                              onCancel={resetReviewForm}
-                            />
-                          ) : (
+                    
+                    {showReviewForm && (
+                      <div className="mx-4 mb-6">
+                        <ReviewForm
+                          availableTags={availableTags}
+                          isUploading={isUploading}
+                          onSubmit={handleSaveReview}
+                          onCancel={resetReviewForm}
+                        />
+                      </div>
+                    )}
+                    
+                    {filteredReviews.length > 0 ? (
+                      showAllReviews ? (
+                        <div className="space-y-3 px-4">
+                          {filteredReviews.map(review => (
+                            <div key={review.id} id={`review-${review.id}`}>
+                              {editingReviewId === review.id ? (
+                                <ReviewForm
+                                  initialRating={review.score}
+                                  initialComment={review.review_content}
+                                  initialTagCodes={review.tags.map(t => t.code)}
+                                  initialIsPrivate={review.is_private}
+                                  initialImages={review.images || []}
+                                  availableTags={availableTags}
+                                  isUploading={isUploading}
+                                  onSubmit={(data) => handleSaveEditReview(review.id, data)}
+                                  onCancel={resetReviewForm}
+                                />
+                              ) : (
+                                <ReviewCard
+                                  review={review}
+                                  isMyReview={review.is_my_review}
+                                  onEdit={() => setEditingReviewId(review.id)}
+                                  onDelete={() => setShowDeleteReviewConfirm(review.id)}
+                                  onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
+                                  onImageClick={(images, index) => setImageViewerState({
+                                    isOpen: true,
+                                    images,
+                                    initialIndex: index
+                                  })}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+                          {filteredReviews.map(review => (
                             <ReviewCard
+                              key={review.id}
+                              variant="compact"
                               review={review}
                               isMyReview={review.is_my_review}
-                              onEdit={() => setEditingReviewId(review.id)}
+                              onEdit={() => {
+                                setShowAllReviews(true);
+                                setEditingReviewId(review.id);
+                              }}
                               onDelete={() => setShowDeleteReviewConfirm(review.id)}
                               onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
                               onImageClick={(images, index) => setImageViewerState({
@@ -736,38 +767,43 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                                 initialIndex: index
                               })}
                             />
-                          )}
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                      {filteredReviews.map(review => (
-                        <ReviewCard
-                          key={review.id}
-                          variant="compact"
-                          review={review}
-                          isMyReview={review.is_my_review}
-                          onEdit={() => {
-                            setShowAllReviews(true);
-                            setEditingReviewId(review.id);
-                          }}
-                          onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                          onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                          onImageClick={(images, index) => setImageViewerState({
-                            isOpen: true,
-                            images,
-                            initialIndex: index
-                          })}
-                        />
-                      ))}
-                    </div>
-                  )
+                      )
+                    ) : (
+                      <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                        <p className="text-sm text-surface-400">
+                          작성한 리뷰가 없습니다
+                        </p>
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                    <p className="text-sm text-surface-400">
-                      {showOnlyMyReviews ? "작성한 리뷰가 없습니다" : "첫 번째 리뷰를 남겨주세요"}
-                    </p>
+                  <div className="mx-4 mb-4">
+                    {showReviewForm ? (
+                      <ReviewForm
+                        availableTags={availableTags}
+                        isUploading={isUploading}
+                        onSubmit={handleSaveReview}
+                        onCancel={resetReviewForm}
+                      />
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                          setShowReviewForm(true);
+                        }}
+                        className="w-full py-10 flex flex-col items-center justify-center gap-3 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
+                      >
+                        <div className="size-12 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center shadow-sm">
+                          <Plus className="size-6 text-primary-500" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[15px] font-bold text-surface-900 dark:text-surface-100">첫 번째 리뷰를 남겨주세요</p>
+                          <p className="text-[12px] text-surface-500 mt-1">방문하신 경험이 다른 분들께 큰 도움이 됩니다</p>
+                        </div>
+                      </button>
+                    )}
                   </div>
                 )}
               </section>
