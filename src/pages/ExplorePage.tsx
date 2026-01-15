@@ -304,12 +304,21 @@ export function ExplorePage() {
             <>
               {/* 상단 헤더 - 타이포 중심 + 우측 아이콘 영역 */}
               <div className="px-5 pt-8 pb-4 flex items-end justify-between">
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <h1 className="text-xl font-medium text-surface-900 dark:text-white relative w-fit">
-                    {isSearching ? "검색 결과" : "탐색"}
+                    탐색
                     <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
                   </h1>
-                  {!isSearching && (
+                  {isSearching ? (
+                    <div 
+                      onClick={enterSearchMode}
+                      className="flex items-center gap-1.5 mt-2.5 active:opacity-60 cursor-pointer"
+                    >
+                      <span className="text-[14px] font-medium text-primary-600 dark:text-primary-400 truncate">
+                        "{searchQueryDisplay}" ({searchResults.length})
+                      </span>
+                    </div>
+                  ) : (
                     <button 
                       onClick={() => setIsFilterOpen(true)}
                       className="flex items-center gap-1 mt-2.5 active:opacity-60"
@@ -322,19 +331,20 @@ export function ExplorePage() {
                   )}
                 </div>
 
-                {!isSearching && (
-                  <div className="flex items-center gap-0.5">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
-                      onClick={() => {
-                        trackEvent("explore_search_mode_enter", { location: "header" });
-                        enterSearchMode();
-                      }}
-                    >
-                      <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
-                    </Button>
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-10 rounded-full active:bg-surface-50 dark:active:bg-surface-900"
+                    onClick={() => {
+                      trackEvent("explore_search_mode_enter", { location: "header" });
+                      enterSearchMode();
+                    }}
+                  >
+                    <Search className="size-5.5 text-surface-900 dark:text-surface-100" />
+                  </Button>
+                  
+                  {!isSearching && (
                     <div className="relative">
                       <Button 
                         variant="ghost" 
@@ -353,9 +363,21 @@ export function ExplorePage() {
                         </span>
                       )}
                     </div>
-                    
-                    {/* 레이아웃 전환 버튼 */}
-                    <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
+                  )}
+
+                  {isSearching && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="size-10 rounded-full text-surface-400 active:bg-surface-50 dark:active:bg-surface-900"
+                      onClick={exitSearchMode}
+                    >
+                      <X className="size-5.5" />
+                    </Button>
+                  )}
+                  
+                  {/* 레이아웃 전환 버튼 */}
+                  <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
                       <button 
                         onClick={() => {
                           trackEvent("explore_layout_change", { layout: "feed" });
@@ -386,7 +408,6 @@ export function ExplorePage() {
                       </button>
                     </div>
                   </div>
-                )}
               </div>
 
               {/* 활성 필터 태그 (정리된 스타일) */}
@@ -453,8 +474,8 @@ export function ExplorePage() {
       {/* 2. 메인 피드 영역 */}
       <main className={cn(
         "flex-1 w-full max-w-lg mx-auto pb-32 min-h-dvh bg-white dark:bg-surface-950",
-        (!isSearchMode && !isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : 
-        (!isSearchMode && !isSearching ? "pt-[110px]" : "pt-16")
+        isSearchMode ? "pt-16" : 
+        (!isSearching && (filters.group2 || (filters.categories && filters.categories.length > 0) || (filters.theme_codes && filters.theme_codes.length > 0) || filters.price_min !== null || filters.price_max !== null)) ? "pt-[150px]" : "pt-[110px]"
       )}>
         {isSearchLoading ? (
           /* 검색 중 로딩 상태 */
@@ -511,26 +532,6 @@ export function ExplorePage() {
           </div>
         ) : isSearching ? (
           <>
-            {/* 검색 키워드 및 종료 버튼 표시 - 검색 결과가 있을 때만 */}
-            {searchResults.length > 0 && (
-              <div className="w-full px-5 py-8 bg-white dark:bg-surface-950 border-b-[8px] border-surface-100 dark:border-black flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-base font-medium text-surface-900 dark:text-white truncate">
-                    "{searchQueryDisplay}"
-                  </span>
-                  <span className="text-xs font-medium text-surface-400 dark:text-surface-500 shrink-0">
-                    {searchResults.length}개의 장소
-                  </span>
-                </div>
-                
-                <button
-                  onClick={exitSearchMode}
-                  className="px-3 py-1.5 rounded-lg bg-surface-50 dark:bg-surface-900 text-[13px] font-medium text-surface-600 dark:text-surface-400 active:bg-surface-100 dark:active:bg-surface-800 transition-colors"
-                >
-                  종료
-                </button>
-              </div>
-            )}
             {searchResults.length > 0 ? (
               <div className={cn(
                 layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
@@ -593,19 +594,20 @@ export function ExplorePage() {
                   "{searchQueryDisplay}"에 대한 검색 결과가 없습니다.<br />
                   다른 검색어로 다시 시도해보세요.
                 </p>
-                <div className="flex items-center gap-3">
-                  <button 
+                <div className="flex flex-col w-full gap-3">
+                  <Button 
                     onClick={enterSearchMode}
-                    className="px-8 py-3 rounded-xl text-[15px] font-medium border-2 border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white active:bg-surface-50 dark:active:bg-surface-900"
+                    className="w-full h-13 rounded-2xl text-[16px] font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/20"
                   >
                     다시 검색하기
-                  </button>
-                  <button 
+                  </Button>
+                  <Button 
                     onClick={exitSearchMode}
-                    className="px-8 py-3 rounded-xl text-[15px] font-medium border-2 border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white active:bg-surface-50 dark:active:bg-surface-900"
+                    variant="ghost"
+                    className="w-full h-13 rounded-2xl text-[15px] font-medium text-surface-500 dark:text-surface-400 active:bg-surface-50 dark:active:bg-surface-900"
                   >
-                    종료
-                  </button>
+                    검색 종료
+                  </Button>
                 </div>
               </div>
             )}
