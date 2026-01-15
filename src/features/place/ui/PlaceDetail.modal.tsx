@@ -450,7 +450,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           <button onClick={handleClose} className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-50">
             <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
           </button>
-          <h1 className="ml-3 text-lg font-bold text-surface-900 dark:text-surface-50 truncate flex-1">
+          <h1 className="ml-3 text-lg font-medium text-surface-900 dark:text-surface-50 truncate flex-1">
             {details?.name || "장소 상세"}
           </h1>
           {isAdmin(currentUser) && (
@@ -503,7 +503,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   <div className="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
                     {details?.avg_price && details.avg_price > 0 && (
                       <div className="bg-black/70 px-3 py-1.5 rounded-full">
-                        <span className="text-[13px] font-bold text-white">
+                        <span className="text-[13px] font-medium text-white">
                           {formatWithCommas(details.avg_price, '-', true)}원대
                         </span>
                       </div>
@@ -519,7 +519,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   )}
 
                   {details?.experience?.is_visited && (
-                    <div className="absolute bottom-4 right-4 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-bold">
+                    <div className="absolute bottom-4 right-4 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
                       다녀왔어요
                     </div>
                   )}
@@ -535,12 +535,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <h1 className="text-2xl font-black text-surface-900 dark:text-white truncate">{details?.name}</h1>
+                    <h1 className="text-2xl font-medium text-surface-900 dark:text-white truncate">{details?.name}</h1>
                   </div>
                   <div className="flex items-center gap-2 text-sm mb-2">
                     <span className="font-medium text-surface-500">{details?.group2} {details?.group3}</span>
                     <span className="text-surface-200">|</span>
-                    <div className="flex items-center gap-0.5 font-bold text-amber-500">
+                    <div className="flex items-center gap-0.5 font-medium text-amber-500">
                       <Star className="size-4 fill-current" />
                       {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
                     </div>
@@ -602,7 +602,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       </div>
                       <div className="flex flex-col items-start text-left">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-[16px] font-black text-primary-900 dark:text-primary-100">
+                          <span className="text-[16px] font-medium text-primary-900 dark:text-primary-100">
                             {visitStats.visit_count}회 방문
                           </span>
                         </div>
@@ -623,7 +623,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         <MapPin className="size-5 text-surface-400" />
                       </div>
                       <div className="flex flex-col items-start text-left">
-                        <span className="text-[15px] font-bold text-surface-900 dark:text-surface-100">여기 다녀오셨나요?</span>
+                        <span className="text-[15px] font-medium text-surface-900 dark:text-surface-100">여기 다녀오셨나요?</span>
                         <span className="text-[12px] text-surface-500">나만의 방문 기록을 남겨보세요</span>
                       </div>
                     </div>
@@ -637,7 +637,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   {folderFeatures.map(folder => (
                     <button 
                       key={folder.id}
-                      className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[12px] font-bold rounded-full"
+                      className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[12px] font-medium rounded-full"
                       onClick={() => navigate(`/folder/${folder.id}`)}
                     >
                       📁 {folder.title}
@@ -647,10 +647,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               )}
             </div>
 
-            <div className="p-4 space-y-8">
+            <div className="space-y-8 py-4">
               {/* {details?.road && (
-                <div className="p-4 bg-surface-50 dark:bg-surface-900 rounded-xl">
-                  <p className="text-[14px] leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">{details.road}</p>
+                <div className="px-4">
+                  <div className="p-4 bg-surface-50 dark:bg-surface-900 rounded-xl">
+                    <p className="text-[14px] leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">{details.road}</p>
+                  </div>
                 </div>
               )} */}
 
@@ -659,14 +661,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   <>
                     <div className="flex flex-col gap-3 px-4 mb-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                          방문 리뷰 <span className="text-primary-500">{publicReviewsCount}</span>
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                          방문 리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
                         </h3>
                         <div className="flex items-center gap-3">
                           {publicReviewsCount > 5 && (
                             <button 
                               onClick={() => setShowAllReviews(!showAllReviews)} 
-                              className="text-[13px] font-bold text-primary-600"
+                              className="text-[13px] font-medium text-primary-600"
                             >
                               {showAllReviews ? "접기" : `전체보기 (${publicReviewsCount})`}
                             </button>
@@ -677,7 +679,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                                 if (!isAuthenticated) return alert('로그인이 필요합니다.');
                                 setShowReviewForm(true);
                               }}
-                              className="text-[12px] font-bold text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
+                              className="text-[12px] font-medium text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
                             >
                               리뷰쓰기
                             </button>
@@ -690,7 +692,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                           <button
                             onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
                             className={cn(
-                              "px-3 py-1.5 rounded-full text-[12px] font-bold transition-all border",
+                              "px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
                               showOnlyMyReviews 
                                 ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
                                 : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
@@ -793,15 +795,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                           if (!isAuthenticated) return alert('로그인이 필요합니다.');
                           setShowReviewForm(true);
                         }}
-                        className="w-full py-10 flex flex-col items-center justify-center gap-3 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
+                        className="w-full py-6 flex items-center justify-center gap-2 bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
                       >
-                        <div className="size-12 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center shadow-sm">
-                          <Plus className="size-6 text-primary-500" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-[15px] font-bold text-surface-900 dark:text-surface-100">첫 번째 리뷰를 남겨주세요</p>
-                          <p className="text-[12px] text-surface-500 mt-1">방문하신 경험이 다른 분들께 큰 도움이 됩니다</p>
-                        </div>
+                        <Plus className="size-4 text-surface-400" />
+                        <p className="text-[13px] font-medium text-surface-500">첫 번째 리뷰를 남겨주세요</p>
                       </button>
                     )}
                   </div>
@@ -811,7 +808,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               {Array.isArray(details?.menus) && details.menus.length > 0 && (
                 <section className="py-2">
                   <div className="flex items-center justify-between px-4 mb-3">
-                    <h3 className="text-lg font-semibold">메뉴</h3>
+                    <h3 className="text-lg font-medium">메뉴</h3>
                     <button 
                       onClick={() => setShowAllMenus(!showAllMenus)} 
                       className="text-surface-400 p-1"
@@ -845,46 +842,47 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   </div>
                 )}
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">관련 콘텐츠</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-medium">관련 콘텐츠</h3>
+                    {isAuthenticated && (
+                      <button 
+                        onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(!showYoutubeAddForm) : setShowCommunityAddForm(!showCommunityAddForm)}
+                        className="p-1 text-surface-400 hover:text-primary-600 transition-colors"
+                      >
+                        <Plus className="size-5" />
+                      </button>
+                    )}
+                  </div>
                   <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
                     <button 
                       onClick={() => setActiveContentTab('youtube')}
                       className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-semibold transition-all", 
+                        "px-3 py-1 rounded-md text-[12px] font-medium transition-all", 
                         activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
                       )}
                     >유튜브 {youtubeFeatures.length}</button>
                     <button 
                       onClick={() => setActiveContentTab('community')}
                       className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-semibold transition-all", 
+                        "px-3 py-1 rounded-md text-[12px] font-medium transition-all", 
                         activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
                       )}
                     >커뮤니티 {communityFeatures.length}</button>
                   </div>
                 </div>
 
-                {isAuthenticated && (
-                  <div className="mb-4">
-                    {(activeContentTab === 'youtube' ? showYoutubeAddForm : showCommunityAddForm) ? (
-                      <div className="p-4 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 space-y-3">
-                        <Input 
-                          placeholder="링크를 입력하세요" 
-                          className="text-base"
-                          value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
-                          onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
-                        />
-                        <div className="flex gap-2">
-                          <Button variant="ghost" className="flex-1" onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(false) : setShowCommunityAddForm(false)}>취소</Button>
-                          <Button className="flex-1" onClick={() => handleAddFeature(activeContentTab)} disabled={isRequestProcessing}>추가</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(true) : setShowCommunityAddForm(true)}
-                        className="w-full py-3 border border-dashed border-surface-300 dark:border-surface-700 rounded-xl text-surface-400 text-[13px] font-bold hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors"
-                      >+ 링크 추가</button>
-                    )}
+                {isAuthenticated && (activeContentTab === 'youtube' ? showYoutubeAddForm : showCommunityAddForm) && (
+                  <div className="mb-4 p-4 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 space-y-3">
+                    <Input 
+                      placeholder="링크를 입력하세요" 
+                      className="text-base h-11"
+                      value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
+                      onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button variant="ghost" className="flex-1" onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(false) : setShowCommunityAddForm(false)}>취소</Button>
+                      <Button className="flex-1" onClick={() => handleAddFeature(activeContentTab)} disabled={isRequestProcessing}>추가</Button>
+                    </div>
                   </div>
                 )}
 
@@ -935,7 +933,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
       <Dialog open={!!showDeleteReviewConfirm} onOpenChange={(open) => !open && setShowDeleteReviewConfirm(null)}>
         <DialogContent className="rounded-2xl max-w-[320px]">
-          <DialogTitle className="text-center font-bold">리뷰 삭제</DialogTitle>
+          <DialogTitle className="text-center font-medium">리뷰 삭제</DialogTitle>
           <p className="text-center text-sm text-surface-500">정말로 삭제하시겠습니까?</p>
           <div className="flex gap-2 mt-4">
             <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteReviewConfirm(null)}>취소</Button>
@@ -946,7 +944,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
       <Dialog open={showDeletePlaceConfirm} onOpenChange={setShowDeletePlaceConfirm}>
         <DialogContent className="rounded-2xl max-w-[320px]">
-          <DialogTitle className="text-center font-bold">장소 삭제</DialogTitle>
+          <DialogTitle className="text-center font-medium">장소 삭제</DialogTitle>
           <p className="text-center text-sm text-surface-500">이 장소를 정말로 삭제하시겠습니까?<br/>삭제된 데이터는 복구할 수 없습니다.</p>
           <div className="flex gap-2 mt-4">
             <Button variant="ghost" className="flex-1" onClick={() => setShowDeletePlaceConfirm(false)}>취소</Button>
@@ -957,7 +955,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
       <Dialog open={!!showDeleteFeatureConfirm} onOpenChange={(open) => !open && setShowDeleteFeatureConfirm(null)}>
         <DialogContent className="rounded-2xl max-w-[320px]">
-          <DialogTitle className="text-center font-bold">콘텐츠 삭제</DialogTitle>
+          <DialogTitle className="text-center font-medium">콘텐츠 삭제</DialogTitle>
           <p className="text-center text-sm text-surface-500">정말로 삭제하시겠습니까?</p>
           <div className="flex gap-2 mt-4">
             <Button variant="ghost" className="flex-1" onClick={() => setShowDeleteFeatureConfirm(null)}>취소</Button>

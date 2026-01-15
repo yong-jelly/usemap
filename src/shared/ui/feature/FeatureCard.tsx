@@ -38,7 +38,7 @@ export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: Fea
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-[13px] font-bold line-clamp-1 dark:text-surface-100">
+            <h4 className="text-[13px] font-medium line-clamp-1 dark:text-surface-100">
               {title}
             </h4>
             <p className="text-[11px] text-surface-400 mt-0.5">
@@ -68,10 +68,10 @@ export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: Fea
         className="flex items-center justify-between p-2.5 bg-white dark:bg-surface-900 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors block"
       >
         <div className="flex-1 min-w-0">
-          <h4 className="text-[13px] font-bold truncate dark:text-surface-100">
+          <h4 className="text-[13px] font-medium truncate dark:text-surface-100">
             {title}
           </h4>
-          <span className="text-[10px] text-blue-500 font-bold mt-0.5 block">
+          <span className="text-[10px] text-blue-500 font-medium mt-0.5 block">
             {getPlatformName ? getPlatformName(metadata?.domain) : metadata?.domain}
           </span>
         </div>

@@ -77,7 +77,7 @@ export function ReviewCard({
             <div className="flex items-center justify-between">
               <span 
                 className={cn(
-                  "font-bold text-[13px] truncate",
+                  "font-medium text-[13px] truncate",
                   onProfileClick && "cursor-pointer hover:underline"
                 )}
                 onClick={(e) => {
@@ -134,7 +134,7 @@ export function ReviewCard({
         {place_data && (
           <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-lg">
             <MapPin className="size-3 text-surface-400" />
-            <span className="text-[11px] font-bold text-surface-600 dark:text-surface-300 truncate">
+            <span className="text-[11px] font-medium text-surface-600 dark:text-surface-300 truncate">
               {place_data.name}
             </span>
           </div>
@@ -165,7 +165,7 @@ export function ReviewCard({
                   alt={`리뷰 이미지 ${i + 1}`}
                 />
                 {i === 2 && images.length > 3 && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-bold text-white pointer-events-none">
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-medium text-white pointer-events-none">
                     +{images.length - 3}
                   </div>
                 )}
@@ -226,7 +226,7 @@ export function ReviewCard({
             <div className="flex items-center gap-1.5 min-w-0">
               <span 
                 className={cn(
-                  "font-black text-[15px] text-surface-900 dark:text-white truncate",
+                  "font-medium text-[15px] text-surface-900 dark:text-white truncate",
                   onProfileClick && "cursor-pointer hover:underline"
                 )}
                 onClick={(e) => {
@@ -266,7 +266,7 @@ export function ReviewCard({
           <div className="flex items-center gap-2 px-3 py-2 bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-surface-50 dark:border-surface-900/50 w-fit max-w-full group hover:border-primary-200 dark:hover:border-primary-900 transition-colors">
             <MapPin className="size-4 text-primary-500" />
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-[13px] font-black text-surface-900 dark:text-surface-100 truncate">
+              <span className="text-[13px] font-medium text-surface-900 dark:text-surface-100 truncate">
                 {place_data.name}
               </span>
               <span className="text-[11px] text-surface-400 font-medium">
@@ -319,7 +319,7 @@ export function ReviewCard({
             {tags && tags.map((tag) => (
               <span
                 key={tag.code}
-                className="text-[11px] font-bold text-surface-500 dark:text-surface-400 bg-surface-100/50 dark:bg-surface-900 px-2 py-1 rounded-lg"
+                className="text-[11px] font-medium text-surface-500 dark:text-surface-400 bg-surface-100/50 dark:bg-surface-900 px-2 py-1 rounded-lg"
               >
                 #{tag.label}
               </span>

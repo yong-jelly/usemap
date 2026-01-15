@@ -36,13 +36,13 @@ export function MenuCard({ menu, variant = "grid" }: MenuCardProps) {
             </div>
           )}
           {menu.recommend && (
-            <div className="absolute top-1.5 left-1.5 bg-amber-400 px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-sm">
+            <div className="absolute top-1.5 left-1.5 bg-amber-400 px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm">
               대표
             </div>
           )}
         </div>
         <div className="p-2 flex-1 flex flex-col justify-between">
-          <h4 className="text-[12px] font-bold text-surface-900 dark:text-surface-100 line-clamp-1">
+          <h4 className="text-[12px] font-medium text-surface-900 dark:text-surface-100 line-clamp-1">
             {menuName}
           </h4>
           {menuPrice && (
@@ -75,13 +75,13 @@ export function MenuCard({ menu, variant = "grid" }: MenuCardProps) {
           </div>
         )}
         {menu.recommend && (
-          <div className="absolute top-1 left-1 bg-amber-400 px-1 py-0.5 rounded text-[9px] font-bold text-white shadow-sm">
+          <div className="absolute top-1 left-1 bg-amber-400 px-1 py-0.5 rounded text-[9px] font-medium text-white shadow-sm">
             대표
           </div>
         )}
       </div>
       <div className="p-2 flex-1 flex flex-col justify-center">
-        <h4 className="text-[11px] font-bold text-surface-900 dark:text-surface-100 line-clamp-2 text-center">
+        <h4 className="text-[11px] font-medium text-surface-900 dark:text-surface-100 line-clamp-2 text-center">
           {menuName}
         </h4>
         {menuPrice && (
