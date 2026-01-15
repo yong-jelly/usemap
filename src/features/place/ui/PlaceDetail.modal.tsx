@@ -446,27 +446,22 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         "relative w-full h-full bg-white dark:bg-surface-950 flex flex-col",
         "md:max-w-md md:h-[90vh] md:rounded-[24px] md:overflow-hidden"
       )}>
-        <header className="flex h-14 items-center px-4 border-b border-surface-100 dark:border-surface-800 shrink-0 bg-white dark:bg-surface-900">
-          <button onClick={handleClose} className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-50">
-            <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
+        <header className="absolute top-0 left-0 right-0 z-20 flex h-14 items-center justify-between px-4 pointer-events-none">
+          <button 
+            onClick={handleClose} 
+            className="p-2 bg-white/90 dark:bg-surface-900/90 rounded-full shadow-lg hover:bg-white dark:hover:bg-surface-800 transition-colors pointer-events-auto"
+          >
+            <ChevronLeft className="h-5 w-5 text-surface-900 dark:text-surface-100" />
           </button>
-          <h1 className="ml-3 text-lg font-medium text-surface-900 dark:text-surface-50 truncate flex-1">
-            {details?.name || "장소 상세"}
-          </h1>
+          
           {isAdmin(currentUser) && (
             <button 
               onClick={() => setShowDeletePlaceConfirm(true)}
-              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+              className="p-2 bg-white/90 dark:bg-surface-900/90 rounded-full shadow-lg text-rose-500 hover:bg-white dark:hover:bg-surface-800 transition-colors pointer-events-auto"
             >
               <Trash2 className="size-5" />
             </button>
           )}
-          <button 
-            onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
-            className="p-2 text-surface-400"
-          >
-            <Share2 className="size-5" />
-          </button>
         </header>
 
         <div 
@@ -500,7 +495,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     ))}
                   </div>
 
-                  <div className="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
+                  <div className="absolute top-16 left-4 pointer-events-none flex flex-col gap-2">
                     {details?.avg_price && details.avg_price > 0 && (
                       <div className="bg-black/70 px-3 py-1.5 rounded-full">
                         <span className="text-[13px] font-medium text-white">
@@ -574,6 +569,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         ? "fill-emerald-500 text-emerald-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
+                  </button>
+                  <button 
+                    onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
+                    className="p-2 active:opacity-60 transition-opacity"
+                  >
+                    <Share2 className="size-6 text-surface-700 dark:text-surface-300" />
                   </button>
                 </div>
               </div>
