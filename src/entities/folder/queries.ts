@@ -346,6 +346,15 @@ export function useUpdateFolder() {
 }
 
 /**
+ * 네이버 장소 단건 임포트 Mutation (Step 1~4)
+ */
+export function useImportPlaceToFolder() {
+  return useMutation({
+    mutationFn: folderApi.importPlaceToFolder
+  });
+}
+
+/**
  * 비공개 폴더 리뷰 작성/수정 Mutation
  */
 export function useUpsertFolderReview() {

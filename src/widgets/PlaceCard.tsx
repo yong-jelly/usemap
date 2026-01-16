@@ -24,6 +24,7 @@ interface PlaceCardProps {
   imageWidth?: string;
   maxImages?: number;
   showPrice?: boolean;
+  showThumbnail?: boolean;
   sourceLabel?: string;
   sourceTitle?: string;
   sourceImage?: string;
@@ -41,6 +42,7 @@ export function PlaceCard({
   place, 
   maxImages = 5,
   showPrice = true,
+  showThumbnail = true,
   sourceLabel,
   sourceTitle,
   sourceImage,
@@ -120,6 +122,7 @@ export function PlaceCard({
   }, [place?.interaction?.is_liked, place?.interaction?.is_saved, place?.experience?.is_liked, place?.experience?.is_saved]);
 
   useEffect(() => {
+    if (!showThumbnail) return;
     const slider = sliderRef.current;
     if (!slider || displayImages.length <= 1) return;
 
@@ -132,7 +135,7 @@ export function PlaceCard({
 
     slider.addEventListener('scroll', handleScroll, { passive: true });
     return () => slider.removeEventListener('scroll', handleScroll);
-  }, [displayImages.length]);
+  }, [displayImages.length, showThumbnail]);
 
   return (
     <article className={cn(
@@ -173,71 +176,73 @@ export function PlaceCard({
       )}
 
       {/* 이미지 슬라이더 - GPU 가속 및 최적화 */}
-      <div className="relative cursor-pointer" onClick={() => showPopup(place.id)}>
-        {displayImages.length > 0 ? (
-          <>
-            <div 
-              ref={sliderRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-              style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}
-            >
-              {displayImages.map((img: string, index: number) => (
-                <div key={index} className={cn("flex-shrink-0 w-full snap-center bg-surface-50", imageAspectRatio)}>
-                  <img
-                    src={convertToNaverResizeImageUrl(img)}
-                    alt={`${place.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={handleImageError}
-                    loading={index === 0 ? "eager" : "lazy"}
-                    decoding="async"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* 가격 뱃지 - 반투명 검정 배경 (blur 제거) */}
-            <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
-              {showPrice && place.avg_price > 0 && (
-                <div className="bg-black/70 px-3 py-1.5 rounded-full">
-                  <span className="text-[12px] font-medium text-white">
-                    {formatWithCommas(place.avg_price, '-', true)}원대
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* 폴더 뱃지 - 플랫한 색상 */}
-            {folders.length > 0 && (
-              <div className="absolute top-3 right-3 pointer-events-none">
-                <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
-                  {folders.length} 폴더
-                </div>
-              </div>
-            )}
-
-            {/* 인디케이터 - 심플 도트 */}
-            {displayImages.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/40 px-2.5 py-1.5 rounded-full">
-                {displayImages.map((_: any, index: number) => (
-                  <div key={index} className={cn("rounded-full", currentImageIndex === index ? "w-3 h-1 bg-white" : "w-1 h-1 bg-white/40")} />
+      {showThumbnail && (
+        <div className="relative cursor-pointer" onClick={() => showPopup(place.id)}>
+          {displayImages.length > 0 ? (
+            <>
+              <div 
+                ref={sliderRef}
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}
+              >
+                {displayImages.map((img: string, index: number) => (
+                  <div key={index} className={cn("flex-shrink-0 w-full snap-center bg-surface-50", imageAspectRatio)}>
+                    <img
+                      src={convertToNaverResizeImageUrl(img)}
+                      alt={`${place.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                    />
+                  </div>
                 ))}
               </div>
-            )}
 
-            {/* 방문 뱃지 */}
-            {place.experience?.is_visited && (
-              <div className="absolute bottom-3 right-3 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
-                방문
+              {/* 가격 뱃지 - 반투명 검정 배경 (blur 제거) */}
+              <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+                {showPrice && place.avg_price > 0 && (
+                  <div className="bg-black/70 px-3 py-1.5 rounded-full">
+                    <span className="text-[12px] font-medium text-white">
+                      {formatWithCommas(place.avg_price, '-', true)}원대
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </>
-        ) : (
-          <div className={cn("bg-surface-200 dark:bg-surface-800 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500", "aspect-[3/2]")}>
-            <CookingPot className="size-10 mb-2" />
-            <span className="text-xs">이미지 준비중</span>
-          </div>
-        )}
-      </div>
+
+              {/* 폴더 뱃지 - 플랫한 색상 */}
+              {folders.length > 0 && (
+                <div className="absolute top-3 right-3 pointer-events-none">
+                  <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
+                    {folders.length} 폴더
+                  </div>
+                </div>
+              )}
+
+              {/* 인디케이터 - 심플 도트 */}
+              {displayImages.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/40 px-2.5 py-1.5 rounded-full">
+                  {displayImages.map((_: any, index: number) => (
+                    <div key={index} className={cn("rounded-full", currentImageIndex === index ? "w-3 h-1 bg-white" : "w-1 h-1 bg-white/40")} />
+                  ))}
+                </div>
+              )}
+
+              {/* 방문 뱃지 */}
+              {place.experience?.is_visited && (
+                <div className="absolute bottom-3 right-3 bg-primary-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
+                  방문
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={cn("bg-surface-200 dark:bg-surface-800 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500", "aspect-[3/2]")}>
+              <CookingPot className="size-10 mb-2" />
+              <span className="text-xs">이미지 준비중</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 컨텐츠 영역 - Flat & Modern */}
       <div className="px-2 pt-1 pb-5">

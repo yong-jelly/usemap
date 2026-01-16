@@ -1,21 +1,32 @@
+/**
+ * =====================================================
+ * ID: FN-V1-CRW-FOR-PLACE-QUEUE
+ * 기능: 장소 크롤링 큐 처리 (배치성 작업)
+ * 작성일: 2026-01-16
+ * 설명: tbl_place_queue 테이블에서 PENDING 상태의 장소를 하나씩 가져와 
+ *       네이버 플레이스 상세 정보를 크롤링하고 tbl_place 테이블에 저장합니다.
+ *       결과는 tbl_crw_log에 기록됩니다.
+ * 
+ * 관련 테이블:
+ *   - tbl_place_queue: 크롤링 대기 큐
+ *   - tbl_place: 장소 상세 정보 저장
+ *   - tbl_crw_log: 크롤링 수행 이력 로그
+ * 
+ * 외부 의존성:
+ *   - 네이버 플레이스 GraphQL API (pcmap-api.place.naver.com)
+ * 
+ * 요청(Request Body):
+ *   - 없음 (Authorization 헤더에 service-role 필요)
+ * 
+ * 응답(Response):
+ *   - 성공: { status: "SUCCESS", place_id: string }
+ *   - 실패: { status: "FAILED", error: string }
+ * =====================================================
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
-
-/**
- * [fn_v1_crw_for_place_queue]
- * 
- * 설계 목적:
- * 1. tbl_place_queue 테이블에서 대기 중(PENDING)인 장소 하나를 가져옴.
- * 2. 해당 장소의 상세 정보를 네이버 GraphQL API를 통해 크롤링함.
- * 3. 크롤링 성공 시 tbl_place 테이블에 상세 데이터를 저장(upsert)하고, 큐의 상태를 SUCCESS로 변경.
- * 4. 크롤링 실패 시 재시도 횟수를 증가시키고 상태를 FAILED 또는 STOPPED(제한 초과 시)로 변경.
- * 5. 모든 과정은 tbl_crw_log 테이블에 기록하여 추적 가능하게 함.
- * 
- * [테스트용 curl 명령어]
- * curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/fn_v1_crw_for_place_queue' \
- *   --header 'Authorization: Bearer <service-role-key>'
- */
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

@@ -14,12 +14,14 @@ import {
   useVerifyInviteCode,
   useToggleFolderSubscription,
   useMySubscriptions,
-  useRemovePlaceFromFolder
+  useRemovePlaceFromFolder,
+  useImportPlaceToFolder
 } from "@/entities/folder/queries";
 
 const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
 mapboxgl.accessToken = MAP_TOKEN;
 import { Button, Input, FloatingViewToggleButton } from "@/shared/ui";
+import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { 
   Plus, 
   Loader2, 
@@ -32,12 +34,15 @@ import {
   RefreshCw, 
   Clock, 
   History, 
+  Eye,
   EyeOff, 
   X, 
   CheckCircle, 
   AlertCircle, 
   List, 
-  RotateCcw 
+  RotateCcw,
+  Download,
+  LayoutGrid
 } from "lucide-react";
 import { PlaceSearchModal } from "@/features/folder/ui/PlaceSearch.modal";
 import { PlaceCommentForm } from "@/features/folder/ui/PlaceCommentForm";
@@ -261,11 +266,16 @@ export function FolderDetailPage() {
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [showThumbnails, setShowThumbnails] = useState(true);
   const [showInviteHistory, setShowInviteHistory] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
+  const [showImportInput, setShowImportInput] = useState(false);
+  const [importInput, setImportInput] = useState("");
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importDebug, setImportDebug] = useState<Record<string, any> | null>(null);
   const [editingPlace, setEditingPlace] = useState<{ 
     placeId: string; 
     place: any; 
@@ -334,6 +344,7 @@ export function FolderDetailPage() {
   const { mutate: addPlace } = useAddPlaceToFolder();
   const { mutate: hideFolder } = useHideFolder();
   const { mutate: removePlace } = useRemovePlaceFromFolder();
+  const { mutate: importPlace, isPending: isImporting } = useImportPlaceToFolder();
   const { 
     mutate: toggleSubscription, 
     isPending: isTogglePending, 
@@ -368,6 +379,47 @@ export function FolderDetailPage() {
     } else {
       navigate(-1);
     }
+  };
+
+  const handleImportPlace = () => {
+    if (!id) return;
+    const trimmedInput = importInput.trim();
+    if (!trimmedInput) {
+      setImportError("place 주소 또는 place_id를 입력해주세요.");
+      return;
+    }
+
+    setImportError(null);
+    setImportDebug(null);
+
+    importPlace(
+      { folderId: id, input: trimmedInput },
+      {
+        onSuccess: (data: any) => {
+          setImportDebug({
+            ok: data?.ok,
+            step: data?.step,
+            place_id: data?.place_id,
+            message: data?.message || null,
+            raw: data
+          });
+          if (data?.ok) {
+            setImportError(null);
+          } else {
+            setImportError(data?.message || "임포트에 실패했습니다.");
+          }
+        },
+        onError: (error: any) => {
+          const errorMessage = error?.message || "임포트 중 오류가 발생했습니다.";
+          setImportError(errorMessage);
+          setImportDebug({
+            ok: false,
+            message: errorMessage,
+            raw: error
+          });
+        }
+      }
+    );
   };
 
   // 지도용 데이터 조회
@@ -797,16 +849,85 @@ export function FolderDetailPage() {
                     )}
                   </div>
 
-                  {canEdit && (
-                    <Button 
-                      size="sm" 
-                      onClick={() => setIsSearchOpen(true)}
-                      className="gap-1.5 font-bold h-9 px-4 rounded-full"
-                    >
-                      <Plus className="size-4" />
-                      맛집추가
-                    </Button>
-                  )}
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setShowThumbnails((prev) => !prev)}
+                        className={cn(
+                          "gap-1.5 font-bold h-9 px-3 rounded-full",
+                          !showThumbnails && "text-surface-400 dark:text-surface-500"
+                        )}
+                        title={showThumbnails ? "리스트 뷰로 보기" : "썸네일 뷰로 보기"}
+                      >
+                        {showThumbnails ? <LayoutGrid className="size-4" /> : <List className="size-4" />}
+                        <span>{showThumbnails ? "썸네일" : "리스트"}</span>
+                      </Button>
+                      {canEdit && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => setIsSearchOpen(true)}
+                          className="gap-1.5 font-bold h-9 px-4 rounded-full"
+                        >
+                          <Plus className="size-4" />
+                          맛집추가
+                        </Button>
+                      )}
+                    </div>
+
+                    {isOwner && (
+                      <div className="flex flex-col items-end gap-2 w-full">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setShowImportInput((prev) => !prev);
+                            setImportError(null);
+                          }}
+                          className="gap-1.5 font-bold h-9 px-4 rounded-full"
+                        >
+                          <Download className="size-4" />
+                          네이버 Import
+                        </Button>
+
+                        {showImportInput && (
+                          <div className="flex flex-col items-end gap-2 w-full">
+                            <div className="flex items-center gap-2 w-full">
+                              <Input
+                                value={importInput}
+                                onChange={(e) => setImportInput(e.target.value)}
+                                placeholder="place 주소 또는 place_id"
+                                className="h-9 w-full sm:w-72"
+                              />
+                              <Button
+                                size="sm"
+                                onClick={handleImportPlace}
+                                disabled={isImporting}
+                                className="h-9 px-4 rounded-full font-bold"
+                              >
+                                {isImporting ? <Loader2 className="size-4 animate-spin" /> : "실행"}
+                              </Button>
+                            </div>
+                            {importError && (
+                              <p className="text-xs text-red-500 font-medium">{importError}</p>
+                            )}
+                            <div className="w-full rounded-lg border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-3 text-xs text-surface-600 dark:text-surface-300">
+                              <div className="font-bold mb-2">디버깅 로그</div>
+                              <div className="space-y-1">
+                                <div>요청 folderId: {id}</div>
+                                <div>요청 input: {importInput || "(empty)"}</div>
+                              </div>
+                              <div className="mt-2 text-[11px] uppercase tracking-wide text-surface-400">response</div>
+                              <pre className="mt-1 whitespace-pre-wrap break-words">
+{importDebug ? JSON.stringify(importDebug, null, 2) : "응답 대기 중"}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 함께 편집 가이드 (참여형 폴더) */}
@@ -834,56 +955,80 @@ export function FolderDetailPage() {
               {/* 장소 목록 */}
               <div className="flex flex-col pb-20">
                 {places.length > 0 ? (
-                  <>
-                    {places.map((item: any) => (
-                      <div key={item.place_id} className="flex flex-col bg-white dark:bg-surface-950 overflow-hidden">
-                        <PlaceCard 
-                          place={item.place_data} 
-                          showPrice={true}
-                          addedAt={formatKoreanDate(item.added_at)}
-                          hideShadow={true}
-                        />
-                        {/* 메모 표시 및 편집 UI */}
-                        <div className="px-5 pb-5">
-                          {item.comment ? (
-                            <div className="flex flex-col gap-2">
-                              <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
-                                <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap">
-                                  {item.comment}
-                                </p>
+                  showThumbnails ? (
+                    <div className="grid grid-cols-3 gap-0.5 bg-white dark:bg-surface-950">
+                      {places.map((item: any, index: number) => {
+                        const place = item.place_data;
+                        const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
+                        return (
+                          <PlaceThumbnail
+                            key={`${item.place_id}-${index}`}
+                            placeId={item.place_id}
+                            name={place.name}
+                            thumbnail={images[0]}
+                            group2={place.group2}
+                            group3={place.group3}
+                            category={place.category}
+                            features={place.features}
+                            interaction={place.interaction}
+                            onClick={showPlaceModal}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <>
+                      {places.map((item: any) => (
+                        <div key={item.place_id} className="flex flex-col bg-white dark:bg-surface-950 overflow-hidden">
+                          <PlaceCard 
+                            place={item.place_data} 
+                            showPrice={true}
+                            showThumbnail={true}
+                            addedAt={formatKoreanDate(item.added_at)}
+                            hideShadow={true}
+                          />
+                          {/* 메모 표시 및 편집 UI */}
+                          <div className="px-5 pb-5">
+                            {item.comment ? (
+                              <div className="flex flex-col gap-2">
+                                <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
+                                  <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap">
+                                    {item.comment}
+                                  </p>
+                                </div>
+                                {canEdit && (
+                                  <button
+                                    onClick={() => handleEditComment(item.place_id, item.place_data, item.comment, item.added_at, item.updated_at)}
+                                    className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
+                                  >
+                                    메모 수정
+                                  </button>
+                                )}
                               </div>
-                              {canEdit && (
+                            ) : (
+                              canEdit && (
                                 <button
-                                  onClick={() => handleEditComment(item.place_id, item.place_data, item.comment, item.added_at, item.updated_at)}
-                                  className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
+                                  onClick={() => handleEditComment(item.place_id, item.place_data, undefined, item.added_at, item.updated_at)}
+                                  className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                                 >
-                                  메모 수정
+                                  + 메모 추가
                                 </button>
-                              )}
+                              )
+                            )}
+                          </div>
+                          {folderInfo?.permission === 'invite' && (
+                            <div className="px-5 pb-5">
+                              <FolderReviewSection 
+                                folderId={id!}
+                                placeId={item.place_id}
+                                placeName={item.place_data.name}
+                              />
                             </div>
-                          ) : (
-                            canEdit && (
-                              <button
-                                onClick={() => handleEditComment(item.place_id, item.place_data, undefined, item.added_at, item.updated_at)}
-                                className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                              >
-                                + 메모 추가
-                              </button>
-                            )
                           )}
                         </div>
-                        {folderInfo?.permission === 'invite' && (
-                          <div className="px-5 pb-5">
-                            <FolderReviewSection 
-                              folderId={id!}
-                              placeId={item.place_id}
-                              placeName={item.place_data.name}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </>
+                      ))}
+                    </>
+                  )
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
                     <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">

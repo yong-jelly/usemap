@@ -130,7 +130,7 @@ BEGIN
         f.description,
         f.permission,
         f.subscriber_count,
-        f.place_count,
+        COALESCE(place_counts.cnt, 0)::int AS place_count,
         f.created_at::TIMESTAMPTZ,
         (
             SELECT jsonb_agg(sub.place_info)
@@ -149,6 +149,12 @@ BEGIN
             ) sub
         ) AS preview_places
     FROM public.tbl_folder f
+    LEFT JOIN LATERAL (
+        SELECT count(*) AS cnt
+        FROM public.tbl_folder_place fp_cnt
+        WHERE fp_cnt.folder_id = f.id
+          AND fp_cnt.deleted_at IS NULL
+    ) place_counts ON TRUE
     LEFT JOIN public.tbl_user_profile p ON f.owner_id = p.auth_user_id
     WHERE f.permission = 'public' 
       AND f.is_hidden = FALSE

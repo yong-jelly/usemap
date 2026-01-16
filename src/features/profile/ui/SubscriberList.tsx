@@ -19,7 +19,7 @@ export function SubscriberList() {
     <div className="flex flex-col gap-8 py-4">
       {/* 구독자 섹션 */}
       <div className="flex flex-col gap-4">
-        <div className="px-4">
+        <div className="px-5">
           <h2 className="text-xl font-medium text-surface-900 dark:text-white">나를 구독중인 사람들</h2>
           <p className="text-sm text-surface-500">내 맛탐정 폴더를 구독하고 있는 사용자들입니다.</p>
         </div>
@@ -52,7 +52,7 @@ export function SubscriberList() {
 
                   {/* 정보 */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-surface-900 dark:text-white truncate">{sub.nickname}</h4>
+                    <h4 className="font-medium text-[15px] text-surface-900 dark:text-white truncate">{sub.nickname}</h4>
                     <p className="text-xs text-surface-500 truncate mt-0.5">
                       <span className="text-primary-500 font-medium">{folderDisplay}</span>
                       <span className="ml-1">구독 중</span>

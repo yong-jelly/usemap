@@ -37,7 +37,7 @@ BEGIN
         f.description,
         f.permission,
         f.permission_write_type,
-        f.place_count,
+        COALESCE(place_counts.cnt, 0)::int AS place_count,
         f.subscriber_count,
         f.created_at::TIMESTAMPTZ,
         f.updated_at::TIMESTAMPTZ,
@@ -50,6 +50,12 @@ BEGIN
             ELSE FALSE
         END AS is_place_in_folder
     FROM public.tbl_folder f
+    LEFT JOIN LATERAL (
+        SELECT count(*) AS cnt
+        FROM public.tbl_folder_place fp_cnt
+        WHERE fp_cnt.folder_id = f.id
+          AND fp_cnt.deleted_at IS NULL
+    ) place_counts ON TRUE
     WHERE f.owner_id = auth.uid()
       AND f.is_hidden = FALSE
     ORDER BY (f.permission = 'default') DESC, COALESCE(f.updated_at, f.created_at) DESC;

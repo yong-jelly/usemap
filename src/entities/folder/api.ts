@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/api/client";
+import { supabase } from "@/shared/lib/supabase";
 import type { 
   Folder, 
   FolderPlace, 
@@ -68,6 +69,24 @@ export const folderApi = {
       p_folder_id: folderId,
     });
     return response.data?.[0];
+  },
+
+  /**
+   * 네이버 장소 단건 임포트 (Step 1~4)
+   */
+  importPlaceToFolder: async (params: { folderId: string; input: string }) => {
+    const { data, error } = await supabase.functions.invoke("fn_v1_import_place_to_folder", {
+      body: {
+        folderId: params.folderId,
+        input: params.input
+      }
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
   },
 
   /**

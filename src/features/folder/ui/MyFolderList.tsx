@@ -78,10 +78,10 @@ export function MyFolderList() {
     <div className="flex flex-col gap-8 py-4">
       {/* 내 폴더 섹션 */}
       <div className="flex flex-col gap-4">
-        <div className="mx-4 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
-            <h2 className="text-sm text-surface-900 dark:text-white leading-tight">내 맛탐정 폴더</h2>
-            <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
+        <div className="px-5 flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-medium text-surface-900 dark:text-white">내 맛탐정 폴더</h2>
+            <p className="text-sm text-surface-500">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button 
