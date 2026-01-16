@@ -103,7 +103,7 @@ export function PlaceCard({
     if (folder.platform_type === "folder" && folder.metadata?.channelId) {
       navigate(`/feature/detail/folder/${folder.metadata.channelId}`);
     } else {
-      navigate(`/folder/${folder.id}`);
+      navigate(`/feature/detail/folder/${folder.id}`);
     }
   };
   
