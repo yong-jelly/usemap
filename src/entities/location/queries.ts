@@ -22,10 +22,14 @@ export function useSaveLocation() {
 /**
  * 사용자 위치 목록 조회
  */
-export function useUserLocations(params: { limit?: number } = {}) {
+export function useUserLocations(
+  params: { limit?: number } = {},
+  options: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: [...locationKeys.list(), params.limit],
     queryFn: () => locationApi.getUserLocations(params),
+    ...options
   });
 }
 

@@ -42,7 +42,7 @@ export function FeedPage() {
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; id: string } | null>(null);
 
-  const { data: userLocations } = useUserLocations({ limit: 1 });
+  const { data: userLocations } = useUserLocations({ limit: 1 }, { enabled: isAuthenticated });
   
   // 최근 위치 정보가 있으면 초기값으로 설정
   useEffect(() => {
@@ -197,47 +197,47 @@ export function FeedPage() {
               </h1>
             </div>
             
-            <div className="flex items-center gap-2">
-              {/* 정렬 전환 버튼 */}
-              <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
+            {isAuthenticated && (
+              <div className="flex items-center gap-2">
+                {/* 정렬 전환 버튼 */}
+                <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
+                  <button 
+                    onClick={() => setSortBy('recent')}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                      sortBy === 'recent' 
+                        ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
+                        : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
+                    )}
+                  >
+                    최신순
+                  </button>
+                  <button 
+                    onClick={handleSortByDistance}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                      sortBy === 'distance' 
+                        ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
+                        : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
+                    )}
+                  >
+                    거리순
+                  </button>
+                </div>
+
+                {/* 위치 설정 버튼 */}
                 <button 
-                  onClick={() => setSortBy('recent')}
+                  onClick={() => setIsLocationSheetOpen(true)}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'recent' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
+                    "p-2 rounded-xl transition-colors",
+                    selectedLocation 
+                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
+                      : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
                   )}
                 >
-                  최신순
+                  <MapPin className="size-5" />
                 </button>
-                <button 
-                  onClick={handleSortByDistance}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'distance' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-                  )}
-                >
-                  거리순
-                </button>
-              </div>
 
-              {/* 위치 설정 버튼 */}
-              <button 
-                onClick={() => setIsLocationSheetOpen(true)}
-                className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  selectedLocation 
-                    ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
-                    : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
-                )}
-              >
-                <MapPin className="size-5" />
-              </button>
-
-              {isAuthenticated && (
                 <div className="relative">
                   <Button 
                     variant="ghost" 
@@ -256,12 +256,12 @@ export function FeedPage() {
                     </span>
                   )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* 위치 가이드 메시지 (거리순 정렬인데 위치 정보가 없을 때) */}
-          {sortBy === 'distance' && !selectedLocation && (
+          {isAuthenticated && sortBy === 'distance' && !selectedLocation && (
             <div className="mt-4 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/50 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
               <Info className="size-4 text-orange-500 shrink-0" />
               <p className="text-[12px] text-orange-700 dark:text-orange-400 font-medium">
@@ -297,7 +297,10 @@ export function FeedPage() {
 
       <main className={cn(
         "flex-1 flex flex-col pt-[80px]",
-        (isAuthenticated && (filters.price_min !== null || filters.price_max !== null)) || (sortBy === 'distance' && !selectedLocation) ? "pt-[110px]" : "pt-[80px]"
+        (isAuthenticated && (
+          (filters.price_min !== null || filters.price_max !== null) || 
+          (sortBy === 'distance' && !selectedLocation)
+        )) ? "pt-[110px]" : "pt-[80px]"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">

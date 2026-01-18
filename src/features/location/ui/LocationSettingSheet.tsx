@@ -11,6 +11,7 @@ import {
 import { Button } from "@/shared/ui";
 import { Navigation, Trash2, MapPin, Loader2, Info } from "lucide-react";
 import { useUserLocations, useSaveLocation, useDeleteLocation } from "@/entities/location";
+import { useUserStore } from "@/entities/user";
 import { getCurrentLocation } from "@/shared/lib/location";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -28,7 +29,11 @@ export function LocationSettingSheet({
   onSelect,
   selectedId 
 }: LocationSettingSheetProps) {
-  const { data: locations, isLoading: isLoadingList } = useUserLocations();
+  const { isAuthenticated } = useUserStore();
+  const { data: locations, isLoading: isLoadingList } = useUserLocations(
+    {}, 
+    { enabled: isOpen && isAuthenticated }
+  );
   const saveLocationMutation = useSaveLocation();
   const deleteLocationMutation = useDeleteLocation();
 
