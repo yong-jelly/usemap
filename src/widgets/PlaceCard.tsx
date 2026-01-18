@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Sparkles,
   CookingPot,
-  Users
+  Users,
+  Navigation
 } from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
@@ -31,6 +32,7 @@ interface PlaceCardProps {
   sourcePath?: string;
   addedAt?: string;
   comment?: string;
+  distance?: number;
   className?: string;
   hideShadow?: boolean;
 }
@@ -49,6 +51,7 @@ export function PlaceCard({
   sourcePath,
   addedAt,
   comment,
+  distance,
   imageAspectRatio = "aspect-[4/3]",
   className,
   hideShadow = false
@@ -199,12 +202,20 @@ export function PlaceCard({
                 ))}
               </div>
 
-              {/* 가격 뱃지 - 반투명 검정 배경 (blur 제거) */}
+              {/* 가격 및 거리 뱃지 - 반투명 배경 */}
               <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
                 {showPrice && place.avg_price > 0 && (
                   <div className="bg-black/70 px-3 py-1.5 rounded-full">
                     <span className="text-[12px] font-medium text-white">
                       {formatWithCommas(place.avg_price, '-', true)}원대
+                    </span>
+                  </div>
+                )}
+                {distance !== undefined && distance !== null && (
+                  <div className="bg-primary-600/90 px-3 py-1.5 rounded-full flex items-center gap-1">
+                    <Navigation className="size-3 text-white fill-current" />
+                    <span className="text-[12px] font-medium text-white">
+                      {distance < 1000 ? `${Math.round(distance)}m` : `${(distance / 1000).toFixed(1)}km`}
                     </span>
                   </div>
                 )}

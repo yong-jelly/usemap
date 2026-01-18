@@ -4,6 +4,7 @@ import { Header, BottomNav } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { AuthModal } from "@/features/auth/ui/AuthModal";
+import { Toaster } from "sonner";
 import { cn } from "@/shared/lib/utils";
 
 // Page Imports
@@ -105,6 +106,7 @@ function RootLayout() {
       </main>
       {showBottomNav && <BottomNav />}
       <AuthModal />
+      <Toaster position="top-center" expand={false} richColors />
       
       {/* 전역 장소 상세 모달: usePlacePopup 스토어로 제어 */}
       {isPlaceModalOpen && modalPlaceId && (

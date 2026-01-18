@@ -179,13 +179,23 @@ export const folderApi = {
   /**
    * 내 피드 조회
    */
-  getMyFeed: async (params: { limit?: number; offset?: number; price_min?: number | null; price_max?: number | null } = {}) => {
-    // const response = await apiClient.rpc<any>("v1_get_my_feed", {
-    const response = await apiClient.rpc<any>("v2_get_my_feed", {
+  getMyFeed: async (params: { 
+    limit?: number; 
+    offset?: number; 
+    price_min?: number | null; 
+    price_max?: number | null;
+    sortBy?: string;
+    userLat?: number | null;
+    userLng?: number | null;
+  } = {}) => {
+    const response = await apiClient.rpc<any>("v3_get_my_feed", {
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_price_min: params.price_min || null,
       p_price_max: params.price_max || null,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },

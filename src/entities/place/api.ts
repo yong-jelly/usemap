@@ -323,7 +323,8 @@ export const placeApi = {
     limit?: number;
     offset?: number;
   }) => {
-    const response = await apiClient.rpc<CommunityRegion>("v2_get_community_contents", {
+    // const response = await apiClient.rpc<CommunityRegion>("v2_get_community_contents", {
+    const response = await apiClient.rpc<CommunityRegion>("v3_get_community_contents", {
       p_domain: params.domain || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,

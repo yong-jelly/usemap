@@ -70,7 +70,13 @@ export function useUserSharedFolders(userId: string) {
  * 내 피드 무한 스크롤 조회
  */
 export function useMyFeed(
-  filters: { price_min?: number | null; price_max?: number | null } = {},
+  filters: { 
+    price_min?: number | null; 
+    price_max?: number | null;
+    sortBy?: string;
+    userLat?: number | null;
+    userLng?: number | null;
+  } = {},
   options: { enabled?: boolean } = {}
 ) {
   return useInfiniteQuery({
