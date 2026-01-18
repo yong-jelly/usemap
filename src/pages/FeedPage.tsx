@@ -348,7 +348,7 @@ export function FeedPage() {
                 description="영상 속 화제의 장소, 유튜버들의 생생한 맛집 추천"
                 items={youtubeFeed} 
                 isLoading={isLoadingYoutube} 
-                renderItem={renderItem} 
+                renderItem={renderFeedItem} 
               />
             </div>
 
