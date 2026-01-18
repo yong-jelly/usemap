@@ -45,17 +45,17 @@ export function LocationSettingSheet({
         {
           onSuccess: (data) => {
             if (data) {
-              toast.success("현재 위치가 저장되었습니다.");
+              // toast.success("현재 위치가 저장되었습니다.", { duration: 1000 });
               onSelect(pos.latitude, pos.longitude, data.id);
             }
           },
           onError: () => {
-            toast.error("위치 저장 중 오류가 발생했습니다.");
+            toast.error("위치 저장 중 오류가 발생했습니다.", { duration: 1000 });
           }
         }
       );
     } catch (error: any) {
-      toast.error(error.message || "위치 정보를 가져올 수 없습니다.");
+      toast.error(error.message || "위치 정보를 가져올 수 없습니다.", { duration: 1000 });
     }
   };
 
@@ -63,7 +63,7 @@ export function LocationSettingSheet({
     e.stopPropagation();
     deleteLocationMutation.mutate(id, {
       onSuccess: () => {
-        toast.success("위치 정보가 삭제되었습니다.");
+        // toast.success("위치 정보가 삭제되었습니다.", { duration: 1000 });
       }
     });
   };

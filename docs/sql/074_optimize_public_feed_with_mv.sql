@@ -119,6 +119,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth, public
 AS $$
+#variable_conflict use_column
 BEGIN
     RETURN QUERY
     SELECT 
@@ -127,7 +128,26 @@ BEGIN
         mv.source_title,
         mv.source_image,
         mv.place_id,
-        mv.place_data,
+        (mv.place_data || 
+         jsonb_build_object(
+            'interaction', jsonb_build_object(
+                'place_liked_count', COALESCE((SELECT count(*) FROM public.tbl_like WHERE liked_id = mv.place_id AND liked_type = 'place' AND liked = true), 0),
+                'place_saved_count', COALESCE((SELECT count(*) FROM public.tbl_save WHERE saved_id = mv.place_id AND saved_type = 'place' AND saved = true), 0),
+                'place_comment_count', COALESCE((SELECT count(*) FROM public.tbl_comment_for_place WHERE business_id = mv.place_id AND is_active = true), 0),
+                'place_reviews_count', COALESCE((SELECT count(*) FROM public.tbl_place_user_review pur WHERE pur.place_id = mv.place_id AND pur.is_active = true), 0),
+                'is_liked', false,
+                'is_saved', false,
+                'is_commented', false,
+                'is_reviewed', false,
+                'visit_count', 0,
+                'last_visited_at', NULL
+            ),
+            'experience', jsonb_build_object(
+                'is_visited', false,
+                'visit_count', 0,
+                'last_visited_at', NULL
+            )
+         )) as place_data,
         mv.added_at
     FROM public.mv_public_feed mv
     WHERE (p_source_type IS NULL OR mv.source_type = p_source_type)
