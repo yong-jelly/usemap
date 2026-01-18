@@ -69,7 +69,10 @@ export function useUserSharedFolders(userId: string) {
 /**
  * 내 피드 무한 스크롤 조회
  */
-export function useMyFeed(filters: { price_min?: number | null; price_max?: number | null } = {}) {
+export function useMyFeed(
+  filters: { price_min?: number | null; price_max?: number | null } = {},
+  options: { enabled?: boolean } = {}
+) {
   return useInfiniteQuery({
     queryKey: [...folderKeys.all, "feed", filters],
     queryFn: ({ pageParam = 0 }) => folderApi.getMyFeed({ limit: 20, offset: pageParam, ...filters }),
@@ -78,19 +81,24 @@ export function useMyFeed(filters: { price_min?: number | null; price_max?: numb
       if (!lastPage || lastPage.length < 20) return undefined;
       return allPages.length * 20;
     },
+    ...options,
   });
 }
 
 /**
  * 공개 피드 조회 (타입별)
  */
-export function usePublicFeed(params: { sourceType?: string | null; limit?: number } = {}) {
+export function usePublicFeed(
+  params: { sourceType?: string | null; limit?: number } = {},
+  options: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: [...folderKeys.all, "publicFeed", params.sourceType, params.limit],
     queryFn: () => folderApi.getPublicFeed({ 
       sourceType: params.sourceType, 
       limit: params.limit || 10 
     }),
+    ...options,
   });
 }
 

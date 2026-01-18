@@ -180,7 +180,8 @@ export const folderApi = {
    * 내 피드 조회
    */
   getMyFeed: async (params: { limit?: number; offset?: number; price_min?: number | null; price_max?: number | null } = {}) => {
-    const response = await apiClient.rpc<any>("v1_get_my_feed", {
+    // const response = await apiClient.rpc<any>("v1_get_my_feed", {
+    const response = await apiClient.rpc<any>("v2_get_my_feed", {
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_price_min: params.price_min || null,

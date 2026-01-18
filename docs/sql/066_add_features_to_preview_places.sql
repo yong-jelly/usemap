@@ -272,9 +272,14 @@ BEGIN
         ) AS preview_places
     FROM public.tbl_folder f
     LEFT JOIN public.tbl_user_profile p ON f.owner_id = p.auth_user_id
+    LEFT JOIN LATERAL (
+        SELECT MAX(created_at) as last_added_at
+        FROM public.tbl_folder_place
+        WHERE folder_id = f.id AND deleted_at IS NULL
+    ) lp ON TRUE
     WHERE f.permission = 'public'
       AND f.is_hidden = FALSE
-    ORDER BY COALESCE(f.updated_at, f.created_at) DESC
+    ORDER BY COALESCE(lp.last_added_at, f.created_at) DESC
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;

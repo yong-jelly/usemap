@@ -20,6 +20,23 @@ export function extractShareId(input: string): string {
 }
 
 /**
+ * 단축 URL(naver.me)인 경우 리다이렉션된 최종 URL에서 shareId를 추출합니다.
+ */
+export async function resolveShareId(input: string): Promise<string> {
+    if (!input) return '';
+    if (!input.includes('naver.me')) return extractShareId(input);
+
+    try {
+        // 단축 URL인 경우 리다이렉트 정보를 가져옴
+        const response = await fetch(input, { redirect: 'follow' });
+        return extractShareId(response.url);
+    } catch (error) {
+        console.error('URL 해소 중 오류:', error);
+        return extractShareId(input);
+    }
+}
+
+/**
  * 배열을 지정된 크기의 청크로 나눕니다.
  */
 export function chunkArray<T>(array: T[], size: number): T[][] {

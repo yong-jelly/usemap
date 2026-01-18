@@ -99,7 +99,7 @@ serve(async (req) => {
   }
 
   // 4. 입력값에서 네이버 shareId 추출
-  const shareId = extractShareId(input);
+  const shareId = await resolveShareId(input);
   if (!shareId) {
     return jsonResponse({ ok: false, message: "shareId 형식을 확인해주세요." }, 400);
   }
@@ -376,6 +376,26 @@ function extractShareId(input: string) {
   // URL에서 32자리 해시값 추출
   const match = trimmed.match(new RegExp(`[A-Za-z0-9]{${SHARE_ID_LENGTH}}`));
   return match?.[0] && isAlphaNumeric(match[0]) ? match[0] : null;
+}
+
+/**
+ * 단축 URL(naver.me)인 경우 리다이렉션된 최종 URL에서 shareId를 추출합니다.
+ */
+async function resolveShareId(input: string): Promise<string | null> {
+  if (!input) return null;
+  const trimmed = input.trim();
+  
+  if (trimmed.includes("naver.me")) {
+    try {
+      const response = await fetch(trimmed, { redirect: "follow" });
+      return extractShareId(response.url);
+    } catch (error) {
+      console.error("URL 해소 중 오류:", error);
+      return extractShareId(trimmed);
+    }
+  }
+  
+  return extractShareId(trimmed);
 }
 
 /**

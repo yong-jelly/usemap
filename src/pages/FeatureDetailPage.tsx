@@ -10,6 +10,7 @@ import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink } from "lucide-r
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 import { useUserStore, isAdmin } from "@/entities/user";
+import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
@@ -24,7 +25,8 @@ export function FeatureDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { show: showPlaceModal } = usePlacePopup();
-  const { profile: currentUser } = useUserStore();
+  const { profile: currentUser, isAuthenticated } = useUserStore();
+  const { openLogin } = useAuthModalStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleBack = () => {
@@ -147,6 +149,13 @@ export function FeatureDetailPage() {
 
   const handleToggleSubscription = () => {
     if (!subscriptionType || !id) return;
+    
+    // 비로그인 상태인 경우 로그인 모달 표시
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+    
     toggleSubscription({ type: subscriptionType, id });
   };
   

@@ -370,6 +370,13 @@ export function FolderDetailPage() {
   const handleToggleSubscription = () => {
     if (isOwner) return;
     if (!id) return;
+    
+    // 비로그인 상태인 경우 로그인 모달 표시
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+    
     toggleSubscription(id);
   };
 

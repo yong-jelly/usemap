@@ -30,13 +30,25 @@ export function FeedPage() {
     hasNextPage, 
     isFetchingNextPage, 
     isLoading 
-  } = useMyFeed(filters);
+  } = useMyFeed(filters, { enabled: isAuthenticated });
 
   // 공개 피드 데이터 (비로그인용)
-  const { data: communityFeed, isLoading: isLoadingCommunity } = usePublicFeed({ sourceType: 'community_region', limit: 10 });
-  const { data: detectiveFeed, isLoading: isLoadingDetective } = usePublicFeed({ sourceType: 'folder', limit: 10 });
-  const { data: naverFeed, isLoading: isLoadingNaver } = usePublicFeed({ sourceType: 'naver_folder', limit: 10 });
-  const { data: youtubeFeed, isLoading: isLoadingYoutube } = usePublicFeed({ sourceType: 'youtube_channel', limit: 10 });
+  const { data: communityFeed, isLoading: isLoadingCommunity } = usePublicFeed(
+    { sourceType: 'community_region', limit: 10 },
+    { enabled: !isAuthenticated }
+  );
+  const { data: detectiveFeed, isLoading: isLoadingDetective } = usePublicFeed(
+    { sourceType: 'folder', limit: 10 },
+    { enabled: !isAuthenticated }
+  );
+  const { data: naverFeed, isLoading: isLoadingNaver } = usePublicFeed(
+    { sourceType: 'naver_folder', limit: 10 },
+    { enabled: !isAuthenticated }
+  );
+  const { data: youtubeFeed, isLoading: isLoadingYoutube } = usePublicFeed(
+    { sourceType: 'youtube_channel', limit: 10 },
+    { enabled: !isAuthenticated }
+  );
 
   const observerTarget = useRef<HTMLDivElement>(null);
 

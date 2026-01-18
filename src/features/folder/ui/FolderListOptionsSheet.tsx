@@ -75,7 +75,7 @@ export function FolderListOptionsSheet({
     >
       <DrawerContent className="bg-white dark:bg-surface-900 border-t-2 border-[#2B4562]/10 shadow-none rounded-t-[32px] max-w-lg mx-auto">
         <DrawerHeader className="px-6 py-5 relative flex items-center justify-center">
-          <DrawerTitle className="text-lg font-black text-surface-900 dark:text-white text-center">
+          <DrawerTitle className="text-lg text-surface-900 dark:text-white text-center">
             {folder.title}
           </DrawerTitle>
           <DrawerDescription className="sr-only">
@@ -104,7 +104,7 @@ export function FolderListOptionsSheet({
               )}
             >
               <item.icon className="size-6" />
-              <span className="text-lg font-bold">{item.label}</span>
+              <span className="text-lg">{item.label}</span>
             </button>
           ))}
         </div>

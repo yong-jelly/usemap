@@ -5,7 +5,7 @@
  */
 
 import { sql } from '../shared/db';
-import { extractShareId } from '../shared/utils';
+import { resolveShareId } from '../shared/utils';
 import { Bookmark } from '../shared/types';
 import { crawlAndSyncPlaces } from './place';
 import { fetchFolderData } from './folder-shared';
@@ -34,7 +34,7 @@ async function main() {
         process.exit(1);
     }
 
-    const shareId = extractShareId(input);
+    const shareId = await resolveShareId(input);
     if (!shareId) {
         console.error('❌ 유효한 share_id를 찾을 수 없습니다. share_id가 없거나 공개로 설정되어야 합니다.');
         process.exit(1);

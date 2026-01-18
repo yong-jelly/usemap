@@ -47,18 +47,18 @@ export async function classifyPlaces(bookmarks: Bookmark[], folderId: number) {
 /**
  * 폴더 메타데이터 및 장소 관계 UPSERT
  */
-export async function syncFolderToDb(folder: FolderInfo, places: Bookmark[], sourceUrl: string) {
+export async function syncFolderToDb(folder: FolderInfo, places: Bookmark[], sourceUrl: string, managed: boolean = false) {
     // 1. 폴더 정보 저장
     await sql`
         INSERT INTO public.tbl_naver_folder (
-            folder_id, share_id, name, memo, last_use_time, creation_time, url, follow_count, view_count
+            folder_id, share_id, name, memo, last_use_time, creation_time, url, follow_count, view_count, managed
         ) VALUES (
             ${folder.folderId}, ${folder.shareId}, ${folder.name}, ${folder.memo ?? null},
             ${toDate(folder.lastUseTime)}, ${toDate(folder.creationTime)}, ${sourceUrl},
-            ${folder.followCount || 0}, ${folder.viewCount || 0}
+            ${folder.followCount || 0}, ${folder.viewCount || 0}, ${managed}
         )
         ON CONFLICT (folder_id) DO UPDATE SET
-            name = EXCLUDED.name, memo = EXCLUDED.memo, updated_at = NOW()
+            name = EXCLUDED.name, memo = EXCLUDED.memo, managed = EXCLUDED.managed, updated_at = NOW()
     `;
 
     // 2. 폴더-장소 관계 저장
