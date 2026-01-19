@@ -13,12 +13,14 @@ import {
   LogIn, 
   MapPin, 
   Navigation,
-  Info 
+  Info,
+  LayoutGrid
 } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
+import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 import type { ReactNode } from "react";
@@ -32,6 +34,7 @@ export function FeedPage() {
   const { show: showPlaceModal } = usePlacePopup();
   
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
   const [filters, setFilters] = useState<{ price_min: number | null; price_max: number | null }>({
     price_min: null,
     price_max: null,
@@ -61,6 +64,13 @@ export function FeedPage() {
     if (!selectedLocation) {
       setIsLocationSheetOpen(true);
     }
+  };
+
+  const handleLayoutToggle = () => {
+    const newLayout = layout === 'feed' ? 'grid' : 'feed';
+    trackEvent("feed_layout_change", { layout: newLayout });
+    setLayout(newLayout);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const { 
@@ -133,6 +143,28 @@ export function FeedPage() {
       sourceImage = undefined;
     }
 
+    // 그리드 레이아웃: PlaceThumbnail 컴포넌트 사용
+    if (layout === 'grid') {
+      const place = item.place_data;
+      const images = place.images || place.image_urls || [];
+      
+      return (
+        <PlaceThumbnail
+          key={`${item.source_id}-${item.place_id}-${idx}`}
+          placeId={place.id}
+          name={place.name}
+          thumbnail={images[0]}
+          group2={place.group2}
+          group3={place.group3}
+          category={place.category}
+          features={place.features}
+          interaction={place.interaction}
+          onClick={showPlaceModal}
+        />
+      );
+    }
+
+    // 피드 레이아웃: PlaceCard 컴포넌트 사용
     return (
       <PlaceCard 
         key={`${item.source_id}-${item.place_id}-${idx}`}
@@ -256,6 +288,19 @@ export function FeedPage() {
                     </span>
                   )}
                 </div>
+
+                {/* 레이아웃 토글 버튼 (우측 끝) */}
+                <button 
+                  onClick={handleLayoutToggle}
+                  className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    layout === 'grid' 
+                      ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
+                      : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
+                  )}
+                >
+                  <LayoutGrid className="size-4" />
+                </button>
               </div>
             )}
           </div>
@@ -378,11 +423,17 @@ export function FeedPage() {
               <Loader2 className="size-8 animate-spin text-surface-300" />
             </div>
           ) : feedItems.length > 0 ? (
-            <div className="flex-1 flex flex-col pb-20 bg-white dark:bg-surface-950">
+            <div className={cn(
+              "flex-1 pb-20 bg-white dark:bg-surface-950",
+              layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5"
+            )}>
               {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
               
               {hasNextPage && (
-                <div ref={observerTarget} className="py-12 flex justify-center">
+                <div ref={observerTarget} className={cn(
+                  "py-12 flex justify-center",
+                  layout === 'grid' && "col-span-3"
+                )}>
                   <Loader2 className="size-6 text-surface-300 animate-spin" />
                 </div>
               )}

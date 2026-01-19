@@ -6,8 +6,6 @@ import {
   ChevronDown, 
   X, 
   LayoutGrid,
-  List as ListIcon,
-  SquareX,
   RotateCcw,
   Loader2,
   History,
@@ -17,8 +15,8 @@ import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
 import { THEMES } from "@/widgets/ExploreFilterSheet/ThemeTab";
 import { Button, Input, Skeleton } from "@/shared/ui";
+import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { cn } from "@/shared/lib/utils";
-import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import { placeApi } from "@/entities/place/api";
@@ -152,18 +150,6 @@ export function ExplorePage() {
   const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
   const isInitialLoading = isLoading && places.length === 0;
 
-  const FALLBACK_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
-    <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="400" height="600" fill="#F1F5F9"/>
-      <rect x="175" y="275" width="50" height="50" rx="8" stroke="#CBD5E1" stroke-width="3"/>
-      <path d="M185 285L215 315M215 285L185 315" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  `.trim())}`;
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = FALLBACK_IMAGE;
-  };
-
   // 활성화된 필터 개수 계산 (위치와 기본 카테고리 제외)
   const activeExtraFilterCount = useMemo(() => {
     let count = 0;
@@ -179,7 +165,9 @@ export function ExplorePage() {
     return !!filters.group1 && !filters.group2 && !filters.group3;
   }, [filters.group1, filters.group2, filters.group3]);
 
-  const handleLayoutChange = (newLayout: 'feed' | 'grid') => {
+  const handleLayoutToggle = () => {
+    const newLayout = layout === 'feed' ? 'grid' : 'feed';
+    trackEvent("explore_layout_change", { layout: newLayout });
     setLayout(newLayout);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -376,38 +364,19 @@ export function ExplorePage() {
                     </Button>
                   )}
                   
-                  {/* 레이아웃 전환 버튼 */}
-                  <div className="flex items-center bg-surface-50 dark:bg-surface-900 p-0.5 rounded-xl ml-1">
-                      <button 
-                        onClick={() => {
-                          trackEvent("explore_layout_change", { layout: "feed" });
-                          handleLayoutChange('feed');
-                        }}
-                        className={cn(
-                          "p-1.5 rounded-lg", 
-                          layout === 'feed' 
-                            ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                            : "text-surface-300 dark:text-surface-600"
-                        )}
-                      >
-                        <ListIcon className="size-4.5" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          trackEvent("explore_layout_change", { layout: "grid" });
-                          handleLayoutChange('grid');
-                        }}
-                        className={cn(
-                          "p-1.5 rounded-lg", 
-                          layout === 'grid' 
-                            ? "bg-white dark:bg-surface-800 shadow-sm text-surface-900 dark:text-white" 
-                            : "text-surface-300 dark:text-surface-600"
-                        )}
-                      >
-                        <LayoutGrid className="size-4.5" />
-                      </button>
-                    </div>
-                  </div>
+                  {/* 레이아웃 토글 버튼 (우측 끝) */}
+                  <button 
+                    onClick={handleLayoutToggle}
+                    className={cn(
+                      "p-2 rounded-xl transition-colors ml-1",
+                      layout === 'grid' 
+                        ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
+                        : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
+                    )}
+                  >
+                    <LayoutGrid className="size-4" />
+                  </button>
+                </div>
               </div>
 
               {/* 활성 필터 태그 (정리된 스타일) */}
@@ -534,51 +503,28 @@ export function ExplorePage() {
           <>
             {searchResults.length > 0 ? (
               <div className={cn(
-                layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+                layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5"
               )}>
                 {searchResults.map((place) => {
                   if (layout === 'feed') {
                     return <PlaceCard key={`search-${place.id}`} place={place} />;
                   }
                   
-                  const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
                   const images = place.images || place.image_urls || [];
-                  const hasImage = images.length > 0;
                   
                   return (
-                    <div 
+                    <PlaceThumbnail
                       key={`search-${place.id}`}
-                      className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
-                      onClick={() => showPopup(place.id)}
-                    >
-                      {hasImage ? (
-                        <img 
-                          src={convertToNaverResizeImageUrl(images[0])} 
-                          className="w-full h-full object-cover"
-                          alt={place.name}
-                          loading="lazy"
-                          decoding="async"
-                          onError={handleImageError}
-                        />
-                      ) : (
-                        <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
-                      )}
-                      
-                      {folders.length > 0 && (
-                        <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-medium rounded-sm">
-                          {folders.length}
-                        </span>
-                      )}
-
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                        <span className="text-[10px] text-white/80 font-medium truncate block">
-                          {place.group2} {place.group3}
-                        </span>
-                        <span className="text-[13px] text-white font-medium truncate block leading-tight">
-                          {place.name}
-                        </span>
-                      </div>
-                    </div>
+                      placeId={place.id}
+                      name={place.name}
+                      thumbnail={images[0]}
+                      group2={place.group2}
+                      group3={place.group3}
+                      category={place.category}
+                      features={place.features}
+                      interaction={place.interaction}
+                      onClick={showPopup}
+                    />
                   );
                 })}
               </div>
@@ -672,51 +618,28 @@ export function ExplorePage() {
           </div>
         ) : (
           <div className={cn(
-            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5 pt-0.5"
+            layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5"
           )}>
             {places.map((place) => {
               if (layout === 'feed') {
                 return <PlaceCard key={`feed-${place.id}`} place={place} />;
               }
-
-              const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+              
               const images = place.images || place.image_urls || [];
-              const hasImage = images.length > 0;
               
               return (
-                <div 
+                <PlaceThumbnail
                   key={`grid-${place.id}`}
-                  className="relative aspect-[3/4] bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 cursor-pointer flex items-center justify-center"
-                  onClick={() => showPopup(place.id)}
-                >
-                  {hasImage ? (
-                    <img 
-                      src={convertToNaverResizeImageUrl(images[0])} 
-                      className="w-full h-full object-cover"
-                      alt={place.name}
-                      loading="lazy"
-                      decoding="async"
-                      onError={handleImageError}
-                    />
-                  ) : (
-                    <SquareX className="size-10 stroke-[1.5] text-surface-300 dark:text-surface-700" />
-                  )}
-                  
-                  {folders.length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 bg-[#1E8449] text-white text-[9px] font-medium rounded-sm">
-                      {folders.length}
-                    </span>
-                  )}
-
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                    <span className="text-[10px] text-white/80 font-medium truncate block">
-                      {place.group2} {place.group3}
-                    </span>
-                    <span className="text-[13px] text-white font-medium truncate block leading-tight">
-                      {place.name}
-                    </span>
-                  </div>
-                </div>
+                  placeId={place.id}
+                  name={place.name}
+                  thumbnail={images[0]}
+                  group2={place.group2}
+                  group3={place.group3}
+                  category={place.category}
+                  features={place.features}
+                  interaction={place.interaction}
+                  onClick={showPopup}
+                />
               );
             })}
           </div>
