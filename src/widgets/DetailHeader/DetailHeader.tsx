@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, Share2, Settings, User, CheckCircle, Heart, Trash2 } from "lucide-react";
+import { ChevronLeft, Share2, Settings, User, CheckCircle, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
@@ -163,7 +163,6 @@ export function DetailHeader({
             )}
             title={isOwner && type === 'folder' ? "내 폴더 (구독 중)" : (isSubscribed ? "구독 중" : "구독하기")}
           >
-            <Heart className={cn("size-3.5", isSubscribed && "fill-primary-500 text-primary-500")} />
             <span>{isSubscribed ? "구독중" : "구독"}</span>
           </button>
         )}

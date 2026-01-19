@@ -141,8 +141,33 @@ export function useToggleFolderSubscription() {
 
   return useMutation({
     mutationFn: folderApi.toggleFolderSubscription,
+    onMutate: async (folderId) => {
+      // 낙관적 업데이트를 위해 진행 중인 쿼리 취소
+      await queryClient.cancelQueries({ queryKey: subscriptionKey });
+      
+      // 이전 데이터 백업
+      const previousSubscriptions = queryClient.getQueryData<any[]>(subscriptionKey);
+      
+      // 캐시 업데이트
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
+        if (!old) return old;
+        return old.map((sub) => 
+          (sub.subscription_type === 'folder' && sub.feature_id === folderId)
+            ? { ...sub, is_subscribed: !sub.is_subscribed }
+            : sub
+        );
+      });
+
+      return { previousSubscriptions };
+    },
+    onError: (err, folderId, context) => {
+      // 에러 발생 시 이전 데이터로 복구
+      if (context?.previousSubscriptions) {
+        queryClient.setQueryData(subscriptionKey, context.previousSubscriptions);
+      }
+    },
     onSuccess: (result, folderId) => {
-      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 업데이트하거나 새로 추가 (낙관적 업데이트)
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 최종 업데이트
       queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
         if (!old) return old;
         
@@ -165,7 +190,8 @@ export function useToggleFolderSubscription() {
         }
         return old;
       });
-      
+    },
+    onSettled: (result, error, folderId) => {
       // 관련 쿼리 무효화 (폴더 상세 및 목록)
       queryClient.invalidateQueries({ queryKey: folderKeys.list('public') });
       queryClient.invalidateQueries({ queryKey: folderKeys.details(folderId) });
@@ -182,8 +208,33 @@ export function useToggleFeatureSubscription() {
 
   return useMutation({
     mutationFn: folderApi.toggleFeatureSubscription,
+    onMutate: async ({ type, id }) => {
+      // 낙관적 업데이트를 위해 진행 중인 쿼리 취소
+      await queryClient.cancelQueries({ queryKey: subscriptionKey });
+      
+      // 이전 데이터 백업
+      const previousSubscriptions = queryClient.getQueryData<any[]>(subscriptionKey);
+      
+      // 캐시 업데이트
+      queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
+        if (!old) return old;
+        return old.map((sub) => 
+          (sub.subscription_type === type && sub.feature_id === id)
+            ? { ...sub, is_subscribed: !sub.is_subscribed }
+            : sub
+        );
+      });
+
+      return { previousSubscriptions };
+    },
+    onError: (err, variables, context) => {
+      // 에러 발생 시 이전 데이터로 복구
+      if (context?.previousSubscriptions) {
+        queryClient.setQueryData(subscriptionKey, context.previousSubscriptions);
+      }
+    },
     onSuccess: (result, { type, id }) => {
-      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 업데이트하거나 새로 추가 (낙관적 업데이트)
+      // 성공 시: 캐시의 목록에서 해당 아이템의 구독 상태를 최종 업데이트
       queryClient.setQueryData<any[]>(subscriptionKey, (old) => {
         if (!old) return old;
 
@@ -206,10 +257,7 @@ export function useToggleFeatureSubscription() {
         return old;
       });
 
-      // 구독 목록 쿼리 무효화하여 서버에서 최신 데이터 가져오기
-      queryClient.invalidateQueries({ queryKey: subscriptionKey });
-      
-      // 피쳐 정보 쿼리도 무효화 (is_subscribed 포함)
+      // 피쳐 정보 쿼리 무효화 (is_subscribed 포함)
       queryClient.invalidateQueries({ 
         queryKey: ["place", "featureInfo", type, id] 
       });

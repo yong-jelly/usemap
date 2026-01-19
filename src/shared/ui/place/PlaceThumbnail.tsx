@@ -67,8 +67,8 @@ export function PlaceThumbnail({
           decoding="async"
         />
       ) : (
-        <div className="flex flex-col items-center justify-center w-full h-full bg-surface-50 dark:bg-surface-900/50">
-          <CookingPot className="size-8 text-surface-200 dark:text-surface-800 stroke-[1.2] opacity-50" />
+        <div className="flex flex-col items-center justify-center w-full h-full bg-zinc-800">
+          <CookingPot className="size-10 text-zinc-500/50 stroke-[1.5]" />
         </div>
       )}
 

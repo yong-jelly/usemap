@@ -83,8 +83,8 @@ export function LocationSettingSheet({
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex gap-3">
             <Info className="size-5 text-blue-500 shrink-0 mt-0.5" />
             <div className="text-[13px] text-blue-700 dark:text-blue-300 leading-relaxed">
-              <p className="font-semibold mb-1">위치 정보 수집 안내</p>
-              <p>• 브라우저의 위치 권한 요청이 뜨면 <span className="font-bold underline text-blue-600 dark:text-blue-400">'허용'</span>을 눌러주세요.</p>
+              <p className="mb-1">위치 정보 수집 안내</p>
+              <p>• 브라우저의 위치 권한 요청이 뜨면 <span className="underline text-blue-600 dark:text-blue-400">'허용'</span>을 눌러주세요.</p>
               <p>• 거리순 정렬은 저장된 위치 정보를 기반으로 계산됩니다.</p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export function LocationSettingSheet({
           <Button 
             onClick={handleSaveCurrentLocation}
             disabled={saveLocationMutation.isPending}
-            className="w-full h-14 rounded-2xl text-base font-semibold gap-2 shadow-sm"
+            className="w-full h-14 rounded-2xl text-base gap-2 shadow-sm"
           >
             {saveLocationMutation.isPending ? (
               <Loader2 className="size-5 animate-spin" />
@@ -105,7 +105,7 @@ export function LocationSettingSheet({
 
           {/* 저장된 위치 목록 */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-surface-500 px-1">최근 저장된 위치</h3>
+            <h3 className="text-sm text-surface-500 px-1">최근 저장된 위치</h3>
             {isLoadingList ? (
               <div className="py-8 flex justify-center">
                 <Loader2 className="size-6 text-surface-300 animate-spin" />
@@ -128,7 +128,7 @@ export function LocationSettingSheet({
                         <MapPin className="size-5" />
                       </div>
                       <div className="text-left truncate">
-                        <div className="text-sm font-bold text-surface-900 dark:text-white truncate">
+                        <div className="text-sm text-surface-900 dark:text-white truncate">
                           {loc.nearest_place_name} 근처
                         </div>
                         <div className="text-[12px] text-surface-500 truncate">
@@ -157,11 +157,11 @@ export function LocationSettingSheet({
           </div>
         </div>
 
-        <DrawerFooter className="pb-8">
+        {/* <DrawerFooter className="pb-8">
           <DrawerClose asChild>
             <Button variant="outline" className="rounded-xl h-12">닫기</Button>
           </DrawerClose>
-        </DrawerFooter>
+        </DrawerFooter> */}
       </DrawerContent>
     </Drawer>
   );

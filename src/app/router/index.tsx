@@ -43,6 +43,7 @@ import { FolderDetailPage } from "@/pages/folder/FolderDetailPage";
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
 import { PlaceDetailModal } from "@/features/place/ui/PlaceDetail.modal";
 import { InstagramParserPage } from "@/pages/tool/InstagramParserPage";
+import { TestMetaPage } from "@/pages/tool/TestMetaPage";
 
 import { useUIStore } from "@/shared/model/ui-store";
 
@@ -223,6 +224,10 @@ const router = createBrowserRouter([
         children: [
           { path: "insta-gram", element: <InstagramParserPage /> },
         ],
+      },
+      {
+        path: "test",
+        element: <TestMetaPage />,
       },
       // 정의되지 않은 모든 경로에 대한 404 처리
       {

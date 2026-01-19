@@ -109,7 +109,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   );
 
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [activeContentTab, setActiveContentTab] = useState<'youtube' | 'community'>('youtube');
+  const [activeContentTab, setActiveContentTab] = useState<'all' | 'youtube' | 'community'>('all');
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllMenus, setShowAllMenus] = useState(false);
   const [showOnlyMyReviews, setShowOnlyMyReviews] = useState(false);
@@ -124,12 +124,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [ageGroup, setAgeGroup] = useState<string | null>(null);
   const [showDemographicsForm, setShowDemographicsForm] = useState(false);
 
-  const [showYoutubeAddForm, setShowYoutubeAddForm] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showVisitHistoryModal, setShowVisitHistoryModal] = useState(false);
-  const [youtubeUrlInput, setYoutubeUrlInput] = useState('');
-  const [showCommunityAddForm, setShowCommunityAddForm] = useState(false);
-  const [communityUrlInput, setCommunityUrlInput] = useState('');
+  const [showContentAddForm, setShowContentAddForm] = useState(false);
+  const [contentUrlInput, setContentUrlInput] = useState('');
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 10;
 
@@ -186,9 +184,9 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     setShowAllReviews(false);
     setShowAllMenus(false);
     setEditingReviewId(null);
-    setActiveContentTab('youtube');
-    setShowYoutubeAddForm(false);
-    setShowCommunityAddForm(false);
+    setActiveContentTab('all');
+    setShowContentAddForm(false);
+    setContentUrlInput('');
   }, [placeId]);
 
   useEffect(() => {
@@ -212,10 +210,19 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     imageSliderRef.current.scrollTo({ left: itemWidth * index, behavior: 'auto' });
   };
 
-  const youtubeFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'youtube'), [allFeatures]);
-  const communityFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'community'), [allFeatures]);
-  const folderFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'folder'), [allFeatures]);
-  const publicUserFeatures = useMemo(() => allFeatures.filter(f => f.platform_type === 'public_user'), [allFeatures]);
+  const youtubeFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'youtube'), [allFeatures]);
+  const communityFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'community'), [allFeatures]);
+  const folderFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'folder'), [allFeatures]);
+  const publicUserFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'public_user'), [allFeatures]);
+  
+  const displayFeatures = useMemo(() => {
+    if (activeContentTab === 'youtube') return youtubeFeatures;
+    if (activeContentTab === 'community') return communityFeatures;
+    return [...youtubeFeatures, ...communityFeatures];
+  }, [activeContentTab, youtubeFeatures, communityFeatures]);
+
+  const hasAnyContent = youtubeFeatures.length > 0 || communityFeatures.length > 0;
+  const hasBothTypes = youtubeFeatures.length > 0 && communityFeatures.length > 0;
   
   const filteredReviews = useMemo(() => {
     const publicReviews = reviews.filter(r => !r.is_private || r.is_my_review);
@@ -354,63 +361,68 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     } catch (e: any) { alert(e.message); }
   };
 
-  const handleAddFeature = async (platform: 'youtube' | 'community') => {
-    const url = platform === 'youtube' ? youtubeUrlInput : communityUrlInput;
-    if (!url.trim()) return;
+  const handleAddFeature = async () => {
+    const url = contentUrlInput.trim();
+    if (!url) return;
+    
     setIsRequestProcessing(true);
     setRetryCount(0);
+    
     try {
+      let platform: 'youtube' | 'community' | null = null;
       let title: string | null = null;
       let metadata: any = null;
-      if (platform === 'youtube') {
+
+      // 플랫폼 자동 판별
+      const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
+      const isCommunity = ['clien.net', 'damoang.net', 'bobaedream.co.kr'].some(d => url.includes(d));
+
+      if (isYoutube) {
+        platform = 'youtube';
         const videoId = url.includes('youtu.be') ? url.split('/').pop()?.split('?')[0] : url.match(/[?&]v=([^&]+)/)?.[1];
         if (!videoId) throw new Error('유효한 YouTube URL이 아닙니다.');
         const { error, results } = await requestYouTubeMetaService(videoId);
         if (error) throw new Error('YouTube 정보를 가져올 수 없습니다.');
-        title = results.title; metadata = results;
-      } else {
-        // 커뮤니티 정보 가져오기 재시도 로직
+        title = results.title; 
+        metadata = results;
+      } else if (isCommunity) {
+        platform = 'community';
         let communityResults = null;
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
           setRetryCount(attempt);
           try {
             const { error: metaError, results } = await requestCommunityMetaService(url);
-            
             if (!metaError && results) {
-              // 클리앙 차단 패턴 체크 (notConnection.html?blockedIp)
-              const isClienBlocked = results.domain === 'clien.net' && 
-                                   results.url?.includes('notConnection.html?blockedIp');
-              
+              const isClienBlocked = results.domain === 'clien.net' && results.url?.includes('notConnection.html?blockedIp');
               if (!isClienBlocked) {
                 communityResults = results;
                 break;
               }
-              console.warn(`커뮤니티 정보 가져오기 시도 ${attempt}/${maxRetries} - 클리앙 차단 패턴 감지`);
             }
-          } catch (error) {
-            console.error(`커뮤니티 정보 가져오기 시도 ${attempt}/${maxRetries} 실패:`, error);
-          }
-
-          // 마지막 시도가 아니면 1초 대기
-          if (attempt < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
+          } catch (error) { console.error(`시도 ${attempt} 실패:`, error); }
+          if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000));
         }
 
-        if (!communityResults) {
-          throw new Error('커뮤니티 정보를 가져올 수 없습니다. 나중에 다시 시도해주세요.');
-        }
-
+        if (!communityResults) throw new Error('커뮤니티 정보를 가져올 수 없습니다.');
         title = communityResults.title;
         metadata = communityResults;
+      } else {
+        throw new Error('지원되지 않는 서비스 링크입니다. (유튜브, 다모앙, 클리앙, 보배드림 지원)');
       }
+
       await upsertPlaceFeatureMutation.mutateAsync({
-        p_business_id: placeId!, p_platform_type: platform, p_content_url: url, p_title: title, p_metadata: metadata
+        p_business_id: placeId!, 
+        p_platform_type: platform, 
+        p_content_url: url, 
+        p_title: title, 
+        p_metadata: metadata
       });
-      if (platform === 'youtube') { setYoutubeUrlInput(''); setShowYoutubeAddForm(false); }
-      else { setCommunityUrlInput(''); setShowCommunityAddForm(false); }
-    } catch (e: any) { alert(e.message); }
-    finally { 
+      
+      setContentUrlInput('');
+      setShowContentAddForm(false);
+    } catch (e: any) { 
+      alert(e.message); 
+    } finally { 
       setIsRequestProcessing(false);
       setRetryCount(0);
     }
@@ -635,13 +647,24 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
               {folderFeatures.length > 0 && (
                 <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide pb-1">
-                  {folderFeatures.map(folder => (
+                  {folderFeatures.map((folder: Feature) => (
                     <button 
                       key={folder.id}
                       className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[12px] font-medium rounded-full"
-                      onClick={() => navigate(`/folder/${folder.id}`)}
+                      onClick={() => {
+                        // 폴더 클릭 시 모달을 닫고 해당 폴더 페이지로 이동
+                        // hideModal()은 내부적으로 window.history.back()을 호출하므로,
+                        // 여기서는 URL을 직접 교체(replace)하기 위해 상태만 명시적으로 끕니다.
+                        if (placeIdFromStore) {
+                          usePlacePopup.setState({ isOpen: false, placeId: null });
+                        }
+                        
+                        // replace: true를 사용하여 현재 히스토리(모달이 열린 /p/status/:id 상태)를 
+                        // 폴더 페이지로 교체함으로써 뒤로 가기를 했을 때 모달이 다시 뜨지 않도록 처리
+                        navigate(`/feature/detail/folder/${folder.id}`, { replace: true });
+                      }}
                     >
-                      📁 {folder.title}
+                      {folder.title}
                     </button>
                   ))}
                 </div>
@@ -834,7 +857,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </section>
               )}
 
-              <section className="px-4 py-6 relative">
+              <section className="px-4 py-6 relative border-t border-surface-50 dark:border-surface-900">
                 {isRequestProcessing && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-surface-950/60 backdrop-blur-[1px]">
                     <div className="flex flex-col items-center gap-2">
@@ -842,77 +865,88 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     </div>
                   </div>
                 )}
+                
                 <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">관련 콘텐츠</h3>
+                  
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-medium">관련 콘텐츠</h3>
-                    {isAuthenticated && (
+                    {!showContentAddForm && isAuthenticated && (
                       <button 
-                        onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(!showYoutubeAddForm) : setShowCommunityAddForm(!showCommunityAddForm)}
-                        className="p-1 text-surface-400 hover:text-primary-600 transition-colors"
+                        onClick={() => setShowContentAddForm(true)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-all"
                       >
-                        <Plus className="size-5" />
+                        <Plus className="size-3.5" />
+                        추가
                       </button>
                     )}
-                  </div>
-                  <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
-                    <button 
-                      onClick={() => setActiveContentTab('youtube')}
-                      className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-medium transition-all", 
-                        activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
-                      )}
-                    >유튜브 {youtubeFeatures.length}</button>
-                    <button 
-                      onClick={() => setActiveContentTab('community')}
-                      className={cn(
-                        "px-3 py-1 rounded-md text-[12px] font-medium transition-all", 
-                        activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
-                      )}
-                    >커뮤니티 {communityFeatures.length}</button>
-                  </div>
-                </div>
 
-                {isAuthenticated && (activeContentTab === 'youtube' ? showYoutubeAddForm : showCommunityAddForm) && (
-                  <div className="mb-4 p-4 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 space-y-3">
+                    {hasBothTypes && (
+                      <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
+                      <button 
+                        onClick={() => setActiveContentTab('all')}
+                        className={cn(
+                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
+                          activeContentTab === 'all' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+                        )}
+                      >전체</button>
+                      <button 
+                        onClick={() => setActiveContentTab('youtube')}
+                        className={cn(
+                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
+                          activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+                        )}
+                      >유튜브</button>
+                      <button 
+                        onClick={() => setActiveContentTab('community')}
+                        className={cn(
+                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
+                          activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+                        )}
+                      >커뮤니티</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+                {showContentAddForm && (
+                  <div className="mb-4 p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-100 dark:border-surface-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] font-medium text-surface-500">YouTube 또는 커뮤니티 링크</span>
+                      <button onClick={() => { setShowContentAddForm(false); setContentUrlInput(''); }} className="p-1 text-surface-400"><X className="size-4" /></button>
+                    </div>
                     <Input 
-                      placeholder="링크를 입력하세요" 
-                      className="text-base h-11"
-                      value={activeContentTab === 'youtube' ? youtubeUrlInput : communityUrlInput}
-                      onChange={(e) => activeContentTab === 'youtube' ? setYoutubeUrlInput(e.target.value) : setCommunityUrlInput(e.target.value)}
+                      placeholder="유튜브 또는 커뮤니티(다모앙, 클리앙 등) 링크를 입력하세요" 
+                      className="text-base h-11 mb-3 bg-white dark:bg-surface-950"
+                      value={contentUrlInput}
+                      onChange={(e) => setContentUrlInput(e.target.value)}
+                      autoFocus
                     />
-                    <div className="flex gap-2">
-                      <Button variant="ghost" className="flex-1" onClick={() => activeContentTab === 'youtube' ? setShowYoutubeAddForm(false) : setShowCommunityAddForm(false)}>취소</Button>
-                      <Button className="flex-1" onClick={() => handleAddFeature(activeContentTab)} disabled={isRequestProcessing}>추가</Button>
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-2">
+                        <Youtube className="size-4 text-rose-500 opacity-50" />
+                        <MessageCircle className="size-4 text-emerald-500 opacity-50" />
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="px-6 h-9 rounded-full" 
+                        onClick={handleAddFeature} 
+                        disabled={!contentUrlInput.trim() || isRequestProcessing}
+                      >
+                        추가하기
+                      </Button>
                     </div>
                   </div>
                 )}
 
-                <div className="flex flex-col gap-1">
-                  {activeContentTab === 'youtube' ? (
-                    youtubeFeatures.length > 0 ? (
-                      youtubeFeatures.map(feature => (
-                        <FeatureCard 
-                          key={feature.id} 
-                          feature={feature} 
-                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.id}
-                          onDelete={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowDeleteFeatureConfirm(feature.id);
-                          }}
-                        />
-                      ))
-                    ) : (
-                      <div className="w-full py-8 text-center text-surface-400 text-sm">관련 영상이 없습니다.</div>
-                    )
-                  ) : (
-                    communityFeatures.length > 0 ? (
-                      communityFeatures.map(feature => (
+                <div className="flex flex-col gap-2">
+                  {hasAnyContent ? (
+                    displayFeatures.length > 0 ? (
+                      displayFeatures.map((feature: Feature) => (
                         <FeatureCard 
                           key={feature.id} 
                           feature={feature} 
                           getPlatformName={getPlatformName}
-                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.id}
+                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.auth_user_id}
                           onDelete={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -921,7 +955,22 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         />
                       ))
                     ) : (
-                      <div className="w-full py-8 text-center text-surface-400 text-sm">관련 커뮤니티 글이 없습니다.</div>
+                      <div className="w-full py-8 text-center text-surface-400 text-sm">해당 카테고리의 콘텐츠가 없습니다.</div>
+                    )
+                  ) : (
+                    !showContentAddForm && (
+                      <button 
+                        onClick={() => {
+                          if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                          setShowContentAddForm(true);
+                        }}
+                        className="w-full py-10 flex flex-col items-center justify-center gap-3 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
+                      >
+                        <div className="size-10 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center shadow-sm">
+                          <Plus className="size-5 text-surface-400" />
+                        </div>
+                        <p className="text-[13px] font-medium text-surface-500">관련 영상이나 커뮤니티 글을 공유해주세요</p>
+                      </button>
                     )
                   )}
                 </div>

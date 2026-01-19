@@ -1,25 +1,20 @@
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useMyFeed, usePublicFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { PlaceCard, ExploreFilterSheet } from "@/widgets";
+import { PlaceCard } from "@/widgets";
 import { 
   Loader2, 
   Bell, 
-  Filter, 
-  X, 
-  RotateCcw, 
   ChevronRight, 
   LogIn, 
   MapPin, 
-  Navigation,
   Info,
   LayoutGrid
 } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
@@ -33,12 +28,7 @@ export function FeedPage() {
   const { openLogin } = useAuthModalStore();
   const { show: showPlaceModal } = usePlacePopup();
   
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
-  const [filters, setFilters] = useState<{ price_min: number | null; price_max: number | null }>({
-    price_min: null,
-    price_max: null,
-  });
 
   // 위치 및 정렬 상태
   const [sortBy, setSortBy] = useState<'recent' | 'distance'>('recent');
@@ -80,7 +70,6 @@ export function FeedPage() {
     isFetchingNextPage, 
     isLoading 
   } = useMyFeed({
-    ...filters,
     sortBy,
     userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
     userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
@@ -208,12 +197,6 @@ export function FeedPage() {
 
   const feedItems = data?.pages.flatMap(page => page) || [];
 
-  const activeExtraFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.price_min !== null || filters.price_max !== null) count++;
-    return count;
-  }, [filters]);
-
   return (
     <div 
       className="flex flex-col min-h-dvh bg-white dark:bg-surface-950"
@@ -270,25 +253,6 @@ export function FeedPage() {
                   <MapPin className="size-5" />
                 </button>
 
-                <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="size-10 rounded-full hover:bg-surface-50 dark:hover:bg-surface-900 active:scale-90 transition-transform"
-                    onClick={() => {
-                      trackEvent("feed_filter_click", { location: "header" });
-                      setIsFilterOpen(true);
-                    }}
-                  >
-                    <Filter className="size-5.5 text-surface-900 dark:text-surface-100" />
-                  </Button>
-                  {activeExtraFilterCount > 0 && (
-                    <span className="absolute top-1 right-1 size-4 bg-[#6366F1] rounded-full ring-2 ring-white dark:ring-white dark:ring-surface-950 flex items-center justify-center text-[10px] text-white font-medium animate-in zoom-in">
-                      {activeExtraFilterCount}
-                    </span>
-                  )}
-                </div>
-
                 {/* 레이아웃 토글 버튼 (우측 끝) */}
                 <button 
                   onClick={handleLayoutToggle}
@@ -314,38 +278,12 @@ export function FeedPage() {
               </p>
             </div>
           )}
-
-          {/* 활성 필터 태그 (로그인 시에만) */}
-          {isAuthenticated && (filters.price_min !== null || filters.price_max !== null) && (
-            <div className="flex items-center gap-2 mt-4 overflow-x-auto overflow-y-hidden scrollbar-hide">
-              <button 
-                onClick={() => setFilters({ price_min: null, price_max: null })}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 text-[11px] font-medium shrink-0 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
-              >
-                <RotateCcw className="size-3" />
-                초기화
-              </button>
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-[11px] font-medium border border-orange-100 dark:border-orange-800/50 shrink-0">
-                <span>
-                  💰 {filters.price_min === null ? `${filters.price_max! / 10000}만원 이하` : 
-                      filters.price_max === null ? `${filters.price_min! / 10000}만원 이상` :
-                      `${filters.price_min! / 10000}~${filters.price_max! / 10000}만원`}
-                </span>
-                <X className="size-3 cursor-pointer opacity-40 hover:opacity-100" onClick={() => {
-                  setFilters({ price_min: null, price_max: null });
-                }} />
-              </div>
-            </div>
-          )}
         </div>
       </header>
 
       <main className={cn(
         "flex-1 flex flex-col pt-[80px]",
-        (isAuthenticated && (
-          (filters.price_min !== null || filters.price_max !== null) || 
-          (sortBy === 'distance' && !selectedLocation)
-        )) ? "pt-[110px]" : "pt-[80px]"
+        (isAuthenticated && sortBy === 'distance' && !selectedLocation) ? "pt-[110px]" : "pt-[80px]"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
@@ -458,20 +396,6 @@ export function FeedPage() {
         )}
       </main>
       
-      {/* 필터 바텀 시트 */}
-      <ExploreFilterSheet
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        filters={filters}
-        onApply={(newFilters) => {
-          setFilters(prev => ({ ...prev, ...newFilters }));
-          setIsFilterOpen(false);
-        }}
-        onReset={() => setFilters({ price_min: null, price_max: null })}
-        totalCount={feedItems.length}
-        visibleTabs={["price"]}
-      />
-
       {/* 위치 설정 바텀 시트 */}
       <LocationSettingSheet 
         isOpen={isLocationSheetOpen}

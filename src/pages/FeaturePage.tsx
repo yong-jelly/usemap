@@ -9,7 +9,7 @@ import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider } from "@/shared/ui";
-import { Loader2, Heart, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
+import { Loader2, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 /**
@@ -610,13 +610,12 @@ function FeatureSubscribeButton({ type, id }: { type: string; id: string }) {
       onClick={handleToggle}
       disabled={isCurrentlyToggling}
       className={cn(
-        "flex-shrink-0 rounded-full h-8 gap-1.5 font-medium transition-colors px-3",
+        "flex-shrink-0 rounded-full h-8 font-medium transition-colors px-3",
         displaySubscribed 
           ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
           : "border-surface-200 dark:border-surface-700"
       )}
     >
-      <Heart className={cn("size-3.5", displaySubscribed && "fill-primary-500 text-primary-500")} />
       <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
     </Button>
   );

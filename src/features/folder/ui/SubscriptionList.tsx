@@ -1,17 +1,28 @@
 import { useNavigate } from "react-router";
+import { useState } from "react";
 import { useMySubscriptions, useToggleFolderSubscription, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { Button } from "@/shared/ui";
-import { Loader2, Heart, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Bookmark, User, Bell } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 export function SubscriptionList() {
   const navigate = useNavigate();
+  const [cooldowns, setCooldowns] = useState<Record<string, boolean>>({});
   const { data: subscriptions, isLoading } = useMySubscriptions();
   const { mutate: toggleFolder, isPending: isFolderPending, variables: folderIdBeingToggled } = useToggleFolderSubscription();
   const { mutate: toggleFeature, isPending: isFeaturePending, variables: featureBeingToggled } = useToggleFeatureSubscription();
 
   const handleUnsubscribe = (sub: any) => {
+    const id = `${sub.subscription_type}-${sub.feature_id}`;
+    if (cooldowns[id]) return;
+
+    // 1초간 클릭 방지 및 음영 처리를 위한 쿨다운 설정
+    setCooldowns(prev => ({ ...prev, [id]: true }));
+    setTimeout(() => {
+      setCooldowns(prev => ({ ...prev, [id]: false }));
+    }, 1000);
+
     if (sub.subscription_type === 'folder') {
       toggleFolder(sub.feature_id);
     } else {
@@ -51,23 +62,25 @@ export function SubscriptionList() {
   const otherSubscriptions = subscriptions?.filter((sub: any) => sub.subscription_type !== 'region_recommend') || [];
 
   const renderSubscriptionItem = (sub: any) => {
+    const itemId = `${sub.subscription_type}-${sub.feature_id}`;
+    const isCooldown = cooldowns[itemId];
     const isToggling = 
       (sub.subscription_type === 'folder' && isFolderPending && folderIdBeingToggled === sub.feature_id) ||
       (sub.subscription_type !== 'folder' && isFeaturePending && featureBeingToggled?.id === sub.feature_id && featureBeingToggled?.type === sub.subscription_type);
 
-    const isSubscribed = sub.is_subscribed !== false;
-    const displaySubscribed = isToggling ? !isSubscribed : isSubscribed;
+    // 낙관적 업데이트가 적용되었으므로 sub.is_subscribed를 그대로 사용
+    const displaySubscribed = sub.is_subscribed !== false;
     const displayThumbnail = sub.subscription_type === 'naver_folder' ? naverIcon : sub.thumbnail;
 
     return (
-      <div key={`${sub.subscription_type}-${sub.feature_id}`} className="flex items-center gap-4 p-4 hover:bg-surface-50 dark:hover:bg-surface-900/50 transition-colors">
+      <div key={itemId} className="flex items-center gap-4 p-4 hover:bg-surface-50 dark:hover:bg-surface-900/50 transition-colors">
         {/* 썸네일/아이콘 */}
         <div className="size-12 rounded-full bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden border border-surface-100 dark:border-surface-800">
           {displayThumbnail ? (
             <img src={displayThumbnail} alt={sub.title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-surface-300">
-              <Heart className="size-5" />
+              <User className="size-5" />
             </div>
           )}
         </div>
@@ -90,20 +103,29 @@ export function SubscriptionList() {
 
         {/* 액션 */}
         <div className="flex items-center gap-1">
-          <button 
-            disabled={isToggling}
-            onClick={() => handleUnsubscribe(sub)}
+          <Button 
+            variant="outline"
+            size="sm"
+            disabled={isCooldown || isToggling}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUnsubscribe(sub);
+            }}
             className={cn(
-              "p-2 rounded-full transition-colors",
-              isToggling 
-                ? "text-surface-300 cursor-not-allowed" 
-                : "text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              "rounded-full h-8 font-medium transition-colors px-3",
+              displaySubscribed 
+                ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
+                : "border-surface-200 dark:border-surface-700 text-surface-400",
+              (isCooldown || isToggling) && "opacity-50 grayscale"
             )}
           >
-            <Heart className={cn("size-5", displaySubscribed && "fill-current")} />
-          </button>
+            <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
+          </Button>
           <button 
-            onClick={() => handleNavigate(sub)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNavigate(sub);
+            }}
             className="p-2 text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors"
           >
             <ExternalLink className="size-4" />
@@ -141,7 +163,7 @@ export function SubscriptionList() {
           </div>
         ) : regionRecommendations.length === 0 ? (
           <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center">
-            <Heart className="size-12 text-surface-200" />
+            <Bell className="size-12 text-surface-200" />
             <div>
               <p className="text-sm text-surface-900 dark:text-white">구독 중인 폴더가 없습니다</p>
               <p className="text-xs text-surface-500 mt-1">트렌드 탭에서 마음에 드는 폴더를 구독해보세요!</p>

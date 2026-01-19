@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { Folder } from "@/entities/folder/types";
 import { PlaceSlider, Button } from "@/shared/ui";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import { User, Users, Heart, Lock, Globe, EyeOff, Clock } from "lucide-react";
+import { User, Users, Lock, Globe, EyeOff, Clock } from "lucide-react";
 import { useToggleFolderSubscription, useMySubscriptions } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
@@ -150,13 +150,12 @@ export function FolderCard({
               onClick={handleSubscribe}
               disabled={isCurrentlyToggling}
               className={cn(
-                "flex-shrink-0 rounded-full h-8 gap-1.5 font-medium transition-colors duration-150 px-3",
+                "flex-shrink-0 rounded-full h-8 font-medium transition-colors duration-150 px-3",
                 displaySubscribed 
                   ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
                   : "border-surface-200 dark:border-surface-700"
               )}
             >
-              <Heart className={cn("size-3.5", displaySubscribed && "fill-primary-500 text-primary-500")} />
               <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
             </Button>
           )}
