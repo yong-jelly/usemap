@@ -1,5 +1,5 @@
 import React from "react";
-import { SquareX, Heart, MessageCircle, Bookmark } from "lucide-react";
+import { CookingPot, Heart, MessageCircle, Bookmark } from "lucide-react";
 import { convertToNaverResizeImageUrl, cn } from "@/shared/lib";
 
 export interface PlaceThumbnailProps {
@@ -67,8 +67,8 @@ export function PlaceThumbnail({
           decoding="async"
         />
       ) : (
-        <div className="flex flex-col items-center justify-center text-surface-300 dark:text-surface-700">
-          <SquareX className="size-10 stroke-[1.5]" />
+        <div className="flex flex-col items-center justify-center w-full h-full bg-surface-50 dark:bg-surface-900/50">
+          <CookingPot className="size-8 text-surface-200 dark:text-surface-800 stroke-[1.2] opacity-50" />
         </div>
       )}
 

@@ -146,7 +146,7 @@ export function FeedPage() {
     // 그리드 레이아웃: PlaceThumbnail 컴포넌트 사용
     if (layout === 'grid') {
       const place = item.place_data;
-      const images = place.images || place.image_urls || [];
+      const images = place.images || place.image_urls || place.place_images || [];
       
       return (
         <PlaceThumbnail

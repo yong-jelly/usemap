@@ -138,7 +138,7 @@ export function FolderReviewSection({ folderId, placeId, placeName }: FolderRevi
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="이 폴더 멤버들에게만 보여지는 리뷰입니다."
-                  className="w-full p-3 text-sm bg-surface-50 dark:bg-surface-900 rounded-xl resize-none h-20 focus:outline-none"
+                  className="w-full p-3 text-base bg-surface-50 dark:bg-surface-900 rounded-xl resize-none h-20 focus:outline-none"
                 />
                 <div className="flex justify-end gap-2">
                   <Button 

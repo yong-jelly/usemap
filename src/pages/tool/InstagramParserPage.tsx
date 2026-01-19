@@ -22,7 +22,7 @@ import {
   Trash2,
   Search,
   Loader2,
-  SquareX,
+  CookingPot,
   EyeOff,
   Eye
 } from "lucide-react";
@@ -165,7 +165,7 @@ function InstagramPlaceSearchModal({ isOpen, onClose, onSelect, selectedIds, cap
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
             <input 
               ref={inputRef}
-              className="w-full pl-9 pr-4 py-2 bg-surface-50 dark:bg-surface-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none font-bold"
+              className="w-full pl-9 pr-4 py-2 bg-surface-50 dark:bg-surface-800 border-none rounded-xl text-base focus:ring-2 focus:ring-primary-500 outline-none font-bold"
               placeholder="업체명 검색..."
               value={query}
               onChange={e => setQuery(e.target.value)}
@@ -208,8 +208,8 @@ function InstagramPlaceSearchModal({ isOpen, onClose, onSelect, selectedIds, cap
                         alt="" 
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Store className="w-6 h-6 text-surface-300" />
+                      <div className="w-full h-full flex items-center justify-center bg-surface-50 dark:bg-surface-800/50">
+                        <CookingPot className="w-6 h-6 text-surface-200 dark:text-surface-700 stroke-[1.2] opacity-50" />
                       </div>
                     )}
                   </div>
@@ -852,9 +852,9 @@ export function InstagramParserPage() {
                   신규 사용자 등록
                 </h2>
                 <div className="space-y-4">
-                  <textarea
-                    className="w-full h-32 p-3 border rounded-xl bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-xs resize-none"
-                    placeholder="사용자 정보 JSON (Header)을 붙여넣으세요..."
+                <textarea
+                  className="w-full h-32 p-3 border rounded-xl bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-base resize-none"
+                  placeholder="사용자 정보 JSON (Header)을 붙여넣으세요..."
                     value={headerInput}
                     onChange={(e) => {
                       setHeaderInput(e.target.value);
@@ -980,7 +980,7 @@ export function InstagramParserPage() {
               </h2>
               <div className="space-y-4">
                 <textarea
-                  className="w-full h-32 p-3 border rounded-xl bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-xs resize-none"
+                  className="w-full h-32 p-3 border rounded-xl bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-base resize-none"
                   placeholder="콘텐츠 목록 JSON (Feed)을 붙여넣으세요..."
                   value={contentInput}
                   onChange={(e) => {
@@ -1284,8 +1284,8 @@ export function InstagramParserPage() {
                                   {p.thumbnail_url ? (
                                     <img src={convertToNaverResizeImageUrl(p.thumbnail_url)} className="w-full h-full object-cover" alt="" />
                                   ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <Store className="w-5 h-5 text-surface-200" />
+                                    <div className="w-full h-full flex items-center justify-center bg-surface-50 dark:bg-surface-900/50">
+                                      <CookingPot className="w-5 h-5 text-surface-200 dark:text-surface-700 stroke-[1.2] opacity-50" />
                                     </div>
                                   )}
                                 </div>

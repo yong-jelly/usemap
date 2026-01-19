@@ -966,7 +966,7 @@ export function FolderDetailPage() {
                     <div className="grid grid-cols-3 gap-0.5 bg-white dark:bg-surface-950">
                       {places.map((item: any, index: number) => {
                         const place = item.place_data;
-                        const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
+                        const images = place.images || place.image_urls || place.place_images || (place.thumbnail ? [place.thumbnail] : []);
                         return (
                           <PlaceThumbnail
                             key={`${item.place_id}-${index}`}

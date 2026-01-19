@@ -175,7 +175,7 @@ export function FolderCard({
           title=""
           items={folder.preview_places?.map((p: any) => ({
             ...p,
-            thumbnail: p.thumbnail || p.image_urls?.[0]
+            thumbnail: p.thumbnail || p.images?.[0] || p.image_urls?.[0] || p.place_images?.[0]
           })) || []}
           onItemClick={showPlaceModal}
           onMoreClick={() => navigate(`/folder/${folder.id}`)}

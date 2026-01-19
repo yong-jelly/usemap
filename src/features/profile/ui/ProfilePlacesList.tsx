@@ -77,7 +77,7 @@ export function ProfilePlacesList({
           // unified place_data 구조 지원
           const place = item.place_data || item;
           const placeId = item.place_id || place.id;
-          const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
+          const images = place.images || place.image_urls || place.place_images || (place.thumbnail ? [place.thumbnail] : []);
           
           return (
             <PlaceThumbnail

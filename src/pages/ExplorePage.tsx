@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { PlaceCard, ExploreFilterSheet } from "@/widgets";
-import { THEMES } from "@/widgets/ExploreFilterSheet/ThemeTab";
+import { THEMES } from "@/shared/config/filter-constants";
 import { Button, Input, Skeleton } from "@/shared/ui";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { cn } from "@/shared/lib/utils";
@@ -57,7 +57,8 @@ const DEFAULT_FILTERS: ExplorerFilterState = {
 };
 
 /**
- * 탐색 페이지 컴포넌트
+ * 탐색 페이지 컴포넌트 (V1 - Legacy)
+ * 현재 /explore2 경로로 이동됨. 신규 탐색 UI는 /explorer 참조.
  */
 export function ExplorePage() {
   const { show: showPlaceModal } = usePlacePopup();
@@ -510,7 +511,7 @@ export function ExplorePage() {
                     return <PlaceCard key={`search-${place.id}`} place={place} />;
                   }
                   
-                  const images = place.images || place.image_urls || [];
+                  const images = place.images || place.image_urls || place.place_images || [];
                   
                   return (
                     <PlaceThumbnail

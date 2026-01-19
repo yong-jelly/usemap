@@ -133,7 +133,7 @@ export function ReviewForm({
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="이 장소에 대한 솔직한 평을 남겨주세요."
-        className="w-full h-24 p-3 rounded-lg bg-white border-none resize-none text-[13px] focus:ring-1 focus:ring-primary-500"
+        className="w-full h-24 p-3 rounded-lg bg-white border-none resize-none text-[16px] focus:ring-1 focus:ring-primary-500"
         maxLength={200}
         disabled={isUploading}
       />

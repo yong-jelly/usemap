@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, Loader2, Star, MapPin, Trash2, FolderEdit } from "lucide-react";
+import { CookingPot, ChevronLeft, Loader2, Star, MapPin, Trash2, FolderEdit } from "lucide-react";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { Button, ConfirmDialog } from "@/shared/ui";
@@ -137,17 +137,15 @@ export function PlaceCommentForm({
             {/* 업체 정보 */}
             <div className="p-5 border-b border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900">
               <div className="flex gap-4">
-                <div className="size-20 rounded-[20px] bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0 border border-surface-50 dark:border-surface-800 shadow-sm">
-                  {place.image_urls?.[0] || place.place_images?.[0] ? (
+                <div className="size-20 rounded-[20px] bg-surface-50 dark:bg-surface-900/50 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 shadow-sm flex items-center justify-center">
+                  {place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0] ? (
                     <img 
-                      src={convertToNaverResizeImageUrl(place.image_urls?.[0] || place.place_images?.[0] || "")} 
+                      src={convertToNaverResizeImageUrl(place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0] || "")} 
                       alt={place.name} 
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <MapPin className="size-8 text-surface-200" />
-                    </div>
+                    <CookingPot className="size-8 text-surface-200 dark:text-surface-800 stroke-[1.2] opacity-50" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0 py-1">
@@ -220,7 +218,7 @@ export function PlaceCommentForm({
                   "w-full min-h-[300px] p-4 rounded-2xl",
                   "bg-surface-50 dark:bg-surface-900",
                   "border border-surface-200 dark:border-surface-800",
-                  "text-surface-900 dark:text-surface-50",
+                  "text-surface-900 dark:text-surface-50 text-base",
                   "placeholder:text-surface-400",
                   "focus:outline-none focus:ring-2 focus:ring-primary-500/20",
                   "resize-none",

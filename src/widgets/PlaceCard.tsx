@@ -247,9 +247,9 @@ export function PlaceCard({
               )}
             </>
           ) : (
-            <div className={cn("bg-surface-200 dark:bg-surface-800 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500", "aspect-[3/2]")}>
-              <CookingPot className="size-10 mb-2" />
-              <span className="text-xs">이미지 준비중</span>
+            <div className={cn("bg-surface-50 dark:bg-surface-900/50 flex flex-col items-center justify-center text-surface-200 dark:text-surface-800", "aspect-[3/2]")}>
+              <CookingPot className="size-10 mb-2 stroke-[1.2] opacity-50" />
+              <span className="text-xs font-medium opacity-50">이미지 준비중</span>
             </div>
           )}
         </div>

@@ -26,3 +26,6 @@
 19. `018_v1_more_aggregation_functions.sql`: 추가 집계 함수
 20. `019_v1_search_and_list_functions.sql`: 검색 및 개인화 목록
 21. `021_v1_list_places_by_filters.sql`: 필터 기반 장소 목록 조회
+    22. `080_location_functions.sql`: 사용자 위치 관리 및 거리순 정렬
+    23. `081_optimize_v4_get_my_feed.sql`: 내 피드 조회 v4 성능 최적화 (v3 대체)
+    

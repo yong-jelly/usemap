@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { RotateCcw, X } from "lucide-react";
 import { 
   Drawer, 
@@ -35,6 +35,7 @@ export function ExploreFilterSheet({
   visibleTabs = ["region", "category", "theme", "price"],
 }: ExploreFilterSheetProps) {
   const [activeTab, setActiveTab] = useState(visibleTabs[0] || "category");
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedGroup1, setSelectedGroup1] = useState<string | null>(filters.group1);
   const [selectedGroup2, setSelectedGroup2] = useState<string | null>(filters.group2);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(filters.categories || []);
@@ -42,7 +43,14 @@ export function ExploreFilterSheet({
   const [selectedPriceMin, setSelectedPriceMin] = useState<number | null>(filters.price_min || null);
   const [selectedPriceMax, setSelectedPriceMax] = useState<number | null>(filters.price_max || null);
 
-  const allTabs = [
+  // 탭 변경 시 상단 스크롤
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
+
+  const allTabs: { id: "region" | "category" | "theme" | "price"; label: string; count: number }[] = [
     { id: "region", label: "지역", count: (selectedGroup1 || selectedGroup2) ? 1 : 0 },
     { id: "category", label: "카테고리", count: selectedCategories.length },
     { id: "theme", label: "테마", count: selectedThemes.length },
@@ -102,8 +110,8 @@ export function ExploreFilterSheet({
       group1: selectedGroup1,
       group2: selectedGroup2 === "전체" ? null : selectedGroup2,
       group3: null, // 상세 지역(dong)은 현재 지원하지 않으므로 null로 초기화
-      categories: selectedCategories.length > 0 ? selectedCategories : null,
-      theme_codes: selectedThemes.length > 0 ? selectedThemes : null,
+      categories: selectedCategories,
+      theme_codes: selectedThemes,
       price_min: selectedPriceMin,
       price_max: selectedPriceMax,
       exclude_franchises: filters.exclude_franchises ?? true
@@ -129,7 +137,7 @@ export function ExploreFilterSheet({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex-1 py-4 text-lg font-black transition-colors relative flex items-center justify-center gap-1.5",
+                    "flex-1 py-4 text-lg font-medium transition-colors relative flex items-center justify-center gap-1.5",
                     isActive 
                       ? "text-[#6366F1]" 
                       : "text-surface-400 hover:text-surface-600"
@@ -138,7 +146,7 @@ export function ExploreFilterSheet({
                   {tab.label}
                   {tab.count > 0 && (
                     <span className={cn(
-                      "flex items-center justify-center size-5 rounded-full text-[11px] font-bold transition-colors",
+                      "flex items-center justify-center size-5 rounded-full text-[11px] font-medium transition-colors",
                       isActive ? "bg-[#6366F1] text-white" : "bg-surface-100 text-surface-400"
                     )}>
                       {tab.count}
@@ -154,7 +162,7 @@ export function ExploreFilterSheet({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-8">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8">
           {activeTab === "region" && (
             <RegionTab 
               selectedGroup1={selectedGroup1}
@@ -187,27 +195,26 @@ export function ExploreFilterSheet({
           )}
         </div>
 
-        {/* Footer Actions - Flat Vector Style */}
-        <DrawerFooter className="p-6 border-t-2 border-surface-50 dark:border-surface-800 flex flex-row items-center gap-6 bg-white dark:bg-surface-900">
-          <button
+        {/* Footer Actions */}
+        <DrawerFooter className="p-6 border-t-2 border-surface-50 dark:border-surface-800 flex flex-row items-center gap-3 bg-white dark:bg-surface-900">
+          <Button
             onClick={handleReset}
             disabled={!isResetEnabled}
+            variant="outline"
             className={cn(
-              "flex items-center gap-2 font-black transition-colors group",
-              isResetEnabled ? "text-surface-400 hover:text-[#2B4562]" : "text-surface-200 cursor-not-allowed"
+              "flex-1 py-6 rounded-2xl text-lg font-medium transition-all",
+              isResetEnabled 
+                ? "border-surface-200 text-surface-600 hover:bg-surface-50" 
+                : "border-surface-100 text-surface-300 cursor-not-allowed"
             )}
           >
-            <RotateCcw className={cn(
-              "size-5 transition-transform",
-              isResetEnabled && "group-active:rotate-[-45deg]"
-            )} />
-            <span className="text-lg">초기화</span>
-          </button>
+            <RotateCcw className="size-4 mr-2" />
+            초기화
+          </Button>
           <Button
             onClick={handleApply}
-            className="flex-1 bg-[#6366F1] hover:bg-[#5356E2] text-white font-black py-7 rounded-2xl text-xl border-b-4 border-[#5356E2] active:border-b-0 active:translate-y-[2px] transition-all shadow-none"
+            className="flex-1 bg-[#6366F1] hover:bg-[#5356E2] text-white font-medium py-6 rounded-2xl text-lg transition-all shadow-none"
           >
-            {/* {totalCount}개 장소 보기 */}
             필터 적용
           </Button>
         </DrawerFooter>

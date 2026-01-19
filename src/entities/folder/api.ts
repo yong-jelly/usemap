@@ -188,7 +188,7 @@ export const folderApi = {
     userLat?: number | null;
     userLng?: number | null;
   } = {}) => {
-    const response = await apiClient.rpc<any>("v3_get_my_feed", {
+    const response = await apiClient.rpc<any>("v4_get_my_feed", {
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_price_min: params.price_min || null,

@@ -177,7 +177,7 @@ export function FolderSettingsSheet({
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="이 폴더에 대해 설명해주세요."
                     maxLength={50}
-                    className="w-full p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none h-24"
+                    className="w-full p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none h-24 text-base"
                   />
                   <div className="flex justify-end">
                     <span className={cn(

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Search, Loader2, Plus, X, ChevronLeft, MapPin } from "lucide-react";
+import { CookingPot, Search, Loader2, Plus, X, ChevronLeft, MapPin } from "lucide-react";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import { placeApi } from "@/entities/place/api";
 import { convertToNaverResizeImageUrl } from "@/shared/lib";
@@ -182,17 +182,15 @@ export function PlaceSearchModal({ isOpen, onClose, onSelect }: PlaceSearchModal
                   onClick={() => setSelectedPlace(place)}
                   className="flex items-center gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-900 transition-colors text-left group"
                 >
-                  <div className="size-20 rounded-[20px] bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0 border border-surface-50 dark:border-surface-800 shadow-sm">
-                    {place.image_urls?.[0] || place.place_images?.[0] ? (
+                  <div className="size-20 rounded-[20px] bg-surface-50 dark:bg-surface-900/50 overflow-hidden flex-shrink-0 border border-surface-100 dark:border-surface-800 shadow-sm flex items-center justify-center">
+                    {place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0] ? (
                       <img 
-                        src={convertToNaverResizeImageUrl(place.image_urls?.[0] || place.place_images?.[0] || "")} 
+                        src={convertToNaverResizeImageUrl(place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0] || "")} 
                         alt={place.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin className="size-8 text-surface-200" />
-                      </div>
+                      <CookingPot className="size-8 text-surface-200 dark:text-surface-800 stroke-[1.2] opacity-50" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0 py-1">

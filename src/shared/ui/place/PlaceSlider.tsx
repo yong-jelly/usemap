@@ -60,7 +60,7 @@ export function PlaceSlider({
             key={item.id || item.place_id}
             placeId={item.id || item.place_id}
             name={item.name || item.place_name}
-            thumbnail={item.thumbnail || item.images?.[0] || item.image_urls?.[0]}
+            thumbnail={item.thumbnail || item.images?.[0] || item.image_urls?.[0] || item.place_images?.[0]}
             group2={item.group2}
             category={item.category}
             score={item.score}

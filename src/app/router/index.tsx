@@ -11,6 +11,7 @@ import { cn } from "@/shared/lib/utils";
 import { HomePage } from "@/pages/HomePage";
 import { FeedPage } from "@/pages/FeedPage";
 import { ExplorePage } from "@/pages/ExplorePage";
+import { ExplorerPage } from "@/pages/ExplorerPage";
 import { FeaturePage } from "@/pages/FeaturePage";
 import { FeatureDetailPage } from "@/pages/FeatureDetailPage";
 import { MapPage } from "@/pages/MapPage";
@@ -139,8 +140,12 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "explore",
+        path: "explore2",
         element: <ExplorePage />,
+      },
+      {
+        path: "explorer",
+        element: <ExplorerPage />,
       },
       {
         path: "feature",
