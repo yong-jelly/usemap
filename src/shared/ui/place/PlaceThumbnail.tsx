@@ -1,5 +1,5 @@
 import React from "react";
-import { SquareX, Heart, MessageCircle } from "lucide-react";
+import { SquareX, Heart, MessageCircle, Bookmark } from "lucide-react";
 import { convertToNaverResizeImageUrl, cn } from "@/shared/lib";
 
 export interface PlaceThumbnailProps {
@@ -13,6 +13,7 @@ export interface PlaceThumbnailProps {
   interaction?: {
     place_liked_count?: number;
     place_reviews_count?: number;
+    is_saved?: boolean;
   };
   onClick?: (id: string) => void;
   aspectRatio?: string; // "aspect-[3/4]" 등
@@ -107,16 +108,21 @@ export function PlaceThumbnail({
           )}
         </div>
 
-        {/* 좋아요 및 리뷰 카운트 표시 */}
-        {showCounts && (interaction?.place_liked_count || 0) + (interaction?.place_reviews_count || 0) > 0 && (
+        {/* 저장됨 및 좋아요/리뷰 카운트 표시 */}
+        {(interaction?.is_saved || (showCounts && (interaction?.place_liked_count || 0) + (interaction?.place_reviews_count || 0) > 0)) && (
           <div className="flex items-center gap-2 mt-0.5">
-            {(interaction?.place_liked_count || 0) > 0 && (
+            {interaction?.is_saved && (
+              <div className="flex items-center">
+                <Bookmark className="size-3 fill-amber-500 text-amber-500" />
+              </div>
+            )}
+            {showCounts && (interaction?.place_liked_count || 0) > 0 && (
               <div className="flex items-center gap-0.5 text-white">
                 <Heart className="size-2.5 fill-rose-500 text-rose-500" />
                 <span className="text-[9px] font-bold">{interaction?.place_liked_count}</span>
               </div>
             )}
-            {(interaction?.place_reviews_count || 0) > 0 && (
+            {showCounts && (interaction?.place_reviews_count || 0) > 0 && (
               <div className="flex items-center gap-0.5 text-white">
                 <MessageCircle className="size-2.5 text-white fill-white/20" />
                 <span className="text-[9px] font-bold">{interaction?.place_reviews_count}</span>
