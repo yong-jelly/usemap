@@ -19,6 +19,7 @@ import {
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { useToggleLike, useToggleSave } from "@/entities/place/queries";
+import { PlaceFeatureTags } from "@/shared/ui";
 
 interface PlaceCardProps {
   place: any;
@@ -361,37 +362,13 @@ export function PlaceCard({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          <span className="text-[12px] font-medium text-primary-500 bg-primary-50 px-2 py-0.5 rounded">#{place.category}</span>
-          {place.keyword_list?.slice(0, 3).map((tag: string, i: number) => (
-            <span key={i} className="text-[12px] font-medium text-blue-500 bg-blue-50 px-2 py-0.5 rounded">#{tag}</span>
-          ))}
-          {folders.length > 0 && (
-            <>
-              {isFoldersExpanded || folders.length === 1 ? (
-                folders.map((folder: any, i: number) => (
-                  <button
-                    key={folder.id || i}
-                    onClick={(e) => handleFolderClick(e, folder)}
-                    className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
-                  >
-                    {folder.title || `폴더 ${i + 1}`}
-                  </button>
-                ))
-              ) : (
-                <button
-                  onClick={handleFoldersToggle}
-                  className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
-                >
-                  {folders[0]?.title || '폴더 1'}
-                  {folders.length > 1 && (
-                    <span className="ml-1 text-emerald-500">+{folders.length - 1}</span>
-                  )}
-                </button>
-              )}
-            </>
-          )}
-        </div>
+        <PlaceFeatureTags 
+          place={place} 
+          isFoldersExpanded={isFoldersExpanded}
+          onFoldersToggle={handleFoldersToggle}
+          onFolderClick={handleFolderClick}
+          className="mt-4"
+        />
       </div>
     </article>
   );

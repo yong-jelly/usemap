@@ -52,7 +52,8 @@ import {
   ReviewCard,
   MenuCard,
   FeatureCard,
-  PlaceActionRow
+  PlaceActionRow,
+  PlaceFeatureTags
 } from "@/shared/ui";
 import { ReviewForm } from "./ReviewForm";
 import { cn } from "@/shared/lib/utils";
@@ -649,30 +650,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 )}
               </div>
 
-              {folderFeatures.length > 0 && (
-                <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide pb-1">
-                  {folderFeatures.map((folder: Feature) => (
-                    <button 
-                      key={folder.id}
-                      className="flex-shrink-0 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[12px] font-medium rounded-full"
-                      onClick={() => {
-                        // 폴더 클릭 시 모달을 닫고 해당 폴더 페이지로 이동
-                        // hideModal()은 내부적으로 window.history.back()을 호출하므로,
-                        // 여기서는 URL을 직접 교체(replace)하기 위해 상태만 명시적으로 끕니다.
-                        if (placeIdFromStore) {
-                          usePlacePopup.setState({ isOpen: false, placeId: null });
-                        }
-                        
-                        // replace: true를 사용하여 현재 히스토리(모달이 열린 /p/status/:id 상태)를 
-                        // 폴더 페이지로 교체함으로써 뒤로 가기를 했을 때 모달이 다시 뜨지 않도록 처리
-                        navigate(`/feature/detail/folder/${folder.id}`, { replace: true });
-                      }}
-                    >
-                      {folder.title}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <PlaceFeatureTags 
+                place={{ ...details, features: allFeatures }}
+                className="mt-2"
+                onFolderClick={(e, folder) => {
+                  e.stopPropagation();
+                  if (placeIdFromStore) {
+                    usePlacePopup.setState({ isOpen: false, placeId: null });
+                  }
+                  navigate(`/feature/detail/folder/${folder.id}`, { replace: true });
+                }}
+              />
             </div>
 
             <div className="space-y-8 py-4">

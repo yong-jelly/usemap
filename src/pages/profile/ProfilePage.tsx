@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
+import { SavedPlacesTab } from "@/features/profile/ui/SavedPlacesTab";
 import { VisitedPlacesTab } from "@/features/profile/ui/VisitedPlacesTab";
 import { MyReviewsTab } from "@/features/profile/ui/MyReviewsTab";
 import { MyFolderList } from "@/features/folder/ui/MyFolderList";
@@ -44,6 +45,7 @@ export function ProfilePage() {
     { id: "profile", label: "프로필" },
     { id: "recent", label: "최근" },
     { id: "liked", label: "좋아요" },
+    { id: "saved", label: "저장" },
     { id: "visited", label: "방문" },
     { id: "reviews", label: "리뷰" },
     { id: "folder", label: "맛탐정" },
@@ -116,6 +118,7 @@ export function ProfilePage() {
         {activeTab === "profile" && <ProfileHeader />}
         {activeTab === "recent" && <RecentPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}
+        {activeTab === "saved" && <SavedPlacesTab />}
         {activeTab === "visited" && <VisitedPlacesTab />}
         {activeTab === "reviews" && <MyReviewsTab />}
         {activeTab === "folder" && <MyFolderList />}
