@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/shared/lib/utils";
 import { REGION_DATA } from "@/shared/config/filter-constants";
+import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 
 interface DistrictChipsProps {
   selectedGroup1: string | null;
@@ -22,7 +23,12 @@ export function DistrictChips({
   if (!selectedGroup1) return null;
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide px-4 h-full">
+    <HorizontalScroll 
+      className="flex-1 h-full min-w-0"
+      containerClassName="flex items-center gap-2 px-4 h-full"
+      scrollAmount={200}
+      fadeEdges={false}
+    >
       {currentGroup2List.map((group2) => {
         const isSelected = selectedGroup2 === group2 || (group2 === "전체" && !selectedGroup2);
         return (
@@ -40,6 +46,6 @@ export function DistrictChips({
           </button>
         );
       })}
-    </div>
+    </HorizontalScroll>
   );
 }

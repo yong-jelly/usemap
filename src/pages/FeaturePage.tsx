@@ -8,7 +8,7 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
-import { Button, PlaceSlider } from "@/shared/ui";
+import { Button, PlaceSlider, HorizontalScroll } from "@/shared/ui";
 import { Loader2, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
@@ -59,7 +59,11 @@ export function FeaturePage() {
       {/* 상단 헤더 - 타이포 중심 */}
       <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
         <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
-          <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
+          <HorizontalScroll 
+            containerClassName="flex items-center gap-6 pb-3"
+            scrollAmount={200}
+            fadeEdges={false}
+          >
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -77,7 +81,7 @@ export function FeaturePage() {
                 )}
               </button>
             ))}
-          </div>
+          </HorizontalScroll>
         </div>
       </header>
 
@@ -295,7 +299,11 @@ function RegionList() {
         description="다양한 소스에서 엄선된 지역별 맛집 리스트입니다." 
       />
       {/* 소스 필터 */}
-      <div className="flex items-center gap-2 px-4 mb-2 overflow-x-auto overflow-y-hidden scrollbar-hide">
+      <HorizontalScroll 
+        containerClassName="flex items-center gap-2 px-4 mb-2"
+        scrollAmount={150}
+        fadeEdges={false}
+      >
         {sources.map((source) => (
           <button
             key={source.id || 'all'}
@@ -312,7 +320,7 @@ function RegionList() {
             {source.label}
           </button>
         ))}
-      </div>
+      </HorizontalScroll>
 
       {isLoading ? (
         <LoadingSkeleton />
@@ -485,7 +493,11 @@ function CommunityList() {
         description="다모앙, 클리앙 등 주요 커뮤니티 유저들이 추천하는 지역별 맛집입니다." 
       />
       {/* 도메인 필터 */}
-      <div className="flex items-center gap-2 px-4 mb-2 overflow-x-auto overflow-y-hidden scrollbar-hide">
+      <HorizontalScroll 
+        containerClassName="flex items-center gap-2 px-4 mb-2"
+        scrollAmount={150}
+        fadeEdges={false}
+      >
         {domains.map((domain) => (
           <button
             key={domain.id || 'all'}
@@ -502,7 +514,7 @@ function CommunityList() {
             {domain.label}
           </button>
         ))}
-      </div>
+      </HorizontalScroll>
 
       {isLoading ? (
         <LoadingSkeleton />

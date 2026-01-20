@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
+import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 import { 
   MapPin, 
   Star, 
@@ -183,10 +184,12 @@ export function PlaceCard({
         <div className="relative cursor-pointer" onClick={() => showPopup(place.id)}>
           {displayImages.length > 0 ? (
             <>
-              <div 
+              <HorizontalScroll 
                 ref={sliderRef}
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-                style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}
+                containerClassName="flex snap-x snap-mandatory"
+                containerStyle={{ willChange: 'scroll-position', transform: 'translateZ(0)' }}
+                scrollAmount={400}
+                fadeEdges={false}
               >
                 {displayImages.map((img: string, index: number) => (
                   <div key={index} className={cn("flex-shrink-0 w-full snap-center bg-surface-50", imageAspectRatio)}>
@@ -200,7 +203,7 @@ export function PlaceCard({
                     />
                   </div>
                 ))}
-              </div>
+              </HorizontalScroll>
 
               {/* 가격 및 거리 뱃지 - 반투명 배경 */}
               <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">

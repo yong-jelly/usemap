@@ -1,101 +1,146 @@
 /**
  * 장소 크롤링 대기열(Queue) 처리 CLI
  * 
- * 사용법: bun run tools/cli/queue.ts [limit] [--poll]
- * - limit: 한 번에 처리할 최대 항목 수 (기본값: 10)
- * - --poll: 데이터가 없을 경우 3초마다 폴링하며 대기
+ * 사용법: bun run tools/cli/queue.ts [--batch=10] [--poll]
+ * - --batch=N: N개씩 묶어서 bulk 크롤링 (기본값: 10)
+ * - --poll   : 데이터가 없을 경우 3초마다 폴링하며 대기
+ * 
+ * 예시:
+ *   - bun run tools/cli/queue.ts --batch=20         # 20개씩 bulk 처리
+ *   - bun run tools/cli/queue.ts --batch=10 --poll  # 10개씩 bulk 처리 + 폴링
  */
 
 import { sql } from '../shared/db';
-import { crawlAndSyncPlaces, type CrawlProgress } from './place';
-import { sleep } from '../shared/utils';
+import { crawlAndSyncPlaces } from './place';
+import { chunkArray, sleep } from '../shared/utils';
 
 /**
- * DB에 크롤링 결과 저장 및 큐 상태 업데이트
+ * 배치(bulk) 단위로 크롤링 처리
+ * @param items 처리할 큐 아이템 배열
+ * @returns 성공/실패 개수
  */
-async function processQueueItem(item: any, progress?: CrawlProgress) {
+async function processQueueBatch(items: any[], batchIndex: number, totalBatches: number) {
     const startTime = new Date();
-    const placeId = item.id;
+    const placeIds = items.map(item => item.id);
     
-    const progressStr = progress ? `(${progress.current}/${progress.total}) ` : '';
-    console.log(`[큐] ${progressStr}처리 시작: ${placeId} (${item.name})`);
-
+    console.log(`\n[큐] 배치 ${batchIndex}/${totalBatches} 처리 시작 (${placeIds.length}건)`);
+    items.forEach(item => console.log(`  - ${item.id} (${item.name})`));
+    
     try {
-        // 1. 상태를 PROCESSING으로 변경
+        // 1. 상태를 PROCESSING으로 일괄 변경
         await sql`
             UPDATE public.tbl_place_queue 
             SET status = 'PROCESSING', updated_at = NOW() 
-            WHERE id = ${placeId}
+            WHERE id = ANY(${placeIds})
         `;
 
-        // 2. 크롤링 및 DB 동기화 (place.ts의 공통 로직 활용)
-        const syncedIds = await crawlAndSyncPlaces([placeId], progress);
-        const isSuccess = syncedIds.length > 0;
+        // 2. bulk 크롤링 및 DB 동기화 (folder.ts와 동일한 방식)
+        const syncedIds = await crawlAndSyncPlaces(placeIds);
+        const syncedSet = new Set(syncedIds);
 
         const endTime = new Date();
         const durationMs = endTime.getTime() - startTime.getTime();
 
-        if (!isSuccess) {
-            throw new Error('크롤링 결과가 없거나 유효하지 않은 카테고리입니다.');
+        // 3. 결과에 따라 각 항목 상태 업데이트
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const item of items) {
+            const placeId = item.id;
+            const isSuccess = syncedSet.has(placeId);
+
+            if (isSuccess) {
+                await sql`
+                    UPDATE public.tbl_place_queue 
+                    SET status = 'SUCCESS', updated_at = NOW() 
+                    WHERE id = ${placeId}
+                `;
+                await sql`
+                    INSERT INTO public.tbl_crw_log (place_id, status, start_time, end_time, duration_ms)
+                    VALUES (${placeId}, 'SUCCESS', ${startTime}, ${endTime}, ${durationMs})
+                `;
+                successCount++;
+            } else {
+                const newRetryCount = (item.retry_count || 0) + 1;
+                const isStopped = newRetryCount >= (item.retry_limit || 5);
+                const newStatus = isStopped ? 'STOPPED' : 'FAILED';
+                const errorMessage = '크롤링 결과가 없거나 유효하지 않은 카테고리입니다.';
+
+                await sql`
+                    UPDATE public.tbl_place_queue 
+                    SET 
+                        status = ${newStatus}, 
+                        retry_count = ${newRetryCount}, 
+                        error_message = ${errorMessage},
+                        updated_at = NOW() 
+                    WHERE id = ${placeId}
+                `;
+                await sql`
+                    INSERT INTO public.tbl_crw_log (place_id, status, error_message, start_time, end_time, duration_ms)
+                    VALUES (${placeId}, 'FAILED', ${errorMessage}, ${startTime}, ${endTime}, ${durationMs})
+                `;
+                failCount++;
+            }
         }
 
-        // 3. 성공 시: 큐 상태 SUCCESS 변경
-        await sql`
-            UPDATE public.tbl_place_queue 
-            SET status = 'SUCCESS', updated_at = NOW() 
-            WHERE id = ${placeId}
-        `;
-
-        // 로그 기록
-        await sql`
-            INSERT INTO public.tbl_crw_log (place_id, status, start_time, end_time, duration_ms)
-            VALUES (${placeId}, 'SUCCESS', ${startTime}, ${endTime}, ${durationMs})
-        `;
-
-        console.log(`[큐] 성공: ${placeId}`);
+        console.log(`[큐] 배치 ${batchIndex}/${totalBatches} 완료: 성공 ${successCount}건, 실패 ${failCount}건 (${durationMs}ms)`);
+        return { successCount, failCount };
 
     } catch (error: any) {
+        console.error(`[큐] 배치 ${batchIndex} 전체 실패:`, error.message);
+        
+        // 전체 배치 실패 시 모든 항목을 FAILED로 처리
         const endTime = new Date();
         const durationMs = endTime.getTime() - startTime.getTime();
-        const newRetryCount = (item.retry_count || 0) + 1;
-        const isStopped = newRetryCount >= (item.retry_limit || 5);
-        const newStatus = isStopped ? 'STOPPED' : 'FAILED';
 
-        console.error(`[큐] 실패: ${placeId} - ${error.message}`);
+        for (const item of items) {
+            const newRetryCount = (item.retry_count || 0) + 1;
+            const isStopped = newRetryCount >= (item.retry_limit || 5);
+            const newStatus = isStopped ? 'STOPPED' : 'FAILED';
 
-        await sql`
-            UPDATE public.tbl_place_queue 
-            SET 
-                status = ${newStatus}, 
-                retry_count = ${newRetryCount}, 
-                error_message = ${error.message},
-                updated_at = NOW() 
-            WHERE id = ${placeId}
-        `;
+            await sql`
+                UPDATE public.tbl_place_queue 
+                SET 
+                    status = ${newStatus}, 
+                    retry_count = ${newRetryCount}, 
+                    error_message = ${error.message},
+                    updated_at = NOW() 
+                WHERE id = ${item.id}
+            `;
+            await sql`
+                INSERT INTO public.tbl_crw_log (place_id, status, error_message, start_time, end_time, duration_ms)
+                VALUES (${item.id}, 'FAILED', ${error.message}, ${startTime}, ${endTime}, ${durationMs})
+            `;
+        }
 
-        // 로그 기록
-        await sql`
-            INSERT INTO public.tbl_crw_log (place_id, status, error_message, start_time, end_time, duration_ms)
-            VALUES (${placeId}, 'FAILED', ${error.message}, ${startTime}, ${endTime}, ${durationMs})
-        `;
+        return { successCount: 0, failCount: items.length };
     }
 }
 
 async function main() {
     const args = process.argv.slice(2);
-    const limit = args.find(arg => !arg.startsWith('--')) ? parseInt(args.find(arg => !arg.startsWith('--'))!, 10) : 10;
-    const isPolling = args.includes('--poll');
+    
+    let batchSize = 10;
+    let isPolling = false;
+
+    for (const arg of args) {
+        if (arg.startsWith('--batch=')) {
+            batchSize = parseInt(arg.split('=')[1], 10) || 10;
+        } else if (arg === '--poll') {
+            isPolling = true;
+        }
+        // 기존 숫자 옵션은 무시 (--batch가 있으면)
+    }
 
     try {
-        console.log(`[큐] 대기열 처리 시작 (최대 ${limit}건, 폴링: ${isPolling ? 'ON' : 'OFF'})`);
+        console.log(`[큐] 대기열 처리 시작 (bulk 배치 크기: ${batchSize}, 폴링: ${isPolling ? 'ON' : 'OFF'})`);
 
         while (true) {
-            // 1. PENDING 상태인 항목 가져오기
+            // 1. PENDING 상태인 모든 항목 가져오기
             const pendingItems = await sql`
                 SELECT * FROM public.tbl_place_queue 
                 WHERE status = 'PENDING' 
-                ORDER BY created_at ASC 
-                LIMIT ${limit}
+                ORDER BY created_at ASC
             `;
 
             if (pendingItems.length === 0) {
@@ -103,27 +148,36 @@ async function main() {
                     console.log('[큐] 처리할 대기 항목이 없습니다.');
                     break;
                 }
-                // 폴링 모드인 경우 3초 대기 후 다시 확인
-                process.stdout.write('.'); // 대기 중임을 표시
+                process.stdout.write('.');
                 await sleep(3000);
                 continue;
             }
 
-            console.log(`\n[큐] 총 ${pendingItems.length}건의 항목을 발견했습니다.`);
+            console.log(`\n[큐] 총 ${pendingItems.length}건의 항목을 발견했습니다. (${batchSize}개씩 bulk 처리)`);
 
-            // 2. 순차적으로 처리
-            for (let i = 0; i < pendingItems.length; i++) {
-                const item = pendingItems[i];
-                await processQueueItem(item, { current: i + 1, total: pendingItems.length });
-                await sleep(500);
+            // 2. batchSize 단위로 나누어 bulk 처리
+            const batches = chunkArray(pendingItems, batchSize);
+            let totalSuccess = 0;
+            let totalFail = 0;
+
+            for (let i = 0; i < batches.length; i++) {
+                const batch = batches[i];
+                const result = await processQueueBatch(batch, i + 1, batches.length);
+                totalSuccess += result.successCount;
+                totalFail += result.failCount;
+                
+                // 배치 간 잠시 대기
+                if (i < batches.length - 1) await sleep(1000);
             }
+
+            console.log(`\n[큐] 전체 처리 완료: 성공 ${totalSuccess}건, 실패 ${totalFail}건`);
 
             if (!isPolling) {
                 console.log('✅ 모든 작업 완료');
                 break;
             }
             
-            console.log('[큐] 현재 배치 완료, 다음 항목 확인 중...');
+            console.log('[큐] 다음 항목 확인 중...');
             await sleep(1000);
         }
 

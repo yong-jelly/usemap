@@ -13,6 +13,7 @@ import { useUserStore } from "@/entities/user";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams, Navigate } from "react-router";
 import { cn } from "@/shared/lib/utils";
+import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -82,7 +83,11 @@ export function ProfilePage() {
       {/* 상단 헤더 - 타이포 중심 (FeaturePage 스타일) */}
       <div className="fixed top-0 inset-x-0 bg-white dark:bg-neutral-900 z-20">
         <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
-          <div className="flex items-center gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide pb-3">
+          <HorizontalScroll 
+            containerClassName="flex items-center gap-6 pb-3"
+            scrollAmount={200}
+            fadeEdges={false}
+          >
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -100,7 +105,7 @@ export function ProfilePage() {
                 )}
               </button>
             ))}
-          </div>
+          </HorizontalScroll>
         </div>
       </div>
 

@@ -243,7 +243,7 @@ export function ExplorerPage() {
                   "text-[14px] truncate",
                   searchQueryDisplay ? "text-surface-900 dark:text-white" : "text-surface-400"
                 )}>
-                  {searchQueryDisplay || "어디로 가시나요?"}
+                  {searchQueryDisplay || "지역과 함께 음식점을 검색하면 더 정확한 결과를 얻을 수 있어요."}
                 </span>
               </div>
               {searchQueryDisplay && (
@@ -278,23 +278,18 @@ export function ExplorerPage() {
           </div>
 
           {/* 하단: 지역 필터 영역 */}
-          <div className="h-11 flex items-center border-t border-surface-50 dark:border-surface-900 overflow-hidden relative">
+          <div className="h-11 flex items-center border-t border-surface-50 dark:border-surface-900 relative">
             <button 
               onClick={() => setIsRegionSheetOpen(true)}
               className="flex items-center gap-1.5 pl-6 pr-5 h-full border-r border-surface-50 dark:border-surface-900 text-[14px] text-surface-900 dark:text-white shrink-0 active:bg-surface-50 transition-colors bg-white dark:bg-surface-950 z-10"
             >
               {filters.group1} <ChevronDown className="ml-0.5 size-4 text-surface-500 stroke-[3px]" />
             </button>
-            <div 
-              className="flex-1 overflow-x-auto scrollbar-hide h-full flex items-center"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
-              <DistrictChips 
-                selectedGroup1={filters.group1} 
-                selectedGroup2={filters.group2} 
-                onSelect={(g2) => setFilters(prev => ({ ...prev, group2: g2 }))} 
-              />
-            </div>
+            <DistrictChips 
+              selectedGroup1={filters.group1} 
+              selectedGroup2={filters.group2} 
+              onSelect={(g2) => setFilters(prev => ({ ...prev, group2: g2 }))} 
+            />
           </div>
         </div>
       </header>

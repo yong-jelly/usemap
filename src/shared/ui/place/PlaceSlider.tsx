@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronRight } from "lucide-react";
 import { PlaceSliderCard } from "./PlaceSliderCard";
 import { cn } from "@/shared/lib/utils";
+import { HorizontalScroll } from "../HorizontalScroll";
 
 interface PlaceSliderProps {
   title: string;
@@ -44,16 +45,12 @@ export function PlaceSlider({
           )}
         </div>
       )}
-      <div 
-        className={cn(
-          "flex overflow-x-auto overflow-y-hidden scrollbar-hide gap-3 pb-2 px-4",
+      <HorizontalScroll 
+        containerClassName={cn(
+          "flex gap-3 pb-2 px-4",
           snap && "snap-x"
         )}
-        style={{ 
-          willChange: 'scroll-position',
-          WebkitOverflowScrolling: 'touch',
-          transform: 'translateZ(0)',
-        }}
+        fadeEdges={false}
       >
         {items.map((item) => (
           <PlaceSliderCard
@@ -91,7 +88,7 @@ export function PlaceSlider({
             <div className="mt-auto h-6" />
           </div>
         )}
-      </div>
+      </HorizontalScroll>
     </div>
   );
 }
