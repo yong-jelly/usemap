@@ -73,6 +73,7 @@ export const placeApi = {
     p_profile_gender_and_age_by_pass?: boolean;
     p_image_paths?: string[];
     p_deleted_image_ids?: string[];
+    p_created_at?: string;
   }) => {
     const response = await apiClient.rpc<any>("v1_upsert_place_user_review", params);
     if (response.meta.code !== 200) throw new Error(response.meta.message);

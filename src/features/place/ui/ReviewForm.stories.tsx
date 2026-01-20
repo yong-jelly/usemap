@@ -37,6 +37,7 @@ export const Edit: Story = {
     initialRating: 4,
     initialComment: "정말 맛있게 먹고 왔습니다. 다시 가고 싶네요!",
     initialTagCodes: ["good_taste", "local"],
+    initialDate: "2024-01-20",
     availableTags: mockTags,
     initialImages: [
       { id: "1", image_path: "path1" },

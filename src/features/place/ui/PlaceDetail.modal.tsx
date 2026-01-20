@@ -289,6 +289,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     comment: string;
     tagCodes: string[];
     isPrivate: boolean;
+    visitDate: string;
     imageFiles: File[];
   }) => {
     setIsUploading(true);
@@ -311,7 +312,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         p_age_group_code: ageGroup,
         p_tag_codes: data.tagCodes,
         p_profile_gender_and_age_by_pass: (gender !== currentUser?.gender_code || ageGroup !== currentUser?.age_group_code),
-        p_image_paths: successfulPaths
+        p_image_paths: successfulPaths,
+        p_created_at: data.visitDate
       });
       resetReviewForm();
     } catch (e: any) { alert(e.message); }
@@ -323,6 +325,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     comment: string;
     tagCodes: string[];
     isPrivate: boolean;
+    visitDate: string;
     imageFiles: File[];
     deletedImageIds: string[];
   }) => {
@@ -346,7 +349,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         p_tag_codes: data.tagCodes,
         p_profile_gender_and_age_by_pass: true,
         p_image_paths: successfulPaths,
-        p_deleted_image_ids: data.deletedImageIds
+        p_deleted_image_ids: data.deletedImageIds,
+        p_created_at: data.visitDate
       });
       resetReviewForm();
     } catch (e: any) { alert(e.message); }
@@ -750,6 +754,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                                   initialComment={review.review_content}
                                   initialTagCodes={review.tags.map(t => t.code)}
                                   initialIsPrivate={review.is_private}
+                                  initialDate={review.created_at?.split('T')[0]}
                                   initialImages={review.images || []}
                                   availableTags={availableTags}
                                   isUploading={isUploading}

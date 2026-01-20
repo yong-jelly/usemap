@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Camera, X, Lock, Loader2 } from "lucide-react";
+import { Star, Camera, X, Lock, Loader2, Calendar } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 import { getReviewImageUrl } from "@/shared/lib/storage";
@@ -14,6 +14,8 @@ interface ReviewFormProps {
   initialTagCodes?: string[];
   /** 초기 비공개 여부 */
   initialIsPrivate?: boolean;
+  /** 초기 방문 날짜 */
+  initialDate?: string;
   /** 기존 이미지 목록 (수정 모드용) */
   initialImages?: ReviewImage[];
   /** 사용 가능한 태그 목록 */
@@ -26,6 +28,7 @@ interface ReviewFormProps {
     comment: string;
     tagCodes: string[];
     isPrivate: boolean;
+    visitDate: string;
     imageFiles: File[];
     deletedImageIds: string[];
   }) => Promise<void>;
@@ -43,6 +46,7 @@ export function ReviewForm({
   initialComment = "",
   initialTagCodes = [],
   initialIsPrivate = false,
+  initialDate = new Date().toISOString().split('T')[0],
   initialImages = [],
   availableTags,
   isUploading = false,
@@ -53,13 +57,14 @@ export function ReviewForm({
   const [comment, setComment] = useState(initialComment);
   const [selectedTagCodes, setSelectedTagCodes] = useState<string[]>(initialTagCodes);
   const [isPrivate, setIsPrivate] = useState(initialIsPrivate);
+  const [visitDate, setVisitDate] = useState(initialDate);
   
   const [reviewFiles, setReviewFiles] = useState<File[]>([]);
   const [reviewPreviews, setReviewPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ReviewImage[]>(initialImages);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const currentCount = reviewFiles.length + existingImages.length - deletedImageIds.length;
     const remainingSlot = 5 - currentCount;
@@ -70,10 +75,35 @@ export function ReviewForm({
     }
 
     const filesToAdd = files.slice(0, remainingSlot);
-    const newFiles = [...reviewFiles, ...filesToAdd];
+    
+    // HEIC 파일 미리보기를 위해 브라우저 호환 이미지(JPEG)로 변환
+    const processedFilesToAdd = await Promise.all(
+      filesToAdd.map(async (file) => {
+        if (file.type.includes("heic") || file.name.toLowerCase().endsWith(".heic")) {
+          try {
+            const heic2any = (await import("heic2any")).default;
+            const blob = await heic2any({
+              blob: file,
+              toType: "image/jpeg",
+              quality: 0.7
+            });
+            const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
+            return new File([convertedBlob], file.name.replace(/\.heic$/i, ".jpg"), {
+              type: "image/jpeg"
+            });
+          } catch (error) {
+            console.error("HEIC preview conversion failed:", error);
+            return file;
+          }
+        }
+        return file;
+      })
+    );
+
+    const newFiles = [...reviewFiles, ...processedFilesToAdd];
     setReviewFiles(newFiles);
 
-    const newPreviews = filesToAdd.map(file => URL.createObjectURL(file));
+    const newPreviews = processedFilesToAdd.map(file => URL.createObjectURL(file));
     setReviewPreviews(prev => [...prev, ...newPreviews]);
     
     e.target.value = '';
@@ -102,6 +132,7 @@ export function ReviewForm({
       comment,
       tagCodes: selectedTagCodes,
       isPrivate,
+      visitDate,
       imageFiles: reviewFiles,
       deletedImageIds,
     });
@@ -207,6 +238,18 @@ export function ReviewForm({
       </div>
 
       <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-surface-100">
+          <Calendar className="size-3.5 text-surface-400" />
+          <input
+            type="date"
+            value={visitDate}
+            onChange={(e) => setVisitDate(e.target.value)}
+            className="text-[12px] font-bold text-surface-600 bg-transparent outline-none cursor-pointer"
+            disabled={isUploading}
+            max={new Date().toISOString().split('T')[0]}
+          />
+        </div>
+
         <button 
           onClick={() => setIsPrivate(!isPrivate)}
           className={cn(

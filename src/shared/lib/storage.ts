@@ -1,4 +1,31 @@
+import heic2any from "heic2any";
 import { supabase } from "./supabase";
+
+/**
+ * HEIC 파일을 JPEG로 변환
+ */
+async function ensureWebFriendlyImage(file: File): Promise<File> {
+  if (!file.type.includes("heic") && !file.name.toLowerCase().endsWith(".heic")) {
+    return file;
+  }
+
+  try {
+    const blob = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.8
+    });
+
+    const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
+    return new File([convertedBlob], file.name.replace(/\.heic$/i, ".jpg"), {
+      type: "image/jpeg",
+      lastModified: Date.now()
+    });
+  } catch (error) {
+    console.error("HEIC conversion failed, uploading original file:", error);
+    return file;
+  }
+}
 
 /**
  * Storage 버킷 이름
@@ -39,18 +66,21 @@ export async function uploadProfileImage(
       return { path: "", error: new Error("파일 크기는 5MB 이하여야 합니다") };
     }
 
+    // HEIC 변환 시도
+    const processedFile = await ensureWebFriendlyImage(file);
+
     // 파일명 생성: profile-{timestamp}.{extension}
     const timestamp = Date.now();
-    const extension = file.name.split(".").pop() || "jpg";
+    const extension = processedFile.name.split(".").pop() || "jpg";
     const fileName = `profile-${timestamp}.${extension}`;
     const filePath = `${userId}/${fileName}`;
 
     // Storage에 업로드
     const { error } = await supabase.storage
       .from(STORAGE_BUCKETS.USER_IMAGES)
-      .upload(filePath, file, {
+      .upload(filePath, processedFile, {
         upsert: true,
-        contentType: file.type,
+        contentType: processedFile.type,
       });
 
     if (error) {
@@ -81,10 +111,13 @@ export function getImageUrl(
     return filePath;
   }
 
+  // HEIC 파일인 경우 transformation을 건너뜀 (Supabase transformation 엔진이 HEIC를 지원하지 않을 수 있음)
+  const isHeic = filePath.toLowerCase().endsWith(".heic");
+
   const { data } = supabase.storage
     .from(bucket)
     .getPublicUrl(filePath, {
-      transform: transform ? {
+      transform: (transform && !isHeic) ? {
         width: transform.width,
         height: transform.height,
         resize: transform.resize || "cover",
@@ -144,16 +177,19 @@ export async function uploadReviewImage(
       return { path: "", error: new Error("파일 크기는 10MB 이하여야 합니다") };
     }
 
+    // HEIC 변환 시도
+    const processedFile = await ensureWebFriendlyImage(file);
+
     const timestamp = Date.now();
-    const extension = file.name.split(".").pop() || "jpg";
+    const extension = processedFile.name.split(".").pop() || "jpg";
     const fileName = `${timestamp}.${extension}`;
     const filePath = `${userId}/${reviewId}/${fileName}`;
 
     const { error } = await supabase.storage
       .from(STORAGE_BUCKETS.REVIEW_IMAGES)
-      .upload(filePath, file, {
+      .upload(filePath, processedFile, {
         upsert: true,
-        contentType: file.type,
+        contentType: processedFile.type,
       });
 
     if (error) {
