@@ -126,6 +126,8 @@ export interface PlaceUserReview {
   age_group_code: '10s' | '20s' | '30s' | '40s' | '50s+' | null;
   is_private: boolean;
   is_active: boolean;
+  is_drinking?: boolean;
+  drinking_bottles?: number;
   created_at: string;
   updated_at: string;
   is_my_review: boolean;

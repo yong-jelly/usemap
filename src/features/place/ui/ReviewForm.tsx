@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Camera, X, Lock, Loader2, Calendar } from "lucide-react";
+import { Star, Camera, X, Lock, Loader2, Calendar, ChevronDown, ChevronUp, Check, Wine, Plus, Minus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 import { getReviewImageUrl } from "@/shared/lib/storage";
@@ -16,6 +16,10 @@ interface ReviewFormProps {
   initialIsPrivate?: boolean;
   /** 초기 방문 날짜 */
   initialDate?: string;
+  /** 초기 음주 여부 */
+  initialIsDrinking?: boolean;
+  /** 초기 음주 병 수 */
+  initialBottles?: number;
   /** 기존 이미지 목록 (수정 모드용) */
   initialImages?: ReviewImage[];
   /** 사용 가능한 태그 목록 */
@@ -31,6 +35,8 @@ interface ReviewFormProps {
     visitDate: string;
     imageFiles: File[];
     deletedImageIds: string[];
+    isDrinking: boolean;
+    bottles: number;
   }) => Promise<void>;
   /** 취소 핸들러 */
   onCancel: () => void;
@@ -47,6 +53,8 @@ export function ReviewForm({
   initialTagCodes = [],
   initialIsPrivate = false,
   initialDate = new Date().toISOString().split('T')[0],
+  initialIsDrinking = false,
+  initialBottles = 1,
   initialImages = [],
   availableTags,
   isUploading = false,
@@ -59,15 +67,31 @@ export function ReviewForm({
   const [isPrivate, setIsPrivate] = useState(initialIsPrivate);
   const [visitDate, setVisitDate] = useState(initialDate);
   
+  // 수정 모드 여부 확인
+  const isEditMode = initialRating > 0 || initialComment.trim().length > 0;
+  
+  // 추가 설정 데이터가 있는지 확인 (이미지, 태그, 음주, 비공개)
+  const hasAdditionalData = initialImages.length > 0 || 
+                             initialTagCodes.length > 0 || 
+                             initialIsDrinking === true || 
+                             initialIsPrivate === true;
+  
+  const [showOptions, setShowOptions] = useState(hasAdditionalData);
+  
+  // 음주 여부 상태
+  const [isDrinking, setIsDrinking] = useState(initialIsDrinking);
+  const [bottles, setBottles] = useState(initialBottles);
+  
   const [reviewFiles, setReviewFiles] = useState<File[]>([]);
   const [reviewPreviews, setReviewPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ReviewImage[]>(initialImages);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
 
+  const totalImageCount = reviewFiles.length + existingImages.length - deletedImageIds.length;
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const currentCount = reviewFiles.length + existingImages.length - deletedImageIds.length;
-    const remainingSlot = 5 - currentCount;
+    const remainingSlot = 5 - totalImageCount;
 
     if (remainingSlot <= 0) {
       e.target.value = '';
@@ -76,7 +100,6 @@ export function ReviewForm({
 
     const filesToAdd = files.slice(0, remainingSlot);
     
-    // HEIC 파일 미리보기를 위해 브라우저 호환 이미지(JPEG)로 변환
     const processedFilesToAdd = await Promise.all(
       filesToAdd.map(async (file) => {
         if (file.type.includes("heic") || file.name.toLowerCase().endsWith(".heic")) {
@@ -89,7 +112,8 @@ export function ReviewForm({
             });
             const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
             return new File([convertedBlob], file.name.replace(/\.heic$/i, ".jpg"), {
-              type: "image/jpeg"
+              type: "image/jpeg",
+              lastModified: new Date().getTime() // 변환된 파일은 새로운 파일로 취급
             });
           } catch (error) {
             console.error("HEIC preview conversion failed:", error);
@@ -100,10 +124,30 @@ export function ReviewForm({
       })
     );
 
-    const newFiles = [...reviewFiles, ...processedFilesToAdd];
+    // 중복 파일 필터링 (기존 새 파일 + 기존 업로드된 이미지와 비교)
+    const uniqueNewFiles = processedFilesToAdd.filter(newFile => {
+      // 1. 현재 추가된 새 파일들과 비교
+      const isDuplicateInNew = reviewFiles.some(
+        existing => existing.name === newFile.name && existing.size === newFile.size
+      );
+      // 2. 기존 서버 이미지들과 비교 (파일명만으로 체크해야 함 - 서버 이미지는 size 정보가 없을 수 있음)
+      // 정확한 비교를 위해선 서버 이미지 메타데이터가 필요하지만, 일단 파일명으로 1차 필터링
+      const isDuplicateInExisting = existingImages
+        .filter(img => !deletedImageIds.includes(img.id))
+        .some(existing => existing.image_path.split('/').pop() === newFile.name);
+
+      return !isDuplicateInNew && !isDuplicateInExisting;
+    });
+
+    if (uniqueNewFiles.length === 0) {
+      e.target.value = '';
+      return;
+    }
+
+    const newFiles = [...reviewFiles, ...uniqueNewFiles];
     setReviewFiles(newFiles);
 
-    const newPreviews = processedFilesToAdd.map(file => URL.createObjectURL(file));
+    const newPreviews = uniqueNewFiles.map(file => URL.createObjectURL(file));
     setReviewPreviews(prev => [...prev, ...newPreviews]);
     
     e.target.value = '';
@@ -135,10 +179,11 @@ export function ReviewForm({
       visitDate,
       imageFiles: reviewFiles,
       deletedImageIds,
+      isDrinking,
+      bottles
     });
   };
 
-  // 컴포넌트 언마운트 시 메모리 해제
   useEffect(() => {
     return () => {
       reviewPreviews.forEach(url => URL.revokeObjectURL(url));
@@ -146,139 +191,247 @@ export function ReviewForm({
   }, [reviewPreviews]);
 
   return (
-    <div className="p-4 rounded-xl border border-primary-100 bg-primary-50/30 space-y-4">
-      <div className="flex justify-between px-2">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <button 
-            key={s} 
-            onClick={() => setRating(s)} 
-            className="active:scale-90 transition-transform"
-            disabled={isUploading}
-          >
-            <Star className={cn("size-8", s <= rating ? "text-amber-400 fill-current" : "text-surface-200")} />
-          </button>
-        ))}
-      </div>
-      
-      <textarea
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder="이 장소에 대한 솔직한 평을 남겨주세요."
-        className="w-full h-24 p-3 rounded-lg bg-white border-none resize-none text-[16px] focus:ring-1 focus:ring-primary-500"
-        maxLength={200}
-        disabled={isUploading}
-      />
-
-      {/* 이미지 업로드 영역 */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <label className={cn(
-          "flex-shrink-0 size-20 flex flex-col items-center justify-center rounded-xl bg-white border-2 border-dashed border-surface-200 text-surface-400 cursor-pointer active:bg-surface-50",
-          isUploading && "opacity-50 cursor-not-allowed"
-        )}>
-          <Camera className="size-6 mb-1" />
-          <span className="text-[10px] font-bold">
-            {reviewFiles.length + existingImages.length - deletedImageIds.length}/5
-          </span>
-          <input 
-            type="file" 
-            className="hidden" 
-            accept="image/*" 
-            multiple 
-            onChange={handleImageChange} 
-            disabled={isUploading}
-          />
-        </label>
-        
-        {/* 기존 이미지 */}
-        {existingImages.filter(img => !deletedImageIds.includes(img.id)).map((img) => (
-          <div key={img.id} className="relative flex-shrink-0 size-20 rounded-xl overflow-hidden group">
-            <img src={getReviewImageUrl(img.image_path, "thumbnail")} className="w-full h-full object-cover" alt="기존 리뷰 이미지" />
-            <button 
-              onClick={() => removeExistingImage(img.id)}
-              className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white"
-              disabled={isUploading}
-            >
-              <X className="size-3" />
-            </button>
-          </div>
-        ))}
-
-        {/* 새 이미지 프리뷰 */}
-        {reviewPreviews.map((preview, index) => (
-          <div key={`new-${index}`} className="relative flex-shrink-0 size-20 rounded-xl overflow-hidden group">
-            <img src={preview} className="w-full h-full object-cover" alt="새 리뷰 이미지" />
-            <button 
-              onClick={() => removeNewImage(index)}
-              className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white"
-              disabled={isUploading}
-            >
-              <X className="size-3" />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {availableTags.map(tag => (
-          <button
-            key={tag.code}
-            onClick={() => toggleTag(tag.code)}
-            className={cn(
-              "px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors",
-              selectedTagCodes.includes(tag.code) 
-                ? "bg-primary-600 text-white" 
-                : "bg-white text-surface-400 border border-surface-100",
-              isUploading && "opacity-50 cursor-not-allowed"
+    <div className="flex flex-col rounded-2xl bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden">
+      {/* 1. 핵심 입력 섹션 (별점 + 날짜 + 코멘트) */}
+      <div className="p-5 space-y-5">
+        {/* 상단: 별점 & 날짜 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <button 
+                key={s} 
+                onClick={() => setRating(s)} 
+                className="p-1 -ml-1 first:ml-0 active:scale-90 transition-transform"
+                disabled={isUploading}
+              >
+                <Star className={cn(
+                  "size-7", 
+                  s <= rating ? "text-amber-400 fill-amber-400" : "text-surface-200 dark:text-surface-700"
+                )} />
+              </button>
+            ))}
+            {rating > 0 && (
+              <span className="ml-2 text-[15px] font-bold text-amber-500">{rating}점</span>
             )}
-            disabled={isUploading}
-          >
-            {tag.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-surface-100">
-          <Calendar className="size-3.5 text-surface-400" />
-          <input
-            type="date"
-            value={visitDate}
-            onChange={(e) => setVisitDate(e.target.value)}
-            className="text-[12px] font-bold text-surface-600 bg-transparent outline-none cursor-pointer"
-            disabled={isUploading}
-            max={new Date().toISOString().split('T')[0]}
-          />
+          </div>
+          
+          <div className="flex items-center gap-2 bg-surface-50 dark:bg-surface-800 px-3 py-1.5 rounded-lg">
+            <Calendar className="size-3.5 text-surface-400" />
+            <input
+              type="date"
+              value={visitDate}
+              onChange={(e) => setVisitDate(e.target.value)}
+              className="text-[13px] font-medium bg-transparent border-none outline-none text-surface-600 dark:text-surface-300 p-0 cursor-pointer text-right min-w-[110px]"
+              disabled={isUploading}
+              max={new Date().toISOString().split('T')[0]}
+            />
+          </div>
         </div>
 
-        <button 
-          onClick={() => setIsPrivate(!isPrivate)}
-          className={cn(
-            "flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors",
-            isPrivate ? "bg-surface-900 text-white" : "text-surface-400 hover:bg-surface-100",
-            isUploading && "opacity-50 cursor-not-allowed"
-          )}
+        {/* 코멘트 입력 */}
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="이 장소는 어떠셨나요? 후기를 남겨주세요."
+          className="w-full h-32 bg-transparent border-none resize-none text-[16px] leading-relaxed text-surface-900 dark:text-surface-100 placeholder:text-surface-400 focus:ring-0 p-0"
+          maxLength={500}
           disabled={isUploading}
-        >
-          <Lock className={cn("size-3.5", isPrivate && "fill-current")} />
-          {isPrivate ? "나만 보기 (비공개)" : "전체 공개"}
-        </button>
+        />
       </div>
 
-      <div className="flex gap-2">
+      {/* 2. 추가 옵션 토글 버튼 */}
+      <button 
+        onClick={() => setShowOptions(!showOptions)}
+        className="flex items-center justify-center gap-1.5 py-3 border-t border-surface-100 dark:border-surface-800 text-[13px] font-medium text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
+      >
+        <span>사진, 태그, 추가 설정</span>
+        {showOptions ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+      </button>
+
+      {/* 3. 추가 옵션 섹션 (사진, 태그, 설정) */}
+      {showOptions && (
+        <div className="p-5 pt-2 space-y-6 border-t border-surface-100 dark:border-surface-800 bg-surface-50/50 dark:bg-surface-900/50">
+          
+          {/* 사진 첨부 */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-medium text-surface-500">사진 첨부</span>
+              <span className="text-[11px] text-surface-400">{totalImageCount}/5</span>
+            </div>
+            <div 
+              className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide"
+              style={{ 
+                willChange: 'scroll-position',
+                WebkitOverflowScrolling: 'touch',
+                transform: 'translateZ(0)',
+              }}
+            >
+              <label className={cn(
+                "flex-shrink-0 size-16 flex flex-col items-center justify-center rounded-xl bg-white dark:bg-surface-800 border border-dashed border-surface-300 dark:border-surface-700 text-surface-400 cursor-pointer active:scale-95 transition-all",
+                isUploading && "opacity-50 cursor-not-allowed"
+              )}>
+                <Camera className="size-5 mb-0.5" />
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*" 
+                  multiple 
+                  onChange={handleImageChange} 
+                  disabled={isUploading}
+                />
+              </label>
+              
+              {existingImages.filter(img => !deletedImageIds.includes(img.id)).map((img) => (
+                <div key={img.id} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
+                  <img 
+                    src={getReviewImageUrl(img.image_path, "thumbnail")} 
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover" 
+                    alt="리뷰" 
+                  />
+                  <button 
+                    onClick={() => removeExistingImage(img.id)}
+                    className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
+                    disabled={isUploading}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+
+              {reviewPreviews.map((preview, index) => (
+                <div key={`new-${index}`} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
+                  <img 
+                    src={preview} 
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover" 
+                    alt="새 이미지" 
+                  />
+                  <button 
+                    onClick={() => removeNewImage(index)}
+                    className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
+                    disabled={isUploading}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 태그 선택 */}
+          <div className="space-y-2">
+            <span className="text-[13px] font-medium text-surface-500">이 장소의 특징</span>
+            <div className="flex flex-wrap gap-1.5">
+              {availableTags.map(tag => (
+                <button
+                  key={tag.code}
+                  onClick={() => toggleTag(tag.code)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border",
+                    selectedTagCodes.includes(tag.code) 
+                      ? "bg-primary-500 border-primary-500 text-white shadow-sm" 
+                      : "bg-white dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-500 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-700"
+                  )}
+                  disabled={isUploading}
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 설정 (음주 & 공개) */}
+          <div className="space-y-3 pt-2">
+            <span className="text-[13px] font-medium text-surface-500">추가 설정</span>
+            
+            {/* 음주 여부 */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Wine className="size-4 text-surface-400" />
+                <span className="text-[13px] font-medium text-surface-700 dark:text-surface-300">음주 여부</span>
+              </div>
+              <div className="flex items-center gap-3">
+                {isDrinking && (
+                  <div className="flex items-center gap-2 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg p-0.5 h-8">
+                    <button 
+                      onClick={() => setBottles(Math.max(0.5, bottles - 0.5))}
+                      className="p-1 hover:bg-surface-50 dark:hover:bg-surface-700 rounded text-surface-500"
+                      disabled={isUploading}
+                    >
+                      <Minus className="size-3" />
+                    </button>
+                    <span className="text-[12px] font-medium w-8 text-center tabular-nums">{bottles}병</span>
+                    <button 
+                      onClick={() => setBottles(bottles + 0.5)}
+                      className="p-1 hover:bg-surface-50 dark:hover:bg-surface-700 rounded text-surface-500"
+                      disabled={isUploading}
+                    >
+                      <Plus className="size-3" />
+                    </button>
+                  </div>
+                )}
+                <button 
+                  onClick={() => setIsDrinking(!isDrinking)}
+                  className={cn(
+                    "w-12 h-7 rounded-full transition-colors relative",
+                    isDrinking ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
+                  )}
+                  disabled={isUploading}
+                >
+                  <div className={cn(
+                    "absolute top-1 left-1 size-5 bg-white rounded-full shadow-sm transition-transform",
+                    isDrinking ? "translate-x-5" : "translate-x-0"
+                  )} />
+                </button>
+              </div>
+            </div>
+
+            {/* 공개 설정 */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="size-4 text-surface-400" />
+                <span className="text-[13px] font-medium text-surface-700 dark:text-surface-300">나만 보기 (비공개)</span>
+              </div>
+              <button 
+                onClick={() => setIsPrivate(!isPrivate)}
+                className={cn(
+                  "w-12 h-7 rounded-full transition-colors relative",
+                  isPrivate ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
+                )}
+                disabled={isUploading}
+              >
+                <div className={cn(
+                  "absolute top-1 left-1 size-5 bg-white rounded-full shadow-sm transition-transform",
+                  isPrivate ? "translate-x-5" : "translate-x-0"
+                )} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. 하단 버튼 */}
+      <div className="flex gap-3 p-5 pt-3 border-t border-surface-100 dark:border-surface-800">
         <Button 
-          variant="ghost" 
+          variant="ghost"
           onClick={onCancel} 
-          className="flex-1 h-10 text-[13px] font-bold" 
+          className="flex-1 h-11 rounded-xl text-[14px] font-medium text-surface-600 bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700" 
           disabled={isUploading}
         >
           취소
         </Button>
         <Button 
           onClick={handleSubmit} 
-          className="flex-1 h-10 text-[13px] font-bold bg-primary-600 text-white" 
-          disabled={isUploading}
+          className={cn(
+            "flex-[2] h-11 rounded-xl text-[14px] font-medium shadow-sm transition-all",
+            comment.trim() ? "bg-primary-500 text-white hover:bg-primary-600" : "bg-surface-100 dark:bg-surface-800 text-surface-400 cursor-not-allowed"
+          )}
+          disabled={isUploading || !comment.trim()}
         >
-          {isUploading ? <Loader2 className="size-4 animate-spin" /> : "저장 완료"}
+          {isUploading ? <Loader2 className="size-5 animate-spin text-white" /> : (isEditMode ? "수정 완료" : "작성 완료")}
         </Button>
       </div>
     </div>

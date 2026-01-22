@@ -74,6 +74,8 @@ export const placeApi = {
     p_image_paths?: string[];
     p_deleted_image_ids?: string[];
     p_created_at?: string;
+    p_is_drinking?: boolean;
+    p_drinking_bottles?: number;
   }) => {
     const response = await apiClient.rpc<any>("v1_upsert_place_user_review", params);
     if (response.meta.code !== 200) throw new Error(response.meta.message);

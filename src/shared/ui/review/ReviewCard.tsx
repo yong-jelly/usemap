@@ -189,7 +189,7 @@ export function ReviewCard({
             )}
           </div>
           {is_private && (
-            <Lock className="size-3 text-surface-400 fill-current ml-2" />
+            <Lock className="size-3 text-surface-400 ml-2" />
           )}
         </div>
       </article>

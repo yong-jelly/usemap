@@ -292,6 +292,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     isPrivate: boolean;
     visitDate: string;
     imageFiles: File[];
+    isDrinking: boolean;
+    bottles: number;
   }) => {
     setIsUploading(true);
     try {
@@ -314,7 +316,9 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         p_tag_codes: data.tagCodes,
         p_profile_gender_and_age_by_pass: (gender !== currentUser?.gender_code || ageGroup !== currentUser?.age_group_code),
         p_image_paths: successfulPaths,
-        p_created_at: data.visitDate
+        p_created_at: data.visitDate,
+        p_is_drinking: data.isDrinking,
+        p_drinking_bottles: data.bottles
       });
       resetReviewForm();
     } catch (e: any) { alert(e.message); }
@@ -329,6 +333,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     visitDate: string;
     imageFiles: File[];
     deletedImageIds: string[];
+    isDrinking: boolean;
+    bottles: number;
   }) => {
     setIsUploading(true);
     try {
@@ -351,7 +357,9 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         p_profile_gender_and_age_by_pass: true,
         p_image_paths: successfulPaths,
         p_deleted_image_ids: data.deletedImageIds,
-        p_created_at: data.visitDate
+        p_created_at: data.visitDate,
+        p_is_drinking: data.isDrinking,
+        p_drinking_bottles: data.bottles
       });
       resetReviewForm();
     } catch (e: any) { alert(e.message); }
@@ -463,18 +471,18 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         "relative w-full h-full bg-white dark:bg-surface-950 flex flex-col",
         "md:max-w-md md:h-[90vh] md:rounded-[24px] md:overflow-hidden"
       )}>
-        <header className="absolute top-0 left-0 right-0 z-20 flex h-14 items-center justify-between px-4 pointer-events-none">
+        <header className="relative z-20 flex h-14 flex-shrink-0 items-center justify-between px-4 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
           <button 
             onClick={handleClose} 
-            className="p-2 bg-white/90 dark:bg-surface-900/90 rounded-full shadow-lg hover:bg-white dark:hover:bg-surface-800 transition-colors pointer-events-auto"
+            className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-surface-900 dark:text-surface-100" />
+            <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-surface-100" />
           </button>
           
           {isAdmin(currentUser) && (
             <button 
               onClick={() => setShowDeletePlaceConfirm(true)}
-              className="p-2 bg-white/90 dark:bg-surface-900/90 rounded-full shadow-lg text-rose-500 hover:bg-white dark:hover:bg-surface-800 transition-colors pointer-events-auto"
+              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg text-rose-500 transition-colors"
             >
               <Trash2 className="size-5" />
             </button>
@@ -673,7 +681,34 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               )} */}
 
               <section id="review-section" className="py-2">
-                {publicReviewsCount > 0 ? (
+                {editingReviewId || showReviewForm ? (
+                  // 수정 중이거나 작성 중일 때는 폼만 표시
+                  <div className="px-4 mb-4">
+                    {editingReviewId && filteredReviews.find(r => r.id === editingReviewId) ? (
+                      <ReviewForm
+                        initialRating={filteredReviews.find(r => r.id === editingReviewId)!.score}
+                        initialComment={filteredReviews.find(r => r.id === editingReviewId)!.review_content}
+                        initialTagCodes={filteredReviews.find(r => r.id === editingReviewId)!.tags.map(t => t.code)}
+                        initialIsPrivate={filteredReviews.find(r => r.id === editingReviewId)!.is_private}
+                        initialDate={filteredReviews.find(r => r.id === editingReviewId)!.created_at?.split('T')[0]}
+                        initialIsDrinking={filteredReviews.find(r => r.id === editingReviewId)!.is_drinking ?? false}
+                        initialBottles={filteredReviews.find(r => r.id === editingReviewId)!.drinking_bottles ?? 1}
+                        initialImages={filteredReviews.find(r => r.id === editingReviewId)!.images || []}
+                        availableTags={availableTags}
+                        isUploading={isUploading}
+                        onSubmit={(data) => handleSaveEditReview(editingReviewId, data)}
+                        onCancel={resetReviewForm}
+                      />
+                    ) : showReviewForm ? (
+                      <ReviewForm
+                        availableTags={availableTags}
+                        isUploading={isUploading}
+                        onSubmit={handleSaveReview}
+                        onCancel={resetReviewForm}
+                      />
+                    ) : null}
+                  </div>
+                ) : publicReviewsCount > 0 ? (
                   <>
                     <div className="flex flex-col gap-3 px-4 mb-4">
                       <div className="flex items-center justify-between">
@@ -695,9 +730,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                                 if (!isAuthenticated) return alert('로그인이 필요합니다.');
                                 setShowReviewForm(true);
                               }}
-                              className="text-[12px] font-medium text-primary-600 px-3 py-1.5 bg-primary-50 rounded-lg active:scale-95 transition-transform"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
                             >
-                              리뷰쓰기
+                              <Plus className="size-3.5" />
+                              추가
                             </button>
                           )}
                         </div>
@@ -720,72 +756,54 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       )}
                     </div>
                     
-                    {showReviewForm && (
-                      <div className="mx-4 mb-6">
-                        <ReviewForm
-                          availableTags={availableTags}
-                          isUploading={isUploading}
-                          onSubmit={handleSaveReview}
-                          onCancel={resetReviewForm}
-                        />
-                      </div>
-                    )}
-                    
                     {filteredReviews.length > 0 ? (
                       showAllReviews ? (
                         <div className="space-y-3 px-4">
                           {filteredReviews.map(review => (
-                            <div key={review.id} id={`review-${review.id}`}>
-                              {editingReviewId === review.id ? (
-                                <ReviewForm
-                                  initialRating={review.score}
-                                  initialComment={review.review_content}
-                                  initialTagCodes={review.tags.map(t => t.code)}
-                                  initialIsPrivate={review.is_private}
-                                  initialDate={review.created_at?.split('T')[0]}
-                                  initialImages={review.images || []}
-                                  availableTags={availableTags}
-                                  isUploading={isUploading}
-                                  onSubmit={(data) => handleSaveEditReview(review.id, data)}
-                                  onCancel={resetReviewForm}
-                                />
-                              ) : (
-                                <ReviewCard
-                                  review={review}
-                                  isMyReview={review.is_my_review}
-                                  onEdit={() => setEditingReviewId(review.id)}
-                                  onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                                  onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                                  onImageClick={(images, index) => setImageViewerState({
-                                    isOpen: true,
-                                    images,
-                                    initialIndex: index
-                                  })}
-                                />
-                              )}
+                            <div 
+                              key={review.id} 
+                              id={`review-${review.id}`}
+                              className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-4 shadow-sm"
+                            >
+                              <ReviewCard
+                                review={review}
+                                isMyReview={review.is_my_review}
+                                onEdit={() => setEditingReviewId(review.id)}
+                                onDelete={() => setShowDeleteReviewConfirm(review.id)}
+                                onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
+                                onImageClick={(images, index) => setImageViewerState({
+                                  isOpen: true,
+                                  images,
+                                  initialIndex: index
+                                })}
+                              />
                             </div>
                           ))}
                         </div>
                       ) : (
                         <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
                           {filteredReviews.map(review => (
-                            <ReviewCard
+                            <div
                               key={review.id}
-                              variant="compact"
-                              review={review}
-                              isMyReview={review.is_my_review}
-                              onEdit={() => {
-                                setShowAllReviews(true);
-                                setEditingReviewId(review.id);
-                              }}
-                              onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                              onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                              onImageClick={(images, index) => setImageViewerState({
-                                isOpen: true,
-                                images,
-                                initialIndex: index
-                              })}
-                            />
+                              className="flex-shrink-0 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-3 shadow-sm"
+                            >
+                              <ReviewCard
+                                variant="compact"
+                                review={review}
+                                isMyReview={review.is_my_review}
+                                onEdit={() => {
+                                  setShowAllReviews(true);
+                                  setEditingReviewId(review.id);
+                                }}
+                                onDelete={() => setShowDeleteReviewConfirm(review.id)}
+                                onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
+                                onImageClick={(images, index) => setImageViewerState({
+                                  isOpen: true,
+                                  images,
+                                  initialIndex: index
+                                })}
+                              />
+                            </div>
                           ))}
                         </div>
                       )
@@ -798,7 +816,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     )}
                   </>
                 ) : (
-                  <div className="mx-4 mb-4">
+                  <div className="px-4 mb-4">
                     {showReviewForm ? (
                       <ReviewForm
                         availableTags={availableTags}
@@ -807,16 +825,26 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         onCancel={resetReviewForm}
                       />
                     ) : (
-                      <button 
-                        onClick={() => {
-                          if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                          setShowReviewForm(true);
-                        }}
-                        className="w-full py-6 flex items-center justify-center gap-2 bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
-                      >
-                        <Plus className="size-4 text-surface-400" />
-                        <p className="text-[13px] font-medium text-surface-500">첫 번째 리뷰를 남겨주세요</p>
-                      </button>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-medium">방문 리뷰</h3>
+                          <button 
+                            onClick={() => {
+                              if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                              setShowReviewForm(true);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
+                          >
+                            <Plus className="size-3.5" />
+                            추가
+                          </button>
+                        </div>
+                        <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                          <p className="text-sm text-surface-400">
+                            리뷰가 없습니다.
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
@@ -948,22 +976,15 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         />
                       ))
                     ) : (
-                      <div className="w-full py-8 text-center text-surface-400 text-sm">해당 카테고리의 콘텐츠가 없습니다.</div>
+                      <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                        <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
+                      </div>
                     )
                   ) : (
                     !showContentAddForm && (
-                      <button 
-                        onClick={() => {
-                          if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                          setShowContentAddForm(true);
-                        }}
-                        className="w-full py-10 flex flex-col items-center justify-center gap-3 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-dashed border-surface-200 dark:border-surface-800 active:scale-[0.98] transition-all"
-                      >
-                        <div className="size-10 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center shadow-sm">
-                          <Plus className="size-5 text-surface-400" />
-                        </div>
-                        <p className="text-[13px] font-medium text-surface-500">관련 영상이나 커뮤니티 글을 공유해주세요</p>
-                      </button>
+                      <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                        <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
+                      </div>
                     )
                   )}
                 </div>
