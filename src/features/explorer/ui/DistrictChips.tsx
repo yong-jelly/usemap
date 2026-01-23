@@ -21,12 +21,12 @@ export function DistrictChips({
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentGroup2List = REGION_DATA.find(r => r.group1 === selectedGroup1)?.group2_json || [];
 
-  // 지역(group1)이 변경되면 스크롤을 가장 왼쪽으로 이동
+  // 지역(group1) 또는 검색 모드 종료 시 스크롤을 가장 왼쪽으로 이동
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ left: 0, behavior: 'instant' });
     }
-  }, [selectedGroup1]);
+  }, [selectedGroup1, selectedGroup2]); // selectedGroup2가 "전체"로 바뀔 때도 초기화되도록 추가
 
   if (!selectedGroup1) return null;
 

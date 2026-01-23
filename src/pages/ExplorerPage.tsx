@@ -178,6 +178,8 @@ export function ExplorerPage() {
     setSearchQuery("");
     setSearchQueryDisplay("");
     setSearchResults([]);
+    // 검색 종료 시 지역 필터를 "전체"로 초기화
+    setFilters(prev => ({ ...prev, group2: "전체" }));
   };
 
   const handleFilterApply = (newFilters: any) => {
