@@ -16,7 +16,7 @@ Mapbox를 사용하기 위해서는 발급받은 Access Token이 필요합니다
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
+mapboxgl.accessToken = 'pk.eyJ1Ijoia3dvbjIwMjYiLCJhIjoiY21rcTdxMjhsMHBmMjNsb2Z2N3NsdjRzOCJ9.ocd7LnJbKYOrMLnW0ygljg';
 ```
 
 ## 2. 기본 구현 패턴 (React)

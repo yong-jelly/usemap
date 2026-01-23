@@ -18,8 +18,9 @@ import {
   useImportPlaceToFolder
 } from "@/entities/folder/queries";
 
-const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
-mapboxgl.accessToken = MAP_TOKEN;
+import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
+
+mapboxgl.accessToken = MAPBOX_TOKEN;
 import { Button, Input, FloatingViewToggleButton } from "@/shared/ui";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { 

@@ -35,7 +35,7 @@ export const YoutubeFeature: Story = {
     thumbnailUrl: "https://yt3.googleusercontent.com/ytc/AIdro_n_Y5q_qf8Z_mX_q_q_q_q_q_q_q_q_q_q_q_q=s176-c-k-c0x00ffffff-no-rj",
     isSubscribed: false,
     onSubscribe: () => alert("구독 클릭"),
-    onShare: () => alert("공유 클릭"),
+   ㅜ onShare: () => alert("공유 클릭"),
   },
 };
 

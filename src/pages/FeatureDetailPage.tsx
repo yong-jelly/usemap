@@ -14,8 +14,9 @@ import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
-const MAP_TOKEN = 'pk.eyJ1IjoibmV3c2plbGx5IiwiYSI6ImNsa3JwejZkajFkaGkzZ2xrNWc3NDc4cnoifQ.FgzDXrGJwwZ4Ab7SZKoaWw';
-mapboxgl.accessToken = MAP_TOKEN;
+import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
+
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 export function FeatureDetailPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
