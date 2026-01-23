@@ -896,7 +896,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       </button>
                     )}
 
-                    {hasBothTypes && (
+                    {!showContentAddForm && hasBothTypes && (
                       <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
                       <button 
                         onClick={() => setActiveContentTab('all')}
@@ -924,7 +924,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               </div>
 
-                {showContentAddForm && (
+                {showContentAddForm ? (
                   <div className="mb-6">
                     <ContentForm 
                       isProcessing={isRequestProcessing}
@@ -939,37 +939,35 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       }}
                     />
                   </div>
-                )}
-
-                <div className="flex flex-col gap-2">
-                  {hasAnyContent ? (
-                    displayFeatures.length > 0 ? (
-                      displayFeatures.map((feature: Feature) => (
-                        <FeatureCard 
-                          key={feature.id} 
-                          feature={feature} 
-                          getPlatformName={getPlatformName}
-                          isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.auth_user_id}
-                          onDelete={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowDeleteFeatureConfirm(feature.id);
-                          }}
-                        />
-                      ))
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {hasAnyContent ? (
+                      displayFeatures.length > 0 ? (
+                        displayFeatures.map((feature: Feature) => (
+                          <FeatureCard 
+                            key={feature.id} 
+                            feature={feature} 
+                            getPlatformName={getPlatformName}
+                            isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.auth_user_id}
+                            onDelete={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShowDeleteFeatureConfirm(feature.id);
+                            }}
+                          />
+                        ))
+                      ) : (
+                        <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                          <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
+                        </div>
+                      )
                     ) : (
                       <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
                         <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
                       </div>
-                    )
-                  ) : (
-                    !showContentAddForm && (
-                      <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                        <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
-                      </div>
-                    )
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </section>
             </div>
           </>
