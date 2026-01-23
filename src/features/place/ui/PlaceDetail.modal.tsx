@@ -56,6 +56,7 @@ import {
   PlaceFeatureTags
 } from "@/shared/ui";
 import { ReviewForm } from "./ReviewForm";
+import { ContentForm } from "./ContentForm";
 import { cn } from "@/shared/lib/utils";
 import { safeFormatDate } from "@/shared/lib/date";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
@@ -374,8 +375,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     } catch (e: any) { alert(e.message); }
   };
 
-  const handleAddFeature = async () => {
-    const url = contentUrlInput.trim();
+  const handleAddFeature = async (urlOverride?: string) => {
+    const url = urlOverride || contentUrlInput.trim();
     if (!url) return;
     
     setIsRequestProcessing(true);
@@ -879,14 +880,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               )}
 
               <section className="px-4 py-6 relative border-t border-surface-50 dark:border-surface-900">
-                {isRequestProcessing && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-surface-950/60 backdrop-blur-[1px]">
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="size-6 animate-spin text-primary-600" />
-                    </div>
-                  </div>
-                )}
-                
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium">관련 콘텐츠</h3>
                   
@@ -930,32 +923,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               </div>
 
                 {showContentAddForm && (
-                  <div className="mb-4 p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-100 dark:border-surface-800">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[12px] font-medium text-surface-500">YouTube 또는 커뮤니티 링크</span>
-                      <button onClick={() => { setShowContentAddForm(false); setContentUrlInput(''); }} className="p-1 text-surface-400"><X className="size-4" /></button>
-                    </div>
-                    <Input 
-                      placeholder="유튜브 또는 커뮤니티(다모앙, 클리앙 등) 링크를 입력하세요" 
-                      className="text-base h-11 mb-3 bg-white dark:bg-surface-950"
-                      value={contentUrlInput}
-                      onChange={(e) => setContentUrlInput(e.target.value)}
-                      autoFocus
+                  <div className="mb-6">
+                    <ContentForm 
+                      isProcessing={isRequestProcessing}
+                      onSubmit={async (url) => {
+                        await handleAddFeature(url);
+                      }}
+                      onCancel={() => {
+                        setShowContentAddForm(false);
+                        setContentUrlInput('');
+                      }}
                     />
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-2">
-                        <Youtube className="size-4 text-rose-500 opacity-50" />
-                        <MessageCircle className="size-4 text-emerald-500 opacity-50" />
-                      </div>
-                      <Button 
-                        size="sm" 
-                        className="px-6 h-9 rounded-full" 
-                        onClick={handleAddFeature} 
-                        disabled={!contentUrlInput.trim() || isRequestProcessing}
-                      >
-                        추가하기
-                      </Button>
-                    </div>
                   </div>
                 )}
 
