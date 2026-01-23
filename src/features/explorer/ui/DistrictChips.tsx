@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/shared/lib/utils";
 import { REGION_DATA } from "@/shared/config/filter-constants";
 import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
@@ -18,12 +18,21 @@ export function DistrictChips({
   selectedGroup2, 
   onSelect 
 }: DistrictChipsProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const currentGroup2List = REGION_DATA.find(r => r.group1 === selectedGroup1)?.group2_json || [];
+
+  // 지역(group1)이 변경되면 스크롤을 가장 왼쪽으로 이동
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ left: 0, behavior: 'instant' });
+    }
+  }, [selectedGroup1]);
 
   if (!selectedGroup1) return null;
 
   return (
     <HorizontalScroll 
+      ref={scrollRef}
       className="flex-1 h-full min-w-0"
       containerClassName="flex items-center gap-2 px-4 h-full"
       scrollAmount={200}
