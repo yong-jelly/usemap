@@ -1,0 +1,49 @@
+# 최근 30일 등록 회원 목록
+psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -c "
+WITH date_series AS (
+    SELECT generate_series(
+        CURRENT_DATE - INTERVAL '29 days',
+        CURRENT_DATE,
+        INTERVAL '1 day'
+    )::date AS registration_date
+),
+daily_registrations AS (
+    SELECT
+        DATE(created_at AT TIME ZONE 'Asia/Seoul') AS registration_date,
+        COUNT(*) AS user_count
+    FROM public.tbl_user_profile
+    WHERE created_at >= (CURRENT_DATE - INTERVAL '29 days')::timestamp AT TIME ZONE 'Asia/Seoul'
+    GROUP BY DATE(created_at AT TIME ZONE 'Asia/Seoul')
+)
+SELECT
+    ds.registration_date AS date,
+    COALESCE(dr.user_count, 0) AS count
+FROM date_series ds
+LEFT JOIN daily_registrations dr ON ds.registration_date = dr.registration_date
+ORDER BY ds.registration_date;
+"
+
+# 최근 30일 등록 회원 목록 (auth.users 기준)
+psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -c "
+WITH date_series AS (
+    SELECT generate_series(
+        CURRENT_DATE - INTERVAL '29 days',
+        CURRENT_DATE,
+        INTERVAL '1 day'
+    )::date AS registration_date
+),
+daily_registrations AS (
+    SELECT
+        DATE(created_at AT TIME ZONE 'Asia/Seoul') AS registration_date,
+        COUNT(*) AS user_count
+    FROM auth.users
+    WHERE created_at >= (CURRENT_DATE - INTERVAL '29 days')::timestamp AT TIME ZONE 'Asia/Seoul'
+    GROUP BY DATE(created_at AT TIME ZONE 'Asia/Seoul')
+)
+SELECT
+    ds.registration_date AS date,
+    COALESCE(dr.user_count, 0) AS count
+FROM date_series ds
+LEFT JOIN daily_registrations dr ON ds.registration_date = dr.registration_date
+ORDER BY ds.registration_date;
+"

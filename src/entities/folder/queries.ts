@@ -67,7 +67,7 @@ export function useUserSharedFolders(userId: string) {
 }
 
 /**
- * 내 피드 무한 스크롤 조회
+ * 내 피드 무한 스크롤 조회 (v5: Fast Path 최적화)
  */
 export function useMyFeed(
   filters: { 

@@ -14,3 +14,7 @@ SELECT
 FROM recent
 GROUP BY category, category_code
 ORDER BY cnt DESC, category, category_code;
+
+
+
+select * from tbl_search_history order by created_at desc limit 100;

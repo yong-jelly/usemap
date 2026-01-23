@@ -177,7 +177,7 @@ export const folderApi = {
   },
 
   /**
-   * 내 피드 조회
+   * 내 피드 조회 (v5: Fast Path 최적화)
    */
   getMyFeed: async (params: { 
     limit?: number; 
@@ -188,7 +188,7 @@ export const folderApi = {
     userLat?: number | null;
     userLng?: number | null;
   } = {}) => {
-    const response = await apiClient.rpc<any>("v4_get_my_feed", {
+    const response = await apiClient.rpc<any>("v5_get_my_feed", {
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_price_min: params.price_min || null,
