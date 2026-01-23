@@ -195,7 +195,10 @@ export function ExplorerPage() {
   return (
     <div className="flex flex-col min-h-dvh bg-white dark:bg-surface-950">
       {/* --- 통합 고정 헤더 --- */}
-      <header className="fixed top-0 inset-x-0 z-50 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 transition-all duration-300 h-[109px]">
+      <header className={cn(
+        "fixed top-0 inset-x-0 z-50 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 transition-all duration-300",
+        isSearching ? "h-[64px]" : "h-[109px]"
+      )}>
         <div className="max-w-lg mx-auto flex flex-col h-full">
           {/* 상단: 검색 영역 */}
           <div className="h-[64px] flex items-center px-5 gap-3">
@@ -278,19 +281,21 @@ export function ExplorerPage() {
           </div>
 
           {/* 하단: 지역 필터 영역 */}
-          <div className="h-11 flex items-center border-t border-surface-50 dark:border-surface-900 relative">
-            <button 
-              onClick={() => setIsRegionSheetOpen(true)}
-              className="flex items-center gap-1.5 pl-6 pr-5 h-full border-r border-surface-50 dark:border-surface-900 text-[14px] text-surface-900 dark:text-white shrink-0 active:bg-surface-50 transition-colors bg-white dark:bg-surface-950 z-10"
-            >
-              {filters.group1} <ChevronDown className="ml-0.5 size-4 text-surface-500 stroke-[3px]" />
-            </button>
-            <DistrictChips 
-              selectedGroup1={filters.group1} 
-              selectedGroup2={filters.group2} 
-              onSelect={(g2) => setFilters(prev => ({ ...prev, group2: g2 }))} 
-            />
-          </div>
+          {!isSearching && (
+            <div className="h-11 flex items-center border-t border-surface-50 dark:border-surface-900 relative">
+              <button 
+                onClick={() => setIsRegionSheetOpen(true)}
+                className="flex items-center gap-1.5 pl-6 pr-5 h-full border-r border-surface-50 dark:border-surface-900 text-[14px] text-surface-900 dark:text-white shrink-0 active:bg-surface-50 transition-colors bg-white dark:bg-surface-950 z-10"
+              >
+                {filters.group1} <ChevronDown className="ml-0.5 size-4 text-surface-500 stroke-[3px]" />
+              </button>
+              <DistrictChips 
+                selectedGroup1={filters.group1} 
+                selectedGroup2={filters.group2} 
+                onSelect={(g2) => setFilters(prev => ({ ...prev, group2: g2 }))} 
+              />
+            </div>
+          )}
         </div>
       </header>
 
@@ -381,7 +386,10 @@ export function ExplorerPage() {
       )}
 
       {/* --- 메인 콘텐츠 --- */}
-      <main className="flex-1 w-full max-w-lg mx-auto pb-20 pt-[109px]">
+      <main className={cn(
+        "flex-1 w-full max-w-lg mx-auto pb-20",
+        isSearching ? "pt-[64px]" : "pt-[109px]"
+      )}>
         {isSearchLoading || (isLoading && places.length === 0) ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="size-8 text-primary-500 animate-spin" />
