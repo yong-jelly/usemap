@@ -130,6 +130,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [showVisitHistoryModal, setShowVisitHistoryModal] = useState(false);
   const [showContentAddForm, setShowContentAddForm] = useState(false);
   const [contentUrlInput, setContentUrlInput] = useState('');
+  const [contentFormError, setContentFormError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 10;
 
@@ -380,6 +381,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     if (!url) return;
     
     setIsRequestProcessing(true);
+    setContentFormError(null);
     setRetryCount(0);
     
     try {
@@ -421,7 +423,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         title = communityResults.title;
         metadata = communityResults;
       } else {
-        throw new Error('지원되지 않는 서비스 링크입니다. (유튜브, 다모앙, 클리앙, 보배드림 지원)');
+        throw new Error('지원되지 않는 서비스 링크입니다.');
       }
 
       await upsertPlaceFeatureMutation.mutateAsync({
@@ -435,7 +437,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
       setContentUrlInput('');
       setShowContentAddForm(false);
     } catch (e: any) { 
-      alert(e.message); 
+      setContentFormError(e.message); 
     } finally { 
       setIsRequestProcessing(false);
       setRetryCount(0);
@@ -926,12 +928,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   <div className="mb-6">
                     <ContentForm 
                       isProcessing={isRequestProcessing}
+                      error={contentFormError}
                       onSubmit={async (url) => {
                         await handleAddFeature(url);
                       }}
                       onCancel={() => {
                         setShowContentAddForm(false);
                         setContentUrlInput('');
+                        setContentFormError(null);
                       }}
                     />
                   </div>

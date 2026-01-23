@@ -45,3 +45,20 @@ export const Processing: Story = {
     ),
   ],
 };
+
+export const Error: Story = {
+  args: {
+    initialUrl: "invalid-url",
+    error: "유효한 YouTube URL이 아닙니다.",
+    onSubmit: async () => {},
+    onCancel: () => {},
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[400px]">
+        <Story />
+      </div>
+    ),
+  ],
+};
+

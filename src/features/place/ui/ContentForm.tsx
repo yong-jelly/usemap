@@ -8,6 +8,8 @@ interface ContentFormProps {
   initialUrl?: string;
   /** 처리 중 여부 */
   isProcessing?: boolean;
+  /** 에러 메시지 */
+  error?: string | null;
   /** 제출 핸들러 */
   onSubmit: (url: string) => Promise<void>;
   /** 취소 핸들러 */
@@ -20,6 +22,7 @@ interface ContentFormProps {
 export function ContentForm({
   initialUrl = "",
   isProcessing = false,
+  error = null,
   onSubmit,
   onCancel,
 }: ContentFormProps) {
@@ -35,33 +38,32 @@ export function ContentForm({
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-surface-500">YouTube 또는 커뮤니티 링크</span>
-          <button 
-            onClick={onCancel} 
-            className="p-1 text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors"
-            disabled={isProcessing}
-          >
-            <X className="size-4" />
-          </button>
         </div>
 
-        <Input 
-          placeholder="유튜브 또는 커뮤니티(다모앙, 클리앙 등) 링크를 입력하세요" 
-          className="text-base h-12 bg-surface-50 dark:bg-surface-950 border-none focus-visible:ring-1 focus-visible:ring-primary-500"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          autoFocus
-          disabled={isProcessing}
-        />
-
-        <div className="flex items-center gap-3 px-1">
-          <div className="flex items-center gap-1.5 text-[12px] text-surface-400">
-            <Youtube className="size-3.5 text-rose-500" />
-            <span>YouTube</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[12px] text-surface-400">
-            <MessageCircle className="size-3.5 text-emerald-500" />
-            <span>커뮤니티</span>
-          </div>
+        <div className="space-y-2">
+          <Input 
+            placeholder="유튜브 또는 커뮤니티(다모앙, 클리앙 등) 링크를 입력하세요" 
+            className={cn(
+              "text-base h-12 bg-surface-50 dark:bg-surface-950 border-none focus-visible:ring-1 focus-visible:ring-primary-500",
+              error && "ring-1 ring-rose-500 focus-visible:ring-rose-500"
+            )}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            autoFocus
+            disabled={isProcessing}
+          />
+          
+          {error && (
+            <p className="text-[12px] text-rose-500 px-1 font-medium animate-in fade-in slide-in-from-top-1">
+              {error}
+            </p>
+          )}
+          
+          {!error && (
+            <p className="text-[11px] text-surface-400 px-1">
+              유튜브, 다모앙, 클리앙, 보배드림 링크를 지원합니다.
+            </p>
+          )}
         </div>
       </div>
 
