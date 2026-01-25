@@ -89,18 +89,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const { data: reviews = [] } = usePlaceUserReviews(placeId!);
   const { data: placeFeaturesData = [], refetch: refetchFeatures } = usePlaceFeatures(placeId!);
   
-  // details 데이터에 포함된 features를 우선 사용하고, 없으면 placeFeaturesData 사용
-  const allFeatures = useMemo(() => {
-    // details 자체에 features가 있는 경우, 또는 details.place_data.features에 있는 경우 모두 확인
-    const featuresFromDetails = details?.features || (details as any)?.place_data?.features;
-    
-    // 만약 details에서 온 데이터가 비어있다면 placeFeaturesData를 사용
-    if (!featuresFromDetails || featuresFromDetails.length === 0) {
-      return placeFeaturesData || [];
-    }
-    
-    return featuresFromDetails;
-  }, [details, placeFeaturesData]);
+  // 관련 콘텐츠는 v1_get_place_features (placeFeaturesData)만 사용
+  const allFeatures = placeFeaturesData;
 
   const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
   const { data: visitStats } = useVisitStats(placeId!);
