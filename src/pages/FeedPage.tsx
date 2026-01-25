@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useMyFeed, usePublicFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets";
@@ -24,16 +24,30 @@ import { useUserLocations } from "@/entities/location";
 
 export function FeedPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useUserStore();
   const { openLogin } = useAuthModalStore();
   const { show: showPlaceModal } = usePlacePopup();
   
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
 
-  // 위치 및 정렬 상태
-  const [sortBy, setSortBy] = useState<'recent' | 'distance'>('recent');
+  // 위치 및 정렬 상태 - URL 쿼리 파라미터와 동기화
+  const sortParam = searchParams.get('sort');
+  const sortBy: 'recent' | 'distance' = (sortParam === 'distance' ? 'distance' : 'recent');
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; id: string } | null>(null);
+
+  // URL 쿼리 파라미터 초기화 (없으면 기본값 'recent' 설정)
+  useEffect(() => {
+    if (!sortParam) {
+      setSearchParams({ sort: 'recent' }, { replace: true });
+    }
+  }, [sortParam, setSearchParams]);
+
+  // sortBy 변경 시 스크롤 초기화
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [sortBy]);
 
   const { data: userLocations } = useUserLocations({ limit: 1 }, { enabled: isAuthenticated });
   
@@ -50,10 +64,16 @@ export function FeedPage() {
 
   const handleSortByDistance = () => {
     trackEvent("feed_sort_click", { type: "distance" });
-    setSortBy('distance');
     if (!selectedLocation) {
       setIsLocationSheetOpen(true);
+      return;
     }
+    setSearchParams({ sort: 'distance' }, { replace: true });
+  };
+
+  const handleSortByRecent = () => {
+    trackEvent("feed_sort_click", { type: "recent" });
+    setSearchParams({ sort: 'recent' }, { replace: true });
   };
 
   const handleLayoutToggle = () => {
@@ -68,20 +88,12 @@ export function FeedPage() {
     fetchNextPage, 
     hasNextPage, 
     isFetchingNextPage, 
-    isLoading,
-    refetch
+    isLoading 
   } = useMyFeed({
     sortBy,
     userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
     userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
   }, { enabled: isAuthenticated });
-
-  // sortBy나 selectedLocation 변경 시 데이터 다시 불러오기
-  useEffect(() => {
-    if (isAuthenticated) {
-      refetch();
-    }
-  }, [sortBy, selectedLocation, isAuthenticated, refetch]);
 
   // 공개 피드 데이터 (비로그인용)
   const { data: communityFeed, isLoading: isLoadingCommunity } = usePublicFeed(
@@ -183,9 +195,13 @@ export function FeedPage() {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
 
+  const feedItems = data?.pages.flatMap(page => page) || [];
+
   useEffect(() => {
+    if (!isAuthenticated || !hasNextPage || isFetchingNextPage) return;
+
     const currentTarget = observerTarget.current;
-    if (!isAuthenticated || !hasNextPage || !currentTarget) return;
+    if (!currentTarget) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -199,11 +215,9 @@ export function FeedPage() {
     observer.observe(currentTarget);
 
     return () => {
-      observer.unobserve(currentTarget);
+      observer.disconnect();
     };
-  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage, layout]);
-
-  const feedItems = data?.pages.flatMap(page => page) || [];
+  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage, sortBy, feedItems.length]);
 
   return (
     <div 
@@ -225,7 +239,7 @@ export function FeedPage() {
                 {/* 정렬 전환 버튼 */}
                 <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
                   <button 
-                    onClick={() => setSortBy('recent')}
+                    onClick={handleSortByRecent}
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
                       sortBy === 'recent' 
@@ -375,14 +389,18 @@ export function FeedPage() {
             )}>
               {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
               
-              {hasNextPage && (
-                <div ref={observerTarget} className={cn(
+              <div 
+                ref={observerTarget} 
+                className={cn(
                   "py-12 flex justify-center",
-                  layout === 'grid' && "col-span-3"
-                )}>
+                  layout === 'grid' && "col-span-3",
+                  !hasNextPage && "hidden"
+                )}
+              >
+                {isFetchingNextPage && (
                   <Loader2 className="size-6 text-surface-300 animate-spin" />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4">
@@ -411,7 +429,9 @@ export function FeedPage() {
         onSelect={(lat, lng, id) => {
           setSelectedLocation({ lat, lng, id });
           setIsLocationSheetOpen(false);
-          setSortBy('distance');
+          if (sortBy !== 'distance') {
+            setSearchParams({ sort: 'distance' }, { replace: true });
+          }
         }}
         selectedId={selectedLocation?.id}
       />

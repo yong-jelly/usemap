@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Instagram, MessageCircle } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { ago } from "@/shared/lib/date";
 import type { Feature } from "@/entities/place/types";
@@ -15,7 +15,7 @@ interface FeatureCardProps {
 }
 
 /**
- * 관련 콘텐츠(유튜브/커뮤니티) 카드 컴포넌트
+ * 관련 콘텐츠(유튜브/커뮤니티/소셜) 카드 컴포넌트
  */
 export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: FeatureCardProps) {
   const { platform_type, content_url, title, metadata } = feature;
@@ -51,6 +51,63 @@ export function FeatureCard({ feature, getPlatformName, isOwner, onDelete }: Fea
                 </>
               )}
             </p>
+          </div>
+        </a>
+        {isOwner && onDelete && (
+          <button
+            onClick={onDelete}
+            className="absolute top-1/2 -right-1 -translate-y-1/2 p-2 text-surface-300 hover:text-rose-500 transition-all"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (platform_type === "social") {
+    const isThreads = metadata?.service === 'threads';
+    const isInstagram = metadata?.service === 'instagram';
+
+    return (
+      <div className="relative group w-full">
+        <a
+          href={content_url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-3 p-2.5 bg-white dark:bg-surface-900 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+        >
+          <div className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+            isThreads ? "bg-black text-white" : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white"
+          )}>
+            {isInstagram ? <Instagram className="size-5" /> : <MessageCircle className="size-5" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-[13px] font-medium truncate dark:text-surface-100">
+              {title || (isThreads ? "Threads Post" : "Instagram Post")}
+            </h4>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className={cn(
+                "text-[10px] font-bold uppercase",
+                isThreads ? "text-surface-900 dark:text-surface-100" : "text-rose-500"
+              )}>
+                {metadata?.service}
+              </span>
+              {metadata?.username && (
+                <span className="text-[10px] text-surface-500 font-medium">
+                  {metadata.username}
+                </span>
+              )}
+              {feature.created_at && (
+                <>
+                  <span className="text-surface-300 text-[10px]">·</span>
+                  <span className="text-[10px] text-surface-400">
+                    {ago(feature.created_at)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </a>
         {isOwner && onDelete && (

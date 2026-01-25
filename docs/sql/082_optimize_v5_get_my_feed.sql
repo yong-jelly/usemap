@@ -149,7 +149,8 @@ BEGIN
         early_limited AS MATERIALIZED (
             SELECT * FROM (
                 SELECT DISTINCT ON (pid) type, sid, pid, added_time, fi_comment
-                FROM raw_feed_items
+                FROM raw_feed_items rfi
+                WHERE EXISTS (SELECT 1 FROM public.tbl_place p WHERE p.id = rfi.pid)
                 ORDER BY pid, added_time DESC
             ) sub
             ORDER BY added_time DESC

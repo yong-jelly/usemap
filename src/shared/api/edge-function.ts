@@ -69,3 +69,13 @@ export async function searchPlaceService(query: string) {
     code: result.results?.code || 500
   };
 }
+
+/**
+ * 소셜 URL 파싱 서비스 (fn_v1_parse_social_url Edge Function)
+ * Threads, Instagram 등의 소셜 URL을 파싱하여 메타데이터를 추출하고 저장합니다.
+ */
+export async function parseSocialUrlService(url: string, placeId: string) {
+  return callSupabaseFunction('fn_v1_parse_social_url', {
+    body: { url, place_id: placeId },
+  });
+}

@@ -533,3 +533,13 @@ export function useFeaturePlacesForMap(params: {
     staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 }
+
+/**
+ * 특정 장소의 피처 목록 캐시를 무효화하는 Hook
+ */
+export function useInvalidatePlaceFeatures() {
+  const queryClient = useQueryClient();
+  return (placeId: string) => {
+    return queryClient.invalidateQueries({ queryKey: placeKeys.features(placeId) });
+  };
+}

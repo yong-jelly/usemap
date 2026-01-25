@@ -34,7 +34,8 @@ import {
   useDeletePlace,
   useToggleLike,
   useToggleSave,
-  useVisitStats
+  useVisitStats,
+  useInvalidatePlaceFeatures
 } from "@/entities/place/queries";
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
@@ -60,7 +61,11 @@ import { ContentForm } from "./ContentForm";
 import { cn } from "@/shared/lib/utils";
 import { safeFormatDate } from "@/shared/lib/date";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
-import { requestYouTubeMetaService, requestCommunityMetaService } from "@/shared/api/edge-function";
+import { 
+  requestYouTubeMetaService, 
+  requestCommunityMetaService,
+  parseSocialUrlService 
+} from "@/shared/api/edge-function";
 import { uploadReviewImage } from "@/shared/lib/storage";
 import type { PlaceUserReview, Feature, ReviewTag, ReviewImage } from "@/entities/place/types";
 
@@ -82,13 +87,19 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
   const { data: details, isLoading: isDetailsLoading } = usePlaceByIdWithRecentView(placeId!);
   const { data: reviews = [] } = usePlaceUserReviews(placeId!);
-  const { data: placeFeaturesData = [] } = usePlaceFeatures(placeId!);
+  const { data: placeFeaturesData = [], refetch: refetchFeatures } = usePlaceFeatures(placeId!);
   
   // details 데이터에 포함된 features를 우선 사용하고, 없으면 placeFeaturesData 사용
   const allFeatures = useMemo(() => {
     // details 자체에 features가 있는 경우, 또는 details.place_data.features에 있는 경우 모두 확인
     const featuresFromDetails = details?.features || (details as any)?.place_data?.features;
-    return featuresFromDetails || placeFeaturesData || [];
+    
+    // 만약 details에서 온 데이터가 비어있다면 placeFeaturesData를 사용
+    if (!featuresFromDetails || featuresFromDetails.length === 0) {
+      return placeFeaturesData || [];
+    }
+    
+    return featuresFromDetails;
   }, [details, placeFeaturesData]);
 
   const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
@@ -104,6 +115,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const deletePlaceMutation = useDeletePlace();
   const toggleLikeMutation = useToggleLike();
   const toggleSaveMutation = useToggleSave();
+  const invalidatePlaceFeatures = useInvalidatePlaceFeatures();
 
   const isSavedToAnyFolder = useMemo(() => 
     isAuthenticated && myFolders.some((f: any) => f.is_place_in_folder), 
@@ -215,17 +227,25 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
   const youtubeFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'youtube'), [allFeatures]);
   const communityFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'community'), [allFeatures]);
+  const socialFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'social'), [allFeatures]);
   const folderFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'folder'), [allFeatures]);
   const publicUserFeatures = useMemo(() => allFeatures.filter((f: Feature) => f.platform_type === 'public_user'), [allFeatures]);
   
   const displayFeatures = useMemo(() => {
     if (activeContentTab === 'youtube') return youtubeFeatures;
-    if (activeContentTab === 'community') return communityFeatures;
-    return [...youtubeFeatures, ...communityFeatures];
-  }, [activeContentTab, youtubeFeatures, communityFeatures]);
+    if (activeContentTab === 'community') return [...communityFeatures, ...socialFeatures];
+    return [...youtubeFeatures, ...communityFeatures, ...socialFeatures];
+  }, [activeContentTab, youtubeFeatures, communityFeatures, socialFeatures]);
 
-  const hasAnyContent = youtubeFeatures.length > 0 || communityFeatures.length > 0;
-  const hasBothTypes = youtubeFeatures.length > 0 && communityFeatures.length > 0;
+  const hasAnyContent = useMemo(() => 
+    youtubeFeatures.length > 0 || communityFeatures.length > 0 || socialFeatures.length > 0,
+    [youtubeFeatures, communityFeatures, socialFeatures]
+  );
+  
+  const hasBothTypes = useMemo(() => 
+    youtubeFeatures.length > 0 && (communityFeatures.length > 0 || socialFeatures.length > 0),
+    [youtubeFeatures, communityFeatures, socialFeatures]
+  );
   
   const filteredReviews = useMemo(() => {
     const publicReviews = reviews.filter(r => !r.is_private || r.is_my_review);
@@ -392,6 +412,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
       // 플랫폼 자동 판별
       const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
       const isCommunity = ['clien.net', 'damoang.net', 'bobaedream.co.kr'].some(d => url.includes(d));
+      
+      // 소셜 미디어 패턴 체크 (Threads, Instagram)
+      const threadsRegex = /https?:\/\/(?:www\.)?threads\.(?:net|com)\/@[^\/\?#]+\/post\/[^\/\?#]+/;
+      const instagramRegex = /https?:\/\/(?:www\.)?instagram\.com\/(?:p|reels|reel)\/[^\/\?#]+/;
+      const isSocial = threadsRegex.test(url) || instagramRegex.test(url);
 
       if (isYoutube) {
         platform = 'youtube';
@@ -422,6 +447,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         if (!communityResults) throw new Error('커뮤니티 정보를 가져올 수 없습니다.');
         title = communityResults.title;
         metadata = communityResults;
+      } else if (isSocial) {
+        const { error, results } = await parseSocialUrlService(url, placeId!);
+        if (error) throw new Error('소셜 미디어 정보를 가져올 수 없습니다.');
+        
+        // 소셜 콘텐츠 등록 성공 후 목록 갱신
+        await refetchFeatures();
+        await invalidatePlaceFeatures(placeId!);
+        
+        setContentUrlInput('');
+        setShowContentAddForm(false);
+        return;
       } else {
         throw new Error('지원되지 않는 서비스 링크입니다.');
       }
@@ -449,6 +485,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     try {
       await deletePlaceFeatureMutation.mutateAsync(showDeleteFeatureConfirm);
       setShowDeleteFeatureConfirm(null);
+      // 삭제 성공 후 목록 갱신
+      if (placeId) {
+        await refetchFeatures();
+        await invalidatePlaceFeatures(placeId);
+      }
     } catch (e: any) { alert(e.message); }
   };
 
@@ -614,7 +655,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 youtubeCount={youtubeFeatures.length}
                 placeCount={folderFeatures.length}
                 detectiveCount={publicUserFeatures.length}
-                communityCount={communityFeatures.length}
+                communityCount={communityFeatures.length + socialFeatures.length}
                 showStats={false}
               />
 
