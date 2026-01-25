@@ -230,7 +230,7 @@ export function PlaceCard({
               {totalFeaturesCount > 0 && (
                 <div className="absolute top-3 right-3 pointer-events-none">
                   <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
-                    {totalFeaturesCount} 출처
+                    {totalFeaturesCount} 소스
                   </div>
                 </div>
               )}

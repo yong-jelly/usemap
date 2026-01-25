@@ -68,12 +68,20 @@ export function FeedPage() {
     fetchNextPage, 
     hasNextPage, 
     isFetchingNextPage, 
-    isLoading 
+    isLoading,
+    refetch
   } = useMyFeed({
     sortBy,
     userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
     userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
   }, { enabled: isAuthenticated });
+
+  // sortBy나 selectedLocation 변경 시 데이터 다시 불러오기
+  useEffect(() => {
+    if (isAuthenticated) {
+      refetch();
+    }
+  }, [sortBy, selectedLocation, isAuthenticated, refetch]);
 
   // 공개 피드 데이터 (비로그인용)
   const { data: communityFeed, isLoading: isLoadingCommunity } = usePublicFeed(
@@ -176,24 +184,24 @@ export function FeedPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || !hasNextPage || isFetchingNextPage) return;
+    const currentTarget = observerTarget.current;
+    if (!isAuthenticated || !hasNextPage || !currentTarget) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0, rootMargin: '200px' }
+      { threshold: 0.1, rootMargin: '400px' }
     );
 
-    const currentTarget = observerTarget.current;
-    if (currentTarget) observer.observe(currentTarget);
+    observer.observe(currentTarget);
 
     return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
+      observer.unobserve(currentTarget);
     };
-  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage, layout]);
 
   const feedItems = data?.pages.flatMap(page => page) || [];
 
