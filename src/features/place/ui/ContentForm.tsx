@@ -42,7 +42,7 @@ export function ContentForm({
 
         <div className="space-y-2">
           <Input 
-            placeholder="유튜브 또는 커뮤니티(다모앙, 클리앙 등) 링크를 입력하세요" 
+            placeholder="공유하고 싶은 콘텐츠 링크를 입력하세요" 
             className={cn(
               "text-base h-12 bg-surface-50 dark:bg-surface-950 border-none focus-visible:ring-1 focus-visible:ring-primary-500",
               error && "ring-1 ring-rose-500 focus-visible:ring-rose-500"
@@ -61,7 +61,7 @@ export function ContentForm({
           
           {!error && (
             <p className="text-[11px] text-surface-400 px-1">
-              유튜브, 다모앙, 클리앙, 보배드림 링크를 지원합니다.
+              쓰레드, 인스타그램, 유튜브, 다모앙, 클리앙, 보배드림 링크를 지원합니다.
             </p>
           )}
         </div>
