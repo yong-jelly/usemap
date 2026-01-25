@@ -96,6 +96,7 @@ export function PlaceCard({
   };
   
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
+  const totalFeaturesCount = (place.features || []).length;
   const images = place.images || place.image_urls || (place.thumbnail ? [place.thumbnail] : []);
   const displayImages = images.slice(0, maxImages);
 
@@ -226,10 +227,10 @@ export function PlaceCard({
               </div>
 
               {/* 폴더 뱃지 - 플랫한 색상 */}
-              {folders.length > 0 && (
+              {totalFeaturesCount > 0 && (
                 <div className="absolute top-3 right-3 pointer-events-none">
                   <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-full text-[11px] font-medium">
-                    {folders.length} 폴더
+                    {totalFeaturesCount} 출처
                   </div>
                 </div>
               )}
