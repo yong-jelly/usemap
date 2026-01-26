@@ -53,7 +53,6 @@ export function ProfileEditPage() {
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-xl font-medium">프로필 수정</h1>
           </div>
           <button
             onClick={handleSave}
