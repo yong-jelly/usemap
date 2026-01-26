@@ -18,7 +18,9 @@ export function getAvatarUrl(url: string | null | undefined): string | undefined
 
   // Supabase Storage URL 구성
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://xyqpggpilgcdsawuvpzn.supabase.co";
-  return `${supabaseUrl}/storage/v1/object/public/avatars/${url}`;
+  // return `${supabaseUrl}/storage/v1/object/public/avatars/${url}`;
+  // https://xyqpggpilgcdsawuvpzn.supabase.co/storage/v1/object/public/public-profile-avatars/a4a203bf-cac3-4d27-a8c1-175e4e402025/profile-1768996777945.jpeg
+  return `${supabaseUrl}/storage/v1/object/public/public-profile-avatars/${url}`;
 }
 
 /**
