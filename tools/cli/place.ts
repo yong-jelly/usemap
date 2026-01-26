@@ -1,7 +1,7 @@
 /**
  * 네이버 장소(Place) 상세 정보 크롤러 CLI
  * 
- * 사용법: bun run tools/cli/place.ts <placeId1> <placeId2> ...
+ * 사용법: bun run tools/cli/place.ts 1279756975
  */
 
 import { sql, toSqlArray } from '../shared/db';

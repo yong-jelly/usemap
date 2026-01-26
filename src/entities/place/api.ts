@@ -523,6 +523,16 @@ export const placeApi = {
     return response.data;
   },
 
+  /**
+   * 특정 장소 ID(business_id)로 장소 데이터를 직접 조회합니다.
+   */
+  getPlaceByBusinessId: async (businessId: string) => {
+    const response = await apiClient.rpc<{ place_data: Place }>("v1_list_places_by_ids", {
+      p_place_ids: [businessId],
+    });
+    return response.data?.[0]?.place_data || null;
+  },
+
   // =====================================================
   // 지도용 전체 데이터 조회 API (페이지네이션 없음)
   // =====================================================

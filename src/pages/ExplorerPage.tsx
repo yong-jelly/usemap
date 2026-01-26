@@ -149,6 +149,17 @@ export function ExplorerPage() {
     trackEvent("explorer_search_execute", { query: trimmed });
 
     try {
+      // @숫자 패턴인 경우 DB에서 직접 조회
+      if (trimmed.startsWith('@') && /^\d+$/.test(trimmed.slice(1))) {
+        const businessId = trimmed.slice(1);
+        const place = await placeApi.getPlaceByBusinessId(businessId);
+        if (place) {
+          setSearchResults([place]);
+          setIsSearchLoading(false);
+          return;
+        }
+      }
+
       const res = await searchPlaceService(trimmed);
       if (!res.error && res.rows) {
         const uniqueIds = [...new Set(res.rows.map((row: PlaceSearchSummary) => row.id))] as string[];
