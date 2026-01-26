@@ -32,38 +32,58 @@ if (!require("fs").existsSync(dbFullPath)) {
 }
 
 const sqlite = new Database(dbFullPath);
+console.log(`ℹ️  SQLite 데이터베이스 연결됨: ${dbFullPath}`);
 
 // upsert_at 컬럼이 없는 경우를 대비한 자동 마이그레이션
 try {
-  sqlite.run("ALTER TABLE tbl_place ADD COLUMN upsert_at DATETIME");
-  console.log("ℹ️  SQLite: upsert_at 컬럼이 추가되었습니다.");
-} catch (e) {
-  // 이미 컬럼이 존재하는 경우 무시
+  console.log("🔍 SQLite: upsert_at 컬럼 확인 중...");
+  // 컬럼 존재 여부 먼저 확인
+  const tableInfo = sqlite.prepare("PRAGMA table_info(tbl_place)").all() as any[];
+  const hasColumn = tableInfo.some(col => col.name === 'upsert_at');
+  
+  if (!hasColumn) {
+    sqlite.run("ALTER TABLE tbl_place ADD COLUMN upsert_at DATETIME");
+    console.log("✅ SQLite: upsert_at 컬럼이 추가되었습니다.");
+  } else {
+    console.log("ℹ️  SQLite: upsert_at 컬럼이 이미 존재합니다.");
+  }
+} catch (e: any) {
+  console.log("⚠️  SQLite: 컬럼 확인/추가 중 오류 (무시 가능):", e.message);
 }
 
 try {
-  sqlite.run("CREATE INDEX IF NOT EXISTS idx_tbl_place_upsert_at ON tbl_place (upsert_at)");
-  console.log("ℹ️  SQLite: upsert_at 인덱스가 생성/확인되었습니다.");
-} catch (e) {
-  // 인덱스 생성 실패 시 무시
+  console.log("🔍 SQLite: upsert_at 인덱스 확인 중...");
+  // 인덱스 존재 여부 먼저 확인
+  const indexList = sqlite.prepare("PRAGMA index_list(tbl_place)").all() as any[];
+  const hasIndex = indexList.some(idx => idx.name === 'idx_tbl_place_upsert_at');
+  
+  if (!hasIndex) {
+    sqlite.run("CREATE INDEX idx_tbl_place_upsert_at ON tbl_place (upsert_at)");
+    console.log("✅ SQLite: upsert_at 인덱스가 생성되었습니다.");
+  } else {
+    console.log("ℹ️  SQLite: upsert_at 인덱스가 이미 존재합니다.");
+  }
+} catch (e: any) {
+  console.log("⚠️  SQLite: 인덱스 확인/생성 중 오류 (무시 가능):", e.message);
 }
 
 /**
  * 연결 테스트 및 초기화
  */
 async function checkConnections() {
-  console.log("🔍 연결 테스트 중...");
+  console.log("\n🔍 네트워크 및 데이터베이스 연결 테스트 중...");
   
   // 1. SQLite 테스트
   try {
     sqlite.prepare("SELECT 1").get();
-    console.log("✅ SQLite 연결 성공");
+    console.log("✅ SQLite 연결 테스트 성공");
   } catch (e: any) {
     throw new Error(`SQLite 연결 실패: ${e.message}`);
   }
 
   // 2. Supabase 테스트
   try {
+    console.log("📡 Supabase 연결 시도 중 (SELECT now())...");
     const result = await sql`SELECT now() as now`;
     console.log(`✅ Supabase 연결 성공 (서버 시간: ${result[0].now})`);
   } catch (e: any) {
@@ -130,20 +150,11 @@ async function main() {
     process.exit(1);
   }
 
-  const whereClause = isForce ? "" : "WHERE upsert_at IS NULL";
-  console.log(`🔍 대상 데이터 개수 파악 중...`);
-  const totalCountRow = sqlite.prepare(`SELECT COUNT(*) as count FROM tbl_place ${whereClause}`).get() as { count: number };
-  const totalToProcess = totalCountRow.count;
-
-  if (totalToProcess === 0) {
-    console.log("✅ 처리할 데이터가 없습니다.");
-    return;
-  }
-
-  console.log(`📦 총 ${totalToProcess}개의 데이터를 처리해야 합니다.`);
-
   let successCount = 0;
   let failCount = 0;
+
+  const whereClause = isForce ? "" : "WHERE upsert_at IS NULL";
+  console.log(`🚀 데이터 처리를 시작합니다. (배치 크기: ${BATCH_SIZE})`);
 
   while (true) {
     const rows = sqlite.prepare(`
@@ -152,12 +163,16 @@ async function main() {
       LIMIT ${BATCH_SIZE}
     `).all() as any[];
 
-    if (rows.length === 0) break;
+    if (rows.length === 0) {
+      console.log("\n✅ 모든 데이터 처리가 완료되었거나 처리할 데이터가 없습니다.");
+      break;
+    }
 
     const transformedRows = rows.map(transformRow);
     const ids = rows.map(r => r.id);
 
     try {
+      console.log(`📡 Supabase Upsert 중... (${rows.length}개, 누적: ${successCount})`);
       // Supabase Upsert
       // columns를 명시적으로 지정하여 SQLite에 있는 컬럼만 처리
       const columns = Object.keys(transformedRows[0]);
@@ -179,7 +194,7 @@ async function main() {
       })();
 
       successCount += rows.length;
-      console.log(`✅ 처리 중... (${successCount}/${totalToProcess})`);
+      console.log(`✅ 배치 완료 (누적: ${successCount})`);
 
       if (DELAY_MS > 0) {
         await new Promise(resolve => setTimeout(resolve, DELAY_MS));
