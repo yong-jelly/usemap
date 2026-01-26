@@ -410,7 +410,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
       if (isYoutube) {
         platform = 'youtube';
-        const videoId = url.includes('youtu.be') ? url.split('/').pop()?.split('?')[0] : url.match(/[?&]v=([^&]+)/)?.[1];
+        const videoId = url.includes('youtu.be') 
+          ? url.split('/').pop()?.split('?')[0] 
+          : url.includes('/shorts/')
+            ? url.split('/shorts/')[1].split(/[?&]/)[0]
+            : url.match(/[?&]v=([^&]+)/)?.[1];
         if (!videoId) throw new Error('유효한 YouTube URL이 아닙니다.');
         const { error, results } = await requestYouTubeMetaService(videoId);
         if (error) throw new Error('YouTube 정보를 가져올 수 없습니다.');
