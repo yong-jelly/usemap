@@ -7,6 +7,7 @@ import {
   Loader2, 
   FolderHeart
 } from "lucide-react";
+import { getAvatarUrl } from "@/shared/lib/utils";
 
 export function UserSharedFolderPage() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export function UserSharedFolderPage() {
         <div className="flex items-center gap-3 ml-2 flex-1 min-w-0">
           <div className="size-9 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0 border border-surface-200 dark:border-surface-700">
             {ownerAvatar ? (
-              <img src={ownerAvatar} alt={ownerNickname} className="size-full object-cover" />
+              <img src={getAvatarUrl(ownerAvatar)} alt={ownerNickname} className="size-full object-cover" />
             ) : (
               <div className="size-full flex items-center justify-center text-xs font-medium text-surface-400">
                 {ownerNickname.charAt(0)}

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useMySubscribers } from "@/entities/user/queries";
 import { Loader2, Users, User } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 
 export function SubscriberList() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export function SubscriberList() {
                   {/* 프로필 이미지 */}
                   <div className="size-12 rounded-full bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden border border-surface-100 dark:border-surface-800">
                     {sub.profile_image_url ? (
-                      <img src={sub.profile_image_url} alt={sub.nickname} className="w-full h-full object-cover" />
+                      <img src={getAvatarUrl(sub.profile_image_url)} alt={sub.nickname} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-surface-300">
                         <User className="size-6" />

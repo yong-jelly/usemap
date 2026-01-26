@@ -9,6 +9,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * 아바타 URL을 변환합니다.
+ * http가 포함되지 않은 경우 Supabase Storage URL로 변환합니다.
+ */
+export function getAvatarUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http")) return url;
+
+  // Supabase Storage URL 구성
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://xyqpggpilgcdsawuvpzn.supabase.co";
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${url}`;
+}
+
+/**
  * 날짜를 상대적 시간으로 포맷합니다.
  */
 export function formatRelativeTime(date: Date | string): string {

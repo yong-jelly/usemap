@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { ChevronLeft, Share2, Settings, User, CheckCircle, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { useState } from "react";
 import { trackEvent } from "@/shared/lib/gtm";
 
@@ -119,7 +119,7 @@ export function DetailHeader({
         {thumbnailUrl ? (
           <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-surface-100 dark:border-surface-800">
             <img 
-              src={thumbnailUrl} 
+              src={getAvatarUrl(thumbnailUrl)} 
               alt={title} 
               className="w-full h-full object-cover"
             />

@@ -1,5 +1,5 @@
 import { Star, Lock, Pencil, Trash2, MapPin } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { safeFormatDate } from "@/shared/lib/date";
 import { getReviewImageUrl } from "@/shared/lib/storage";
 import type { PlaceUserReview, MyReview } from "@/entities/place/types";
@@ -58,7 +58,7 @@ export function ReviewCard({
       >
         <div className="flex gap-3 mb-2">
           <img
-            src={user_profile?.profile_image_url || "/default-avatar.png"}
+            src={getAvatarUrl(user_profile?.profile_image_url) || "/default-avatar.png"}
             className={cn(
               "size-8 rounded-full bg-surface-100 object-cover",
               onProfileClick && "cursor-pointer"
@@ -206,7 +206,7 @@ export function ReviewCard({
     >
       <div className="flex items-center gap-3">
         <img
-          src={user_profile?.profile_image_url || "/default-avatar.png"}
+          src={getAvatarUrl(user_profile?.profile_image_url) || "/default-avatar.png"}
           className={cn(
             "size-10 rounded-full bg-surface-100 object-cover border border-surface-50 dark:border-surface-800 shadow-sm",
             onProfileClick && "cursor-pointer"

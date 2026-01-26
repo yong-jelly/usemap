@@ -6,7 +6,7 @@ import { User, Users, Lock, Globe, EyeOff, Clock } from "lucide-react";
 import { useToggleFolderSubscription, useMySubscriptions } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { ago, safeFormatDate } from "@/shared/lib/date";
 import React from "react";
 
@@ -91,7 +91,7 @@ export function FolderCard({
           >
             {folder.owner_avatar_url ? (
               <img 
-                src={folder.owner_avatar_url} 
+                src={getAvatarUrl(folder.owner_avatar_url)} 
                 alt={folder.owner_nickname} 
                 className="w-full h-full object-cover" 
                 loading="lazy"
