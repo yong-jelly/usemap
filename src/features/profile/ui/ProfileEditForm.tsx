@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 import { useNavigate } from "react-router";
 import { Camera, X, Loader2, RefreshCw } from "lucide-react";
 import { useUserProfile, useUpsertProfile } from "@/entities/user/queries";
-import { Button, Input } from "@/shared/ui";
+import { Input } from "@/shared/ui";
 import { uploadProfileImage, getProfileImageUrl } from "@/shared/lib/storage";
 import { useUserStore } from "@/entities/user";
 
-export function ProfileEditForm() {
+export const ProfileEditForm = forwardRef((props, ref) => {
   const navigate = useNavigate();
   const { data: profile } = useUserProfile();
   const { mutate: upsertProfile, isPending: isSaving } = useUpsertProfile();
@@ -20,6 +20,13 @@ export function ProfileEditForm() {
   const [error, setError] = useState("");
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    submit: () => {
+      formRef.current?.requestSubmit();
+    }
+  }));
 
   useEffect(() => {
     if (profile) {
@@ -60,6 +67,8 @@ export function ProfileEditForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving || isUploading) return;
+    
     setError("");
 
     if (nickname.length < 2) {
@@ -93,7 +102,7 @@ export function ProfileEditForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       {/* 프로필 이미지 섹션 */}
       <div className="flex flex-col items-center space-y-4">
         <div className="relative group">
@@ -193,32 +202,14 @@ export function ProfileEditForm() {
         </div>
       )}
 
-      {/* 버튼 */}
-      <div className="flex gap-4 pt-4">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => navigate("/profile")}
-          className="flex-1 h-14 rounded-2xl font-medium text-[16px] bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:hover:bg-surface-700"
-          disabled={isSaving || isUploading}
-        >
-          취소
-        </Button>
-        <Button
-          type="submit"
-          className="flex-1 h-14 rounded-2xl font-medium text-[16px] shadow-soft-lg active:scale-[0.98]"
-          disabled={isSaving || isUploading || !nickname.trim()}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              저장 중...
-            </>
-          ) : (
-            "변경사항 저장"
-          )}
-        </Button>
-      </div>
+      {/* 로딩 표시 (저장 중일 때) */}
+      {isSaving && (
+        <div className="flex justify-center pt-4">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        </div>
+      )}
     </form>
   );
-}
+});
+
+ProfileEditForm.displayName = "ProfileEditForm";
