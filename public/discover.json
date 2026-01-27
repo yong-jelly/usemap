@@ -1,53 +1,53 @@
 {
   "users": [
     {
-      "id": "b40e1ddb-912b-408e-abba-9a69e648aa78",
-      "nickname": "wanderplug_6033",
+      "id": "f029e13b-55e2-4169-b668-8bb9d42ddb54",
+      "nickname": "dbtlsdl_9916",
       "avatar_url": null
     },
     {
-      "id": "ebccf428-9340-4206-9b90-2e1fcb6bb31f",
-      "nickname": "solarplane88_9604",
+      "id": "d2289444-7c90-46e4-9d4a-c25c2bd9586e",
+      "nickname": "kth0119_6668",
       "avatar_url": null
     },
     {
-      "id": "49219e75-e3db-4491-b9f5-4207f30d814f",
-      "nickname": "ckw9999_4015",
+      "id": "f23f5080-bb65-48cc-97b9-dba2511c5778",
+      "nickname": "dlfotjr_6654",
       "avatar_url": null
     },
     {
-      "id": "e256f710-1911-4a17-a632-648aaf8dce1a",
-      "nickname": "focus532_3657",
+      "id": "b03da7fd-2f49-4190-b5f9-f793ee62ae70",
+      "nickname": "cesign_9803",
       "avatar_url": null
     },
     {
-      "id": "263cbd8d-7d40-4cf2-9861-687f6a2140a4",
-      "nickname": "fromhappy7_8260",
+      "id": "dbba3aed-b03c-4da1-a8da-eae18181c813",
+      "nickname": "kimht1_1807",
       "avatar_url": null
     },
     {
-      "id": "59696938-811f-4e65-a58a-bd9511cad8f8",
-      "nickname": "ktlim03_3590",
+      "id": "366743fa-5293-48ef-a575-0220303331cd",
+      "nickname": "herohs8520_5091",
       "avatar_url": null
     },
     {
-      "id": "4fd3c60e-6a3c-4af1-97aa-3a9117ec8592",
-      "nickname": "songgs33_5142",
+      "id": "cb72dcb4-5980-427d-9789-868e831e9161",
+      "nickname": "sgryu1122_4157",
       "avatar_url": null
     },
     {
-      "id": "25fccc60-c484-4323-9245-d75bd21bc0c3",
-      "nickname": "junu224_7894",
+      "id": "b0ccb194-9485-4182-bcd7-d6479f5b9daa",
+      "nickname": "jsko88_1971",
       "avatar_url": null
     },
     {
-      "id": "006f2732-c5db-4e9b-8ec1-9b99737ac3f2",
-      "nickname": "fnsechky_8817",
+      "id": "d800f36b-5b20-4a21-a714-870533f5b262",
+      "nickname": "wrcohs_7162",
       "avatar_url": null
     },
     {
-      "id": "07c0d770-11d9-4811-9163-d32aed286b2a",
-      "nickname": "zulurich_2208",
+      "id": "196de46f-456a-407d-ab1b-c5a56fc9c2ed",
+      "nickname": "zion12900_5697",
       "avatar_url": null
     }
   ],
@@ -125,95 +125,154 @@
   ],
   "youtubeChannels": [
     {
-      "title": "discovery",
-      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=discovery",
-      "subscriber_count": 0,
-      "place_count": 147
+      "channel_id": "UCbe8-MJ7-XFMChR8ewrL_kA",
+      "channel_title": "시장한부부",
+      "channel_thumbnail": "https://i.ytimg.com/vi/zY7Puts6GCE/mqdefault.jpg",
+      "place_count": 211,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMThfMTA2/MDAxNzY2MDI4Nzk4ODEw.NS9zJHIazQp4Yxy3BzL4cPhu8wg3ZX4J7EvMXMAgulgg.spb3y-scXIOAclyfV67jNGvBj2sfJmtfjHCadffAILQg.JPEG/20251218_122931.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAyMDFfMjA3/MDAxNzM4Mzg1NjI1MTgx.mam0D85z8BcCHLHztAmPUqS5HjboWjDDamRt0X8C1NUg.6JTTDrSroDuvnJmKE2O4EbCHQs2Y7k2FNpgY7ssfCQ4g.JPEG/1000050247.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MjNfMzcg/MDAxNzQ1MzY3MDQyNzM5.4k13embKvTTzvoswrzezGGEAgY4urxJxx9HwJkDCFLAg.D5m7YjrVpci4VQQUl7EcupUkXC9qQE-opDlo5ooPQQAg.JPEG/20241226_113231.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MjRfNTcg/MDAxNzQ1NTA0MjU5MTg3.WTS6Ml9f2L9OK7WUi8dfv_VCcaCDbCdhU-_2UT2wEkcg._5aZeoSViXP2wct9cfzulI1I2iuS6QnnzpyM48x4HI0g.JPEG/1745504111666.jpg.jpg"
+      ]
     },
     {
-      "title": "local",
-      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=local",
-      "subscriber_count": 0,
-      "place_count": 675
+      "channel_id": "UCp0lOa_qKrhpcIxhmH9-BwQ",
+      "channel_title": "스티브잡부",
+      "channel_thumbnail": "https://i.ytimg.com/vi/zl76mxVq-d4/mqdefault.jpg",
+      "place_count": 78,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTlfMjM2/MDAxNjg0NDc0MzM3NTgx.CkHvBmDv-6WK3VxQWMGeIW1eUGMPRtmw8KHdUTIOIh8g.Ec5YMwhlzmt-W6MTtGSaIm8lYfp7X_zwgHnD8Nho8bQg.JPEG/CAFFAE92-E357-4445-AC71-27EA4E161850.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA5MDlfOTIg/MDAxNjYyNzMyNDkwODU3.QtyCrvbfSDd5kkbnbRA1F7WH2XzG_lb6_OPCovo0oCcg.zHOsDDW4DWXa5tztKKAQmPX_tXoMPAvzY4eYPmRz3AEg.JPEG/20220906_145957.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MjNfNTYg/MDAxNjg3NDg5ODU5MDQw.o_jxNgoTiyzpjPPX6cTwmQzCkbFeN-YTzGmBIoXLX3kg.tBNwPE3pM2g0JIA19ueJAlAvvFBQ_OoYmS_3rZot10Mg.JPEG/IMG_4351.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA5MTdfMjQ5/MDAxNjYzMzkzMTI2MTg0.KvSIwkoXtfpBxS74BvJURm3C_OfBxpHvfGIeVzroyr4g.ddjcDzQDv-4Wyfcewgo8Ka7Dkj5kELWFm41HACVYZ20g.JPEG/A13ACDCB-EFC3-48DD-81A6-C82FEB658CDF.jpeg"
+      ]
     },
     {
-      "title": "popular",
-      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=popular",
-      "subscriber_count": 0,
-      "place_count": 1700
+      "channel_id": "UC1oXmhvYHVI2bApphh3IzuQ",
+      "channel_title": "정육왕 MeatCreator",
+      "channel_thumbnail": "https://i.ytimg.com/vi/Zwoj4wHxSU8/mqdefault.jpg",
+      "place_count": 297,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDZfNSAg/MDAxNzQxMTk0Mjk3MDQ3.t4muLjFu6OPmb9xT1mZyh06JrfhlcvHxR41Qc6iDGMMg.syQSDdl_K-dfsRAX2-WaSshbdIULgwcVl0YDNFF0QpAg.JPEG/20250203_112419.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTExMDFfMjc2/MDAxNzYyMDA2MzQxMzgy.SmLfvY372nQ-a4GvzkZWpF_CxB8GpgQtwOcuaiPvoAAg.L5Pl7FgPMjpfu3tvJoYZc9YpfoU0yeggMu7fQys6YQ8g.JPEG/B2799761-1BDE-42C0-96D4-C8200CE5070E.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAxMDhfMjAy/MDAxNzM2MzIxODI3NTc3.sDc43ebP-EnUthIrHZSE_TpUBkr8L6LamwtgXq47FMkg.eeR3ThGLX_JD9SQSJtR9UzbSSN7l4Adx2fwqGJj2Tokg.JPEG/20250108_151111.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MTVfMTk5/MDAxNzUyNTM5NTAwMDY2.UL2AbXQDZBsf00v9AgWBneLKi-FIrDVcdg4Q6-Lg_7Ug.gZiK2hYIBj5WkvmX2ZbWe3Dm6f_K1Xg_yFndwqCcOA0g.JPEG/A641B3D1-FFC3-4A08-9A9E-41DF641D6CEF.jpeg"
+      ]
+    },
+    {
+      "channel_id": "UC-x55HF1-IilhxZOzwJm7JA",
+      "channel_title": "김사원세끼",
+      "channel_thumbnail": "https://i.ytimg.com/vi/ZR_qwbg-I5c/mqdefault.jpg",
+      "place_count": 221,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MjdfNCAg/MDAxNzUzNjE1NTY0NzEy.eEHK4dwXoJSzieg4yal7YKEfxNBQiyW5ToT6nOpdGaEg.mhCCUszGQObc9AInVlMRuazGpybmjDg0vj-jPiwqpowg.JPEG/20250723_195153.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAxMzBfMjk2/MDAxNzM4MTc0MjMwMzU0.tPT_KQBHnKp3xVv04i0kbwFuq4LlnXZikTi-OyS8qkMg.uev8BySqbq6HI-fWoTUOWBW3kHYYdMv4AmN37yYPuLQg.JPEG/rP1986770.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MjBfMjYw/MDAxNzU4MzQwMTE5MzE4.CMOtUtkbvPEQdczbcDh7eRDOOcxt2gO7FAhnwn-a_N8g.QcVcZab5-NKneTfPg7mJpLbsjrSisH93JlI_2rAcKb4g.JPEG/20250920_121509.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MTFfMTAg/MDAxNzUyMjM5MDc2OTM3.rO4M-CcdZpEst-En5Vv6IMQmO5bEHKCq_YvnYkZJ6Hgg.qhPGUFYFQ1ZXMnBWLdx9rL-PfkBjQcRnJhesF4KpHwcg.JPEG/25D87E3F-E692-466E-9F8B-0C7E8132773B.jpeg"
+      ]
+    },
+    {
+      "channel_id": "UCHy8o-_zR_vHqpPN4uNUvkg",
+      "channel_title": "푸디랜드 FoodieLand",
+      "channel_thumbnail": "https://i.ytimg.com/vi/zQpih2kMXIQ/mqdefault.jpg",
+      "place_count": 55,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MjlfODgg/MDAxNzU2NDcwNDQ1NTk4.Hnkva4TiljAqYSPQJr804ZUT3tZHeirzILZe_JfHCtYg.MPSMA8pR9MEmH2byUxiCUk-Tzxaq7cgKoits1hmMW94g.JPEG/20250812_123232.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MjZfMjg2/MDAxNzQ1NjU1MTUyNzEz.08-r94VPSiIsn_uSt59rIKlNyarKbJpjQeLdT2kDiEIg.VxmftI3Szk8u2_emzQb2ajXdyt0SJSG7JFJK51rh8Esg.JPEG/20250426_171027.jpg.jpg"
+      ]
+    },
+    {
+      "channel_id": "UCl23-Cci_SMqyGXE1T_LYUg",
+      "channel_title": "성시경 SUNG SI KYUNG",
+      "channel_thumbnail": "https://i.ytimg.com/vi/ZZAqSGZjiPo/mqdefault.jpg",
+      "place_count": 180,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMTdfMTAg/MDAxNzY1OTc2MjQ2MzM5.Xy7IJdFBwiqSrP1cqCeiiVgmXNvR61yv4szSO5OScwIg.2DMqlTXyD4ONS3xWihcQXR9g02jn5WTURan8mWpPSZIg.JPEG/27576B92-9E87-4C4D-A301-888F9B3E4EA7.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNjAxMTJfMTQw/MDAxNzY4MTgzMTc2ODE2.Bw2gMarLpZXnKdK2mkURgs70fTq4zxvCMQKfuc_TFYsg.PTUFkWzs-XfLf6uKeMm4cSMgobYjU726dTluXSLwPSQg.JPEG/1768175606210.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MTNfNSAg/MDAxNzU3NzUzOTE1Njg1.ZrnSRwHZK_JBdT8KLcweorqxvTw81vmMPcBMn3EUUD4g.NSEFLTVWSE49estqgiQCKA164g277AptK0HMLCSWUU4g.JPEG/20250913_172628.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMjJfMTgw/MDAxNzQyNjIzMjUyNzY2.TXI4_djX_cRQQVicHuX1TvtpS-49t5hJqU-mFhVsnmwg.YXmoI3RyI6APf0tIOfq43hSO0v1wSxgH1ky7BkdU-JQg.JPEG/20250322_141238.jpg.jpg"
+      ]
+    },
+    {
+      "channel_id": "UCoLPofyAZuuq6v4EWrWRguw",
+      "channel_title": "회사랑RawFishEater",
+      "channel_thumbnail": "https://i.ytimg.com/vi/7erERwQGcSc/mqdefault.jpg",
+      "place_count": 2,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzAxMjVfMTgz/MDAxNjc0NjQ0ODcxMDc1.FTFyHLuZ7KD7us4afPCEicQS4gpQOmRO4ErjbjRG9WAg.u1vq6LLZnTjmWbvX_3qnjQKUQHmhsty8lmdevHRPk00g.JPEG/20230125_185137_02.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MjlfMjU0/MDAxNzUxMTc1MjYyNjQy.5qcBtK0DKo79HTrsORT7MC9gto2hzZR7QWf6v836Uvog.H1_gdQE90YA4EsHrA-xxN05V9F518JrPxWBfSWEPm74g.JPEG/IMG_2832.jpeg"
+      ]
+    },
+    {
+      "channel_id": "UCmJEpV4hLzGWLU5rrdOHMhQ",
+      "channel_title": "더들리",
+      "channel_thumbnail": "https://i.ytimg.com/vi/zSh388SyNsM/mqdefault.jpg",
+      "place_count": 45,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MDVfMTU1/MDAxNzQ2NDM3MjMxMjIz.SdGosD22I7eYAAx_8K6TtiuDr2obAz5C7w22-sd8UE4g.mTfg_WOEvN8cYbPSTURsNJhxwhqil_GEBNagvomqXSQg.JPEG/rP2076569.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MDRfMjA0/MDAxNzU0Mjg5MDY2MTUz.8hGukk3eeKcvAregcC7-og_irsKPPgl4FQosE4h5W9Ag.BtOuWwFbMgUIb1YenrI2_a2munAyssrcS_lyI2zIJLog.JPEG/IMG_1922.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MTNfMjgg/MDAxNzU3NzQxNzI3MTc1.B3fVN4TlYJrdR7jetXEiIoQiK-g8PdHrWjvCTHeEWvUg.ms4UI718H1gTg72wJ900Z_i0Ls-qUfNO7Q4SCu6qEkMg.JPEG/20250910_193734.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDdfMTE2/MDAxNzY1MDU1MzE3NzQ5.JUQFizcoTRnswed2P9w5Wll2PvQ4G9GIe5HPgr72AvIg.a6g6UYA-4Gq_Wm0arU1H9fG1hEDzq7nlLqXtRohtJb0g.JPEG/E542C661-D12F-4049-B483-1F11D9194978.jpeg"
+      ]
+    },
+    {
+      "channel_id": "UCvfhgTwKU9RSo4aJXW0Xy6A",
+      "channel_title": "버거코치",
+      "channel_thumbnail": "https://i.ytimg.com/vi/z7vOAjW2n4A/mqdefault.jpg",
+      "place_count": 32,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MTRfMTI0/MDAxNzQ5OTA5MDA5NTY2.vx3zjl-8P8Iv5H5Ch7QKror_jQI20pov_Uh91xJauvQg.D--pee-P2Mwd_XXELUYRQfE030Z_rZ5mjecDuRE6E3Ug.JPEG/1000028814.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTExMjVfMjgg/MDAxNzY0MDc0NTA3MTYw.azsfUjEXnLZtZp_xhqvfKpzpBk4TMI-HQP3hfL1AztMg.LrSyBf2DXBF4m5pwhZJA74sJ8OB6yXcfKCBOwyNXCUwg.JPEG/2C9F1116-B148-41D8-8E4E-F6B1E5F5993C.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MjZfNjAg/MDAxNzU4ODI5NTk2MDgx.4EJj21Hm6P4mpIbTlwsg7ov1y7O2vAv8bAXyYQHTILgg.G5tSsGUrYWVQBHOPEyqUYSiPtXu_mHqzpRgEWwJRjmUg.JPEG/A4EC4FFF-F78F-407B-B81F-B73967DBB1CF.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MjlfMyAg/MDAxNzUxMTk0NTk3ODQ1.NLEgX2gzObChve9AVnfLAFfhV_PcvoHB3pg8DWezPR4g.OkAh4WZriuJpEQ3O_5F72jxatAbOcEQv3ZsPuTTyi50g.JPEG/20250629_131700.jpg.jpg"
+      ]
+    },
+    {
+      "channel_id": "UCuw1hxBo5mDVUhgMzRDk3aw",
+      "channel_title": "TVCHOSUN - TV조선",
+      "channel_thumbnail": "https://i.ytimg.com/vi/cjpODOPc9eU/mqdefault.jpg",
+      "place_count": 1,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTBfMiAg/MDAxNjgzNjYyODk1NDk1.Jnzw67iqDqqJjUIimru4TuzCHRemH4pfqcokTJN-v7sg.EtqqpiwGreBCwlsPcPksHPHaiPXdAyzAhZwy3E33pPYg.JPEG/20230509_165054.jpg"
+      ]
     }
   ],
   "naverFolders": [
     {
-      "id": 79477241,
-      "title": "저장 많은 피자집 100선⭐",
+      "id": 127386935,
+      "title": "[흑백요리사]출연 셰프 식당 리스트",
       "owner_nickname": "네이버 사용자",
-      "subscriber_count": 14110,
+      "subscriber_count": 95082,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTEwMTBfMjQ5/MDAxNzYwMDkxODY4OTEw.3ToahnaFFRxT6iHxXIROHrhstC3rGjzvrC9GeIL78L0g.Y1D30dHn2oQCvsR2MgwWUNpArbsgxa_f7iLDcI-2ufwg.JPEG/774D3538-DB0C-4AD6-BEFA-4FAAE29A34AB.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNjAxMDRfMTQ5/MDAxNzY3NTI3NzQ5MTQy.3q8Nn_R_LgMY9UKX7zF2SCvHAEBEu44wO_XzYiNU8Ecg.1o5iwDVQwNm65ApuO7c5DuX1v3bNPrUIlsScR9-C06Eg.JPEG/1000032839.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjdfMjg3/MDAxNjk4NDA2MzMwMTc1.Gp4Bv7cSO_XmQDHLmKVdNtwoLYdKxpekDbhif_CLHaAg.IgdF_s76VMBHmn2j9KTvbyx-_Z7appvkIZBKDLt1sC8g.JPEG/upload_23a428b4ef47c3ee15da404802c557da.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTAzMjdfMTY0/MDAxNzQzMDQ4NTc0NzY0.9yyAZTC07fUuDWyh52F9n0LUiECwzF56w_nh7w0B5AIg.ex2ZcSKtdw-smQL1VLW1j_QtyEA-Ztdae3KcGe-TIV0g.JPEG/1743033831409-7.jpg.jpg"
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMTVfMjA4/MDAxNzYwNTAwNDkzODQ5.CM7YPIT_LIiZgajrxS2YV9HmkAJ2pO6K_kH4oxmj21gg.qhpY2Hkw_KwlZ0L6b-ZJTBoQuKXgH88JsmNU6tSipQIg.JPEG/CA312940-42E2-4C0C-8456-6251482A2315.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA3MDdfMTgw/MDAxNjg4NzI0MTEyOTI2.jyAkbw2Ua0xk1qXS9iBbK6xHdTBMdmNwDVU4VggDwqkg.4JDwV0JrqW4esi7kwOkEAf2AGlU97LozFScC2jsJW9og.JPEG/9DFD292E-49B0-4960-B2C4-694DE6207497.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMTRfMjAx/MDAxNzQxOTQ2NDQ3ODE0.tnJkBcf1skGi4vHidMDT8OOfBQkv2fosznb6c_rJXb0g.M3B1OjObN7aBen9ThKGALM3olZ-dTpp26w6ESGNuea0g.JPEG/1000058571.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MDJfMjA1/MDAxNzUxNDE3MzMzNjM4.BzI9C_OLT-kfVX22Cq5iUl4Zl8zQgmNRtX0x728k1mMg.xGFNEh4iWiLyOBHnA6eEBePUBlRxoazDmrM1ZCxExbEg.JPEG/F4F9D175-086C-4297-B175-91FD859B2F96.jpeg"
       ]
     },
     {
-      "id": 79478443,
-      "title": "저장 많은 수제버거 100선⭐",
+      "id": 68734455,
+      "title": "<서울, 가보자고> 저장 TOP100",
       "owner_nickname": "네이버 사용자",
-      "subscriber_count": 14027,
+      "subscriber_count": 45829,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyMzA2MTdfMTA0/MDAxNjg2OTY4MTkwNjkx.woyC37J1iFB6Nc3Hqq2d6D8xckHqjEsO81Ke7giAg5Ag.C_0D2UTlletw5CjB8BREGOVT2oSop8RHm2FJkqe9BWAg.JPEG/1686967668560-13.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTAyMjFfMTQg/MDAxNzQwMTA2MjE2MDYw.Xfpj6aS_kOZDFNKDX7JAuMI750yTbZCaddE8UJBWN9sg.6IkCSzrBnZR9x6nO6cxByaEfFROFrKpdAysZflGrgZog.JPEG/8B6B36FA-3F7E-4CFB-B333-D94DF83F7E4E.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTdfMTgg/MDAxNzQ3MzE3NDk4NDM5.15EOuCOruCp-AMJEBYiWrnlk66n-TqQG66CP8h5WaBog.Xv1244LcMEm8ne2VS0P6F0h68IOvb19Yg2w6L1kir6Yg.JPEG/20250515_171539.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzA0MTBfNDYg/MDAxNjgxMDU5NjI5NTg2.tcEeND_PNrkG4OzZl-lvPULRM5WUXGwIq_mamyETZRUg.8O1UWRK0GiQq7-K-wO2T98R_Bz0wfwnJCBK3ccobJY8g.JPEG/20230317_134017.jpg"
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MDZfOTEg/MDAxNzU3MTI3NzYxNjc1.AVctMlHltpaisdsJXbK9BsfvvG6N9IZVGlbdreFv8K8g.YZgueV8--z_8qW4osXURUhzLhBc_CAZL6V6G99kPB7Yg.JPEG/20250906_112813.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjBfMjk1/MDAxNjk3NzUxMTQ3MTQx.yQCrBuXxs-QUwj83q6II4tIP3WiijS-8pyU7LU9xhPUg.yftmjs-k7apbxkDKSmU2eoKOpblGmC5xKvFBrDx8QNkg.JPEG/upload_d7b6be5770e7d50c6f047a02927afce3.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MDNfMTk5/MDAxNzU2ODc5Mjg0Mzcw.gxuerwSi1GbjxpoJMPk9egHSgmPamfU-GWHwkxtLmncg.kpVJAowhz2uOPVP4Ft6U-uVNlFVZOr3FQ7wFaejLJNEg.JPEG/6050264E-2582-4934-AC9C-D7CA640DB576.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDJfMTQg/MDAxNzQ4ODcwMzcwMDA5.hhTJV0cXf58lgTz3WKjxnMS1-6R3dAjXB4OreY5Kktkg.4Ml2Sari7VWj51V1A3BWHASD04MCIelsTvaRZl3-D10g.JPEG/20250531_172531.jpg"
       ]
     },
     {
-      "id": 80143915,
-      "title": "저장 많은 곱창집 100선⭐",
+      "id": 70268869,
+      "title": "<제주,가보자고> 맛집 TOP100",
       "owner_nickname": "네이버 사용자",
-      "subscriber_count": 13850,
+      "subscriber_count": 38177,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTAzMzBfMTMw/MDAxNzQzMjY3NjU3MDAw.hZhHayIKjleeTL0KuSmdKVig5FL_sk-ecKkpN6BqTY8g.T1DYwgzgSEvgHOLDcsQKFDuOX5_x3qZGvE3wPM1HYzcg.JPEG/B2279217-D3CE-4CA1-880F-B36AF5E9B381.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTA0MDFfMjU0/MDAxNzQzNDc5OTg3OTIx.E8OszDH7W41TM-ibd4U-AqljlyN09QCvWJPXqTLVmMUg.MQMv3U2x8h8Y1Pt9k0MrDgSVYKqTZ3LtsehqIEOneY4g.JPEG/CC892C03-C2BF-4454-85A5-B4989B0EC9D9.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDVfOTYg/MDAxNzQ5MTE2NDI2MDcz.GCkrbuwPBAe2JAIaCiIp8zjF5zpnvlVdsaRzOa1JIbwg.GY13-i0Tjh6TNlzOS7KGNwV8sO_u9cBhCiGQrILvlw4g.JPEG/20250605_183931.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTlfMTUw/MDAxNzQ3NjQzNjE2NzQz.p2nIIJSfrc2hUNp2O0MV_uMs27daFZj0I-YO97JGEZcg.-Q7P96wrILcBhwDJHstzFvF8sqbtIpJLrVZT1deumdQg.JPEG/20250518_192615.jpg.jpg"
-      ]
-    },
-    {
-      "id": 80142358,
-      "title": "저장 많은 돼지갈비집 100선⭐",
-      "owner_nickname": "네이버 사용자",
-      "subscriber_count": 14885,
-      "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTNfODAg/MDAxNjk3MTQyNjk3MjIz.5kONUMk68Mi8WKF8q28DebtQzrXRBzslTC3zBXhreHAg.hAkpcuJeQ3GyPXj9aIQYerOBcJUq0WfS8bOta3ebqSQg.JPEG/image.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjhfMjM0/MDAxNjg1Mjc0ODkxOTY2.s3QhicMAWLlSy7JEJoH2sTacIUpQ9z4rJ_2QVoOw5t8g.F0yzkLz71lkdIjn6WpDEonpQuZ_hKDIHFZUtIJqXge8g.JPEG/IMG_2095.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEwMjNfMjg3/MDAxNzYxMTk2NDUyODI0.kkpSiHKceVwpUnY9lr61puSkSMdkt-grFIIePV_4inUg.mgMIwqOR-1fH_cgrXsq6eH40CI751vLxfJSPg9m13YEg.JPEG/1000097697.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTRfMjkw/MDAxNjk3MjY4NTI0MzU1.W7m3qJANLY5L4858C5SASA213lX5KhFnrZe321giRHAg.tf-RmpLfLkNg1PeSo_UzzbAzeD4ojSf71gPQkY0_atcg.JPEG/upload_6c8ae478cc6053e5fca35853bec99069.jpeg"
-      ]
-    },
-    {
-      "id": 86627332,
-      "title": "⭐️ 성시경 먹텐스팟 ⭐️",
-      "owner_nickname": "네이버 사용자",
-      "subscriber_count": 2457,
-      "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTA5MTZfMzEg/MDAxNzU3OTk4MjkxODk1.cRLbcIEKhFo02cqaqCJaRQJN-nwgo5hb6ZouAkKXAxUg.NtYEO1vGuVHgt6OFtefmFsRkpUypfiLA97Y-xgLNaNog.JPEG/A8FC0F0B-D565-434C-9037-271B88990DC0.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDdfMjI1/MDAxNzY1MDgxOTUxMjYx.SyLZJVso3JtP-3ePCj9nXYKU0-dNQ--VtCVw3blAkK8g.ysOnkM0BSolGEBsv7SsOVtngTIatd43T0LdsyLjePrUg.JPEG/1000526722.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTAzMzFfNTMg/MDAxNzQzMzg4ODA4MDMy.91r5aTLuigAjNuHcRsGlUjIRlxYQPKtQItZpicFnniwg.JnfC5o26AWLiei1PpBIG3TK0Q6Jp26cYe-BP5wa1FIwg.JPEG/_CFL2479.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzA2MjZfMTQ2/MDAxNjg3NzY2NTU5ODg1.4UyLhiUCYEupwMjc0ZxazfySQ6GCF_okWhtZe2ktQrkg.kK4nZ5GnN-v0XPhQ5_VmcZ-FBnqKRYd7m1eyeDLkEHIg.JPEG/7EC1D137-F40A-49D6-89AC-FB7FCFA0D677.jpeg"
-      ]
-    },
-    {
-      "id": 78707665,
-      "title": "저장 많은 숙성회 파는 집 50선⭐️",
-      "owner_nickname": "네이버 사용자",
-      "subscriber_count": 14135,
-      "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTEwMTFfMTUy/MDAxNzYwMTg3MDc1OTg5.sxYpNg8Yr3SDw8VkcR0Jl-BQpLjk6f11YWgfDvE-8S4g.7TZzgsAf-iSzV_-bluj5mwdl6RiJjupDr2kLCN-PAs4g.JPEG/B0C320F1-8DE4-482F-A790-5274AC7DC6FF.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDJfMjAg/MDAxNzY0NjA1ODAwMTc2.5MUxH-bsgXXrcBq1agz0RtuqiUcqleRVDajH_hap-QQg.EMMvpILixWBzfvjS_f8gJHC3nypyxTU_kkylKyJx3YMg.JPEG/IMG_9918.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTlfMjE1/MDAxNjk3NzAyNTAzMDk0.eBqWfwj359PxZ_2EzN5skUleadG-b2i-QBfCvqPUv3kg.C4rfqtxkffcLpoYCsQUXQp0_FUHEu-zHPpRM8ASsbC0g.JPEG/image.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDJfMjI4/MDAxNzQwODk2NzUzOTgx.nOiU2f3HvM9spFwleBoneRsKC9JqpT3lDOVGp8AQAn8g.I5RPJzs1c_5sgoFi2SqjDFg35qPQAGP6zGOZ7qf9UVkg.JPEG/20250221_171841.jpg.jpg"
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjJfMjEg/MDAxNjk3OTI5MjQxMTIx.Za1BK6hFyaGCi5sjJ2jgJnHP8rZwDJJXHFmVYIVeMUIg.9L5rCjS_XiELlsHI7zBz1nk5q5T66YArC7DcMrZrTEcg.JPEG/upload_239e07bfbfa7aa9cfe399d6cc30f98ab.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAyMDRfMTU5/MDAxNjc1NTE2NjkzODk0.cUeICfbn4ltEQj8zGsvSEDmaLZVLEseI-zc_mF6IYY4g.YZQ7B-YwM3GHU79cc1oqkppERIYLHcRBhPB738glquQg.JPEG/00B4E5EC-565D-408C-AF3B-A6906E532196.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MTRfMjQx/MDAxNjg0MDU5MTc3NTk5.M-Slvl3nPtzdgnv8LxIkkukoxHt5ANAD2CXlFNtd6OMg.pDOrB4VDDBKy_PvF5f3DPXV6Q0fK5KnLWwXS4CP2tZ4g.JPEG/IMG_5233.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjVfMzUg/MDAxNjg1MDE0ODg5MzEz.Nn_8X5z0YJeIs_g4Ml0yFZrvADt4euOoX7j3aVrh3TUg.FqNaTGqD2CqaDolz7laqF5VxcmX_8136l3Ob8iDFe_Eg.JPEG/C3AD0187-1245-4640-9523-A56A6E3C4151.jpeg"
       ]
     },
     {
@@ -222,10 +281,34 @@
       "owner_nickname": "네이버 사용자",
       "subscriber_count": 26826,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTlfMjU4/MDAxNzQ3NjM0NjU2MTc4.NMZcrORcMuAygATolg0TY8U1pwqB9Hm5lJ1S43mc6bsg.jMQyNRC202fWN65P8YekqZGbCSwL4JCTceRWWHiDyuEg.JPEG/20250517_124839.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEwMjVfMTEz/MDAxNzYxMzkwNTc2OTY2.lLS1_XN1RGW4rYSSQMNRLA9_FnYxtR0c8qTXj4p53rkg.3Z-CjImuSVnYkxtj_TtaN6pCzzj_CeW7Y9513bMrhv4g.JPEG/50A411CE-2B70-43D8-9355-26B77CF4F09B.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNDAyMDNfMTA0/MDAxNzA2OTYzNjcwMDUw.4Yty0RrXQvgdD_Lrxv0pEDOQHwrGn9F62zfUvIHqi3Yg.35VTQPLrSoce4e_UL97D4jgGpVBNYNUvCwsSuSJXqdwg.JPEG/20240203_181351.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTAyMDJfNzIg/MDAxNzM4NDM0MzQ5MTkw.PSz0JETIwetRKJPcHonxSHklqEX9Xd9Gi2s1PDq4RMUg.3PIQ0l7jWV0wJyv_zSzYivZrg3qkKntTPLOYlsG0N5Mg.JPEG/1000092247.jpg.jpg"
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjhfMTAg/MDAxNjk4NDg2MjY4MTkz.sQfKjREJfWH62yaeCUPXl9Fhgq36ybhv24HUZvaGTqsg.o-k5uz_wCBy3Izz4CDhOm8BQ_G1BaeoQmx8S6o9T9LIg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMjhfMjE1/MDAxNzQzMTE1ODIxNzc0.EswjAiDWiyMGnFzd6sLHGEGNiB_6Hv5-49NqkjifkYcg.88cc89_hYDsuInBW3QXLThZ1oHYHDLPB-v8Qt-KNt8Yg.JPEG/20250326_113709.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MDdfMjcg/MDAxNzQ2NjE5OTA0OTk1._9FZmdmLGqEJu8QczqINlXZZ6hVsGUlaceAf7ecFkhkg.EiVsIK8FUlnB7hyBjNHdW1v3jLhDrgnFlKklE0YnL9Qg.JPEG/AAF34DE9-680E-4949-BEDC-2D98CB65E521.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA0MjlfMTE3/MDAxNjgyNzU5ODE4ODI2.yzstWa2WKWg6LrBwRWB9IuK4z8EgG7j6v9nx-JbkkKMg.4KhTAhGm11vhm4aRCgSS7TR9RqYiIMpuTPsQLR47rMwg.JPEG/E4FFB7AD-2E9B-412D-8D2F-91022A7D0C68.jpeg"
+      ]
+    },
+    {
+      "id": 107171064,
+      "title": "2025 레드리본 맛집 | 서울",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 23444,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MDRfMTAw/MDAxNzQ2MzMyNTUxNTk4.2jvXpc-IMNtvrC4PFMC6c9Liv8OHdqU_AUXCZOkyk_sg.jd0VtUeAt2woob7dwclDwFQOxsgAYfrywMC19j9_CPkg.JPEG/20250421_112341.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDFfMjUz/MDAxNzQwODAxMjU2MzIw.oqSwt2nflm_UmXEgYSp2K2UZA9v9G0y30BQMkxbSJy0g._yTeTFYBPUuqhkn5s2sjsA_-DxOwX-6Hy2KdCgTWkQAg.JPEG/1000053226.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA3MDdfMTgw/MDAxNjg4NzI0MTEyOTI2.jyAkbw2Ua0xk1qXS9iBbK6xHdTBMdmNwDVU4VggDwqkg.4JDwV0JrqW4esi7kwOkEAf2AGlU97LozFScC2jsJW9og.JPEG/9DFD292E-49B0-4960-B2C4-694DE6207497.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MDRfMTQ4/MDAxNzUxNjEyMTkxNDg3.7Xbrc5tVqqhg-0-Ddft-_K8FLeRTWvcBQLNVZIR2zVYg.fu8Vqv0HMoh0nnoDTHvRH9GuSwCJu-8xLxh-uz7cIUsg.JPEG/1751611835384.jpg.jpg"
+      ]
+    },
+    {
+      "id": 77290370,
+      "title": "저장 많은 국밥집 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 18823,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MjRfMTY3/MDAxNzU2MDE0OTU1NTE3.8Eq1ivDlRAojxOtyq-eigAQZWJM0QStHipAqclLZyPkg.KcX6taZETq_qHRuOTgY5KfXtQaMooQOTd0-zb-oIlPQg.JPEG/20250824_144243.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA4MjdfNzEg/MDAxNjYxNTc3MzkxOTgx.7YfO9F9vYFC6U7Lh8LNNilxr93iRMgqSuPQY49T9Uqog.Klr-rfqNciD4u0fL0WFwyzBhEkcjuD3C0e5vhCNustEg.JPEG/CAEE65BD-FC93-405F-B408-2C5325B6E9AB.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MThfODcg/MDAxNzQ3NTU5OTg2Mzcx.EjPNWb5-wsOEcxwGZsmP5xcje16z7BDITeaQLJMdryog.KkOCvrD5mInnYC3ANeO7f_T92masB8YdE6loyhdawF8g.JPEG/20250518_130305.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MjlfMTAx/MDAxNzQ1OTA2NTE1OTMz.phri4Ewc8QCWBADWGOUujSF64MKYDrDSsCmqmE5h-2Mg.ROXfqFJtXsWrdxnhmG2p0dZmolJaCmY_s_pGMuiDsdEg.JPEG/rP1824463.jpg"
       ]
     },
     {
@@ -234,107 +317,100 @@
       "owner_nickname": "네이버 사용자",
       "subscriber_count": 17677,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDFfMTg5/MDAxNzQ4NzcxMTg2NzYx.Sl_jlnmqjHvOePBkXjv8GPkbNXkJSKwKqyCPsrgcTL4g.yu4sTGVYWNR8gzONyTI-qpM-NqyCbqlwskXlCzq7wMAg.JPEG/20250601_184442.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzA0MTZfOTgg/MDAxNjgxNjU1MzEwODIw._l9kHzR1i6SFLbaOqEEkph2ex7g5n95miNI6I7DNI9sg.gqxJY4xD5L_mOWb2DxYkXGKGHIkwt446NF0jrL0Ui2wg.JPEG/20230407_165916.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzAyMTlfMjYw/MDAxNjc2NzY0ODA4MTk2.hG5jrATQucx02ngqLzyJ3H5axF1OTkwD9qXCUSwVThUg.ShGTKxGKk_3czYrUF0SU9muFb1PgW8N9ur2qLINGmPIg.JPEG/20230217_134216.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDFfMjY2/MDAxNzY0NTkxMzk0ODUy.wBQBf2flzzkJ8DAKnLtOyr2qO__WzZpaZHGDva_XXKAg.ay4SUNnd6rBEWuw-RcgSKNwWo0RCM_iCHbmGGpMmBpcg.JPEG/7479ACDC-213F-4A01-A4F9-C4F37EE37E12.jpeg"
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDJfMTQg/MDAxNzQ4ODcwMzcwMDA5.hhTJV0cXf58lgTz3WKjxnMS1-6R3dAjXB4OreY5Kktkg.4Ml2Sari7VWj51V1A3BWHASD04MCIelsTvaRZl3-D10g.JPEG/20250531_172531.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMzBfMjYy/MDAxNzYxNzkxODM4NjAx.RwWVOGdQD1fe1MqZPJ_69WcP-dUPdoJKuWqf5pqdAtEg.U6g0ZAi97KCfqpVRYrpOpfyINLrSf9VH-B5rgIqPxUog.JPEG/1761791831985.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MDVfMjI5/MDAxNzQ2NDM3MjU4MzYz.3ZXwRo8ILrxOd6cKMJfWf47ygbYRpqnDPr1y8C7BPWYg.xnGtHl5RZW1lUXZ8avr2_q_sjaN-Mqr5mUNPb2nW7ZUg.JPEG/BC247762-640F-4AB5-AD31-C85BAAF6794C.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjExMDFfMjQg/MDAxNjY3MjI5MTA0Njgz.MR9Os5xbp-WkGnc2LBF_CFruGkI3aC4dC2NM2lKm2GQg.HVKQxaNqj5tqxsJN6kQ6tgvTaN83yh1OuUrmUxw39E8g.JPEG/B11EA3C2-BAA5-454D-94B8-48B8EE1CACBD.jpeg"
       ]
     },
     {
-      "id": 79076625,
-      "title": "저장 많은 TV 맛집 부산 100선⭐",
+      "id": 80179241,
+      "title": "저장 많은 삼겹살집 100선⭐",
       "owner_nickname": "네이버 사용자",
-      "subscriber_count": 12478,
+      "subscriber_count": 16519,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyMjEyMTVfOTcg/MDAxNjcxMDgxNTkzMDEz.ifCVPtC34DrllsStB0q3JF3ccqF13VK0wMXi4BIYh2Mg.CDlGz_AiX0KhPYSi91Ms4IIDJWyNYjAkdThPSiCrWgUg.JPEG/1000001157.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjJfMjkz/MDAxNjk3OTgxMzA0ODM4.mNVr82_dm6WulOhjaA5b7ojfCQHMZM1YtF_IRcFO_CAg.nWxIeOqrimMez3vIslXeMlY4TQxl7_haTJM9LaSAEQog.JPEG/upload_1a6b75b040739a1568bb55116c67d0e9.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEyMTBfMTA0/MDAxNzAyMTc5NjAzMjE4.-bEVg3C0_awEezlzW930e0K16ZtP-5RSYrSM16JUcksg.kBkdXaNQuCjJzlctFj7SGMmZNnhkvur_d-NnuhnHuv0g.JPEG/%C3%83%C2%AC%C3%82%C2%82%C3%82%C2%AC%C3%83%C2%AC%C3%82%C2%A7%C3%82%C2%843.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMThfNjkg/MDAxNjk3NjA2MDQ3NjIz.aqKdsBgTzCFjBl-mOgL1Ucby5KfSY8kTbfpFN5ozfiog.Z1f0OIOWQkwyxZ48-cF-oTtdCYslU8KPS7C2KSRdFyYg.JPEG/upload_4ff9d92e3904a17502b90f8a413c0e88.jpeg"
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MTRfMjY4/MDAxNzQ0NjMxMzU0MTcw.zpIkUl2cBBv4qRfkDHjip2zrCVjkyAyJ5FZ2ZlpwkEYg.eFyyX_e-7mOYjW-8Nj0FG03uocGFy1mCPCZYGIBwHTkg.JPEG/20250414_195932.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAzMDNfMTg4/MDAxNjc3ODQ0NDE4Mzkz.eTx4OfT_WhZoKxqqhy0jbdAZt6AXcDEc5JYesP7Lmfwg.6aYZOZID2qNhGo-JBF8zlaZ7vJ4faxsbKzVz_ObCv6cg.JPEG/6F98CBAD-6FF4-4E7D-BE24-75FD286D74C2.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjVfMzUg/MDAxNjg1MDE0ODg5MzEz.Nn_8X5z0YJeIs_g4Ml0yFZrvADt4euOoX7j3aVrh3TUg.FqNaTGqD2CqaDolz7laqF5VxcmX_8136l3Ob8iDFe_Eg.JPEG/C3AD0187-1245-4640-9523-A56A6E3C4151.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MTdfMjgy/MDAxNzU4MDc0NDA0OTgz.fMGtdS2ISjsHCYIXLUoRL6zJn7PayM7fNxvHwz7qYj4g.2dB5NtJG-yc5-pxA371TGnIJjFfTSbiK8FxA0wKBAYog.JPEG/290B1A3F-FA69-423F-85AE-6911FA56A8F6.jpeg"
       ]
     },
     {
-      "id": 79077991,
-      "title": "저장 많은 TV 맛집 전북 100선⭐",
+      "id": 79077937,
+      "title": "저장 많은 TV 맛집 서울 100선⭐",
       "owner_nickname": "네이버 사용자",
-      "subscriber_count": 10358,
+      "subscriber_count": 15923,
       "images": [
-        "https://pup-review-phinf.pstatic.net/MjAyMjExMDdfMjIx/MDAxNjY3ODAwNjcyODAy.sRccAMmJQx40k5uytfdBEUCPHwN14akN6X97xrH8n1wg.UKcLBtYDh0MdPQ7dzcIZwUQ5o8aeFlUKG49v0Sw1iB0g.JPEG/EBE979F9-B512-4ECE-9109-86547DF0DAA1.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjBfMTU3/MDAxNjk3ODEwMTQxNjcy.FPpOi92su2uECdNhLF0AcXXKo_nBnBdtRVwGA0ILbTcg.9hDQtitIFHbtju85V659fSblWuBNwhHdI08uxRDK4ZIg.JPEG/upload_07d01c690ed284243f2ff11588ae6029.jpeg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTA0MTVfMTc5/MDAxNzQ0Njg5MzUzNTU4.kD_tcH8xc0wWt_NItz8C-ja9xKdpdv5psXIiNwWO-Ucg.SCmO0_aBoLQ--Y5nUb2mlWwTWODQtYEA8giln41jIA4g.JPEG/20250415_120745.jpg.jpg",
-        "https://pup-review-phinf.pstatic.net/MjAyNTEwMDJfMTI1/MDAxNzU5NDA3NzIyODcy.tW6jpfngTn41jrOWZAAUBpx70ZCHb-LJK_jbB7cHRq8g.gwfZyyCx5_3iskrIP6a1aTrqUV2SwKT8qZSqkjdREBcg.JPEG/1000058797.jpg.jpg"
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDJfMTQg/MDAxNzQ4ODcwMzcwMDA5.hhTJV0cXf58lgTz3WKjxnMS1-6R3dAjXB4OreY5Kktkg.4Ml2Sari7VWj51V1A3BWHASD04MCIelsTvaRZl3-D10g.JPEG/20250531_172531.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMzBfMjYy/MDAxNzYxNzkxODM4NjAx.RwWVOGdQD1fe1MqZPJ_69WcP-dUPdoJKuWqf5pqdAtEg.U6g0ZAi97KCfqpVRYrpOpfyINLrSf9VH-B5rgIqPxUog.JPEG/1761791831985.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MDVfMjI5/MDAxNzQ2NDM3MjU4MzYz.3ZXwRo8ILrxOd6cKMJfWf47ygbYRpqnDPr1y8C7BPWYg.xnGtHl5RZW1lUXZ8avr2_q_sjaN-Mqr5mUNPb2nW7ZUg.JPEG/BC247762-640F-4AB5-AD31-C85BAAF6794C.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjExMDFfMjQg/MDAxNjY3MjI5MTA0Njgz.MR9Os5xbp-WkGnc2LBF_CFruGkI3aC4dC2NM2lKm2GQg.HVKQxaNqj5tqxsJN6kQ6tgvTaN83yh1OuUrmUxw39E8g.JPEG/B11EA3C2-BAA5-454D-94B8-48B8EE1CACBD.jpeg"
+      ]
+    },
+    {
+      "id": 79486136,
+      "title": "저장 많은 기사식당 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 15399,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MDFfMjQ1/MDAxNzQzNTA0MjIzMTAy.P2i36x7JzwLTN1qFcg52m3Csk54yav476u0lXeiN7-Ag.6tiPEFh2c6Tr_nf1pRhxbwFm0EYus8nMD7x4LPKj6Vcg.JPEG/DB287F6F-EA91-4DCC-BC11-26B82A69A9A6.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMDdfMTk0/MDAxNzU5ODM5MTAyNDMy.HPaU1_ZkshhPVuXQnjZore1B4gJ3NXx63LSgsbzIDZgg.SJSlArnQGW0ocCMLuJXajBI-YmW1D60f7j6U7prgRjAg.JPEG/20250919_091037.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTRfMTU1/MDAxNjk3MjgwMDcwNzg5.ew8KOD9416U4NM67kAAR1fc6nJZArnhsJprVmdFouXwg.txJpEQSR3YBhFQisXzzmXHsHGFQY880X_gTnZNAEjE8g.JPEG/upload_62c4ce9435ec77ff76bb3fff6ca3b643.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MzFfNzQg/MDAxNzU2NjA3NDgzODE1.VTL44fHQnjo9rQwYMaLoZvTyc7fcqhhONqFKznxZO_cg.D2Au4F8CMjJATWIMTuzIzstLsdnoH8bdaVVbPnsqNSwg.JPEG/20250830_163739.jpg.jpg"
       ]
     }
   ],
   "publicFolders": [
     {
-      "id": "9f451e21-7bc7-4842-bf68-1f57dbdafd0d",
-      "title": "인생버거",
+      "id": "a15aafa7-8ede-47be-89da-1c7ae7657296",
+      "title": "가본곳만 등록하는 맛집폴더",
       "description": null,
-      "owner_nickname": "우왕굳",
-      "place_count": 1
+      "owner_nickname": "맛카이브",
+      "place_count": 3,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzA3MTFfMjc3/MDAxNjg5MDYyOTU2OTA0.AzGhAO1Sashq_xiw4UhzFbs8d1pEvDqab-QB0PD0KZIg.aGt-C36ptJh0NBVlHdU4rrXP9kdvaUObQzNNDoCSUzUg.JPEG/20230711_105457.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMjA4MDVfMTU4/MDAxNjU5Njc4Mzc1MjA2.qOfMSNFHnPQ37Dm_LnDPgm660pFsW9TX29x6_gztxBwg.QuZOhEwX3cMGzeX3DcgRd09E0VDse1aeP_ZN-pWxkXEg.JPEG/upload_c7e41b93653566a17db82584f4629833.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA3MjBfMjQz/MDAxNjg5ODQzMDIwNDg5.qEIofuz7A1hv_ZIXsqYzYxk8pfmyDsitN5p3LMUP97kg.j2sg8y2FO0hpRdfdFax2HJIuwnVsch2VPsBqAtI--qYg.JPEG/961CFDD6-5493-4F26-BF5C-C06266D38E26.jpeg"
+      ]
     },
     {
-      "id": "ae78ab54-5f0e-4998-b57a-1020087e23a5",
-      "title": "호밀, 통밀빵 맛집",
+      "id": "8f72ad0a-4658-46ca-933a-627876b6305a",
+      "title": "2026년2월-엄빠 서울",
       "description": null,
-      "owner_nickname": "강양순",
-      "place_count": 2
+      "owner_nickname": "우왕굳",
+      "place_count": 5,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMThfMTA2/MDAxNzY2MDI4Nzk4ODEw.NS9zJHIazQp4Yxy3BzL4cPhu8wg3ZX4J7EvMXMAgulgg.spb3y-scXIOAclyfV67jNGvBj2sfJmtfjHCadffAILQg.JPEG/20251218_122931.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMzFfMTEy/MDAxNzY3MTA4Mzc0MTkx.kP8vHn-W2Zj0sEEEiZj_r5_0K1s5t14w9Wj5j_5y1P0g.aRTGx73N7AbNhnz--4-qy6n3p4aapzgWvJhZomZOJx0g.JPEG/A3507A3A-4FE5-41AE-BED0-D26137985FB5.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjBfMjI3/MDAxNjk3Nzk4NTAwOTU5.DNsakBzYvWy3FLZfHX0KDWiaM1OBzyEMSWaXCeo61jsg.cxIaDRdbBZJvYyx4okpW6hGt2nJiE299Y1PsGwqpClog.JPEG/upload_fb783af18e8781392afd5459aa2e751c.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MTVfMTY1/MDAxNzUyNTA4MDk4NzY5.Ffwfu-Vz7PBlPg3QmN1WxWS_djuyTeRVNAtVIHJXJbkg.zaTvwDl7qjV_9htf1Utjw6y9oXmC_oCDbQcJMSuP3ekg.JPEG/20250705_162841.jpg.jpg"
+      ]
+    },
+    {
+      "id": "c7633212-efe2-4849-a881-34300908e62e",
+      "title": "태용쓰 술집",
+      "description": null,
+      "owner_nickname": "우왕굳",
+      "place_count": 4,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MjBfMjc4/MDAxNzQ3NzI3NjEwODYz.s1dgSIyiX1li0KAnVWTDNY-pU0dJvE-pVCkX0RMj__Qg._kvrgGIseEvZ3ofTPZNGM2a4QyFwZ0JC70ihO5Fg8Qwg.JPEG/20250520_114431.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNjAxMTBfMjQ4/MDAxNzY4MDI5NjQ4MTQ1.gR-8LSCPGXV6xI1Lr24510Y3JjFn38GkeiF2rvOLkfAg.mVKfepE3KdSaL-5h1N6OCcOZMPZKCLJt9RkS664nGEUg.JPEG/Screenshot_20260110_162033_Gallery.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MDNfMTcz/MDAxNzU0MTk1NjE0NDUx.llCA0H-zOCu_oeJ6D66nuRAL0npZoy6Qo8IuL5wyHLYg.KCx7o56bqfR3u8j8MwTvZFNzeTQSbdwDmI2j6tv_Hkog.JPEG/9C936AA5-1215-4195-A6D0-8E8840A2E952.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDlfMTI4/MDAxNzQxNTE0MTUyOTI2.EmdQaugloLIF1etKmN4q0YhbXKlIRfc9poJWgJZ_UEYg.YGIvJWxrFV0Z_DUibma41bTn4kR9YFgEPgiPbu7zIWgg.JPEG/20250309_183734.jpg.jpg"
+      ]
     },
     {
       "id": "ce2bd2bd-b361-4d91-afc4-6535f24edb3a",
       "title": "아재의 알콜라이프",
       "description": "기대하세영",
       "owner_nickname": "우왕굳",
-      "place_count": 19
-    },
-    {
-      "id": "89ec37e1-525a-4a35-96c0-9c1ee996a89b",
-      "title": "맛탐1",
-      "description": "11",
-      "owner_nickname": "우왕굳",
-      "place_count": 1
-    },
-    {
-      "id": "4483dc4a-5eb1-4076-b43d-f775605bf372",
-      "title": "test009",
-      "description": "test009",
-      "owner_nickname": "우왕굳",
-      "place_count": 0
-    },
-    {
-      "id": "761b72fa-d729-4f71-a35f-1240f96542fc",
-      "title": "test333",
-      "description": "test333",
-      "owner_nickname": "우왕굳",
-      "place_count": 0
-    },
-    {
-      "id": "e377e658-1979-49ce-bf0d-79bc921eaaf9",
-      "title": "우리 엄마도 좋아하는 맛집",
-      "description": null,
-      "owner_nickname": "강양순",
-      "place_count": 2
-    },
-    {
-      "id": "f115ab35-4d9b-4bb7-82f0-26ce518dd844",
-      "title": "test1",
-      "description": "test2",
-      "owner_nickname": "우왕굳",
-      "place_count": 0
-    },
-    {
-      "id": "1310c12f-65bf-489e-8cb3-2de32b1cca82",
-      "title": "test",
-      "description": "test",
-      "owner_nickname": "우왕굳",
-      "place_count": 1
-    },
-    {
-      "id": "39a3f124-2a34-44b7-8348-37c9f4f5b9ab",
-      "title": "공개",
-      "description": "1",
-      "owner_nickname": "우왕굳",
-      "place_count": 0
+      "place_count": 19,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MjBfMjc4/MDAxNzQ3NzI3NjEwODYz.s1dgSIyiX1li0KAnVWTDNY-pU0dJvE-pVCkX0RMj__Qg._kvrgGIseEvZ3ofTPZNGM2a4QyFwZ0JC70ihO5Fg8Qwg.JPEG/20250520_114431.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA4MDNfMTcz/MDAxNzU0MTk1NjE0NDUx.llCA0H-zOCu_oeJ6D66nuRAL0npZoy6Qo8IuL5wyHLYg.KCx7o56bqfR3u8j8MwTvZFNzeTQSbdwDmI2j6tv_Hkog.JPEG/9C936AA5-1215-4195-A6D0-8E8840A2E952.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDlfMTI4/MDAxNzQxNTE0MTUyOTI2.EmdQaugloLIF1etKmN4q0YhbXKlIRfc9poJWgJZ_UEYg.YGIvJWxrFV0Z_DUibma41bTn4kR9YFgEPgiPbu7zIWgg.JPEG/20250309_183734.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA3MTVfMTY1/MDAxNzUyNTA4MDk4NzY5.Ffwfu-Vz7PBlPg3QmN1WxWS_djuyTeRVNAtVIHJXJbkg.zaTvwDl7qjV_9htf1Utjw6y9oXmC_oCDbQcJMSuP3ekg.JPEG/20250705_162841.jpg.jpg"
+      ]
     }
   ]
 }

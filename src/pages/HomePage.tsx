@@ -91,7 +91,7 @@ function getFirstImage(item: any): string | undefined {
 function getImages(item: any, count: number = 4): string[] {
   if (!item) return [];
   
-  // 이미 images 배열이 있는 경우 (예: discover.json의 naverFolders)
+  // 이미 images 배열이 있는 경우 (예: discover.json의 naverFolders, youtubeChannels)
   if (Array.isArray(item.images) && item.images.length > 0) {
     return [...item.images].sort(() => Math.random() - 0.5).slice(0, count);
   }
@@ -193,11 +193,9 @@ export function HomePage() {
         </div>
       </header>
 
-      {/* Stories - 사용자 및 유튜브 채널 목업 */}
+      {/* Stories - 사용자 및 유튜브 채널 */}
       <section className="py-4 px-4">
         <div className="flex gap-3 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {/* [개발용 목업] 사용자 및 유튜브 채널 목록을 표시합니다. 
-              추후 API에서 사용자(users) 및 유튜브 채널(youtubeChannels) 데이터를 받아올 예정입니다. */}
           {isDiscoverLoading ? (
             [...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0">
@@ -207,22 +205,22 @@ export function HomePage() {
             ))
           ) : (
             <>
-              {/* 사용자 목업 데이터 */}
-              {discoverData?.users?.slice(0, 5).map((user: any, i: number) => (
+              {/* 사용자 데이터 */}
+              {discoverData?.users?.map((user: any, i: number) => (
                 <StoryBox
                   key={`user-${user.id || i}`}
-                  image={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
+                  image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
                   label={user.nickname || '사용자'}
-                  onClick={() => {}}
+                  onClick={() => navigate(`/profile/${user.id}`)}
                 />
               ))}
-              {/* 유튜브 채널 목업 데이터 */}
-              {discoverData?.youtubeChannels?.slice(0, 5).map((channel: any, i: number) => (
+              {/* 유튜브 채널 데이터 */}
+              {discoverData?.youtubeChannels?.map((channel: any, i: number) => (
                 <StoryBox
-                  key={`youtube-${channel.id || i}`}
-                  image={`https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.id || i + 200}`}
-                  label={channel.title || '유튜브'}
-                  onClick={() => {}}
+                  key={`youtube-${channel.channel_id || i}`}
+                  image={channel.channel_thumbnail || `https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.channel_id || i + 200}`}
+                  label={channel.channel_title || '유튜브'}
+                  onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
                   badge="youtube"
                 />
               ))}
@@ -384,10 +382,11 @@ function ForYouContent({
               key={`${item.type}-${item.data.id || item.data.folder_id || item.data.channel_id}`}
               item={item}
               index={index}
+              onPlaceClick={onPlaceClick}
               onClick={() => {
                 if (item.type === 'folder') navigate(`/folder/${item.data.id}`);
-                else if (item.type === 'place') showPlaceModal(item.data.id);
-                else if (item.type === 'naver') navigate(`/feature/detail/folder/${item.data.folder_id}`);
+                else if (item.type === 'place') onPlaceClick(item.data.id);
+                else if (item.type === 'naver') navigate(`/feature/detail/folder/${item.data.id}`);
                 else if (item.type === 'youtube') navigate(`/feature/detail/youtube/${item.data.channel_id}`);
               }}
             />
@@ -454,6 +453,7 @@ function FollowingContent({
               size: index % 4 === 0 ? 'large' : 'normal',
             }}
             index={index}
+            onPlaceClick={onPlaceClick}
             onClick={() => {
               if (sub.subscription_type === 'folder') navigate(`/folder/${sub.feature_id}`);
               else if (sub.subscription_type === 'naver_folder') navigate(`/feature/detail/folder/${sub.feature_id}`);
@@ -619,10 +619,12 @@ function CollectionCard({
   item,
   index,
   onClick,
+  onPlaceClick,
 }: {
   item: any;
   index: number;
   onClick: () => void;
+  onPlaceClick: (id: string) => void;
 }) {
   const data = item.data;
   const images = item.type === 'place' ? [data.thumbnail] : getImages(data, 4);
@@ -632,68 +634,84 @@ function CollectionCard({
   const title = data.title || data.name || data.channel_title;
   const description = item.type === 'place' ? data.category : (data.description || data.memo);
   const placeCount = data.place_count;
-  const ownerName = item.type === 'naver' ? '플레이스' : data.owner_nickname;
-  const ownerAvatar = data.owner_avatar_url;
+  const ownerName = item.type === 'naver' ? '플레이스' : (item.type === 'youtube' ? data.channel_title : data.owner_nickname);
+  const ownerAvatar = item.type === 'youtube' ? data.channel_thumbnail : data.owner_avatar_url;
+
+  // 1개만 있는 항목인지 확인
+  const isSinglePlace = placeCount === 1 || item.type === 'place';
+  const singlePlaceId = item.type === 'place' ? data.id : (data.preview_places?.[0]?.id || data.id);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSinglePlace && singlePlaceId) {
+      onPlaceClick(singlePlaceId);
+    } else {
+      onClick();
+    }
+  };
 
   return (
     <div
-      onClick={onClick}
       className={cn(
         "break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group shadow-sm border transition-all duration-300",
         item.type === 'naver' 
           ? "bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/30 hover:border-green-300 dark:hover:border-green-700" 
+          : item.type === 'youtube'
+          ? "bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30 hover:border-red-300 dark:hover:border-red-700"
           : "bg-white dark:bg-surface-900 border-surface-100/50 dark:border-surface-800"
       )}
     >
-      {/* Image */}
-      {item.type !== 'place' && images.length >= 4 ? (
-        <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
-          {images.slice(0, 4).map((img, i) => (
-            <div key={i} className="aspect-square overflow-hidden">
-              <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-          ))}
-        </div>
-      ) : mainImage ? (
-        <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
-          <img
-            src={convertToNaverResizeImageUrl(mainImage)}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            loading="lazy"
-          />
-          {/* Overlay for Place */}
-          {item.type === 'place' && (
-            <div className="absolute top-3 right-3">
-              <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center gap-1">
-                <Flame className="size-3 text-rose-400" />
-                <span className="text-[10px] font-bold text-white">{data.popularity_score}</span>
+      {/* Image Area */}
+      <div onClick={handleImageClick}>
+        {item.type !== 'place' && images.length >= 4 ? (
+          <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
+            {images.slice(0, 4).map((img, i) => (
+              <div key={i} className="aspect-square overflow-hidden">
+                <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
               </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className={cn(
-          "flex items-center justify-center bg-gradient-to-br",
-          item.type === 'youtube' ? "from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20" :
-          item.type === 'naver' ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20" :
-          item.type === 'place' ? "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700" :
-          "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700",
-          isTall ? "aspect-[3/4]" : "aspect-square"
-        )}>
-          {item.type === 'youtube' && <Youtube className="size-10 text-red-300" />}
-          {item.type === 'naver' && <MapPin className="size-10 text-green-300" />}
-          {item.type === 'place' && <MapPin className="size-10 text-rose-300" />}
-          {item.type === 'folder' && <Heart className="size-10 text-rose-300" />}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : mainImage ? (
+          <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
+            <img
+              src={convertToNaverResizeImageUrl(mainImage)}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+            />
+            {/* Overlay for Place */}
+            {item.type === 'place' && (
+              <div className="absolute top-3 right-3">
+                <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center gap-1">
+                  <Flame className="size-3 text-rose-400" />
+                  <span className="text-[10px] font-bold text-white">{data.popularity_score}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={cn(
+            "flex items-center justify-center bg-gradient-to-br",
+            item.type === 'youtube' ? "from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20" :
+            item.type === 'naver' ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20" :
+            item.type === 'place' ? "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700" :
+            "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700",
+            isTall ? "aspect-[3/4]" : "aspect-square"
+          )}>
+            {item.type === 'youtube' && <Youtube className="size-10 text-red-300" />}
+            {item.type === 'naver' && <MapPin className="size-10 text-green-300" />}
+            {item.type === 'place' && <MapPin className="size-10 text-rose-300" />}
+            {item.type === 'folder' && <Heart className="size-10 text-rose-300" />}
+          </div>
+        )}
+      </div>
 
-      {/* Content */}
-      <div className="p-3">
+      {/* Content Area */}
+      <div className="p-3" onClick={onClick}>
         {/* Type Badge */}
         <div className="mb-2">
           {item.type === 'youtube' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 font-semibold uppercase tracking-wider">유튜브</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-red-500 text-white font-medium uppercase tracking-wider shadow-sm">유튜브</span>
           )}
           {item.type === 'naver' && (
             <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-medium uppercase tracking-wider shadow-sm">네이버</span>
@@ -709,13 +727,20 @@ function CollectionCard({
         {/* Title */}
         <h3 className={cn(
           "text-sm font-medium line-clamp-2 leading-snug mb-1",
-          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white"
+          item.type === 'naver' ? "text-green-900 dark:text-green-50" : 
+          item.type === 'youtube' ? "text-red-900 dark:text-red-50" :
+          "text-surface-900 dark:text-white"
         )}>
           {title}
         </h3>
 
         {description && (
-          <p className="text-[11px] text-surface-400 line-clamp-1 mb-2">{description}</p>
+          <p className={cn(
+            "text-[11px] line-clamp-1 mb-2",
+            item.type === 'naver' ? "text-green-600/70" :
+            item.type === 'youtube' ? "text-red-600/70" :
+            "text-surface-400"
+          )}>{description}</p>
         )}
 
         {/* Footer */}
@@ -724,10 +749,14 @@ function CollectionCard({
             <div className="flex items-center gap-1.5">
               <div className={cn(
                 "w-5 h-5 rounded-full overflow-hidden flex items-center justify-center",
-                item.type === 'naver' ? "bg-green-100 dark:bg-green-900/50" : "bg-surface-100 dark:bg-surface-800"
+                item.type === 'naver' ? "bg-green-100 dark:bg-green-900/50" : 
+                item.type === 'youtube' ? "bg-red-100 dark:bg-red-900/50" :
+                "bg-surface-100 dark:bg-surface-800"
               )}>
                 {item.type === 'naver' ? (
                   <MapPin className="size-3 text-green-600 dark:text-green-400" />
+                ) : item.type === 'youtube' ? (
+                  <img src={ownerAvatar} alt="" className="w-full h-full object-cover" />
                 ) : ownerAvatar ? (
                   <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -736,7 +765,9 @@ function CollectionCard({
               </div>
               <span className={cn(
                 "text-[10px] font-medium",
-                item.type === 'naver' ? "text-green-700 dark:text-green-400" : "text-surface-500"
+                item.type === 'naver' ? "text-green-700 dark:text-green-400" : 
+                item.type === 'youtube' ? "text-red-700 dark:text-red-400" :
+                "text-surface-500"
               )}>{ownerName}</span>
             </div>
           ) : (
@@ -745,7 +776,9 @@ function CollectionCard({
           {placeCount && (
             <span className={cn(
               "text-[10px] font-medium",
-              item.type === 'naver' ? "text-green-600/70 dark:text-green-500/70" : "text-surface-400"
+              item.type === 'naver' ? "text-green-600/70 dark:text-green-500/70" : 
+              item.type === 'youtube' ? "text-red-600/70 dark:text-red-500/70" :
+              "text-surface-400"
             )}>{placeCount}개</span>
           )}
         </div>
