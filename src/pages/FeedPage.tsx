@@ -83,6 +83,9 @@ export function FeedPage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
+  // 거리순 정렬 시 최대 거리 (km)
+  const MAX_DISTANCE_KM = 5;
+
   const { 
     data, 
     fetchNextPage, 
@@ -93,6 +96,7 @@ export function FeedPage() {
     sortBy,
     userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
     userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
+    maxDistanceKm: sortBy === 'distance' ? MAX_DISTANCE_KM : null,
   }, { enabled: isAuthenticated });
 
   // 공개 피드 데이터 (비로그인용)
@@ -290,22 +294,11 @@ export function FeedPage() {
               </div>
             )}
           </div>
-
-          {/* 위치 가이드 메시지 (거리순 정렬인데 위치 정보가 없을 때) */}
-          {isAuthenticated && sortBy === 'distance' && !selectedLocation && (
-            <div className="mt-4 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/50 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-              <Info className="size-4 text-orange-500 shrink-0" />
-              <p className="text-[12px] text-orange-700 dark:text-orange-400 font-medium">
-                위치 정보가 없어 기본 정렬로 보여드려요. 위치를 설정해보세요!
-              </p>
-            </div>
-          )}
         </div>
       </header>
 
       <main className={cn(
-        "flex-1 flex flex-col pt-[80px]",
-        (isAuthenticated && sortBy === 'distance' && !selectedLocation) ? "pt-[110px]" : "pt-[80px]"
+        "flex-1 flex flex-col pt-[80px]"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
@@ -387,6 +380,32 @@ export function FeedPage() {
               "flex-1 pb-20 bg-white dark:bg-surface-950",
               layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5"
             )}>
+              {/* 위치 가이드 메시지 (거리순 정렬인데 위치 정보가 없을 때) */}
+              {sortBy === 'distance' && !selectedLocation && (
+                <div className={cn(
+                  "mx-5 mt-4 mb-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/50 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2",
+                  layout === 'grid' && "col-span-3"
+                )}>
+                  <Info className="size-4 text-orange-500 shrink-0" />
+                  <p className="text-[12px] text-orange-700 dark:text-orange-400 font-medium">
+                    위치 정보가 없어 기본 정렬로 보여드려요. 위치를 설정해보세요!
+                  </p>
+                </div>
+              )}
+              
+              {/* 거리 제한 안내 메시지 (거리순 정렬 + 위치 설정됨) */}
+              {sortBy === 'distance' && selectedLocation && (
+                <div className={cn(
+                  "mx-5 mt-4 mb-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/50 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2",
+                  layout === 'grid' && "col-span-3"
+                )}>
+                  <MapPin className="size-4 text-primary-500 shrink-0" />
+                  <p className="text-[12px] text-primary-700 dark:text-primary-400 font-medium">
+                    현재 위치에서 {MAX_DISTANCE_KM}km 이내 장소를 표시합니다
+                  </p>
+                </div>
+              )}
+
               {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
               
               <div 
@@ -401,8 +420,46 @@ export function FeedPage() {
                   <Loader2 className="size-6 text-surface-300 animate-spin" />
                 )}
               </div>
+              
+              {/* 페이징 끝 메시지 (거리순일 때만) */}
+              {!hasNextPage && sortBy === 'distance' && selectedLocation && feedItems.length > 0 && (
+                <div className={cn(
+                  "py-8 px-6 flex flex-col items-center text-center gap-3",
+                  layout === 'grid' && "col-span-3"
+                )}>
+                  <div className="p-3 rounded-full bg-surface-100 dark:bg-surface-800">
+                    <MapPin className="size-5 text-surface-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-surface-600 dark:text-surface-300">
+                      {MAX_DISTANCE_KM}km 이내 모든 장소를 확인했습니다
+                    </p>
+                    <p className="text-xs text-surface-400 mt-1">
+                      더 먼 거리의 장소는 '최신순' 정렬로 확인해주세요
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : sortBy === 'distance' && selectedLocation ? (
+            // 거리순 정렬인데 데이터 없을 때
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4">
+              <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                <MapPin className="size-10 text-surface-200" />
+              </div>
+              <div>
+                <p className="text-lg font-medium text-surface-900 dark:text-white">{MAX_DISTANCE_KM}km 이내 장소가 없습니다</p>
+                <p className="text-sm text-surface-500 mt-1">구독 중인 피드에서 가까운 장소를 찾지 못했어요</p>
+              </div>
+              <button 
+                onClick={handleSortByRecent}
+                className="mt-2 px-6 py-3 rounded-xl bg-surface-900 text-white dark:bg-white dark:text-black font-medium text-sm"
+              >
+                최신순으로 보기
+              </button>
             </div>
           ) : (
+            // 최신순인데 데이터 없을 때
             <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4">
               <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
                 <Bell className="size-10 text-surface-200" />

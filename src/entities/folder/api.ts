@@ -177,7 +177,7 @@ export const folderApi = {
   },
 
   /**
-   * 내 피드 조회 (v5: Fast Path 최적화)
+   * 내 피드 조회 (v6: 거리순 최적화 - 바운딩 박스 필터링)
    */
   getMyFeed: async (params: { 
     limit?: number; 
@@ -187,8 +187,9 @@ export const folderApi = {
     sortBy?: string;
     userLat?: number | null;
     userLng?: number | null;
+    maxDistanceKm?: number | null;
   } = {}) => {
-    const response = await apiClient.rpc<any>("v5_get_my_feed", {
+    const response = await apiClient.rpc<any>("v6_get_my_feed", {
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_price_min: params.price_min || null,
@@ -196,6 +197,7 @@ export const folderApi = {
       p_sort_by: params.sortBy || 'recent',
       p_user_lat: params.userLat || null,
       p_user_lng: params.userLng || null,
+      p_max_distance_km: params.maxDistanceKm || 5.0,
     });
     return response.data;
   },

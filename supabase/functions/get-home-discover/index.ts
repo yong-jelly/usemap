@@ -4,13 +4,12 @@
  * 기능: 홈 화면 Discover 데이터 통합 조회
  * 작성일: 2026-01-27
  * 설명: 홈 화면에서 사용할 Discover 데이터를 통합 조회합니다.
- *       공개 폴더, 네이버 폴더 랭킹, 유튜브 채널 랭킹, 커뮤니티 지역별 데이터를
+ *       공개 폴더, 인기 음식점, 커뮤니티 지역별 데이터를
  *       병렬로 조회하여 반환합니다.
  * 
  * 관련 테이블:
  *   - tbl_folder: 공개 폴더 목록
- *   - tbl_naver_folder: 네이버 폴더 목록
- *   - tbl_youtube_channel: 유튜브 채널 목록
+ *   - tbl_place: 인기 음식점
  *   - tbl_community_content: 커뮤니티 콘텐츠
  * 
  * 외부 의존성:
@@ -20,7 +19,7 @@
  *   - 없음 (POST 요청)
  * 
  * 응답(Response):
- *   - 성공: { users, naverFolders, youtubeChannels, communityRegions, publicFolders }
+ *   - 성공: { users, popularPlaces, communityRegions, publicFolders }
  *   - 실패: { error: "..." }
  * =====================================================
  */
@@ -47,20 +46,17 @@ serve(async (req) => {
 
     // 병렬로 데이터 조회
     const [
-      naverFoldersResult,
-      youtubeChannelsResult,
+      popularPlacesResult,
       communityRegionsResult,
       publicFoldersResult
     ] = await Promise.all([
-      supabase.rpc("v2_get_naver_folders", { p_limit: 8, p_offset: 0 }),
-      supabase.rpc("v2_get_youtube_channels", { p_limit: 8, p_offset: 0 }),
+      supabase.rpc("v2_get_popular_places", { p_limit: 10, p_offset: 0 }),
       supabase.rpc("v2_list_community_by_region", { p_domain: null, p_limit: 6, p_offset: 0 }),
       supabase.rpc("v1_list_public_folders", { p_limit: 12, p_offset: 0 })
     ]);
 
     // 결과 처리
-    const naverFolders = naverFoldersResult.data || [];
-    const youtubeChannels = youtubeChannelsResult.data || [];
+    const popularPlaces = popularPlacesResult.data || [];
     const communityRegions = communityRegionsResult.data || [];
     const publicFolders = publicFoldersResult.data || [];
 
@@ -81,15 +77,10 @@ serve(async (req) => {
     });
     const users = Array.from(usersMap.values()).slice(0, 10);
 
-    // 랭킹용 데이터 (place_count 기준 정렬)
-    const rankedNaverFolders = [...naverFolders].sort((a: any, b: any) => b.place_count - a.place_count);
-    const rankedYoutubeChannels = [...youtubeChannels].sort((a: any, b: any) => b.place_count - a.place_count);
-
     return new Response(
       JSON.stringify({
         users,
-        naverFolders: rankedNaverFolders,
-        youtubeChannels: rankedYoutubeChannels,
+        popularPlaces,
         communityRegions,
         publicFolders,
       }),
@@ -99,9 +90,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });

@@ -67,7 +67,7 @@ export function useUserSharedFolders(userId: string) {
 }
 
 /**
- * 내 피드 무한 스크롤 조회 (v5: Fast Path 최적화)
+ * 내 피드 무한 스크롤 조회 (v6: 거리순 최적화 - 바운딩 박스 필터링)
  */
 export function useMyFeed(
   filters: { 
@@ -76,6 +76,7 @@ export function useMyFeed(
     sortBy?: string;
     userLat?: number | null;
     userLng?: number | null;
+    maxDistanceKm?: number | null;
   } = {},
   options: { enabled?: boolean } = {}
 ) {

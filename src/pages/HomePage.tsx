@@ -12,6 +12,59 @@ import { usePlacePopup } from "@/shared/lib/place-popup";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 /**
+ * 인기 음식점 카드
+ */
+function PopularPlaceCard({
+  rank,
+  place,
+  onClick,
+}: {
+  rank: number;
+  place: any;
+  onClick: () => void;
+}) {
+  return (
+    <div onClick={onClick} className="flex-shrink-0 w-32 cursor-pointer group">
+      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 mb-2">
+        {place.thumbnail ? (
+          <img
+            src={convertToNaverResizeImageUrl(place.thumbnail)}
+            alt={place.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-700 dark:to-surface-600 flex items-center justify-center">
+            <MapPin className="size-8 text-rose-300" />
+          </div>
+        )}
+
+        {/* Rank */}
+        <div className={cn(
+          "absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black",
+          rank === 1 ? "bg-amber-400 text-amber-900" :
+          rank === 2 ? "bg-surface-200 text-surface-600" :
+          rank === 3 ? "bg-amber-600 text-white" :
+          "bg-black/40 text-white"
+        )}>
+          {rank}
+        </div>
+
+        {/* Gradient */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
+
+        {/* Score */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <span className="text-white/80 text-[10px] font-medium">{place.popularity_score}회 저장/언급</span>
+        </div>
+      </div>
+      <h4 className="text-xs font-semibold text-surface-900 dark:text-white line-clamp-1 leading-tight mb-0.5">{place.name}</h4>
+      <p className="text-[10px] text-surface-400 line-clamp-1">{place.category}</p>
+    </div>
+  );
+}
+
+/**
  * 폴더/채널에서 첫 번째 유효한 이미지 URL 추출
  */
 function getFirstImage(item: any): string | undefined {
@@ -78,84 +131,94 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] dark:bg-surface-950">
-      {/* Header - 미니멀하고 엣지있는 타이포 */}
-      <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 dark:bg-surface-950/95">
-        <div className="px-5 pt-8 pb-4">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-rose-400 font-medium mb-1">Discover</p>
-              <h1 className="text-[32px] font-black text-surface-900 dark:text-white leading-none tracking-tight">
-                맛탐정
-              </h1>
+      {/* Header - 소셜 느낌의 정돈된 헤더 */}
+      <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 dark:bg-surface-950/95 backdrop-blur-md border-b border-surface-100 dark:border-surface-800">
+        <div className="px-5 pt-6 pb-0">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-black text-surface-900 dark:text-white tracking-tight">
+              맛탐정
+            </h1>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleCreateFolder}
+                className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-surface-600 dark:text-surface-300"
+              >
+                <Plus className="size-5" />
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-surface-600 dark:text-surface-300"
+              >
+                <User className="size-5" />
+              </button>
             </div>
-            <button 
-              onClick={handleCreateFolder}
-              className="w-11 h-11 rounded-full bg-surface-900 dark:bg-white flex items-center justify-center"
-            >
-              <Plus className="size-5 text-white dark:text-surface-900" strokeWidth={2.5} />
-            </button>
           </div>
           
-          {/* Tab Pills */}
-          <div className="flex gap-2">
+          {/* Tab Navigation */}
+          <div className="flex gap-6 relative">
             <button
               onClick={() => setActiveTab("foryou")}
               className={cn(
-                "px-5 py-2.5 rounded-full text-sm font-semibold transition-all",
+                "pb-3 text-[15px] font-bold transition-all relative",
                 activeTab === "foryou"
-                  ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900"
-                  : "bg-white dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-700"
+                  ? "text-surface-900 dark:text-white"
+                  : "text-surface-400 dark:text-surface-500"
               )}
             >
-              For You
+              추천
+              {activeTab === "foryou" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-900 dark:bg-white rounded-full" />
+              )}
             </button>
             <button
               onClick={() => setActiveTab("following")}
               className={cn(
-                "px-5 py-2.5 rounded-full text-sm font-semibold transition-all",
+                "pb-3 text-[15px] font-bold transition-all relative",
                 activeTab === "following"
-                  ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900"
-                  : "bg-white dark:bg-surface-800 text-surface-500 dark:text-surface-400 border border-surface-200 dark:border-surface-700"
+                  ? "text-surface-900 dark:text-white"
+                  : "text-surface-400 dark:text-surface-500"
               )}
             >
-              Following
+              팔로잉
+              {activeTab === "following" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-900 dark:bg-white rounded-full" />
+              )}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Stories - 깔끔한 원형 스토리 */}
+      {/* Stories - 사용자 및 유튜브 채널 목업 */}
       <section className="py-4 px-4">
-        <div className="flex gap-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {isMyFoldersLoading ? (
-            [...Array(4)].map((_, i) => (
+        <div className="flex gap-3 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {/* [개발용 목업] 사용자 및 유튜브 채널 목록을 표시합니다. 
+              추후 API에서 사용자(users) 및 유튜브 채널(youtubeChannels) 데이터를 받아올 예정입니다. */}
+          {isDiscoverLoading ? (
+            [...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0">
-                <Skeleton className="w-16 h-16 rounded-full" />
+                <Skeleton className="w-16 h-16 rounded-xl" />
                 <Skeleton className="w-12 h-3 rounded" />
               </div>
             ))
           ) : (
             <>
-              {myFolders?.slice(0, 5).map((folder, i) => (
-                <StoryCircle
-                  key={folder.id}
-                  image={getFirstImage(folder)}
-                  label={folder.title}
-                  onClick={() => navigate(`/folder/${folder.id}`)}
-                  isFirst={i === 0}
+              {/* 사용자 목업 데이터 */}
+              {discoverData?.users?.slice(0, 5).map((user: any, i: number) => (
+                <StoryBox
+                  key={`user-${user.id || i}`}
+                  image={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
+                  label={user.nickname || '사용자'}
+                  onClick={() => {}}
                 />
               ))}
-              {subscriptions?.slice(0, 3).map((sub: any) => (
-                <StoryCircle
-                  key={`${sub.subscription_type}-${sub.feature_id}`}
-                  image={sub.subscription_type === 'naver_folder' ? naverIcon : sub.thumbnail}
-                  label={sub.title}
-                  onClick={() => {
-                    if (sub.subscription_type === 'folder') navigate(`/folder/${sub.feature_id}`);
-                    else if (sub.subscription_type === 'naver_folder') navigate(`/feature/detail/folder/${sub.feature_id}`);
-                    else if (sub.subscription_type === 'youtube_channel') navigate(`/feature/detail/youtube/${sub.feature_id}`);
-                  }}
-                  badge={sub.subscription_type === 'youtube_channel' ? 'youtube' : sub.subscription_type === 'naver_folder' ? 'naver' : undefined}
+              {/* 유튜브 채널 목업 데이터 */}
+              {discoverData?.youtubeChannels?.slice(0, 5).map((channel: any, i: number) => (
+                <StoryBox
+                  key={`youtube-${channel.id || i}`}
+                  image={`https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.id || i + 200}`}
+                  label={channel.title || '유튜브'}
+                  onClick={() => {}}
+                  badge="youtube"
                 />
               ))}
             </>
@@ -175,6 +238,7 @@ export function HomePage() {
         <FollowingContent
           subscriptions={subscriptions || []}
           isLoading={isSubscriptionsLoading}
+          onPlaceClick={showPlaceModal}
         />
       )}
     </div>
@@ -182,53 +246,41 @@ export function HomePage() {
 }
 
 /**
- * 원형 스토리 컴포넌트
+ * 사각형 스토리 컴포넌트 (사용자/유튜브 채널용)
  */
-function StoryCircle({
+function StoryBox({
   image,
   label,
   onClick,
-  isFirst,
   badge,
 }: {
-  image?: string;
+  image: string;
   label: string;
   onClick: () => void;
-  isFirst?: boolean;
-  badge?: 'youtube' | 'naver';
+  badge?: 'youtube';
 }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-2 flex-shrink-0 group">
-      <div className={cn(
-        "relative w-16 h-16 rounded-full p-0.5",
-        isFirst ? "bg-gradient-to-tr from-rose-400 via-fuchsia-500 to-amber-400" : "bg-surface-200 dark:bg-surface-700"
-      )}>
-        <div className="w-full h-full rounded-full overflow-hidden bg-[#FAFAF9] dark:bg-surface-900 p-0.5">
-          {image ? (
-            <img
-              src={convertToNaverResizeImageUrl(image)}
-              alt={label}
-              className="w-full h-full rounded-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-800 dark:to-surface-700 flex items-center justify-center">
-              <Heart className="size-5 text-rose-300" />
-            </div>
-          )}
-        </div>
+    <button onClick={onClick} className="flex flex-col items-center gap-1.5 flex-shrink-0 group">
+      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+        <img
+          src={image}
+          alt={label}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+        {/* 유튜브 뱃지 */}
         {badge === 'youtube' && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 border-2 border-[#FAFAF9] flex items-center justify-center">
-            <Play className="size-2 text-white fill-white" />
+          <div className="absolute top-1 right-1 w-5 h-5 rounded-lg bg-red-500 flex items-center justify-center shadow-sm">
+            <Play className="size-2.5 text-white fill-white" />
           </div>
         )}
-        {badge === 'naver' && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-green-500 border-2 border-[#FAFAF9] flex items-center justify-center">
-            <MapPin className="size-2 text-white" />
-          </div>
-        )}
+        {/* 이름 오버레이 (박스 하단) */}
+        <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] py-1 px-1">
+          <span className="text-[9px] text-white font-bold truncate block text-center leading-none">
+            {label}
+          </span>
+        </div>
       </div>
-      <span className="text-[11px] text-surface-600 dark:text-surface-400 font-medium truncate max-w-16">{label}</span>
     </button>
   );
 }
@@ -258,12 +310,16 @@ function ForYouContent({
       items.push({ type: 'folder', data: folder, size: i % 5 === 0 ? 'large' : 'normal' });
     });
 
-    discoverData?.naverFolders?.forEach((folder: any, i: number) => {
-      items.push({ type: 'naver', data: folder, size: i % 4 === 0 ? 'large' : 'normal' });
+    discoverData?.popularPlaces?.forEach((place: any, i: number) => {
+      items.push({ type: 'place', data: place, size: i % 4 === 0 ? 'large' : 'normal' });
     });
 
     discoverData?.youtubeChannels?.forEach((channel: any, i: number) => {
       items.push({ type: 'youtube', data: channel, size: i % 3 === 0 ? 'large' : 'normal' });
+    });
+
+    discoverData?.naverFolders?.forEach((folder: any, i: number) => {
+      items.push({ type: 'naver', data: folder, size: i % 4 === 0 ? 'large' : 'normal' });
     });
 
     return items.sort((a, b) => {
@@ -295,7 +351,7 @@ function ForYouContent({
         <div className="flex items-center justify-between px-4 mb-4">
           <div className="flex items-center gap-2">
             <Flame className="size-4 text-rose-500" />
-            <h2 className="text-base font-bold text-surface-900 dark:text-white">인기 소스</h2>
+            <h2 className="text-base font-bold text-surface-900 dark:text-white">인기 음식점</h2>
           </div>
           <button onClick={() => navigate("/feature")} className="text-xs text-surface-400 flex items-center gap-0.5">
             더보기 <ChevronRight className="size-3" />
@@ -303,26 +359,12 @@ function ForYouContent({
         </div>
 
         <div className="flex gap-3 px-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {discoverData?.naverFolders?.slice(0, 4).map((folder: any, i: number) => (
-            <SourceCard
-              key={folder.folder_id}
+          {discoverData?.popularPlaces?.map((place: any, i: number) => (
+            <PopularPlaceCard
+              key={place.id}
               rank={i + 1}
-              title={folder.name}
-              image={getFirstImage(folder)}
-              count={folder.place_count}
-              type="naver"
-              onClick={() => navigate(`/feature/detail/folder/${folder.folder_id}`)}
-            />
-          ))}
-          {discoverData?.youtubeChannels?.slice(0, 4).map((channel: any, i: number) => (
-            <SourceCard
-              key={channel.channel_id}
-              rank={i + 5}
-              title={channel.channel_title}
-              image={getFirstImage(channel)}
-              count={channel.place_count}
-              type="youtube"
-              onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+              place={place}
+              onClick={() => showPlaceModal(place.id)}
             />
           ))}
         </div>
@@ -339,6 +381,7 @@ function ForYouContent({
               index={index}
               onClick={() => {
                 if (item.type === 'folder') navigate(`/folder/${item.data.id}`);
+                else if (item.type === 'place') showPlaceModal(item.data.id);
                 else if (item.type === 'naver') navigate(`/feature/detail/folder/${item.data.folder_id}`);
                 else if (item.type === 'youtube') navigate(`/feature/detail/youtube/${item.data.channel_id}`);
               }}
@@ -356,9 +399,11 @@ function ForYouContent({
 function FollowingContent({
   subscriptions,
   isLoading,
+  onPlaceClick,
 }: {
   subscriptions: any[];
   isLoading: boolean;
+  onPlaceClick: (id: string) => void;
 }) {
   const navigate = useNavigate();
 
@@ -408,6 +453,7 @@ function FollowingContent({
               if (sub.subscription_type === 'folder') navigate(`/folder/${sub.feature_id}`);
               else if (sub.subscription_type === 'naver_folder') navigate(`/feature/detail/folder/${sub.feature_id}`);
               else if (sub.subscription_type === 'youtube_channel') navigate(`/feature/detail/youtube/${sub.feature_id}`);
+              else if (sub.subscription_type === 'place') onPlaceClick(sub.feature_id);
             }}
           />
         ))}
@@ -446,7 +492,7 @@ function HeroCard({ folder, onClick }: { folder: any; onClick: () => void }) {
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm mb-4">
             <Flame className="size-3 text-rose-400" />
-            <span className="text-[11px] font-semibold text-white uppercase tracking-wider">Featured</span>
+            <span className="text-[11px] font-semibold text-white uppercase tracking-wider">추천</span>
           </div>
 
           {/* Title */}
@@ -574,14 +620,14 @@ function CollectionCard({
   onClick: () => void;
 }) {
   const data = item.data;
-  const images = getImages(data, 4);
-  const mainImage = images[0] || (item.type === 'youtube' ? data.channel_thumbnail : undefined);
+  const images = item.type === 'place' ? [data.thumbnail] : getImages(data, 4);
+  const mainImage = images[0] || (item.type === 'youtube' ? data.channel_thumbnail : item.type === 'naver' ? data.folder_thumbnail : undefined);
   const isTall = index % 5 === 0;
 
   const title = data.title || data.name || data.channel_title;
-  const description = data.description || data.memo;
+  const description = item.type === 'place' ? data.category : (data.description || data.memo);
   const placeCount = data.place_count;
-  const ownerName = data.owner_nickname;
+  const ownerName = item.type === 'naver' ? '플레이스' : data.owner_nickname;
   const ownerAvatar = data.owner_avatar_url;
 
   return (
@@ -590,7 +636,7 @@ function CollectionCard({
       className="break-inside-avoid mb-3 rounded-2xl overflow-hidden bg-white dark:bg-surface-900 cursor-pointer group shadow-sm border border-surface-100/50 dark:border-surface-800"
     >
       {/* Image */}
-      {images.length >= 4 ? (
+      {item.type !== 'place' && images.length >= 4 ? (
         <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
           {images.slice(0, 4).map((img, i) => (
             <div key={i} className="aspect-square overflow-hidden">
@@ -599,24 +645,35 @@ function CollectionCard({
           ))}
         </div>
       ) : mainImage ? (
-        <div className={cn("overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
+        <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
           <img
             src={convertToNaverResizeImageUrl(mainImage)}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
+          {/* Overlay for Place */}
+          {item.type === 'place' && (
+            <div className="absolute top-3 right-3">
+              <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center gap-1">
+                <Flame className="size-3 text-rose-400" />
+                <span className="text-[10px] font-bold text-white">{data.popularity_score}</span>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className={cn(
           "flex items-center justify-center bg-gradient-to-br",
           item.type === 'youtube' ? "from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20" :
           item.type === 'naver' ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20" :
+          item.type === 'place' ? "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700" :
           "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700",
           isTall ? "aspect-[3/4]" : "aspect-square"
         )}>
           {item.type === 'youtube' && <Youtube className="size-10 text-red-300" />}
           {item.type === 'naver' && <MapPin className="size-10 text-green-300" />}
+          {item.type === 'place' && <MapPin className="size-10 text-rose-300" />}
           {item.type === 'folder' && <Heart className="size-10 text-rose-300" />}
         </div>
       )}
@@ -626,13 +683,16 @@ function CollectionCard({
         {/* Type Badge */}
         <div className="mb-2">
           {item.type === 'youtube' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 font-semibold uppercase tracking-wider">YouTube</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 font-semibold uppercase tracking-wider">유튜브</span>
           )}
           {item.type === 'naver' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-500 font-semibold uppercase tracking-wider">Place</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-500 font-semibold uppercase tracking-wider">네이버</span>
+          )}
+          {item.type === 'place' && (
+            <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">인기</span>
           )}
           {item.type === 'folder' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">Collection</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 font-semibold uppercase tracking-wider">컬렉션</span>
           )}
         </div>
 
@@ -649,13 +709,13 @@ function CollectionCard({
         <div className="flex items-center justify-between pt-1">
           {ownerName ? (
             <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full overflow-hidden bg-surface-100 dark:bg-surface-800">
-                {ownerAvatar ? (
+              <div className="w-5 h-5 rounded-full overflow-hidden bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
+                {item.type === 'naver' ? (
+                  <MapPin className="size-3 text-surface-400" />
+                ) : ownerAvatar ? (
                   <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="size-2.5 text-surface-400" />
-                  </div>
+                  <User className="size-2.5 text-surface-400" />
                 )}
               </div>
               <span className="text-[10px] text-surface-500 font-medium">{ownerName}</span>

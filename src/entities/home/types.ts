@@ -9,10 +9,19 @@ export interface HomeUser {
   follower_count?: number;
 }
 
+export interface PopularPlace {
+  id: string;
+  name: string;
+  category: string;
+  thumbnail: string;
+  popularity_score: number;
+}
+
 export interface HomeDiscoverData {
   users: HomeUser[];
-  naverFolders: NaverFolder[];
-  youtubeChannels: YoutubeChannel[];
+  popularPlaces?: PopularPlace[];
+  naverFolders?: NaverFolder[];
+  youtubeChannels?: YoutubeChannel[];
   communityRegions: CommunityRegion[];
   publicFolders: Folder[];
 }
