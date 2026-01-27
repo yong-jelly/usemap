@@ -696,7 +696,7 @@ function CollectionCard({
             <span className="text-[9px] px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 font-semibold uppercase tracking-wider">유튜브</span>
           )}
           {item.type === 'naver' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-bold uppercase tracking-wider shadow-sm">네이버</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-medium uppercase tracking-wider shadow-sm">네이버</span>
           )}
           {item.type === 'place' && (
             <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">인기</span>
@@ -708,8 +708,8 @@ function CollectionCard({
 
         {/* Title */}
         <h3 className={cn(
-          "text-sm font-bold line-clamp-2 leading-snug mb-1",
-          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white"
+          "text-sm font-medium line-clamp-2 leading-snug mb-1",
+          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white font-bold"
         )}>
           {title}
         </h3>
