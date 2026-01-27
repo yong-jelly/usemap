@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useInView } from "react-intersection-observer";
+import { useIntersection } from "@/shared/lib/use-intersection";
 import { 
   Search, 
   Camera, 
@@ -219,7 +219,7 @@ export function SearchPage() {
     isLoading 
   } = useMyAndPublicFolders();
 
-  const { ref, inView } = useInView();
+  const { ref, inView } = useIntersection();
 
   useEffect(() => {
     if (inView && hasNextPage && !isSearching) {

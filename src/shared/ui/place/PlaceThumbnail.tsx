@@ -1,6 +1,7 @@
 import React from "react";
 import { CookingPot, Heart, MessageCircle, Bookmark } from "lucide-react";
 import { convertToNaverResizeImageUrl, cn } from "@/shared/lib";
+import { useIntersection } from "@/shared/lib/use-intersection";
 
 export interface PlaceThumbnailProps {
   placeId: string;
@@ -47,9 +48,14 @@ export function PlaceThumbnail({
 }: PlaceThumbnailProps) {
   const folders = (features || []).filter((f: any) => f.platform_type === "folder");
   const hasImage = !!thumbnail;
+  const { ref, inView } = useIntersection({
+    triggerOnce: true,
+    rootMargin: '200px',
+  });
 
   return (
     <div
+      ref={ref}
       className={cn(
         "relative bg-surface-100 dark:bg-surface-900 overflow-hidden active:opacity-80 transition-opacity cursor-pointer group flex items-center justify-center",
         aspectRatio,
@@ -59,13 +65,17 @@ export function PlaceThumbnail({
       onClick={() => onClick?.(placeId)}
     >
       {hasImage ? (
-        <img
-          src={convertToNaverResizeImageUrl(thumbnail)}
-          className="w-full h-full object-cover"
-          alt={name}
-          loading="lazy"
-          decoding="async"
-        />
+        inView ? (
+          <img
+            src={convertToNaverResizeImageUrl(thumbnail)}
+            className="w-full h-full object-cover animate-in fade-in duration-500"
+            alt={name}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="w-full h-full bg-surface-100 dark:bg-surface-900" />
+        )
       ) : (
         <div className="flex flex-col items-center justify-center w-full h-full bg-zinc-800">
           <CookingPot className="size-10 text-zinc-500/50 stroke-[1.5]" />

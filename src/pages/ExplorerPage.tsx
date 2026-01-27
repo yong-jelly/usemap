@@ -11,6 +11,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { useIntersection } from "@/shared/lib/use-intersection";
 import { RegionSelectSheet } from "@/features/explorer/ui/RegionSelectSheet";
 import { DistrictChips } from "@/features/explorer/ui/DistrictChips";
 import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
@@ -69,7 +70,9 @@ export function ExplorerPage() {
   const { history, saveToHistory, clearHistory, removeFromHistory } = useSearchHistory();
   const { setBottomNavVisible } = useUIStore();
   const inputRef = useRef<HTMLInputElement>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const { ref: observerRef, inView } = useIntersection({
+    rootMargin: '400px'
+  });
 
   // 검색 모드 또는 결과 표시 중일 때 하단 네비게이션 숨기기
   useEffect(() => {
@@ -114,23 +117,10 @@ export function ExplorerPage() {
 
   // 무한 스크롤 Observer
   useEffect(() => {
-    if (!shouldFetchByFilters || !hasNextPage || isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1, rootMargin: '400px' }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) observer.observe(currentTarget);
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, shouldFetchByFilters]);
+    if (inView && hasNextPage && !isFetchingNextPage && shouldFetchByFilters) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, shouldFetchByFilters]);
 
   // 텍스트 검색 처리
   const handleSearch = useCallback(async (query: string) => {
@@ -452,7 +442,7 @@ export function ExplorerPage() {
               ))}
             </div>
             {hasNextPage && !isSearching && (
-              <div ref={observerTarget} className="p-12 flex justify-center">
+              <div ref={observerRef} className="p-12 flex justify-center">
                 <Loader2 className="size-6 text-surface-300 animate-spin" />
               </div>
             )}
