@@ -709,7 +709,7 @@ function CollectionCard({
         {/* Title */}
         <h3 className={cn(
           "text-sm font-medium line-clamp-2 leading-snug mb-1",
-          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white font-bold"
+          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white"
         )}>
           {title}
         </h3>
