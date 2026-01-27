@@ -153,14 +153,28 @@ function PinterestFolderCard({ folder }: { folder: any }) {
       <div className="flex flex-col px-1">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col overflow-hidden">
-            <div className="flex items-center gap-1.5 mb-0.5">
+            {/* 설명 텍스트를 타이틀 위로 배치 */}
+            {folder.description && (
+              <div className="flex items-center gap-1 mb-0.5">
+                <span className="text-[13px] text-surface-500 dark:text-surface-400 font-medium truncate">
+                  {folder.description}
+                </span>
+                <span className="text-[12px] text-surface-400 dark:text-surface-500 font-medium flex-shrink-0 flex items-center">
+                  <span className="mx-1 opacity-40">•</span>
+                  {folder.place_count}개
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
               <h3 className="text-[18px] font-medium text-surface-900 dark:text-white leading-tight truncate">
                 {folder.title}
               </h3>
-              <span className="text-[12px] text-surface-400 dark:text-surface-500 font-medium flex-shrink-0 flex items-center">
-                <span className="mx-1 opacity-40">•</span>
-                {folder.place_count}개
-              </span>
+              {!folder.description && (
+                <span className="text-[12px] text-surface-400 dark:text-surface-500 font-medium flex-shrink-0 flex items-center">
+                  <span className="mx-1 opacity-40">•</span>
+                  {folder.place_count}개
+                </span>
+              )}
             </div>
           </div>
           
