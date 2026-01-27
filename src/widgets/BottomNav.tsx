@@ -6,7 +6,7 @@ import {
   useReducedMotion 
 } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
-import { useUserStore } from "@/entities/user";
+import { useUserStore, isAdmin } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { trackEvent } from "@/shared/lib/gtm";
 
@@ -17,7 +17,7 @@ import { trackEvent } from "@/shared/lib/gtm";
 export function BottomNav() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isAuthenticated } = useUserStore();
+  const { isAuthenticated, profile } = useUserStore();
   const { openLogin } = useAuthModalStore();
   const shouldReduceMotion = useReducedMotion();
   
@@ -26,6 +26,7 @@ export function BottomNav() {
   const scrollThreshold = 10;
 
   const navItems = [
+    ...(isAdmin(profile) ? [{ href: "/home", icon: House, label: "홈" }] : []),
     { href: "/feed", icon: GalleryVerticalEnd, label: "피드" },
     { href: "/explorer", icon: Search, label: "탐색" },
     { href: "/feature", icon: HatGlasses, label: "맛탐정" },

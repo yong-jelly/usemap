@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-router";
+import { createBrowserRouter, RouterProvider, Outlet, useLocation, Navigate } from "react-router";
 import { Header, BottomNav } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
 import { usePlacePopup } from "@/shared/lib/place-popup";
@@ -130,7 +130,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <FeedPage />,
+        element: <Navigate to="/feed" replace />,
       },
       {
         path: "feed",
@@ -229,10 +229,10 @@ const router = createBrowserRouter([
         path: "test",
         element: <TestMetaPage />,
       },
-      // 정의되지 않은 모든 경로에 대한 404 처리
+      // 정의되지 않은 모든 경로에 대한 처리 (/feed로 리다이렉트)
       {
         path: "*",
-        element: <NotFoundPage />,
+        element: <Navigate to="/feed" replace />,
       },
     ],
   },
