@@ -1,114 +1,19 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Plus, ChevronRight, User, MapPin, Youtube, Sparkles, Flame, Play, ArrowRight, Heart } from "lucide-react";
-import { useMyFolders, useMySubscriptions, usePublicFolders } from "@/entities/folder/queries";
+import { Plus, User, ArrowRight, Sparkles } from "lucide-react";
+import { useMySubscriptions, usePublicFolders } from "@/entities/folder/queries";
 import { useHomeDiscover } from "@/entities/home/queries";
-import { Skeleton } from "@/shared/ui";
-import { cn, getAvatarUrl } from "@/shared/lib/utils";
-import { convertToNaverResizeImageUrl } from "@/shared/lib/naver";
+import { cn } from "@/shared/lib/utils";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { usePlacePopup } from "@/shared/lib/place-popup";
-import naverIcon from "@/assets/images/naver-map-logo.png";
 
-/**
- * 인기 음식점 카드
- */
-function PopularPlaceCard({
-  rank,
-  place,
-  onClick,
-}: {
-  rank: number;
-  place: any;
-  onClick: () => void;
-}) {
-  return (
-    <div onClick={onClick} className="flex-shrink-0 w-32 cursor-pointer group">
-      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 mb-2">
-        {place.thumbnail ? (
-          <img
-            src={convertToNaverResizeImageUrl(place.thumbnail)}
-            alt={place.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-700 dark:to-surface-600 flex items-center justify-center">
-            <MapPin className="size-8 text-rose-300" />
-          </div>
-        )}
+import { StoriesSection, StoryBox } from "@/widgets/StoriesSection";
+import { HeroSection } from "@/widgets/HeroSection";
+import { PopularPlacesSection } from "@/widgets/PopularPlacesSection";
+import { DiscoverGrid, GridSkeleton, CollectionCard } from "@/widgets/DiscoverGrid";
 
-        {/* Rank */}
-        <div className={cn(
-          "absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black",
-          rank === 1 ? "bg-amber-400 text-amber-900" :
-          rank === 2 ? "bg-surface-200 text-surface-600" :
-          rank === 3 ? "bg-amber-600 text-white" :
-          "bg-black/40 text-white"
-        )}>
-          {rank}
-        </div>
-
-        {/* Gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-
-        {/* Score */}
-        <div className="absolute bottom-2 left-2 right-2">
-          <span className="text-white/80 text-[10px] font-medium">{place.popularity_score}회 저장/언급</span>
-        </div>
-      </div>
-      <h4 className="text-xs font-semibold text-surface-900 dark:text-white line-clamp-1 leading-tight mb-0.5">{place.name}</h4>
-      <p className="text-[10px] text-surface-400 line-clamp-1">{place.category}</p>
-    </div>
-  );
-}
-
-/**
- * 폴더/채널에서 첫 번째 유효한 이미지 URL 추출
- */
-function getFirstImage(item: any): string | undefined {
-  if (!item) return undefined;
-  
-  // preview_places에서 이미지 추출
-  const places = item.preview_places || [];
-  for (const place of places) {
-    if (place.thumbnail) return place.thumbnail;
-    if (place.images?.[0]) return place.images[0];
-    if (place.image_urls?.[0]) return place.image_urls[0];
-    if (place.place_images?.[0]) return place.place_images[0];
-  }
-  
-  // 채널 썸네일
-  if (item.channel_thumbnail) return item.channel_thumbnail;
-  
-  return undefined;
-}
-
-/**
- * 폴더/채널에서 여러 이미지 URL 추출
- */
-function getImages(item: any, count: number = 4): string[] {
-  if (!item) return [];
-  
-  // 이미 images 배열이 있는 경우 (예: discover.json의 naverFolders, youtubeChannels)
-  if (Array.isArray(item.images) && item.images.length > 0) {
-    return [...item.images].sort(() => Math.random() - 0.5).slice(0, count);
-  }
-  
-  const images: string[] = [];
-  const places = item.preview_places || [];
-  
-  for (const place of places) {
-    if (images.length >= count) break;
-    const img = place.thumbnail || place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0];
-    if (img && !images.includes(img)) {
-      images.push(img);
-    }
-  }
-  
-  return images;
-}
+import { PageHeader } from "@/shared/ui/PageHeader";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -119,7 +24,6 @@ export function HomePage() {
   const [activeTab, setActiveTab] = useState<"foryou" | "following">("foryou");
 
   // Data Fetching
-  const { data: myFolders, isLoading: isMyFoldersLoading } = useMyFolders();
   const { data: subscriptions, isLoading: isSubscriptionsLoading } = useMySubscriptions();
   const { data: discoverData, isLoading: isDiscoverLoading } = useHomeDiscover();
   const { data: publicFoldersData, isLoading: isPublicFoldersLoading } = usePublicFolders();
@@ -134,157 +38,63 @@ export function HomePage() {
     navigate("/folder/create");
   };
 
+  const tabs = [
+    { id: "foryou", label: "추천" },
+    { id: "following", label: "팔로잉" },
+  ];
+
   return (
     <div className="min-h-screen bg-white dark:bg-surface-950">
-      {/* Header - 소셜 느낌의 정돈된 헤더 */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-surface-950/95 backdrop-blur-md border-b border-surface-100 dark:border-surface-800">
-        <div className="px-5 pt-6 pb-0">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-black text-surface-900 dark:text-white tracking-tight">
-              탐색
-            </h1>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={handleCreateFolder}
-                className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-surface-600 dark:text-surface-300"
-              >
-                <Plus className="size-5" />
-              </button>
-              <button
-                onClick={() => navigate("/profile")}
-                className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-surface-600 dark:text-surface-300"
-              >
-                <User className="size-5" />
-              </button>
-            </div>
-          </div>
-          
-          {/* Tab Navigation */}
-          <div className="flex gap-6 relative">
-            <button
-              onClick={() => setActiveTab("foryou")}
-              className={cn(
-                "pb-3 text-[15px] font-bold transition-all relative",
-                activeTab === "foryou"
-                  ? "text-surface-900 dark:text-white"
-                  : "text-surface-400 dark:text-surface-500"
-              )}
-            >
-              추천
-              {activeTab === "foryou" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-900 dark:bg-white rounded-full" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("following")}
-              className={cn(
-                "pb-3 text-[15px] font-bold transition-all relative",
-                activeTab === "following"
-                  ? "text-surface-900 dark:text-white"
-                  : "text-surface-400 dark:text-surface-500"
-              )}
-            >
-              팔로잉
-              {activeTab === "following" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-900 dark:bg-white rounded-full" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <PageHeader 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={(id) => setActiveTab(id as "foryou" | "following")} 
+      />
 
-      {/* Stories - 사용자 및 유튜브 채널 */}
-      <section className="py-4 px-4">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {isDiscoverLoading ? (
-            [...Array(6)].map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0">
-                <Skeleton className="w-16 h-16 rounded-xl" />
-                <Skeleton className="w-12 h-3 rounded" />
-              </div>
-            ))
-          ) : (
-            <>
-              {/* 사용자 데이터 */}
-              {discoverData?.users?.map((user: any, i: number) => (
-                <StoryBox
-                  key={`user-${user.id || i}`}
-                  image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
-                  label={user.nickname || '사용자'}
-                  onClick={() => navigate(`/profile/${user.id}`)}
-                />
-              ))}
-              {/* 유튜브 채널 데이터 */}
-              {discoverData?.youtubeChannels?.map((channel: any, i: number) => (
-                <StoryBox
-                  key={`youtube-${channel.channel_id || i}`}
-                  image={channel.channel_thumbnail || `https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.channel_id || i + 200}`}
-                  label={channel.channel_title || '유튜브'}
-                  onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
-                  badge="youtube"
-                />
-              ))}
-            </>
-          )}
-        </div>
-      </section>
+      <main className="pt-24">
+        {/* Stories */}
+        <StoriesSection isLoading={isDiscoverLoading}>
+          {/* 사용자 데이터
+            - 최근에 음식점을 등록한 순서대로 나온다. 이 정보는 5분마다 집계된 정보로 캐싱된 데이터를 사용한다.
+           */}
+          {discoverData?.users?.map((user: any, i: number) => (
+            <StoryBox
+              key={`user-${user.id || i}`}
+              image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
+              label={user.nickname || '사용자'}
+              onClick={() => navigate(`/profile/${user.id}`)}
+            />
+          ))}
+          {/* 유튜브 채널 데이터 */}
+          {/* {discoverData?.youtubeChannels?.map((channel: any, i: number) => (
+            <StoryBox
+              key={`youtube-${channel.channel_id || i}`}
+              image={channel.channel_thumbnail || `https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.channel_id || i + 200}`}
+              label={channel.channel_title || '유튜브'}
+              onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
+              badge="youtube"
+            />
+          ))} */}
+        </StoriesSection>
 
-      {/* Main Content */}
-      {activeTab === "foryou" ? (
-        <ForYouContent
-          discoverData={discoverData}
-          publicFolders={publicFolders}
-          isLoading={isDiscoverLoading || isPublicFoldersLoading}
-          onPlaceClick={showPlaceModal}
-        />
-      ) : (
-        <FollowingContent
-          subscriptions={subscriptions || []}
-          isLoading={isSubscriptionsLoading}
-          onPlaceClick={showPlaceModal}
-        />
-      )}
-    </div>
-  );
-}
-
-/**
- * 사각형 스토리 컴포넌트 (사용자/유튜브 채널용)
- */
-function StoryBox({
-  image,
-  label,
-  onClick,
-  badge,
-}: {
-  image: string;
-  label: string;
-  onClick: () => void;
-  badge?: 'youtube';
-}) {
-  return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1.5 flex-shrink-0 group">
-      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
-        <img
-          src={image}
-          alt={label}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-        {/* 유튜브 뱃지 */}
-        {badge === 'youtube' && (
-          <div className="absolute top-1 right-1 w-5 h-5 rounded-lg bg-red-500 flex items-center justify-center shadow-sm">
-            <Play className="size-2.5 text-white fill-white" />
-          </div>
+        {/* Main Content */}
+        {activeTab === "foryou" ? (
+          <ForYouContent
+            discoverData={discoverData}
+            publicFolders={publicFolders}
+            isLoading={isDiscoverLoading || isPublicFoldersLoading}
+            onPlaceClick={showPlaceModal}
+          />
+        ) : (
+          <FollowingContent
+            subscriptions={subscriptions || []}
+            isLoading={isSubscriptionsLoading}
+            onPlaceClick={showPlaceModal}
+          />
         )}
-        {/* 이름 오버레이 (박스 하단) */}
-        <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] py-1 px-1">
-          <span className="text-[9px] text-white font-bold truncate block text-center leading-none">
-            {label}
-          </span>
-        </div>
-      </div>
-    </button>
+      </main>
+    </div>
   );
 }
 
@@ -302,29 +112,21 @@ function ForYouContent({
   isLoading: boolean;
   onPlaceClick: (id: string) => void;
 }) {
-  const navigate = useNavigate();
-
   const mixedContent = useMemo(() => {
     if (isLoading || !publicFolders) return [];
-
     const items: any[] = [];
-
     publicFolders?.forEach((folder, i) => {
       items.push({ type: 'folder', data: folder, size: i % 5 === 0 ? 'large' : 'normal' });
     });
-
     discoverData?.popularPlaces?.forEach((place: any, i: number) => {
       items.push({ type: 'place', data: place, size: i % 4 === 0 ? 'large' : 'normal' });
     });
-
     discoverData?.youtubeChannels?.forEach((channel: any, i: number) => {
       items.push({ type: 'youtube', data: channel, size: i % 3 === 0 ? 'large' : 'normal' });
     });
-
     discoverData?.naverFolders?.forEach((folder: any, i: number) => {
       items.push({ type: 'naver', data: folder, size: i % 4 === 0 ? 'large' : 'normal' });
     });
-
     return items.sort((a, b) => {
       const aKey = `${a.type}-${a.data.id || a.data.folder_id || a.data.channel_id}`;
       const bKey = `${b.type}-${b.data.id || b.data.folder_id || b.data.channel_id}`;
@@ -333,72 +135,22 @@ function ForYouContent({
   }, [publicFolders, discoverData, isLoading]);
 
   if (isLoading) {
-    return (
-      <div className="px-4 pb-32">
-        <GridSkeleton />
-      </div>
-    );
+    return <div className="px-4 pb-32"><GridSkeleton /></div>;
   }
 
   return (
     <div className="pb-32">
-      {/* Hero Section - 가로 슬라이드 */}
-      {publicFolders.length > 0 && (
-        <section className="mb-8 overflow-hidden">
-          <div className="flex gap-4 px-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-            {publicFolders.slice(0, 5).map((folder: any) => (
-              <div key={folder.id} className="flex-shrink-0 w-[420px]">
-                <HeroCard folder={folder} onClick={() => navigate(`/folder/${folder.id}`)} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Top Sources - 가로 스크롤 */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between px-4 mb-4">
-          <div className="flex items-center gap-2">
-            <Flame className="size-4 text-rose-500" />
-            <h2 className="text-base font-bold text-surface-900 dark:text-white">인기 음식점</h2>
-          </div>
-          <button onClick={() => navigate("/feature")} className="text-xs text-surface-400 flex items-center gap-0.5">
-            더보기 <ChevronRight className="size-3" />
-          </button>
-        </div>
-
-        <div className="flex gap-3 px-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {discoverData?.popularPlaces?.map((place: any, i: number) => (
-            <PopularPlaceCard
-              key={place.id}
-              rank={i + 1}
-              place={place}
-              onClick={() => onPlaceClick(place.id)}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Discover Grid - Pinterest 스타일 */}
-      <section className="px-4">
-        <h2 className="text-base font-bold text-surface-900 dark:text-white mb-4">발견하기</h2>
-        <div className="columns-2 gap-3">
-          {mixedContent.slice(1).map((item, index) => (
-            <CollectionCard
-              key={`${item.type}-${item.data.id || item.data.folder_id || item.data.channel_id}`}
-              item={item}
-              index={index}
-              onPlaceClick={onPlaceClick}
-              onClick={() => {
-                if (item.type === 'folder') navigate(`/folder/${item.data.id}`);
-                else if (item.type === 'place') onPlaceClick(item.data.id);
-                else if (item.type === 'naver') navigate(`/feature/detail/folder/${item.data.id}`);
-                else if (item.type === 'youtube') navigate(`/feature/detail/youtube/${item.data.channel_id}`);
-              }}
-            />
-          ))}
-        </div>
-      </section>
+      <div className="px-4 mt-6 mb-4">
+        <h2 className="text-base font-bold text-surface-900 dark:text-white">추천</h2>
+      </div>
+      <HeroSection publicFolders={publicFolders} />
+      {/* 인기 음식점 섹션 */}
+      <PopularPlacesSection
+        places={discoverData?.popularPlaces}
+        onPlaceClick={onPlaceClick}
+      />
+      {/* 발견하기 섹션 */}
+      <DiscoverGrid items={mixedContent.slice(1)} onPlaceClick={onPlaceClick} />
     </div>
   );
 }
@@ -418,11 +170,7 @@ function FollowingContent({
   const navigate = useNavigate();
 
   if (isLoading) {
-    return (
-      <div className="px-4 pb-32">
-        <GridSkeleton />
-      </div>
-    );
+    return <div className="px-4 pb-32"><GridSkeleton /></div>;
   }
 
   if (!subscriptions || subscriptions.length === 0) {
@@ -431,12 +179,8 @@ function FollowingContent({
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-800 dark:to-surface-700 flex items-center justify-center mb-6">
           <Sparkles className="size-10 text-rose-300" />
         </div>
-        <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2">
-          구독을 시작해보세요
-        </h3>
-        <p className="text-sm text-surface-500 mb-8 leading-relaxed">
-          마음에 드는 맛집 폴더를 구독하고<br/>새로운 맛집 소식을 받아보세요
-        </p>
+        <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2">구독을 시작해보세요</h3>
+        <p className="text-sm text-surface-500 mb-8 leading-relaxed">마음에 드는 맛집 폴더를 구독하고<br/>새로운 맛집 소식을 받아보세요</p>
         <button
           onClick={() => navigate("/feature")}
           className="px-8 py-3.5 bg-surface-900 dark:bg-white text-white dark:text-surface-900 rounded-full font-semibold text-sm flex items-center gap-2"
@@ -469,326 +213,6 @@ function FollowingContent({
           />
         ))}
       </div>
-    </div>
-  );
-}
-
-/**
- * Hero 카드 - 메인 피처드
- */
-function HeroCard({ folder, onClick }: { folder: any; onClick: () => void }) {
-  const images = getImages(folder, 1);
-  const mainImage = images[0];
-
-  return (
-    <div onClick={onClick} className="relative rounded-3xl overflow-hidden cursor-pointer group h-[380px]">
-      {/* Main Image */}
-      {mainImage ? (
-        <img
-          src={convertToNaverResizeImageUrl(mainImage)}
-          alt={folder.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-rose-200 via-fuchsia-200 to-amber-200" />
-      )}
-
-      {/* Gradient Overlay - 좀 더 진하게 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Bookmark Icon (Top Right) */}
-      <div className="absolute top-4 right-4">
-        <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-md border border-white/10">
-          <Plus className="size-4 text-white" />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 p-4">
-        {/* Title */}
-        <h2 className="text-lg font-medium text-white leading-tight mb-3 tracking-tight line-clamp-2">
-          {folder.title}
-        </h2>
-
-        {/* Owner Info */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 shadow-sm">
-            {folder.owner_avatar_url ? (
-              <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-surface-200 flex items-center justify-center">
-                <User className="size-4 text-surface-400" />
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-white text-xs font-medium leading-none mb-1">{folder.owner_nickname || '익명'}</span>
-            <span className="text-white/60 text-[10px] leading-none">{folder.place_count} 장소</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * 소스 카드 - 가로 스크롤용
- */
-function SourceCard({
-  rank,
-  title,
-  image,
-  count,
-  type,
-  onClick,
-}: {
-  rank: number;
-  title: string;
-  image?: string;
-  count: number;
-  type: 'naver' | 'youtube';
-  onClick: () => void;
-}) {
-  return (
-    <div onClick={onClick} className="flex-shrink-0 w-32 cursor-pointer group">
-      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 mb-2">
-        {image ? (
-          <img
-            src={convertToNaverResizeImageUrl(image)}
-            alt={title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-700 dark:to-surface-600 flex items-center justify-center">
-            {type === 'youtube' ? <Youtube className="size-8 text-red-300" /> : <MapPin className="size-8 text-green-300" />}
-          </div>
-        )}
-
-        {/* Rank */}
-        <div className={cn(
-          "absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black",
-          rank === 1 ? "bg-amber-400 text-amber-900" :
-          rank === 2 ? "bg-surface-200 text-surface-600" :
-          rank === 3 ? "bg-amber-600 text-white" :
-          "bg-black/40 text-white"
-        )}>
-          {rank}
-        </div>
-
-        {/* Type Badge */}
-        <div className={cn(
-          "absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center",
-          type === 'youtube' ? "bg-red-500" : "bg-green-500"
-        )}>
-          {type === 'youtube' ? <Play className="size-2.5 text-white fill-white" /> : <MapPin className="size-2.5 text-white" />}
-        </div>
-
-        {/* Gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-
-        {/* Count */}
-        <div className="absolute bottom-2 left-2 right-2">
-          <span className="text-white/80 text-[10px] font-medium">{count}개 장소</span>
-        </div>
-      </div>
-      <h4 className="text-xs font-semibold text-surface-900 dark:text-white line-clamp-2 leading-tight">{title}</h4>
-    </div>
-  );
-}
-
-/**
- * 컬렉션 카드 - Masonry Grid용
- */
-function CollectionCard({
-  item,
-  index,
-  onClick,
-  onPlaceClick,
-}: {
-  item: any;
-  index: number;
-  onClick: () => void;
-  onPlaceClick: (id: string) => void;
-}) {
-  const data = item.data;
-  const images = item.type === 'place' ? [data.thumbnail] : getImages(data, 4);
-  const mainImage = images[0] || (item.type === 'youtube' ? data.channel_thumbnail : item.type === 'naver' ? data.folder_thumbnail : undefined);
-  const isTall = index % 5 === 0;
-
-  const title = data.title || data.name || data.channel_title;
-  const description = item.type === 'place' ? data.category : (data.description || data.memo);
-  const placeCount = data.place_count;
-  const ownerName = item.type === 'naver' ? '플레이스' : (item.type === 'youtube' ? data.channel_title : data.owner_nickname);
-  const ownerAvatar = item.type === 'youtube' ? data.channel_thumbnail : data.owner_avatar_url;
-
-  // 1개만 있는 항목인지 확인
-  const isSinglePlace = placeCount === 1 || item.type === 'place';
-  const singlePlaceId = item.type === 'place' ? data.id : (data.preview_places?.[0]?.id || data.id);
-
-  const handleImageClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isSinglePlace && singlePlaceId) {
-      onPlaceClick(singlePlaceId);
-    } else {
-      onClick();
-    }
-  };
-
-  return (
-    <div
-      className={cn(
-        "break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group shadow-sm border transition-all duration-300",
-        item.type === 'naver' 
-          ? "bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/30 hover:border-green-300 dark:hover:border-green-700" 
-          : item.type === 'youtube'
-          ? "bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30 hover:border-red-300 dark:hover:border-red-700"
-          : "bg-white dark:bg-surface-900 border-surface-100/50 dark:border-surface-800"
-      )}
-    >
-      {/* Image Area */}
-      <div onClick={handleImageClick}>
-        {item.type !== 'place' && images.length >= 4 ? (
-          <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
-            {images.slice(0, 4).map((img, i) => (
-              <div key={i} className="aspect-square overflow-hidden">
-                <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-            ))}
-          </div>
-        ) : mainImage ? (
-          <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
-            <img
-              src={convertToNaverResizeImageUrl(mainImage)}
-              alt={title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              loading="lazy"
-            />
-            {/* Overlay for Place */}
-            {item.type === 'place' && (
-              <div className="absolute top-3 right-3">
-                <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center gap-1">
-                  <Flame className="size-3 text-rose-400" />
-                  <span className="text-[10px] font-bold text-white">{data.popularity_score}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className={cn(
-            "flex items-center justify-center bg-gradient-to-br",
-            item.type === 'youtube' ? "from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20" :
-            item.type === 'naver' ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20" :
-            item.type === 'place' ? "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700" :
-            "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700",
-            isTall ? "aspect-[3/4]" : "aspect-square"
-          )}>
-            {item.type === 'youtube' && <Youtube className="size-10 text-red-300" />}
-            {item.type === 'naver' && <MapPin className="size-10 text-green-300" />}
-            {item.type === 'place' && <MapPin className="size-10 text-rose-300" />}
-            {item.type === 'folder' && <Heart className="size-10 text-rose-300" />}
-          </div>
-        )}
-      </div>
-
-      {/* Content Area */}
-      <div className="p-3" onClick={onClick}>
-        {/* Type Badge */}
-        <div className="mb-2">
-          {item.type === 'youtube' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-red-500 text-white font-medium uppercase tracking-wider shadow-sm">유튜브</span>
-          )}
-          {item.type === 'naver' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-medium uppercase tracking-wider shadow-sm">네이버</span>
-          )}
-          {item.type === 'place' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">인기</span>
-          )}
-          {item.type === 'folder' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 font-semibold uppercase tracking-wider">컬렉션</span>
-          )}
-        </div>
-
-        {/* Title */}
-        <h3 className={cn(
-          "text-sm font-medium line-clamp-2 leading-snug mb-1",
-          item.type === 'naver' ? "text-green-900 dark:text-green-50" : 
-          item.type === 'youtube' ? "text-red-900 dark:text-red-50" :
-          "text-surface-900 dark:text-white"
-        )}>
-          {title}
-        </h3>
-
-        {description && (
-          <p className={cn(
-            "text-[11px] line-clamp-1 mb-2",
-            item.type === 'naver' ? "text-green-600/70" :
-            item.type === 'youtube' ? "text-red-600/70" :
-            "text-surface-400"
-          )}>{description}</p>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-1">
-          {ownerName ? (
-            <div className="flex items-center gap-1.5">
-              <div className={cn(
-                "w-5 h-5 rounded-full overflow-hidden flex items-center justify-center",
-                item.type === 'naver' ? "bg-green-100 dark:bg-green-900/50" : 
-                item.type === 'youtube' ? "bg-red-100 dark:bg-red-900/50" :
-                "bg-surface-100 dark:bg-surface-800"
-              )}>
-                {item.type === 'naver' ? (
-                  <MapPin className="size-3 text-green-600 dark:text-green-400" />
-                ) : item.type === 'youtube' ? (
-                  <img src={ownerAvatar} alt="" className="w-full h-full object-cover" />
-                ) : ownerAvatar ? (
-                  <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="size-2.5 text-surface-400" />
-                )}
-              </div>
-              <span className={cn(
-                "text-[10px] font-medium",
-                item.type === 'naver' ? "text-green-700 dark:text-green-400" : 
-                item.type === 'youtube' ? "text-red-700 dark:text-red-400" :
-                "text-surface-500"
-              )}>{ownerName}</span>
-            </div>
-          ) : (
-            <span />
-          )}
-          {placeCount && (
-            <span className={cn(
-              "text-[10px] font-medium",
-              item.type === 'naver' ? "text-green-600/70 dark:text-green-500/70" : 
-              item.type === 'youtube' ? "text-red-600/70 dark:text-red-500/70" :
-              "text-surface-400"
-            )}>{placeCount}개</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Grid Skeleton
- */
-function GridSkeleton() {
-  return (
-    <div className="columns-2 gap-3">
-      {[...Array(6)].map((_, i) => (
-        <div key={i} className="break-inside-avoid mb-3 animate-pulse">
-          <Skeleton className={cn("rounded-2xl w-full", i % 5 === 0 ? "aspect-[3/4]" : "aspect-square")} />
-          <div className="p-3 space-y-2">
-            <Skeleton className="h-3 w-16 rounded-full" />
-            <Skeleton className="h-4 w-full rounded" />
-            <Skeleton className="h-3 w-2/3 rounded" />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

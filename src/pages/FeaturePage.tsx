@@ -12,6 +12,8 @@ import { Button, PlaceSlider, HorizontalScroll } from "@/shared/ui";
 import { Loader2, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
+import { PageHeader } from "@/shared/ui/PageHeader";
+
 /**
  * 피쳐 페이지 컴포넌트
  */
@@ -56,34 +58,12 @@ export function FeaturePage() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-white dark:bg-surface-950">
-      {/* 상단 헤더 - 타이포 중심 */}
-      <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-surface-100 dark:bg-surface-950 dark:border-surface-800">
-        <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
-          <HorizontalScroll 
-            containerClassName="flex items-center gap-6 pb-3"
-            scrollAmount={200}
-            fadeEdges={false}
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => navigate(`/feature/${tab.id}`)}
-                className={cn(
-                  "text-xl font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
-                  activeTab === tab.id 
-                    ? "text-surface-900 dark:text-white" 
-                    : "text-surface-300 dark:text-surface-700"
-                )}
-              >
-                {tab.label}
-                {activeTab === tab.id && (
-                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
-                )}
-              </button>
-            ))}
-          </HorizontalScroll>
-        </div>
-      </header>
+      {/* 상단 헤더 */}
+      <PageHeader 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        basePath="/feature" 
+      />
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
       <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-32 bg-white dark:bg-surface-950 min-h-dvh">

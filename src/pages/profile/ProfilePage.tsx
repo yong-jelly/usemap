@@ -16,6 +16,8 @@ import { useNavigate, useParams, Navigate } from "react-router";
 import { cn } from "@/shared/lib/utils";
 import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 
+import { PageHeader } from "@/shared/ui/PageHeader";
+
 export function ProfilePage() {
   const navigate = useNavigate();
   const { tab } = useParams();
@@ -82,34 +84,12 @@ export function ProfilePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-neutral-900">
-      {/* 상단 헤더 - 타이포 중심 (FeaturePage 스타일) */}
-      <div className="fixed top-0 inset-x-0 bg-white dark:bg-neutral-900 z-20">
-        <div className="max-w-lg mx-auto px-5 pt-8 pb-4">
-          <HorizontalScroll 
-            containerClassName="flex items-center gap-6 pb-3"
-            scrollAmount={200}
-            fadeEdges={false}
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={cn(
-                  "text-xl font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
-                  activeTab === tab.id 
-                    ? "text-surface-900 dark:text-white" 
-                    : "text-surface-300 dark:text-surface-700"
-                )}
-              >
-                {tab.label}
-                {activeTab === tab.id && (
-                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
-                )}
-              </button>
-            ))}
-          </HorizontalScroll>
-        </div>
-      </div>
+      {/* 상단 헤더 */}
+      <PageHeader 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+      />
 
       {/* 컨텐츠 영역 */}
       <div 
