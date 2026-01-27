@@ -1,1 +1,340 @@
-{"users" : [{"id":"b40e1ddb-912b-408e-abba-9a69e648aa78","nickname":"wanderplug_6033","avatar_url":null},  {"id":"ebccf428-9340-4206-9b90-2e1fcb6bb31f","nickname":"solarplane88_9604","avatar_url":null},  {"id":"49219e75-e3db-4491-b9f5-4207f30d814f","nickname":"ckw9999_4015","avatar_url":null},  {"id":"e256f710-1911-4a17-a632-648aaf8dce1a","nickname":"focus532_3657","avatar_url":null},  {"id":"263cbd8d-7d40-4cf2-9861-687f6a2140a4","nickname":"fromhappy7_8260","avatar_url":null},  {"id":"59696938-811f-4e65-a58a-bd9511cad8f8","nickname":"ktlim03_3590","avatar_url":null},  {"id":"4fd3c60e-6a3c-4af1-97aa-3a9117ec8592","nickname":"songgs33_5142","avatar_url":null},  {"id":"25fccc60-c484-4323-9245-d75bd21bc0c3","nickname":"junu224_7894","avatar_url":null},  {"id":"006f2732-c5db-4e9b-8ec1-9b99737ac3f2","nickname":"fnsechky_8817","avatar_url":null},  {"id":"07c0d770-11d9-4811-9163-d32aed286b2a","nickname":"zulurich_2208","avatar_url":null}], "popularPlaces" : [{"id":"11871325","name":"성심당 본점","category":"베이커리","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyNTA0MjhfMTgz/MDAxNzQ1ODAxODIzNzA4.Zm7mEgFNUyND_6ZlwmbwQaDXZMQSZadgn19Fmwvkzzwg.dCeQrVA-pvcxFZAdCfczhqu566aoN5xN-EAPlZX653og.JPEG/1745656304891-1.jpg.jpg","popularity_score":69985},  {"id":"12011606","name":"이성당","category":"베이커리","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyMzAxMDhfMjA1/MDAxNjczMTQ4NTY1MDYz.96leiYbsmrE_JdonwpRVjn0JPwELdwxvpTumUXai998g.ZV5aDWwZynUoL6iV8zP3T4HT6_hRqwG7NHghVh8pMjcg.JPEG/34FEE566-837A-48E8-A0D8-D8BA2982FB7C.jpeg","popularity_score":53150},  {"id":"37749845","name":"스타벅스 한국프레스센터점","category":"카페","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyNTAxMjZfMzUg/MDAxNzM3ODczNDU0MTU0.wvpPFR-VIfenj87vkyMI70F5kXRmMPck0AF2tanUgycg.hfy2OU44lXXl4NTgxe9wMV51j-CeOtMmNxuAnE4Uv8gg.JPEG/9026DB52-37C2-4314-8E1B-519D47CA3966.jpeg","popularity_score":48137},  {"id":"1358513254","name":"신사우물갈비 불당본점","category":"육류,고기요리","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyNjAxMTBfMjg4/MDAxNzY4MDE4OTk4OTgy.6pJqE9eM5I5sS0L37fQcLRSz1qLEH5-lLrfPK9thA6Ig.fnjW4YzqVy5Xps7rGa4kXgxhI5J_mw1znZ2gEI313ZUg.JPEG/7AA57D8C-9C83-489A-B0DC-518A9B9363CA.jpeg","popularity_score":46306},  {"id":"15006666","name":"만석닭강정 중앙시장점","category":"치킨,닭강정","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyMjA4MjJfMTA2/MDAxNjYxMTAyMjU4ODg5.fEeQz4qRt1IdrPXPhBBBg1c3ItrWjNLEsLrCAotBqqAg.mo_9wwlq2MyHLJhRV90j4bshqNaV236-_4LN15sPHI8g.JPEG/upload_0a2234ee30d9e4af1e6b9e1c7dbe3022.jpeg","popularity_score":44546},  {"id":"20669196","name":"스타벅스 송내역점","category":"카페","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyMzAyMjZfOTcg/MDAxNjc3NDE4MzU2MzQz.7JTCSNbOkaCUjNq1sMspT-bdyNf-GEZlymDui3VNKcgg.cAwpK3bvEAgkNMHmKtzJWBdo_PYUWJmyfQIVa2qGIdIg.JPEG/BE77DA6E-376C-4F0F-9B48-6E4FB4E20D3E.jpeg","popularity_score":44039},  {"id":"35644550","name":"성심당 케익부띠끄","category":"베이커리","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyNTA5MDhfMzkg/MDAxNzU3MzA5NjU1MDY3.c1vi6MWb6AVR0sPPlovrD0lGjscysgxRRIs1TQIM5Ewg.5lk-xWIkxwD0OAxXtIwE5tG0P4VKpzTpX5EVTQ8aR30g.JPEG/AA03385D-5B60-4D5A-9A77-8FDB65195448.jpeg","popularity_score":40666},  {"id":"11592650","name":"명동교자 본점","category":"칼국수,만두","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyNTEyMDFfMjY2/MDAxNzY0NTkxMzk0ODUy.wBQBf2flzzkJ8DAKnLtOyr2qO__WzZpaZHGDva_XXKAg.ay4SUNnd6rBEWuw-RcgSKNwWo0RCM_iCHbmGGpMmBpcg.JPEG/7479ACDC-213F-4A01-A4F9-C4F37EE37E12.jpeg","popularity_score":39703},  {"id":"18851700","name":"NH농협하나로마트동탄유통센터","category":"슈퍼,마트","thumbnail":"https://ldb-phinf.pstatic.net/20211129_11/163816599551089pFt_JPEG/%C0%FC%B0%E6%BB%E7%C1%F8_%B0%C7%B9%B0%C1%A4%B8%E9_2.jpg","popularity_score":37551},  {"id":"16764370","name":"씨엘비베이커리","category":"베이커리","thumbnail":"https://pup-review-phinf.pstatic.net/MjAyMzAyMTlfMjY0/MDAxNjc2NzkyMjIzMTIy.pxDsFdYieiqajNtuhR3HB6Q7fWkLTz6_ZiXdFGmHbnkg.5Whs1Kcl7gZ2pbmIqyhtOEsXGzoON586I3cC0Ywbxcsg.JPEG/image.jpg","popularity_score":37093}], "youtubeChannels" : [{"title":"discovery","channel_thumbnail":"https://api.dicebear.com/7.x/avataaars/svg?seed=discovery","subscriber_count":0,"place_count":147},  {"title":"local","channel_thumbnail":"https://api.dicebear.com/7.x/avataaars/svg?seed=local","subscriber_count":0,"place_count":675},  {"title":"popular","channel_thumbnail":"https://api.dicebear.com/7.x/avataaars/svg?seed=popular","subscriber_count":0,"place_count":1700}], "naverFolders" : [{"id":79477241,"title":"저장 많은 피자집 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":14110},  {"id":79478443,"title":"저장 많은 수제버거 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":14027},  {"id":80143915,"title":"저장 많은 곱창집 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":13850},  {"id":80142358,"title":"저장 많은 돼지갈비집 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":14885},  {"id":86627332,"title":"⭐️ 성시경 먹텐스팟 ⭐️","owner_nickname":"네이버 사용자","subscriber_count":2457},  {"id":78707665,"title":"저장 많은 숙성회 파는 집 50선⭐️","owner_nickname":"네이버 사용자","subscriber_count":14135},  {"id":77292393,"title":"저장 많은 떡볶이집 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":26826},  {"id":79496427,"title":"저장 많은 TV 맛집 전국 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":17677},  {"id":79076625,"title":"저장 많은 TV 맛집 부산 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":12478},  {"id":79077991,"title":"저장 많은 TV 맛집 전북 100선⭐","owner_nickname":"네이버 사용자","subscriber_count":10358}], "publicFolders" : [{"id":"9f451e21-7bc7-4842-bf68-1f57dbdafd0d","title":"인생버거","description":null,"owner_nickname":"우왕굳","place_count":1},  {"id":"ae78ab54-5f0e-4998-b57a-1020087e23a5","title":"호밀, 통밀빵 맛집","description":null,"owner_nickname":"강양순","place_count":2},  {"id":"ce2bd2bd-b361-4d91-afc4-6535f24edb3a","title":"아재의 알콜라이프","description":"기대하세영","owner_nickname":"우왕굳","place_count":19},  {"id":"89ec37e1-525a-4a35-96c0-9c1ee996a89b","title":"맛탐1","description":"11","owner_nickname":"우왕굳","place_count":1},  {"id":"4483dc4a-5eb1-4076-b43d-f775605bf372","title":"test009","description":"test009","owner_nickname":"우왕굳","place_count":0},  {"id":"761b72fa-d729-4f71-a35f-1240f96542fc","title":"test333","description":"test333","owner_nickname":"우왕굳","place_count":0},  {"id":"e377e658-1979-49ce-bf0d-79bc921eaaf9","title":"우리 엄마도 좋아하는 맛집","description":null,"owner_nickname":"강양순","place_count":2},  {"id":"f115ab35-4d9b-4bb7-82f0-26ce518dd844","title":"test1","description":"test2","owner_nickname":"우왕굳","place_count":0},  {"id":"1310c12f-65bf-489e-8cb3-2de32b1cca82","title":"test","description":"test","owner_nickname":"우왕굳","place_count":1},  {"id":"39a3f124-2a34-44b7-8348-37c9f4f5b9ab","title":"공개","description":"1","owner_nickname":"우왕굳","place_count":0}]}
+{
+  "users": [
+    {
+      "id": "b40e1ddb-912b-408e-abba-9a69e648aa78",
+      "nickname": "wanderplug_6033",
+      "avatar_url": null
+    },
+    {
+      "id": "ebccf428-9340-4206-9b90-2e1fcb6bb31f",
+      "nickname": "solarplane88_9604",
+      "avatar_url": null
+    },
+    {
+      "id": "49219e75-e3db-4491-b9f5-4207f30d814f",
+      "nickname": "ckw9999_4015",
+      "avatar_url": null
+    },
+    {
+      "id": "e256f710-1911-4a17-a632-648aaf8dce1a",
+      "nickname": "focus532_3657",
+      "avatar_url": null
+    },
+    {
+      "id": "263cbd8d-7d40-4cf2-9861-687f6a2140a4",
+      "nickname": "fromhappy7_8260",
+      "avatar_url": null
+    },
+    {
+      "id": "59696938-811f-4e65-a58a-bd9511cad8f8",
+      "nickname": "ktlim03_3590",
+      "avatar_url": null
+    },
+    {
+      "id": "4fd3c60e-6a3c-4af1-97aa-3a9117ec8592",
+      "nickname": "songgs33_5142",
+      "avatar_url": null
+    },
+    {
+      "id": "25fccc60-c484-4323-9245-d75bd21bc0c3",
+      "nickname": "junu224_7894",
+      "avatar_url": null
+    },
+    {
+      "id": "006f2732-c5db-4e9b-8ec1-9b99737ac3f2",
+      "nickname": "fnsechky_8817",
+      "avatar_url": null
+    },
+    {
+      "id": "07c0d770-11d9-4811-9163-d32aed286b2a",
+      "nickname": "zulurich_2208",
+      "avatar_url": null
+    }
+  ],
+  "popularPlaces": [
+    {
+      "id": "11871325",
+      "name": "성심당 본점",
+      "category": "베이커리",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyNTA0MjhfMTgz/MDAxNzQ1ODAxODIzNzA4.Zm7mEgFNUyND_6ZlwmbwQaDXZMQSZadgn19Fmwvkzzwg.dCeQrVA-pvcxFZAdCfczhqu566aoN5xN-EAPlZX653og.JPEG/1745656304891-1.jpg.jpg",
+      "popularity_score": 69985
+    },
+    {
+      "id": "12011606",
+      "name": "이성당",
+      "category": "베이커리",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyMzAxMDhfMjA1/MDAxNjczMTQ4NTY1MDYz.96leiYbsmrE_JdonwpRVjn0JPwELdwxvpTumUXai998g.ZV5aDWwZynUoL6iV8zP3T4HT6_hRqwG7NHghVh8pMjcg.JPEG/34FEE566-837A-48E8-A0D8-D8BA2982FB7C.jpeg",
+      "popularity_score": 53150
+    },
+    {
+      "id": "37749845",
+      "name": "스타벅스 한국프레스센터점",
+      "category": "카페",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyNTAxMjZfMzUg/MDAxNzM3ODczNDU0MTU0.wvpPFR-VIfenj87vkyMI70F5kXRmMPck0AF2tanUgycg.hfy2OU44lXXl4NTgxe9wMV51j-CeOtMmNxuAnE4Uv8gg.JPEG/9026DB52-37C2-4314-8E1B-519D47CA3966.jpeg",
+      "popularity_score": 48137
+    },
+    {
+      "id": "1358513254",
+      "name": "신사우물갈비 불당본점",
+      "category": "육류,고기요리",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyNjAxMTBfMjg4/MDAxNzY4MDE4OTk4OTgy.6pJqE9eM5I5sS0L37fQcLRSz1qLEH5-lLrfPK9thA6Ig.fnjW4YzqVy5Xps7rGa4kXgxhI5J_mw1znZ2gEI313ZUg.JPEG/7AA57D8C-9C83-489A-B0DC-518A9B9363CA.jpeg",
+      "popularity_score": 46306
+    },
+    {
+      "id": "15006666",
+      "name": "만석닭강정 중앙시장점",
+      "category": "치킨,닭강정",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyMjA4MjJfMTA2/MDAxNjYxMTAyMjU4ODg5.fEeQz4qRt1IdrPXPhBBBg1c3ItrWjNLEsLrCAotBqqAg.mo_9wwlq2MyHLJhRV90j4bshqNaV236-_4LN15sPHI8g.JPEG/upload_0a2234ee30d9e4af1e6b9e1c7dbe3022.jpeg",
+      "popularity_score": 44546
+    },
+    {
+      "id": "20669196",
+      "name": "스타벅스 송내역점",
+      "category": "카페",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyMzAyMjZfOTcg/MDAxNjc3NDE4MzU2MzQz.7JTCSNbOkaCUjNq1sMspT-bdyNf-GEZlymDui3VNKcgg.cAwpK3bvEAgkNMHmKtzJWBdo_PYUWJmyfQIVa2qGIdIg.JPEG/BE77DA6E-376C-4F0F-9B48-6E4FB4E20D3E.jpeg",
+      "popularity_score": 44039
+    },
+    {
+      "id": "35644550",
+      "name": "성심당 케익부띠끄",
+      "category": "베이커리",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyNTA5MDhfMzkg/MDAxNzU3MzA5NjU1MDY3.c1vi6MWb6AVR0sPPlovrD0lGjscysgxRRIs1TQIM5Ewg.5lk-xWIkxwD0OAxXtIwE5tG0P4VKpzTpX5EVTQ8aR30g.JPEG/AA03385D-5B60-4D5A-9A77-8FDB65195448.jpeg",
+      "popularity_score": 40666
+    },
+    {
+      "id": "11592650",
+      "name": "명동교자 본점",
+      "category": "칼국수,만두",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyNTEyMDFfMjY2/MDAxNzY0NTkxMzk0ODUy.wBQBf2flzzkJ8DAKnLtOyr2qO__WzZpaZHGDva_XXKAg.ay4SUNnd6rBEWuw-RcgSKNwWo0RCM_iCHbmGGpMmBpcg.JPEG/7479ACDC-213F-4A01-A4F9-C4F37EE37E12.jpeg",
+      "popularity_score": 39703
+    },
+    {
+      "id": "18851700",
+      "name": "NH농협하나로마트동탄유통센터",
+      "category": "슈퍼,마트",
+      "thumbnail": "https://ldb-phinf.pstatic.net/20211129_11/163816599551089pFt_JPEG/%C0%FC%B0%E6%BB%E7%C1%F8_%B0%C7%B9%B0%C1%A4%B8%E9_2.jpg",
+      "popularity_score": 37551
+    },
+    {
+      "id": "16764370",
+      "name": "씨엘비베이커리",
+      "category": "베이커리",
+      "thumbnail": "https://pup-review-phinf.pstatic.net/MjAyMzAyMTlfMjY0/MDAxNjc2NzkyMjIzMTIy.pxDsFdYieiqajNtuhR3HB6Q7fWkLTz6_ZiXdFGmHbnkg.5Whs1Kcl7gZ2pbmIqyhtOEsXGzoON586I3cC0Ywbxcsg.JPEG/image.jpg",
+      "popularity_score": 37093
+    }
+  ],
+  "youtubeChannels": [
+    {
+      "title": "discovery",
+      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=discovery",
+      "subscriber_count": 0,
+      "place_count": 147
+    },
+    {
+      "title": "local",
+      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=local",
+      "subscriber_count": 0,
+      "place_count": 675
+    },
+    {
+      "title": "popular",
+      "channel_thumbnail": "https://api.dicebear.com/7.x/avataaars/svg?seed=popular",
+      "subscriber_count": 0,
+      "place_count": 1700
+    }
+  ],
+  "naverFolders": [
+    {
+      "id": 79477241,
+      "title": "저장 많은 피자집 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 14110,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMTBfMjQ5/MDAxNzYwMDkxODY4OTEw.3ToahnaFFRxT6iHxXIROHrhstC3rGjzvrC9GeIL78L0g.Y1D30dHn2oQCvsR2MgwWUNpArbsgxa_f7iLDcI-2ufwg.JPEG/774D3538-DB0C-4AD6-BEFA-4FAAE29A34AB.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNjAxMDRfMTQ5/MDAxNzY3NTI3NzQ5MTQy.3q8Nn_R_LgMY9UKX7zF2SCvHAEBEu44wO_XzYiNU8Ecg.1o5iwDVQwNm65ApuO7c5DuX1v3bNPrUIlsScR9-C06Eg.JPEG/1000032839.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjdfMjg3/MDAxNjk4NDA2MzMwMTc1.Gp4Bv7cSO_XmQDHLmKVdNtwoLYdKxpekDbhif_CLHaAg.IgdF_s76VMBHmn2j9KTvbyx-_Z7appvkIZBKDLt1sC8g.JPEG/upload_23a428b4ef47c3ee15da404802c557da.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMjdfMTY0/MDAxNzQzMDQ4NTc0NzY0.9yyAZTC07fUuDWyh52F9n0LUiECwzF56w_nh7w0B5AIg.ex2ZcSKtdw-smQL1VLW1j_QtyEA-Ztdae3KcGe-TIV0g.JPEG/1743033831409-7.jpg.jpg"
+      ]
+    },
+    {
+      "id": 79478443,
+      "title": "저장 많은 수제버거 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 14027,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MTdfMTA0/MDAxNjg2OTY4MTkwNjkx.woyC37J1iFB6Nc3Hqq2d6D8xckHqjEsO81Ke7giAg5Ag.C_0D2UTlletw5CjB8BREGOVT2oSop8RHm2FJkqe9BWAg.JPEG/1686967668560-13.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAyMjFfMTQg/MDAxNzQwMTA2MjE2MDYw.Xfpj6aS_kOZDFNKDX7JAuMI750yTbZCaddE8UJBWN9sg.6IkCSzrBnZR9x6nO6cxByaEfFROFrKpdAysZflGrgZog.JPEG/8B6B36FA-3F7E-4CFB-B333-D94DF83F7E4E.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTdfMTgg/MDAxNzQ3MzE3NDk4NDM5.15EOuCOruCp-AMJEBYiWrnlk66n-TqQG66CP8h5WaBog.Xv1244LcMEm8ne2VS0P6F0h68IOvb19Yg2w6L1kir6Yg.JPEG/20250515_171539.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA0MTBfNDYg/MDAxNjgxMDU5NjI5NTg2.tcEeND_PNrkG4OzZl-lvPULRM5WUXGwIq_mamyETZRUg.8O1UWRK0GiQq7-K-wO2T98R_Bz0wfwnJCBK3ccobJY8g.JPEG/20230317_134017.jpg"
+      ]
+    },
+    {
+      "id": 80143915,
+      "title": "저장 많은 곱창집 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 13850,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMzBfMTMw/MDAxNzQzMjY3NjU3MDAw.hZhHayIKjleeTL0KuSmdKVig5FL_sk-ecKkpN6BqTY8g.T1DYwgzgSEvgHOLDcsQKFDuOX5_x3qZGvE3wPM1HYzcg.JPEG/B2279217-D3CE-4CA1-880F-B36AF5E9B381.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MDFfMjU0/MDAxNzQzNDc5OTg3OTIx.E8OszDH7W41TM-ibd4U-AqljlyN09QCvWJPXqTLVmMUg.MQMv3U2x8h8Y1Pt9k0MrDgSVYKqTZ3LtsehqIEOneY4g.JPEG/CC892C03-C2BF-4454-85A5-B4989B0EC9D9.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDVfOTYg/MDAxNzQ5MTE2NDI2MDcz.GCkrbuwPBAe2JAIaCiIp8zjF5zpnvlVdsaRzOa1JIbwg.GY13-i0Tjh6TNlzOS7KGNwV8sO_u9cBhCiGQrILvlw4g.JPEG/20250605_183931.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTlfMTUw/MDAxNzQ3NjQzNjE2NzQz.p2nIIJSfrc2hUNp2O0MV_uMs27daFZj0I-YO97JGEZcg.-Q7P96wrILcBhwDJHstzFvF8sqbtIpJLrVZT1deumdQg.JPEG/20250518_192615.jpg.jpg"
+      ]
+    },
+    {
+      "id": 80142358,
+      "title": "저장 많은 돼지갈비집 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 14885,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTNfODAg/MDAxNjk3MTQyNjk3MjIz.5kONUMk68Mi8WKF8q28DebtQzrXRBzslTC3zBXhreHAg.hAkpcuJeQ3GyPXj9aIQYerOBcJUq0WfS8bOta3ebqSQg.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA1MjhfMjM0/MDAxNjg1Mjc0ODkxOTY2.s3QhicMAWLlSy7JEJoH2sTacIUpQ9z4rJ_2QVoOw5t8g.F0yzkLz71lkdIjn6WpDEonpQuZ_hKDIHFZUtIJqXge8g.JPEG/IMG_2095.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMjNfMjg3/MDAxNzYxMTk2NDUyODI0.kkpSiHKceVwpUnY9lr61puSkSMdkt-grFIIePV_4inUg.mgMIwqOR-1fH_cgrXsq6eH40CI751vLxfJSPg9m13YEg.JPEG/1000097697.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTRfMjkw/MDAxNjk3MjY4NTI0MzU1.W7m3qJANLY5L4858C5SASA213lX5KhFnrZe321giRHAg.tf-RmpLfLkNg1PeSo_UzzbAzeD4ojSf71gPQkY0_atcg.JPEG/upload_6c8ae478cc6053e5fca35853bec99069.jpeg"
+      ]
+    },
+    {
+      "id": 86627332,
+      "title": "⭐️ 성시경 먹텐스팟 ⭐️",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 2457,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA5MTZfMzEg/MDAxNzU3OTk4MjkxODk1.cRLbcIEKhFo02cqaqCJaRQJN-nwgo5hb6ZouAkKXAxUg.NtYEO1vGuVHgt6OFtefmFsRkpUypfiLA97Y-xgLNaNog.JPEG/A8FC0F0B-D565-434C-9037-271B88990DC0.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDdfMjI1/MDAxNzY1MDgxOTUxMjYx.SyLZJVso3JtP-3ePCj9nXYKU0-dNQ--VtCVw3blAkK8g.ysOnkM0BSolGEBsv7SsOVtngTIatd43T0LdsyLjePrUg.JPEG/1000526722.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMzFfNTMg/MDAxNzQzMzg4ODA4MDMy.91r5aTLuigAjNuHcRsGlUjIRlxYQPKtQItZpicFnniwg.JnfC5o26AWLiei1PpBIG3TK0Q6Jp26cYe-BP5wa1FIwg.JPEG/_CFL2479.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA2MjZfMTQ2/MDAxNjg3NzY2NTU5ODg1.4UyLhiUCYEupwMjc0ZxazfySQ6GCF_okWhtZe2ktQrkg.kK4nZ5GnN-v0XPhQ5_VmcZ-FBnqKRYd7m1eyeDLkEHIg.JPEG/7EC1D137-F40A-49D6-89AC-FB7FCFA0D677.jpeg"
+      ]
+    },
+    {
+      "id": 78707665,
+      "title": "저장 많은 숙성회 파는 집 50선⭐️",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 14135,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMTFfMTUy/MDAxNzYwMTg3MDc1OTg5.sxYpNg8Yr3SDw8VkcR0Jl-BQpLjk6f11YWgfDvE-8S4g.7TZzgsAf-iSzV_-bluj5mwdl6RiJjupDr2kLCN-PAs4g.JPEG/B0C320F1-8DE4-482F-A790-5274AC7DC6FF.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDJfMjAg/MDAxNzY0NjA1ODAwMTc2.5MUxH-bsgXXrcBq1agz0RtuqiUcqleRVDajH_hap-QQg.EMMvpILixWBzfvjS_f8gJHC3nypyxTU_kkylKyJx3YMg.JPEG/IMG_9918.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMTlfMjE1/MDAxNjk3NzAyNTAzMDk0.eBqWfwj359PxZ_2EzN5skUleadG-b2i-QBfCvqPUv3kg.C4rfqtxkffcLpoYCsQUXQp0_FUHEu-zHPpRM8ASsbC0g.JPEG/image.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAzMDJfMjI4/MDAxNzQwODk2NzUzOTgx.nOiU2f3HvM9spFwleBoneRsKC9JqpT3lDOVGp8AQAn8g.I5RPJzs1c_5sgoFi2SqjDFg35qPQAGP6zGOZ7qf9UVkg.JPEG/20250221_171841.jpg.jpg"
+      ]
+    },
+    {
+      "id": 77292393,
+      "title": "저장 많은 떡볶이집 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 26826,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA1MTlfMjU4/MDAxNzQ3NjM0NjU2MTc4.NMZcrORcMuAygATolg0TY8U1pwqB9Hm5lJ1S43mc6bsg.jMQyNRC202fWN65P8YekqZGbCSwL4JCTceRWWHiDyuEg.JPEG/20250517_124839.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMjVfMTEz/MDAxNzYxMzkwNTc2OTY2.lLS1_XN1RGW4rYSSQMNRLA9_FnYxtR0c8qTXj4p53rkg.3Z-CjImuSVnYkxtj_TtaN6pCzzj_CeW7Y9513bMrhv4g.JPEG/50A411CE-2B70-43D8-9355-26B77CF4F09B.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNDAyMDNfMTA0/MDAxNzA2OTYzNjcwMDUw.4Yty0RrXQvgdD_Lrxv0pEDOQHwrGn9F62zfUvIHqi3Yg.35VTQPLrSoce4e_UL97D4jgGpVBNYNUvCwsSuSJXqdwg.JPEG/20240203_181351.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTAyMDJfNzIg/MDAxNzM4NDM0MzQ5MTkw.PSz0JETIwetRKJPcHonxSHklqEX9Xd9Gi2s1PDq4RMUg.3PIQ0l7jWV0wJyv_zSzYivZrg3qkKntTPLOYlsG0N5Mg.JPEG/1000092247.jpg.jpg"
+      ]
+    },
+    {
+      "id": 79496427,
+      "title": "저장 많은 TV 맛집 전국 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 17677,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyNTA2MDFfMTg5/MDAxNzQ4NzcxMTg2NzYx.Sl_jlnmqjHvOePBkXjv8GPkbNXkJSKwKqyCPsrgcTL4g.yu4sTGVYWNR8gzONyTI-qpM-NqyCbqlwskXlCzq7wMAg.JPEG/20250601_184442.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzA0MTZfOTgg/MDAxNjgxNjU1MzEwODIw._l9kHzR1i6SFLbaOqEEkph2ex7g5n95miNI6I7DNI9sg.gqxJY4xD5L_mOWb2DxYkXGKGHIkwt446NF0jrL0Ui2wg.JPEG/20230407_165916.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzAyMTlfMjYw/MDAxNjc2NzY0ODA4MTk2.hG5jrATQucx02ngqLzyJ3H5axF1OTkwD9qXCUSwVThUg.ShGTKxGKk_3czYrUF0SU9muFb1PgW8N9ur2qLINGmPIg.JPEG/20230217_134216.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEyMDFfMjY2/MDAxNzY0NTkxMzk0ODUy.wBQBf2flzzkJ8DAKnLtOyr2qO__WzZpaZHGDva_XXKAg.ay4SUNnd6rBEWuw-RcgSKNwWo0RCM_iCHbmGGpMmBpcg.JPEG/7479ACDC-213F-4A01-A4F9-C4F37EE37E12.jpeg"
+      ]
+    },
+    {
+      "id": 79076625,
+      "title": "저장 많은 TV 맛집 부산 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 12478,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMjEyMTVfOTcg/MDAxNjcxMDgxNTkzMDEz.ifCVPtC34DrllsStB0q3JF3ccqF13VK0wMXi4BIYh2Mg.CDlGz_AiX0KhPYSi91Ms4IIDJWyNYjAkdThPSiCrWgUg.JPEG/1000001157.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjJfMjkz/MDAxNjk3OTgxMzA0ODM4.mNVr82_dm6WulOhjaA5b7ojfCQHMZM1YtF_IRcFO_CAg.nWxIeOqrimMez3vIslXeMlY4TQxl7_haTJM9LaSAEQog.JPEG/upload_1a6b75b040739a1568bb55116c67d0e9.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEyMTBfMTA0/MDAxNzAyMTc5NjAzMjE4.-bEVg3C0_awEezlzW930e0K16ZtP-5RSYrSM16JUcksg.kBkdXaNQuCjJzlctFj7SGMmZNnhkvur_d-NnuhnHuv0g.JPEG/%C3%83%C2%AC%C3%82%C2%82%C3%82%C2%AC%C3%83%C2%AC%C3%82%C2%A7%C3%82%C2%843.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMThfNjkg/MDAxNjk3NjA2MDQ3NjIz.aqKdsBgTzCFjBl-mOgL1Ucby5KfSY8kTbfpFN5ozfiog.Z1f0OIOWQkwyxZ48-cF-oTtdCYslU8KPS7C2KSRdFyYg.JPEG/upload_4ff9d92e3904a17502b90f8a413c0e88.jpeg"
+      ]
+    },
+    {
+      "id": 79077991,
+      "title": "저장 많은 TV 맛집 전북 100선⭐",
+      "owner_nickname": "네이버 사용자",
+      "subscriber_count": 10358,
+      "images": [
+        "https://pup-review-phinf.pstatic.net/MjAyMjExMDdfMjIx/MDAxNjY3ODAwNjcyODAy.sRccAMmJQx40k5uytfdBEUCPHwN14akN6X97xrH8n1wg.UKcLBtYDh0MdPQ7dzcIZwUQ5o8aeFlUKG49v0Sw1iB0g.JPEG/EBE979F9-B512-4ECE-9109-86547DF0DAA1.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyMzEwMjBfMTU3/MDAxNjk3ODEwMTQxNjcy.FPpOi92su2uECdNhLF0AcXXKo_nBnBdtRVwGA0ILbTcg.9hDQtitIFHbtju85V659fSblWuBNwhHdI08uxRDK4ZIg.JPEG/upload_07d01c690ed284243f2ff11588ae6029.jpeg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTA0MTVfMTc5/MDAxNzQ0Njg5MzUzNTU4.kD_tcH8xc0wWt_NItz8C-ja9xKdpdv5psXIiNwWO-Ucg.SCmO0_aBoLQ--Y5nUb2mlWwTWODQtYEA8giln41jIA4g.JPEG/20250415_120745.jpg.jpg",
+        "https://pup-review-phinf.pstatic.net/MjAyNTEwMDJfMTI1/MDAxNzU5NDA3NzIyODcy.tW6jpfngTn41jrOWZAAUBpx70ZCHb-LJK_jbB7cHRq8g.gwfZyyCx5_3iskrIP6a1aTrqUV2SwKT8qZSqkjdREBcg.JPEG/1000058797.jpg.jpg"
+      ]
+    }
+  ],
+  "publicFolders": [
+    {
+      "id": "9f451e21-7bc7-4842-bf68-1f57dbdafd0d",
+      "title": "인생버거",
+      "description": null,
+      "owner_nickname": "우왕굳",
+      "place_count": 1
+    },
+    {
+      "id": "ae78ab54-5f0e-4998-b57a-1020087e23a5",
+      "title": "호밀, 통밀빵 맛집",
+      "description": null,
+      "owner_nickname": "강양순",
+      "place_count": 2
+    },
+    {
+      "id": "ce2bd2bd-b361-4d91-afc4-6535f24edb3a",
+      "title": "아재의 알콜라이프",
+      "description": "기대하세영",
+      "owner_nickname": "우왕굳",
+      "place_count": 19
+    },
+    {
+      "id": "89ec37e1-525a-4a35-96c0-9c1ee996a89b",
+      "title": "맛탐1",
+      "description": "11",
+      "owner_nickname": "우왕굳",
+      "place_count": 1
+    },
+    {
+      "id": "4483dc4a-5eb1-4076-b43d-f775605bf372",
+      "title": "test009",
+      "description": "test009",
+      "owner_nickname": "우왕굳",
+      "place_count": 0
+    },
+    {
+      "id": "761b72fa-d729-4f71-a35f-1240f96542fc",
+      "title": "test333",
+      "description": "test333",
+      "owner_nickname": "우왕굳",
+      "place_count": 0
+    },
+    {
+      "id": "e377e658-1979-49ce-bf0d-79bc921eaaf9",
+      "title": "우리 엄마도 좋아하는 맛집",
+      "description": null,
+      "owner_nickname": "강양순",
+      "place_count": 2
+    },
+    {
+      "id": "f115ab35-4d9b-4bb7-82f0-26ce518dd844",
+      "title": "test1",
+      "description": "test2",
+      "owner_nickname": "우왕굳",
+      "place_count": 0
+    },
+    {
+      "id": "1310c12f-65bf-489e-8cb3-2de32b1cca82",
+      "title": "test",
+      "description": "test",
+      "owner_nickname": "우왕굳",
+      "place_count": 1
+    },
+    {
+      "id": "39a3f124-2a34-44b7-8348-37c9f4f5b9ab",
+      "title": "공개",
+      "description": "1",
+      "owner_nickname": "우왕굳",
+      "place_count": 0
+    }
+  ]
+}

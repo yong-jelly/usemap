@@ -91,6 +91,11 @@ function getFirstImage(item: any): string | undefined {
 function getImages(item: any, count: number = 4): string[] {
   if (!item) return [];
   
+  // 이미 images 배열이 있는 경우 (예: discover.json의 naverFolders)
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return [...item.images].sort(() => Math.random() - 0.5).slice(0, count);
+  }
+  
   const images: string[] = [];
   const places = item.preview_places || [];
   
