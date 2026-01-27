@@ -33,6 +33,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth, public
 AS $$
+#variable_conflict use_column
 DECLARE
     v_user_id UUID;
 BEGIN
@@ -77,7 +78,7 @@ BEGIN
         FROM public.tbl_folder f
         LEFT JOIN public.tbl_user_profile p ON f.owner_id = p.auth_user_id
         WHERE f.owner_id = v_user_id
-          AND f.deleted_at IS NULL
+          AND f.place_count > 0
     ),
     public_folders AS (
         SELECT
@@ -124,28 +125,28 @@ BEGIN
         WHERE f.permission = 'public'
           AND f.is_hidden = FALSE
           AND (v_user_id IS NULL OR f.owner_id != v_user_id) -- 내 폴더 제외
-          AND f.deleted_at IS NULL
+          AND f.place_count > 0
     )
     SELECT
-        id,
-        owner_id,
-        owner_nickname,
-        owner_avatar_url,
-        title,
-        description,
-        permission,
-        subscriber_count,
-        place_count,
-        created_at::TIMESTAMPTZ,
-        updated_at::TIMESTAMPTZ,
-        preview_places,
-        is_mine
+        combined.id,
+        combined.owner_id,
+        combined.owner_nickname,
+        combined.owner_avatar_url,
+        combined.title,
+        combined.description,
+        combined.permission,
+        combined.subscriber_count,
+        combined.place_count,
+        combined.created_at::TIMESTAMPTZ,
+        combined.updated_at::TIMESTAMPTZ,
+        combined.preview_places,
+        combined.is_mine
     FROM (
         SELECT * FROM my_folders
         UNION ALL
         SELECT * FROM public_folders
     ) combined
-    ORDER BY sort_order ASC, sort_time DESC
+    ORDER BY combined.sort_order ASC, combined.sort_time DESC
     LIMIT p_limit OFFSET p_offset;
 END;
 $$;

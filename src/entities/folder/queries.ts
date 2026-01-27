@@ -3,7 +3,7 @@ import { folderApi } from "./api";
 
 export const folderKeys = {
   all: ["folder"] as const,
-  list: (type: 'public' | 'my' | 'user') => [...folderKeys.all, "list", type] as const,
+  list: (type: 'public' | 'my' | 'user' | 'my_and_public') => [...folderKeys.all, "list", type] as const,
   userList: (userId: string) => [...folderKeys.list('user'), userId] as const,
   details: (id: string) => [...folderKeys.all, "details", id] as const,
   places: (id: string) => [...folderKeys.all, "places", id] as const,
@@ -13,6 +13,21 @@ export const folderKeys = {
   reviews: (folderId: string, placeId?: string) => 
     [...folderKeys.all, "reviews", folderId, placeId] as const,
 };
+
+/**
+ * 내 폴더와 공개 폴더 통합 무한 스크롤 조회
+ */
+export function useMyAndPublicFolders() {
+  return useInfiniteQuery({
+    queryKey: folderKeys.list('my_and_public'),
+    queryFn: ({ pageParam = 0 }) => folderApi.listMyAndPublicFolders({ limit: 20, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+  });
+}
 
 /**
  * 공개 폴더 목록 무한 스크롤 조회

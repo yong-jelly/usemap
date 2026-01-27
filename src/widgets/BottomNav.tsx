@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router";
-import { House, Compass, User, Fan, HatGlasses, Search, GalleryVerticalEnd } from "lucide-react";
+import { House, Compass, User, Fan, HatGlasses, Search, GalleryVerticalEnd, RadioTower } from "lucide-react";
 import { 
   motion, 
   useReducedMotion 
@@ -26,7 +26,7 @@ export function BottomNav() {
   const scrollThreshold = 10;
 
   const navItems = [
-    ...(isAdmin(profile) ? [{ href: "/home", icon: House, label: "홈" }] : []),
+    ...(isAdmin(profile) ? [{ href: "/home", icon: House, label: "홈" }, { href: "/search", icon: RadioTower, label: "검색" }] : []),
     { href: "/feed", icon: GalleryVerticalEnd, label: "피드" },
     { href: "/explorer", icon: Search, label: "탐색" },
     { href: "/feature", icon: HatGlasses, label: "맛탐정" },

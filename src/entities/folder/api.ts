@@ -11,6 +11,17 @@ import type {
 
 export const folderApi = {
   /**
+   * 내 폴더와 공개 폴더 통합 조회
+   */
+  listMyAndPublicFolders: async (params: { limit?: number; offset?: number } = {}) => {
+    const response = await apiClient.rpc<Folder>("v1_list_my_and_public_folders", {
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 공개 폴더 목록 조회
    */
   listPublicFolders: async (params: { limit?: number; offset?: number } = {}) => {

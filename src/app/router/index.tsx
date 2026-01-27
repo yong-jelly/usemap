@@ -9,6 +9,7 @@ import { cn } from "@/shared/lib/utils";
 
 // Page Imports
 import { HomePage } from "@/pages/HomePage";
+import { SearchPage } from "@/pages/SearchPage";
 import { FeedPage } from "@/pages/FeedPage";
 import { ExplorePage } from "@/pages/ExplorePage";
 import { ExplorerPage } from "@/pages/ExplorerPage";
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
       {
         path: "home",
         element: <HomePage />,
+      },
+      {
+        path: "search",
+        element: <SearchPage />,
       },
       {
         path: "explore2",
