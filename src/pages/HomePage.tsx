@@ -135,9 +135,9 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] dark:bg-surface-950">
+    <div className="min-h-screen bg-white dark:bg-surface-950">
       {/* Header - 소셜 느낌의 정돈된 헤더 */}
-      <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 dark:bg-surface-950/95 backdrop-blur-md border-b border-surface-100 dark:border-surface-800">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-surface-950/95 backdrop-blur-md border-b border-surface-100 dark:border-surface-800">
         <div className="px-5 pt-6 pb-0">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-black text-surface-900 dark:text-white tracking-tight">

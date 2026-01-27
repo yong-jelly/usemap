@@ -103,8 +103,8 @@ export function FeaturePage() {
  */
 function FeatureInfoNotice({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="mx-4 mb-2 p-4 rounded-2xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-start gap-3">
-      <div className="p-2 rounded-xl bg-white dark:bg-surface-800 shadow-sm flex-shrink-0">
+    <div className="mx-4 mb-2 p-4 rounded-2xl bg-white dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 flex items-start gap-3">
+      <div className="p-2 rounded-xl bg-surface-50 dark:bg-surface-800 shadow-sm flex-shrink-0">
         <Icon className="size-5 text-surface-600 dark:text-surface-400" />
       </div>
       <div className="flex flex-col gap-0.5 pt-0.5">
@@ -313,7 +313,7 @@ function RegionList() {
               "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
               selectedSource === source.id
                 ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
-                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
               isLoading && "opacity-50 cursor-not-allowed"
             )}
           >
@@ -507,7 +507,7 @@ function CommunityList() {
               "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
               selectedDomain === domain.id 
                 ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
-                : "bg-surface-50 text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
               isLoading && "opacity-50 cursor-not-allowed"
             )}
           >

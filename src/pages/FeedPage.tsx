@@ -306,7 +306,7 @@ export function FeedPage() {
             <div className="px-5 pt-6">
               <button 
                 onClick={openLogin}
-                className="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 active:scale-[0.98] transition-all"
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="size-10 rounded-full bg-primary-500 flex items-center justify-center">
@@ -357,7 +357,7 @@ export function FeedPage() {
             <div className="px-5 mt-4">
               <button 
                 onClick={() => navigate("/feature")}
-                className="w-full py-8 px-6 rounded-3xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 text-center group active:scale-[0.98] transition-all"
+                className="w-full py-8 px-6 rounded-3xl bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 text-center group active:scale-[0.98] transition-all"
               >
                 <h4 className="text-xl font-medium text-surface-900 dark:text-white">더 많은 맛집을 찾고 계신가요?</h4>
                 <p className="text-surface-500 mt-2 mb-6">다양한 테마와 지역별 맛집을 탐색 탭에서 확인해보세요.</p>
