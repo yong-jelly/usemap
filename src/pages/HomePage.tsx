@@ -141,7 +141,7 @@ export function HomePage() {
         <div className="px-5 pt-6 pb-0">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-black text-surface-900 dark:text-white tracking-tight">
-              맛탐정
+              탐색
             </h1>
             <div className="flex items-center gap-3">
               <button 
@@ -342,10 +342,16 @@ function ForYouContent({
 
   return (
     <div className="pb-32">
-      {/* Hero Section */}
-      {publicFolders?.[0] && (
-        <section className="px-4 mb-8">
-          <HeroCard folder={publicFolders[0]} onClick={() => navigate(`/folder/${publicFolders[0].id}`)} />
+      {/* Hero Section - 가로 슬라이드 */}
+      {publicFolders.length > 0 && (
+        <section className="mb-8 overflow-hidden">
+          <div className="flex gap-4 px-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {publicFolders.slice(0, 5).map((folder: any) => (
+              <div key={folder.id} className="flex-shrink-0 w-[420px]">
+                <HeroCard folder={folder} onClick={() => navigate(`/folder/${folder.id}`)} />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
@@ -367,7 +373,7 @@ function ForYouContent({
               key={place.id}
               rank={i + 1}
               place={place}
-              onClick={() => showPlaceModal(place.id)}
+              onClick={() => onPlaceClick(place.id)}
             />
           ))}
         </div>
@@ -471,77 +477,57 @@ function FollowingContent({
  * Hero 카드 - 메인 피처드
  */
 function HeroCard({ folder, onClick }: { folder: any; onClick: () => void }) {
-  const images = getImages(folder, 3);
+  const images = getImages(folder, 1);
   const mainImage = images[0];
 
   return (
-    <div onClick={onClick} className="relative rounded-[28px] overflow-hidden cursor-pointer group">
+    <div onClick={onClick} className="relative rounded-3xl overflow-hidden cursor-pointer group h-[380px]">
       {/* Main Image */}
-      <div className="aspect-[4/5] relative">
-        {mainImage ? (
-          <img
-            src={convertToNaverResizeImageUrl(mainImage)}
-            alt={folder.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-rose-200 via-fuchsia-200 to-amber-200" />
-        )}
+      {mainImage ? (
+        <img
+          src={convertToNaverResizeImageUrl(mainImage)}
+          alt={folder.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-rose-200 via-fuchsia-200 to-amber-200" />
+      )}
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+      {/* Gradient Overlay - 좀 더 진하게 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* Content */}
-        <div className="absolute inset-x-0 bottom-0 p-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm mb-4">
-            <Flame className="size-3 text-rose-400" />
-            <span className="text-[11px] font-semibold text-white uppercase tracking-wider">추천</span>
-          </div>
-
-          {/* Title */}
-          <h2 className="text-[28px] font-black text-white leading-tight mb-2 tracking-tight">
-            {folder.title}
-          </h2>
-          
-          {folder.description && (
-            <p className="text-white/70 text-sm line-clamp-2 mb-4">{folder.description}</p>
-          )}
-
-          {/* Owner & Stats */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-white/20">
-                {folder.owner_avatar_url ? (
-                  <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="size-4 text-white/60" />
-                  </div>
-                )}
-              </div>
-              <span className="text-white/90 text-sm font-medium">{folder.owner_nickname || '익명'}</span>
-            </div>
-            <div className="flex items-center gap-3 text-white/60 text-xs">
-              <span>{folder.place_count} 장소</span>
-              <span>·</span>
-              <span>{folder.subscriber_count || 0} 구독</span>
-            </div>
-          </div>
+      {/* Bookmark Icon (Top Right) */}
+      <div className="absolute top-4 right-4">
+        <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-md border border-white/10">
+          <Plus className="size-4 text-white" />
         </div>
       </div>
 
-      {/* Sub Images */}
-      {images.length > 1 && (
-        <div className="absolute top-4 right-4 flex flex-col gap-2">
-          {images.slice(1, 3).map((img, i) => (
-            <div key={i} className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
-              <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-          ))}
+      {/* Content */}
+      <div className="absolute inset-x-0 bottom-0 p-4">
+        {/* Title */}
+        <h2 className="text-lg font-medium text-white leading-tight mb-3 tracking-tight line-clamp-2">
+          {folder.title}
+        </h2>
+
+        {/* Owner Info */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 shadow-sm">
+            {folder.owner_avatar_url ? (
+              <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-surface-200 flex items-center justify-center">
+                <User className="size-4 text-surface-400" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-white text-xs font-medium leading-none mb-1">{folder.owner_nickname || '익명'}</span>
+            <span className="text-white/60 text-[10px] leading-none">{folder.place_count} 장소</span>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
