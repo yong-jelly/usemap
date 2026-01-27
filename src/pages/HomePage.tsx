@@ -1,6 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Plus, User, ArrowRight, Sparkles } from "lucide-react";
 import { useMySubscriptions, usePublicFolders } from "@/entities/folder/queries";
 import { useHomeDiscover } from "@/entities/home/queries";
 import { cn } from "@/shared/lib/utils";
@@ -14,6 +13,8 @@ import { PopularPlacesSection } from "@/widgets/PopularPlacesSection";
 import { DiscoverGrid, GridSkeleton, CollectionCard } from "@/widgets/DiscoverGrid";
 
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
+import { useUserLocations } from "@/entities/location";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -22,21 +23,27 @@ export function HomePage() {
   const { show: showPlaceModal } = usePlacePopup();
 
   const [activeTab, setActiveTab] = useState<"foryou" | "following">("foryou");
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; id: string } | null>(null);
 
   // Data Fetching
   const { data: subscriptions, isLoading: isSubscriptionsLoading } = useMySubscriptions();
   const { data: discoverData, isLoading: isDiscoverLoading } = useHomeDiscover();
   const { data: publicFoldersData, isLoading: isPublicFoldersLoading } = usePublicFolders();
+  const { data: userLocations } = useUserLocations({ limit: 1 }, { enabled: isAuthenticated });
 
   const publicFolders = publicFoldersData?.pages?.flatMap(page => page) || [];
 
-  const handleCreateFolder = () => {
-    if (!isAuthenticated) {
-      openLogin();
-      return;
+  // 최근 위치 정보 초기화
+  useEffect(() => {
+    if (userLocations && userLocations.length > 0 && !selectedLocation) {
+      setSelectedLocation({
+        lat: userLocations[0].latitude,
+        lng: userLocations[0].longitude,
+        id: userLocations[0].id
+      });
     }
-    navigate("/folder/create");
-  };
+  }, [userLocations, selectedLocation]);
 
   const tabs = [
     { id: "foryou", label: "추천" },
@@ -53,11 +60,32 @@ export function HomePage() {
       />
 
       <main className="pt-24">
-        {/* Stories */}
+        {/* 대시보드 상단: 위치 및 상태 브리핑 */}
+        <section className="px-4 mb-8">
+          <div 
+            onClick={() => setIsLocationSheetOpen(true)}
+            className="flex items-center justify-between p-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 cursor-pointer transition-all"
+          >
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] text-primary-600 font-medium uppercase tracking-wider">Current Location</span>
+              <h3 className="text-base font-medium text-surface-900 dark:text-white">
+                {selectedLocation ? `${userLocations?.[0]?.nearest_place_name || '현재 위치'} 주변` : '위치 설정'}
+              </h3>
+              <p className="text-[11px] text-surface-500">
+                {selectedLocation ? '주변 맛집의 기록을 확인해보세요' : '거리순 정렬과 주변 탐색이 가능해집니다'}
+              </p>
+            </div>
+            <span className="text-xs text-surface-400 font-medium">변경</span>
+          </div>
+        </section>
+
+        {/* Stories: 맛탐정(유저) 및 소스 브리핑 */}
+        <div className="px-4 mb-2 flex items-center justify-between">
+          <h2 className="text-xs text-surface-500 font-medium uppercase tracking-wider">
+            Active Detectives
+          </h2>
+        </div>
         <StoriesSection isLoading={isDiscoverLoading}>
-          {/* 사용자 데이터
-            - 최근에 음식점을 등록한 순서대로 나온다. 이 정보는 5분마다 집계된 정보로 캐싱된 데이터를 사용한다.
-           */}
           {discoverData?.users?.map((user: any, i: number) => (
             <StoryBox
               key={`user-${user.id || i}`}
@@ -66,16 +94,6 @@ export function HomePage() {
               onClick={() => navigate(`/profile/${user.id}`)}
             />
           ))}
-          {/* 유튜브 채널 데이터 */}
-          {/* {discoverData?.youtubeChannels?.map((channel: any, i: number) => (
-            <StoryBox
-              key={`youtube-${channel.channel_id || i}`}
-              image={channel.channel_thumbnail || `https://api.dicebear.com/7.x/avataaars/svg?seed=${channel.channel_id || i + 200}`}
-              label={channel.channel_title || '유튜브'}
-              onClick={() => navigate(`/feature/detail/youtube/${channel.channel_id}`)}
-              badge="youtube"
-            />
-          ))} */}
         </StoriesSection>
 
         {/* Main Content */}
@@ -85,6 +103,7 @@ export function HomePage() {
             publicFolders={publicFolders}
             isLoading={isDiscoverLoading || isPublicFoldersLoading}
             onPlaceClick={showPlaceModal}
+            selectedLocation={selectedLocation}
           />
         ) : (
           <FollowingContent
@@ -94,6 +113,17 @@ export function HomePage() {
           />
         )}
       </main>
+
+      {/* 위치 설정 바텀 시트 */}
+      <LocationSettingSheet 
+        isOpen={isLocationSheetOpen}
+        onClose={() => setIsLocationSheetOpen(false)}
+        onSelect={(lat, lng, id) => {
+          setSelectedLocation({ lat, lng, id });
+          setIsLocationSheetOpen(false);
+        }}
+        selectedId={selectedLocation?.id}
+      />
     </div>
   );
 }
@@ -106,11 +136,13 @@ function ForYouContent({
   publicFolders,
   isLoading,
   onPlaceClick,
+  selectedLocation,
 }: {
   discoverData: any;
   publicFolders: any[];
   isLoading: boolean;
   onPlaceClick: (id: string) => void;
+  selectedLocation: any;
 }) {
   const mixedContent = useMemo(() => {
     if (isLoading || !publicFolders) return [];
@@ -140,16 +172,35 @@ function ForYouContent({
 
   return (
     <div className="pb-32">
-      <div className="px-4 mt-6 mb-4">
-        <h2 className="text-base font-bold text-surface-900 dark:text-white">추천</h2>
+      {/* 아카이브 큐레이션 섹션 */}
+      <div className="px-4 mt-10 mb-4 flex items-center justify-between">
+        <h2 className="text-base font-medium text-surface-900 dark:text-white">추천 아카이브</h2>
+        {selectedLocation && (
+          <span className="text-[10px] text-primary-600 font-medium uppercase tracking-tight">
+            Nearby First
+          </span>
+        )}
       </div>
+      
       <HeroSection publicFolders={publicFolders} />
-      {/* 인기 음식점 섹션 */}
+      
+      {/* 인기 음식점 섹션: 맥락 강조 */}
+      <div className="px-4 mt-12 mb-4">
+        <h2 className="text-base font-medium text-surface-900 dark:text-white">
+          많이 저장된 장소
+        </h2>
+      </div>
       <PopularPlacesSection
         places={discoverData?.popularPlaces}
         onPlaceClick={onPlaceClick}
       />
-      {/* 발견하기 섹션 */}
+      
+      {/* 발견하기 섹션: 다양한 소스 탐색 */}
+      <div className="px-4 mt-12 mb-4">
+        <h2 className="text-base font-medium text-surface-900 dark:text-white">
+          새로운 기록 발견
+        </h2>
+      </div>
       <DiscoverGrid items={mixedContent.slice(1)} onPlaceClick={onPlaceClick} />
     </div>
   );
@@ -176,16 +227,16 @@ function FollowingContent({
   if (!subscriptions || subscriptions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-rose-100 to-amber-100 dark:from-surface-800 dark:to-surface-700 flex items-center justify-center mb-6">
-          <Sparkles className="size-10 text-rose-300" />
+        <div className="w-24 h-24 rounded-full bg-surface-50 dark:bg-surface-900 flex items-center justify-center mb-6">
+          <span className="text-2xl font-medium text-primary-500">!</span>
         </div>
-        <h3 className="text-xl font-bold text-surface-900 dark:text-white mb-2">구독을 시작해보세요</h3>
+        <h3 className="text-xl font-medium text-surface-900 dark:text-white mb-2">구독을 시작해보세요</h3>
         <p className="text-sm text-surface-500 mb-8 leading-relaxed">마음에 드는 맛집 폴더를 구독하고<br/>새로운 맛집 소식을 받아보세요</p>
         <button
           onClick={() => navigate("/feature")}
-          className="px-8 py-3.5 bg-surface-900 dark:bg-white text-white dark:text-surface-900 rounded-full font-semibold text-sm flex items-center gap-2"
+          className="px-8 py-3.5 bg-surface-900 dark:bg-white text-white dark:text-surface-900 rounded-full font-medium text-sm"
         >
-          탐색하기 <ArrowRight className="size-4" />
+          탐색하기
         </button>
       </div>
     );

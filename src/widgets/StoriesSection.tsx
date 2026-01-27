@@ -24,15 +24,15 @@ export function StoryBox({
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        {/* 유튜브 뱃지 */}
+        {/* 유튜브 뱃지 - 텍스트로 변경 */}
         {badge === 'youtube' && (
-          <div className="absolute top-1 right-1 w-5 h-5 rounded-lg bg-red-500 flex items-center justify-center shadow-sm">
-            <Play className="size-2.5 text-white fill-white" />
+          <div className="absolute top-1 right-1 px-1 rounded-sm bg-red-500 flex items-center justify-center shadow-sm">
+            <span className="text-[7px] text-white font-bold">YT</span>
           </div>
         )}
         {/* 이름 오버레이 (박스 하단) */}
         <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] py-1 px-1">
-          <span className="text-[9px] text-white font-bold truncate block text-center leading-none">
+          <span className="text-[9px] text-white font-medium truncate block text-center leading-none">
             {label}
           </span>
         </div>

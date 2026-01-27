@@ -1,32 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useIntersection } from "@/shared/lib/use-intersection";
+import { useNavigate } from "react-router";
 import { 
   Search, 
   Camera, 
-  ChevronRight, 
-  User, 
   ChevronLeft, 
   X, 
   History,
   Loader2
 } from "lucide-react";
-import { useNavigate } from "react-router";
 import { useMyAndPublicFolders } from "@/entities/folder/queries";
 import { BottomNav } from "@/widgets/BottomNav";
-import { cn, getAvatarUrl } from "@/shared/lib/utils";
+import { PlaceCard } from "@/widgets/PlaceCard";
+import { cn, getAvatarUrl, formatRelativeTime } from "@/shared/lib/utils";
 import { useSearchHistory } from "@/features/place/lib/useSearchHistory";
 import { useUIStore } from "@/shared/model/ui-store";
 import { trackEvent } from "@/shared/lib/gtm";
 import { placeApi } from "@/entities/place/api";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
-import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 
 /**
- * 핀터레스트 스타일의 폴더 카드 컴포넌트
+ * 아카이브 스타일의 폴더 카드 컴포넌트
  */
-function PinterestFolderCard({ folder }: { folder: any }) {
+function ArchiveFolderCard({ folder }: { folder: any }) {
   const navigate = useNavigate();
   
   // 미리보기 이미지들 추출 (최대 6개)
@@ -34,28 +32,23 @@ function PinterestFolderCard({ folder }: { folder: any }) {
     p.image_urls?.[0] || p.images?.[0] || p.thumbnail
   ).filter(Boolean) || [];
 
-  const handleGoDetail = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/folder/${folder.id}`);
-  };
-
   /**
-   * 이미지 개수에 따른 핀터레스트 스타일 레이아웃 렌더링
+   * 이미지 개수에 따른 촘촘하고 여백 없는 그리드 레이아웃
    */
   const renderImageGrid = () => {
     const count = previewImages.length;
 
     if (count === 0) {
       return (
-        <div className="w-full h-full flex items-center justify-center text-surface-400">
-          이미지가 없습니다
+        <div className="w-full h-full flex items-center justify-center bg-surface-50 dark:bg-surface-900">
+          <span className="text-[10px] text-surface-400 font-medium uppercase tracking-widest">No Images</span>
         </div>
       );
     }
 
     if (count === 1) {
       return (
-        <div className="w-full h-full bg-surface-200 dark:bg-surface-800">
+        <div className="w-full h-full">
           <img src={previewImages[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
         </div>
       );
@@ -63,30 +56,24 @@ function PinterestFolderCard({ folder }: { folder: any }) {
 
     if (count === 2) {
       return (
-        <div className="grid grid-cols-2 gap-0.5 w-full h-full">
-          <div className="bg-surface-200 dark:bg-surface-800">
-            <img src={previewImages[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
-          </div>
-          <div className="bg-surface-200 dark:bg-surface-800">
-            <img src={previewImages[1]} alt="" className="w-full h-full object-cover" loading="lazy" />
-          </div>
+        <div className="grid grid-cols-2 gap-px w-full h-full bg-surface-100 dark:bg-surface-800">
+          <img src={previewImages[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <img src={previewImages[1]} alt="" className="w-full h-full object-cover" loading="lazy" />
         </div>
       );
     }
 
     if (count === 3) {
       return (
-        <div className="flex gap-0.5 w-full h-full">
-          <div className="w-2/3 bg-surface-200 dark:bg-surface-800">
+        <div className="grid grid-cols-3 grid-rows-2 gap-px w-full h-full bg-surface-100 dark:bg-surface-800">
+          <div className="col-span-2 row-span-2">
             <img src={previewImages[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
           </div>
-          <div className="flex flex-col gap-0.5 w-1/3">
-            <div className="h-1/2 bg-surface-200 dark:bg-surface-800">
-              <img src={previewImages[1]} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="h-1/2 bg-surface-200 dark:bg-surface-800">
-              <img src={previewImages[2]} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
+          <div className="col-span-1 row-span-1">
+            <img src={previewImages[1]} alt="" className="w-full h-full object-cover" loading="lazy" />
+          </div>
+          <div className="col-span-1 row-span-1">
+            <img src={previewImages[2]} alt="" className="w-full h-full object-cover" loading="lazy" />
           </div>
         </div>
       );
@@ -94,11 +81,9 @@ function PinterestFolderCard({ folder }: { folder: any }) {
 
     if (count === 4) {
       return (
-        <div className="grid grid-cols-2 grid-rows-2 gap-0.5 w-full h-full">
-          {previewImages.map((img: string, i: number) => (
-            <div key={i} className="bg-surface-200 dark:bg-surface-800">
-              <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
+        <div className="grid grid-cols-2 grid-rows-2 gap-px w-full h-full bg-surface-100 dark:bg-surface-800">
+          {previewImages.slice(0, 4).map((img: string, i: number) => (
+            <img key={i} src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
           ))}
         </div>
       );
@@ -106,39 +91,24 @@ function PinterestFolderCard({ folder }: { folder: any }) {
 
     if (count === 5) {
       return (
-        <div className="flex gap-0.5 w-full h-full">
-          <div className="w-1/2 bg-surface-200 dark:bg-surface-800">
+        <div className="grid grid-cols-2 grid-rows-2 gap-px w-full h-full bg-surface-100 dark:bg-surface-800">
+          <div className="col-span-1 row-span-2">
             <img src={previewImages[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
           </div>
-          <div className="flex flex-col gap-0.5 w-1/2">
-            <div className="flex gap-0.5 h-1/2">
-              <div className="w-1/2 bg-surface-200 dark:bg-surface-800">
-                <img src={previewImages[1]} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-              <div className="w-1/2 bg-surface-200 dark:bg-surface-800">
-                <img src={previewImages[2]} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-            </div>
-            <div className="flex gap-0.5 h-1/2">
-              <div className="w-1/2 bg-surface-200 dark:bg-surface-800">
-                <img src={previewImages[3]} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-              <div className="w-1/2 bg-surface-200 dark:bg-surface-800">
-                <img src={previewImages[4]} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </div>
-            </div>
+          <div className="col-span-1 row-span-2 grid grid-cols-2 grid-rows-2 gap-px">
+            {previewImages.slice(1, 5).map((img: string, i: number) => (
+              <img key={i} src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+            ))}
           </div>
         </div>
       );
     }
 
-    // 6개 이상
+    // 6개
     return (
-      <div className="grid grid-cols-3 grid-rows-2 gap-0.5 w-full h-full">
-        {previewImages.map((img: string, i: number) => (
-          <div key={i} className="bg-surface-200 dark:bg-surface-800">
-            <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-          </div>
+      <div className="grid grid-cols-3 grid-rows-2 gap-px w-full h-full bg-surface-100 dark:bg-surface-800">
+        {previewImages.slice(0, 6).map((img: string, i: number) => (
+          <img key={i} src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
         ))}
       </div>
     );
@@ -146,66 +116,41 @@ function PinterestFolderCard({ folder }: { folder: any }) {
 
   return (
     <div 
-      className="flex flex-col gap-3 mb-12 cursor-pointer group"
+      className="flex flex-col mb-10 cursor-pointer group"
       onClick={() => navigate(`/folder/${folder.id}`)}
     >
-      {/* 텍스트 영역: 타이틀 상단 배치 */}
-      <div className="flex flex-col px-1">
+      {/* 텍스트 영역: 타이틀 상단 배치, Flat 스타일 */}
+      <div className="flex flex-col mb-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col overflow-hidden">
-            {/* 설명 텍스트를 타이틀 위로 배치 */}
+            <h3 className="text-base font-medium text-surface-900 dark:text-white leading-tight truncate">
+              {folder.title}
+              <span className="text-surface-400 font-normal ml-1.5">· {folder.place_count}개</span>
+            </h3>
             {folder.description && (
-              <div className="flex items-center gap-1 mb-0.5">
-                <span className="text-[13px] text-surface-500 dark:text-surface-400 font-medium truncate">
-                  {folder.description}
-                </span>
-                <span className="text-[12px] text-surface-400 dark:text-surface-500 font-medium flex-shrink-0 flex items-center">
-                  <span className="mx-1 opacity-40">•</span>
-                  {folder.place_count}개
-                </span>
-              </div>
+              <p className="text-[12px] text-surface-500 dark:text-surface-400 mt-1 truncate">
+                {folder.description}
+              </p>
             )}
-            <div className="flex items-center gap-1.5">
-              <h3 className="text-[18px] font-medium text-surface-900 dark:text-white leading-tight truncate">
-                {folder.title}
-              </h3>
-              {!folder.description && (
-                <span className="text-[12px] text-surface-400 dark:text-surface-500 font-medium flex-shrink-0 flex items-center">
-                  <span className="mx-1 opacity-40">•</span>
-                  {folder.place_count}개
-                </span>
-              )}
-            </div>
           </div>
           
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {/* 다른 유저일 때만 프로필 표시 */}
-            {!folder.is_mine && (
-              <div className="flex items-center gap-2">
-                <span className="text-[12px] text-surface-500 dark:text-surface-400 font-medium">
-                  {folder.owner_nickname}
-                </span>
-                <div className="size-6 rounded-full overflow-hidden bg-surface-200 border border-surface-100 dark:border-surface-800">
-                  {folder.owner_avatar_url ? (
-                    <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="size-full p-1 text-surface-400" />
-                  )}
-                </div>
+          {!folder.is_mine && (
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <span className="text-[13px] text-surface-600 dark:text-surface-400 font-medium">
+                {folder.owner_nickname}
+              </span>
+              <div className="size-7 rounded-full overflow-hidden bg-surface-100 border border-surface-100 dark:border-surface-800">
+                {folder.owner_avatar_url && (
+                  <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
+                )}
               </div>
-            )}
-            <button 
-              onClick={handleGoDetail}
-              className="p-1.5 -mr-1.5 rounded-full hover:bg-surface-100 dark:hover:bg-neutral-900 transition-colors"
-            >
-              <ChevronRight className="size-5 text-surface-400" />
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 핀터레스트 스타일 이미지 콜라주 - 개수별 가변 레이아웃 */}
-      <div className="relative aspect-[16/9] w-full rounded-[20px] overflow-hidden bg-surface-100 dark:bg-surface-900 shadow-sm group-active:scale-[0.99] transition-transform duration-200">
+      {/* 촘촘한 그리드 이미지 콜라주 */}
+      <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800">
         {renderImageGrid()}
       </div>
     </div>
@@ -303,12 +248,12 @@ export function SearchPage() {
   const shouldShowBottomNav = !isSearchFocused && !isSearching;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black pb-24">
-      {/* 상단 스티키 검색바 (Explorer 스타일) */}
-      <header className="sticky top-0 z-30 bg-white dark:bg-black border-b border-surface-100 dark:border-surface-800">
-        <div className="max-w-lg mx-auto h-[64px] flex items-center px-5 gap-3">
+    <div className="min-h-screen bg-white dark:bg-surface-950 pb-24">
+      {/* 상단 스티키 검색바 (아이콘 + 텍스트) */}
+      <header className="sticky top-0 z-30 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
+        <div className="max-w-lg mx-auto h-[72px] flex items-center px-5 gap-3">
           {isSearching && (
-            <button onClick={exitSearch} className="mr-1 active:scale-90 transition-transform">
+            <button onClick={exitSearch} className="mr-1 p-2 -ml-2 active:scale-90 transition-transform">
               <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
             </button>
           )}
@@ -317,7 +262,7 @@ export function SearchPage() {
               setIsSearchFocused(true);
               setTimeout(() => inputRef.current?.focus(), 50);
             }}
-            className="flex-1 flex items-center h-11 rounded-xl bg-surface-50 dark:bg-surface-900 px-4 transition-all cursor-pointer overflow-hidden"
+            className="flex-1 flex items-center h-12 rounded-xl bg-surface-50 dark:bg-surface-900 px-4 transition-all cursor-pointer overflow-hidden"
           >
             <Search className="size-4 text-surface-400 stroke-[2.5px] shrink-0" />
             <div className="flex-1 flex items-center gap-2 ml-3 overflow-hidden">
@@ -325,34 +270,34 @@ export function SearchPage() {
                 "text-[14px] truncate",
                 searchQueryDisplay ? "text-surface-900 dark:text-white" : "text-surface-400"
               )}>
-                {searchQueryDisplay || "지역과 함께 음식점을 검색하면 더 정확한 결과를 얻을 수 있어요."}
+                {searchQueryDisplay || "지역과 음식점 검색"}
               </span>
             </div>
             {searchQueryDisplay && (
               <button 
                 onClick={(e) => { e.stopPropagation(); exitSearch(); }}
-                className="ml-auto size-5 flex items-center justify-center rounded-full bg-surface-200 dark:bg-surface-700"
+                className="ml-auto p-1 rounded-full bg-surface-200 dark:bg-surface-700"
               >
                 <X className="size-3 text-white" />
               </button>
             )}
           </div>
           {!isSearching && (
-            <button className="size-11 rounded-xl bg-surface-50 dark:bg-surface-900 flex items-center justify-center shrink-0">
+            <button className="p-2 rounded-xl bg-surface-50 dark:bg-surface-900 flex items-center justify-center shrink-0">
               <Camera className="size-5 text-surface-400" />
             </button>
           )}
         </div>
       </header>
 
-      {/* --- 검색 포커스 모드 (Explorer 스타일 History) --- */}
+      {/* --- 검색 포커스 모드 (아이콘 + 텍스트) --- */}
       {isSearchFocused && (
         <div className="fixed inset-0 z-[60] bg-white dark:bg-surface-950 p-0 flex flex-col">
           <div className="max-w-lg mx-auto w-full flex flex-col h-full bg-white dark:bg-surface-950">
-            <div className="h-[64px] flex items-center px-4 gap-2 border-b border-surface-50 dark:border-surface-900">
+            <div className="h-[72px] flex items-center px-5 gap-4 border-b border-surface-50 dark:border-surface-900">
               <button 
                 onClick={() => setIsSearchFocused(false)}
-                className="p-1.5 -ml-1 rounded-full active:bg-surface-100 dark:active:bg-surface-800 transition-colors"
+                className="p-2 -ml-2 active:scale-90 transition-transform"
               >
                 <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
               </button>
@@ -363,11 +308,11 @@ export function SearchPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-                  placeholder="지역과 함께 음식점을 검색하면 더 정확한 결과를 얻을 수 있어요."
-                  className="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-50 dark:bg-surface-900 border-none text-[16px] outline-none"
+                  placeholder="지역과 음식점 검색"
+                  className="w-full h-12 pl-11 pr-10 rounded-xl bg-surface-50 dark:bg-surface-900 border-none text-[16px] outline-none"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 size-5 flex items-center justify-center rounded-full bg-surface-200">
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 p-1 rounded-full bg-surface-200">
                     <X className="size-3 text-white" />
                   </button>
                 )}
@@ -375,7 +320,7 @@ export function SearchPage() {
               <button 
                 onClick={() => handleSearch(searchQuery)}
                 disabled={!searchQuery.trim()}
-                className="ml-1 px-2 py-2 font-medium text-primary-600 disabled:text-surface-300 text-[15px]"
+                className="text-sm font-medium text-primary-600 disabled:text-surface-300"
               >
                 검색
               </button>
@@ -384,11 +329,14 @@ export function SearchPage() {
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-10">
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-[15px] font-medium text-surface-900 dark:text-white">최근 검색어</h3>
+                  <div className="flex items-center gap-2">
+                    <History className="size-4 text-surface-400" />
+                    <h3 className="text-xs font-medium text-surface-400 uppercase tracking-widest">Recent Searches</h3>
+                  </div>
                   {history.length > 0 && (
                     <button 
                       onClick={clearHistory} 
-                      className="text-[12px] font-medium text-surface-400 active:text-surface-600 dark:active:text-surface-200"
+                      className="text-[11px] font-medium text-surface-400 uppercase tracking-tight"
                     >
                       전체 삭제
                     </button>
@@ -399,7 +347,7 @@ export function SearchPage() {
                     history.slice(0, 10).map((h, i) => (
                       <div 
                         key={i} 
-                        className="flex items-center gap-1.5 pl-4 pr-3 py-2 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800"
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800"
                       >
                         <button 
                           onClick={() => {
@@ -412,16 +360,15 @@ export function SearchPage() {
                         </button>
                         <button 
                           onClick={() => removeFromHistory(h)}
-                          className="p-0.5 rounded-full text-surface-300 hover:text-surface-500 transition-colors"
+                          className="text-[10px] text-surface-300 font-bold"
                         >
-                          <X className="size-3.5" />
+                          ×
                         </button>
                       </div>
                     ))
                   ) : (
-                    <div className="w-full flex flex-col items-center justify-center py-10 text-surface-200 dark:text-surface-700">
-                      <History className="size-10 opacity-20 mb-3" />
-                      <p className="text-sm font-medium">최근 검색 기록이 없습니다.</p>
+                    <div className="w-full flex flex-col items-center justify-center py-10">
+                      <p className="text-sm text-surface-300 font-medium">최근 검색 기록이 없습니다.</p>
                     </div>
                   )}
                 </div>
@@ -432,14 +379,14 @@ export function SearchPage() {
       )}
 
       {/* 메인 콘텐츠 영역 */}
-      <main className="px-5 max-w-lg mx-auto mt-6">
+      <main className="px-5 max-w-lg mx-auto mt-8">
         {isSearching ? (
           /* 검색 결과 모드 */
           isSearchLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="size-8 text-primary-500 animate-spin" />
-              <p className="text-[14px] font-bold text-surface-300 animate-pulse">
-                "{searchQueryDisplay}" 검색 결과를 가져오고 있어요
+              <p className="text-[14px] font-medium text-surface-300 animate-pulse uppercase tracking-widest">
+                Searching...
               </p>
             </div>
           ) : searchResults.length === 0 ? (
@@ -450,27 +397,20 @@ export function SearchPage() {
               <h3 className="text-xl font-medium text-surface-900 dark:text-white mb-2 tracking-tight">
                 결과가 없습니다
               </h3>
-              <p className="text-surface-400 dark:text-surface-500 text-[14px] leading-relaxed font-medium">
+              <p className="text-surface-400 dark:text-surface-500 text-[14px] font-medium">
                 다른 검색어로 시도해보세요.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-0.5 pt-0.5 -mx-5">
+            <div className="flex flex-col gap-0 pt-0.5 -mx-5">
               {searchResults.map((place) => (
-                <PlaceThumbnail
+                <PlaceCard
                   key={place.id}
-                  placeId={place.id}
-                  name={place.name}
-                  thumbnail={place.images?.[0] || place.image_urls?.[0] || place.place_images?.[0]}
-                  group2={place.group2}
-                  group3={place.group3}
-                  category={place.category}
-                  features={place.features}
-                  interaction={place.interaction}
-                  onClick={showPlaceModal}
-                  aspectRatio="aspect-[3/4]"
-                  showBadge={true}
-                  showCounts={true}
+                  place={place}
+                  sourceLabel="검색 결과"
+                  sourceTitle={place.category}
+                  addedAt={place.created_at ? formatRelativeTime(place.created_at) : undefined}
+                  showPrice={true}
                 />
               ))}
             </div>
@@ -482,15 +422,15 @@ export function SearchPage() {
               <div className="flex flex-col gap-10">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex flex-col gap-3 animate-pulse">
-                    <div className="aspect-[16/9] w-full bg-surface-100 dark:bg-neutral-900 rounded-[20px]" />
-                    <div className="h-4 w-1/2 bg-surface-100 dark:bg-neutral-900 rounded" />
+                    <div className="aspect-[16/9] w-full bg-surface-50 dark:bg-surface-900 rounded-xl" />
+                    <div className="h-4 w-1/2 bg-surface-50 dark:bg-surface-900 rounded" />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col">
                 {folders.map((folder) => (
-                  <PinterestFolderCard key={folder.id} folder={folder} />
+                  <ArchiveFolderCard key={folder.id} folder={folder} />
                 ))}
               </div>
             )}
@@ -498,7 +438,7 @@ export function SearchPage() {
             {/* 무한 스크롤 트리거 */}
             {(hasNextPage || isFetchingNextPage) && (
               <div ref={ref} className="py-12 flex justify-center">
-                <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                <Loader2 className="size-6 text-primary-500 animate-spin" />
               </div>
             )}
             

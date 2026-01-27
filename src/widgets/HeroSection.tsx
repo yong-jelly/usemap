@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { User, Plus } from "lucide-react";
 import { getAvatarUrl } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib/naver";
 
@@ -25,38 +24,33 @@ export function HeroCard({ folder, onClick }: HeroCardProps) {
           loading="lazy"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-rose-200 via-fuchsia-200 to-amber-200" />
+        <div className="w-full h-full bg-surface-100 dark:bg-surface-800" />
       )}
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Bookmark Icon (Top Right) */}
-      <div className="absolute top-4 right-4">
-        <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-md border border-white/10">
-          <Plus className="size-4 text-white" />
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 p-4">
-        <h2 className="text-lg font-medium text-white leading-tight mb-3 tracking-tight line-clamp-2">
+      <div className="absolute inset-x-0 bottom-0 p-6">
+        <div className="mb-3">
+          <span className="text-[10px] text-white/80 font-medium uppercase tracking-widest bg-white/10 backdrop-blur-md px-2 py-1 rounded">Archive</span>
+        </div>
+        <h2 className="text-xl font-medium text-white leading-tight mb-4 tracking-tight line-clamp-2">
           {folder.title}
         </h2>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 shadow-sm">
+          <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
             {folder.owner_avatar_url ? (
               <img src={getAvatarUrl(folder.owner_avatar_url)} alt="" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-surface-200 flex items-center justify-center">
-                <User className="size-4 text-surface-400" />
-              </div>
+              <div className="w-full h-full bg-white/20" />
             )}
           </div>
-          <div className="flex flex-col">
-            <span className="text-white text-xs font-medium leading-none mb-1">{folder.owner_nickname || '익명'}</span>
-            <span className="text-white/60 text-[10px] leading-none">{folder.place_count} 장소</span>
+          <div className="flex items-center gap-2">
+            <span className="text-white text-xs font-medium">{folder.owner_nickname || '익명'}</span>
+            <span className="w-0.5 h-0.5 rounded-full bg-white/40" />
+            <span className="text-white/60 text-[10px]">{folder.place_count} 장소</span>
           </div>
         </div>
       </div>

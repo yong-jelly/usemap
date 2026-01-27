@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { Youtube, MapPin, User, Flame, Heart } from "lucide-react";
 import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { convertToNaverResizeImageUrl } from "@/shared/lib/naver";
 import { Skeleton } from "@/shared/ui";
@@ -38,6 +37,7 @@ export function CollectionCard({
 
   const title = data.title || data.name || data.channel_title;
   const description = item.type === 'place' ? data.category : (data.description || data.memo);
+  const memo = data.memo || data.user_note || data.comment;
   const placeCount = data.place_count;
   const ownerName = item.type === 'naver' ? '플레이스' : (item.type === 'youtube' ? data.channel_title : data.owner_nickname);
   const ownerAvatar = item.type === 'youtube' ? data.channel_thumbnail : data.owner_avatar_url;
@@ -56,14 +56,11 @@ export function CollectionCard({
 
   return (
     <div className={cn(
-      "break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group shadow-sm border transition-all duration-300",
-      item.type === 'naver' ? "bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/30 hover:border-green-300 dark:hover:border-green-700" 
-      : item.type === 'youtube' ? "bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30 hover:border-red-300 dark:hover:border-red-700"
-      : "bg-white dark:bg-surface-900 border-surface-100/50 dark:border-surface-800"
+      "break-inside-avoid mb-4 rounded-xl overflow-hidden cursor-pointer bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 transition-all",
     )}>
       <div onClick={handleImageClick}>
         {item.type !== 'place' && images.length >= 4 ? (
-          <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
+          <div className="grid grid-cols-2 gap-px bg-surface-100 dark:bg-surface-800">
             {images.slice(0, 4).map((img, i) => (
               <div key={i} className="aspect-square overflow-hidden">
                 <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
@@ -72,54 +69,63 @@ export function CollectionCard({
           </div>
         ) : mainImage ? (
           <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
-            <img src={convertToNaverResizeImageUrl(mainImage)} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
-            {item.type === 'place' && (
+            <img src={convertToNaverResizeImageUrl(mainImage)} alt={title} className="w-full h-full object-cover" loading="lazy" />
+            {item.type === 'place' && data.popularity_score && (
               <div className="absolute top-3 right-3">
-                <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center gap-1">
-                  <Flame className="size-3 text-rose-400" />
-                  <span className="text-[10px] font-bold text-white">{data.popularity_score}</span>
+                <div className="px-2 py-1 rounded bg-black/40 backdrop-blur-sm">
+                  <span className="text-[10px] font-medium text-white">{data.popularity_score}</span>
                 </div>
               </div>
             )}
           </div>
         ) : (
           <div className={cn(
-            "flex items-center justify-center bg-gradient-to-br",
-            item.type === 'youtube' ? "from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20" :
-            item.type === 'naver' ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20" :
-            item.type === 'place' ? "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700" :
-            "from-rose-50 to-amber-50 dark:from-surface-800 dark:to-surface-700",
+            "flex items-center justify-center bg-surface-50 dark:bg-surface-800",
             isTall ? "aspect-[3/4]" : "aspect-square"
           )}>
-            {item.type === 'youtube' && <Youtube className="size-10 text-red-300" />}
-            {item.type === 'naver' && <MapPin className="size-10 text-green-300" />}
-            {item.type === 'place' && <MapPin className="size-10 text-rose-300" />}
-            {item.type === 'folder' && <Heart className="size-10 text-rose-300" />}
+            <span className="text-xs text-surface-400 font-medium uppercase tracking-widest">{item.type}</span>
           </div>
         )}
       </div>
 
-      <div className="p-3" onClick={onClick}>
-        <div className="mb-2">
-          {item.type === 'youtube' && <span className="text-[9px] px-2 py-1 rounded-full bg-red-500 text-white font-medium uppercase tracking-wider shadow-sm">유튜브</span>}
-          {item.type === 'naver' && <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-medium uppercase tracking-wider shadow-sm">네이버</span>}
-          {item.type === 'place' && <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">인기</span>}
-          {item.type === 'folder' && <span className="text-[9px] px-2 py-1 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-500 font-semibold uppercase tracking-wider">컬렉션</span>}
+      <div className="p-4" onClick={onClick}>
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex gap-1.5">
+            {item.type === 'youtube' && <span className="text-[9px] text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wider">YOUTUBE</span>}
+            {item.type === 'naver' && <span className="text-[9px] text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wider">NAVER</span>}
+            {item.type === 'place' && <span className="text-[9px] text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wider">HOT</span>}
+            {item.type === 'folder' && <span className="text-[9px] text-surface-400 font-medium uppercase tracking-wider">COLLECTION</span>}
+          </div>
+          {data.distance_meters && (
+            <span className="text-[10px] text-primary-600 font-medium">{Math.round(data.distance_meters)}m</span>
+          )}
         </div>
-        <h3 className={cn("text-sm font-medium line-clamp-2 leading-snug mb-1", item.type === 'naver' ? "text-green-900 dark:text-green-50" : item.type === 'youtube' ? "text-red-900 dark:text-red-50" : "text-surface-900 dark:text-white")}>
+        
+        <h3 className="text-sm font-medium text-surface-900 dark:text-white line-clamp-2 leading-snug mb-2">
           {title}
         </h3>
-        {description && <p className={cn("text-[11px] line-clamp-1 mb-2", item.type === 'naver' ? "text-green-600/70" : item.type === 'youtube' ? "text-red-600/70" : "text-surface-400")}>{description}</p>}
-        <div className="flex items-center justify-between pt-1">
-          {ownerName ? (
-            <div className="flex items-center gap-1.5">
-              <div className={cn("w-5 h-5 rounded-full overflow-hidden flex items-center justify-center", item.type === 'naver' ? "bg-green-100 dark:bg-green-900/50" : item.type === 'youtube' ? "bg-red-100 dark:bg-red-900/50" : "bg-surface-100 dark:bg-surface-800")}>
-                {item.type === 'naver' ? <MapPin className="size-3 text-green-600 dark:text-green-400" /> : item.type === 'youtube' ? <img src={ownerAvatar} alt="" className="w-full h-full object-cover" /> : ownerAvatar ? <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" /> : <User className="size-2.5 text-surface-400" />}
+
+        {/* 맥락 메모 강조 */}
+        {memo ? (
+          <div className="mb-3 p-3 rounded-lg bg-surface-50 dark:bg-surface-800/50 border border-surface-100 dark:border-surface-800">
+            <p className="text-[11px] text-surface-600 dark:text-surface-300 line-clamp-3 leading-relaxed">
+              {memo}
+            </p>
+          </div>
+        ) : description && (
+          <p className="text-[11px] text-surface-400 line-clamp-1 mb-3">{description}</p>
+        )}
+
+        <div className="flex items-center justify-between pt-3 border-t border-surface-50 dark:border-surface-800">
+          {ownerName && (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full overflow-hidden bg-surface-100 dark:bg-surface-800">
+                {ownerAvatar ? <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
               </div>
-              <span className={cn("text-[10px] font-medium", item.type === 'naver' ? "text-green-700 dark:text-green-400" : item.type === 'youtube' ? "text-red-700 dark:text-red-400" : "text-surface-500")}>{ownerName}</span>
+              <span className="text-[10px] text-surface-500 font-medium truncate max-w-[80px]">{ownerName}</span>
             </div>
-          ) : <span />}
-          {placeCount && <span className={cn("text-[10px] font-medium", item.type === 'naver' ? "text-green-600/70 dark:text-green-500/70" : item.type === 'youtube' ? "text-red-600/70 dark:text-red-500/70" : "text-surface-400")}>{placeCount}개</span>}
+          )}
+          {placeCount && <span className="text-[10px] text-surface-400 font-medium">{placeCount} Places</span>}
         </div>
       </div>
     </div>
