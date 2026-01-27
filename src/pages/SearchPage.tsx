@@ -286,6 +286,8 @@ export function SearchPage() {
 
   const folders = data?.pages.flat() || [];
 
+  const shouldShowBottomNav = !isSearchFocused && !isSearching;
+
   return (
     <div className="min-h-screen bg-white dark:bg-black pb-24">
       {/* 상단 스티키 검색바 (Explorer 스타일) */}
@@ -495,7 +497,7 @@ export function SearchPage() {
         )}
       </main>
 
-      <BottomNav />
+      {shouldShowBottomNav && <BottomNav />}
     </div>
   );
 }
