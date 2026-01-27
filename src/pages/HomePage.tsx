@@ -93,9 +93,7 @@ function getImages(item: any, count: number = 4): string[] {
   
   // 이미 images 배열이 있는 경우 (예: discover.json의 naverFolders)
   if (Array.isArray(item.images) && item.images.length > 0) {
-    // 1~4개 사이의 랜덤한 개수 선택
-    const randomCount = Math.floor(Math.random() * count) + 1;
-    return [...item.images].sort(() => Math.random() - 0.5).slice(0, randomCount);
+    return [...item.images].sort(() => Math.random() - 0.5).slice(0, count);
   }
   
   const images: string[] = [];
@@ -643,29 +641,16 @@ function CollectionCard({
       className={cn(
         "break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group shadow-sm border transition-all duration-300",
         item.type === 'naver' 
-          ? "bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/30 hover:border-green-200 dark:hover:border-green-800" 
+          ? "bg-green-50/50 dark:bg-green-950/20 border-green-100 dark:border-green-900/30 hover:border-green-300 dark:hover:border-green-700" 
           : "bg-white dark:bg-surface-900 border-surface-100/50 dark:border-surface-800"
       )}
     >
       {/* Image */}
-      {item.type !== 'place' && images.length > 0 ? (
-        <div className={cn(
-          "grid gap-px bg-surface-200 dark:bg-surface-800",
-          images.length === 1 ? "grid-cols-1" : 
-          images.length === 2 ? "grid-cols-2" : 
-          images.length === 3 ? "grid-cols-2" : "grid-cols-2"
-        )}>
-          {images.map((img, i) => (
-            <div 
-              key={i} 
-              className={cn(
-                "overflow-hidden bg-surface-100 dark:bg-surface-800",
-                images.length === 1 ? "aspect-[4/3]" : 
-                images.length === 2 ? "aspect-square" :
-                images.length === 3 && i === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square"
-              )}
-            >
-              <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+      {item.type !== 'place' && images.length >= 4 ? (
+        <div className="grid grid-cols-2 gap-px bg-surface-200 dark:bg-surface-800">
+          {images.slice(0, 4).map((img, i) => (
+            <div key={i} className="aspect-square overflow-hidden">
+              <img src={convertToNaverResizeImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
             </div>
           ))}
         </div>
@@ -711,7 +696,7 @@ function CollectionCard({
             <span className="text-[9px] px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 font-semibold uppercase tracking-wider">유튜브</span>
           )}
           {item.type === 'naver' && (
-            <span className="text-[9px] px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 font-bold uppercase tracking-wider border border-green-200/50 dark:border-green-800/50">네이버</span>
+            <span className="text-[9px] px-2 py-1 rounded-full bg-green-500 text-white font-bold uppercase tracking-wider shadow-sm">네이버</span>
           )}
           {item.type === 'place' && (
             <span className="text-[9px] px-2 py-1 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 font-semibold uppercase tracking-wider">인기</span>
@@ -722,7 +707,10 @@ function CollectionCard({
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold text-surface-900 dark:text-white line-clamp-2 leading-snug mb-1">
+        <h3 className={cn(
+          "text-sm font-bold line-clamp-2 leading-snug mb-1",
+          item.type === 'naver' ? "text-green-900 dark:text-green-50" : "text-surface-900 dark:text-white"
+        )}>
           {title}
         </h3>
 
@@ -739,20 +727,26 @@ function CollectionCard({
                 item.type === 'naver' ? "bg-green-100 dark:bg-green-900/50" : "bg-surface-100 dark:bg-surface-800"
               )}>
                 {item.type === 'naver' ? (
-                  <MapPin className="size-3 text-green-500" />
+                  <MapPin className="size-3 text-green-600 dark:text-green-400" />
                 ) : ownerAvatar ? (
                   <img src={getAvatarUrl(ownerAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <User className="size-2.5 text-surface-400" />
                 )}
               </div>
-              <span className="text-[10px] text-surface-500 font-medium">{ownerName}</span>
+              <span className={cn(
+                "text-[10px] font-medium",
+                item.type === 'naver' ? "text-green-700 dark:text-green-400" : "text-surface-500"
+              )}>{ownerName}</span>
             </div>
           ) : (
             <span />
           )}
           {placeCount && (
-            <span className="text-[10px] text-surface-400 font-medium">{placeCount}개</span>
+            <span className={cn(
+              "text-[10px] font-medium",
+              item.type === 'naver' ? "text-green-600/70 dark:text-green-500/70" : "text-surface-400"
+            )}>{placeCount}개</span>
           )}
         </div>
       </div>
