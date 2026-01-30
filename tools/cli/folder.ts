@@ -1,13 +1,22 @@
 /**
  * 네이버 지도 공유 폴더(Folder) 크롤러 CLI
  * 
+ * 이 도구는 네이버 지도의 '저장' 폴더(공유 URL)를 분석하여 해당 폴더 내의 장소들을 
+ * 로컬 데이터베이스(tbl_naver_folder, tbl_naver_folder_place 등)와 동기화합니다.
+ * 
+ * 주요 기능:
+ *   - 공유 ID(shareId) 또는 전체 URL로부터 폴더 정보 및 장소 목록 추출
+ *   - 신규 장소 발견 시 상세 정보 크롤링 (crawlAndSyncPlaces 호출)
+ *   - 음식점 카테고리 필터링 기능 제공
+ *   - DB 내 기존 폴더 일괄 업데이트 지원
+ * 
  * 사용법: 
  *   1. 특정 폴더 동기화: bun run tools/cli/folder.ts <shareId_또는_URL> [--managed=true] [--filter-food=true]
  *   2. 모든 폴더 동기화: bun run tools/cli/folder.ts --all
  * 
  * 옵션:
- *   --managed=true/false    : 관리 폴더 여부 (기본값: false)
- *   --filter-food=true/false: 비음식점 필터링 (기본값: true) - true인 경우 음식점만 upsert
+ *   --managed=true/false    : 관리 폴더 여부 (기본값: false). true인 경우 서비스 관리용 폴더로 표시됨.
+ *   --filter-food=true/false: 비음식점 필터링 (기본값: true). true인 경우 음식점(카테고리 코드 220036 등)만 DB에 연결함.
  * 
  * 예시:
  *   - bun run tools/cli/folder.ts https://naver.me/5R4ugqWr --managed=true
@@ -39,6 +48,16 @@ async function filterFoodPlaces(placeIds: string[]): Promise<Set<string>> {
 
 /**
  * 개별 폴더를 처리하는 핵심 로직
+ * 
+ * 1. 입력된 URL/ID로부터 shareId를 추출합니다.
+ * 2. 네이버 API를 통해 폴더 정보와 북마크(장소) 목록을 가져옵니다.
+ * 3. DB와 대조하여 신규 장소는 크롤링하고, 기존 장소는 ID를 매칭합니다.
+ * 4. (옵션) 음식점 카테고리가 아닌 장소는 제외합니다.
+ * 5. 최종 결과를 DB(tbl_naver_folder 및 관련 테이블)에 저장/업데이트합니다.
+ * 
+ * @param input shareId 또는 네이버 지도 공유 URL
+ * @param managed 관리 폴더 여부
+ * @param filterFood 비음식점 제외 여부 (기본값: true)
  */
 async function processFolder(input: string, managed: boolean, filterFood: boolean = true) {
     const shareId = await resolveShareId(input);
@@ -92,6 +111,9 @@ async function processFolder(input: string, managed: boolean, filterFood: boolea
     }
 }
 
+/**
+ * CLI 진입점: 인자 파싱 및 실행 모드 결정
+ */
 async function main() {
     const args = process.argv.slice(2);
     
