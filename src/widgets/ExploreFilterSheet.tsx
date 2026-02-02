@@ -23,6 +23,7 @@ interface ExploreFilterSheetProps {
   onReset: () => void;
   totalCount: number;
   visibleTabs?: ("region" | "category" | "theme" | "price")[];
+  onLocationSelect?: () => void;
 }
 
 export function ExploreFilterSheet({
@@ -33,6 +34,7 @@ export function ExploreFilterSheet({
   onReset,
   totalCount,
   visibleTabs = ["region", "category", "theme", "price"],
+  onLocationSelect,
 }: ExploreFilterSheetProps) {
   const [activeTab, setActiveTab] = useState(visibleTabs[0] || "category");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -169,6 +171,7 @@ export function ExploreFilterSheet({
               selectedGroup2={selectedGroup2}
               onGroup1Select={handleGroup1Select}
               onGroup2Select={handleGroup2Select}
+              onLocationSelect={onLocationSelect}
             />
           )}
           {activeTab === "category" && (

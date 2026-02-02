@@ -333,6 +333,11 @@ export function SearchPage() {
 
   const shouldShowBottomNav = !isSearchFocused && !isSearching;
 
+  const handleLocationSelect = () => {
+    setIsFilterSheetOpen(false);
+    setIsLocationSheetOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-surface-950 pb-24">
       {/* 상단 스티키 검색바 (아이콘 + 텍스트) */}
@@ -641,6 +646,7 @@ export function SearchPage() {
         onApply={handleFilterApply}
         onReset={handleFilterReset}
         totalCount={isSearching ? searchResults.length : (isFilterActive ? filterResults.length : 0)}
+        onLocationSelect={handleLocationSelect}
       />
 
       {/* 위치 설정 바텀 시트 */}
