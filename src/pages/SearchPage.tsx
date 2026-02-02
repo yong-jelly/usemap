@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useIntersection } from "@/shared/lib/use-intersection";
 import { useNavigate } from "react-router";
 import { 
   Search, 
-  Camera, 
+  Filter, 
   ChevronLeft, 
   X, 
   History,
@@ -20,6 +20,33 @@ import { placeApi } from "@/entities/place/api";
 import { searchPlaceService } from "@/shared/api/edge-function";
 import type { Place, PlaceSearchSummary } from "@/entities/place/types";
 import { usePlacePopup } from "@/shared/lib/place-popup";
+import { ExploreFilterSheet } from "@/widgets/ExploreFilterSheet";
+import { usePlacesByFilters } from "@/entities/place/queries";
+import { getPriceLabel, getThemeNameByCode } from "@/shared/config/filter-constants";
+
+// 필터 상태 인터페이스
+interface ExplorerFilterState {
+  group1: string | null;
+  group2: string | null;
+  group3: string | null;
+  categories: string[] | null;
+  theme_codes: string[] | null;
+  price_min: number | null;
+  price_max: number | null;
+  exclude_franchises: boolean;
+}
+
+// 기본 필터 상태
+const DEFAULT_FILTERS: ExplorerFilterState = {
+  group1: null,
+  group2: null,
+  group3: null,
+  categories: [],
+  theme_codes: [],
+  price_min: null,
+  price_max: null,
+  exclude_franchises: true,
+};
 
 /**
  * 아카이브 스타일의 폴더 카드 컴포넌트
@@ -165,6 +192,8 @@ export function SearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Place[]>([]);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
   
   const { history, saveToHistory, clearHistory, removeFromHistory } = useSearchHistory();
   const { setBottomNavVisible } = useUIStore();
@@ -245,6 +274,53 @@ export function SearchPage() {
 
   const folders = data?.pages.flat() || [];
 
+  // 활성화된 추가 필터 개수
+  const activeExtraFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.categories && filters.categories.length > 0) count += filters.categories.length;
+    if (filters.theme_codes && filters.theme_codes.length > 0) count += filters.theme_codes.length;
+    if (filters.price_min !== null || filters.price_max !== null) count++;
+    return count;
+  }, [filters]);
+
+  // 필터가 활성화되어 있는지 여부
+  const isFilterActive = activeExtraFilterCount > 0;
+
+  // 필터 기반 데이터 호출
+  const {
+    data: filterData,
+    isLoading: isFilterLoading,
+    isFetchingNextPage: isFetchingNextFilterPage,
+    hasNextPage: hasNextFilterPage,
+    fetchNextPage: fetchNextFilterPage,
+  } = usePlacesByFilters(filters, isFilterActive && !isSearching);
+
+  const filterResults = useMemo(() => (filterData?.pages.flatMap((page) => page) || []) as Place[], [filterData]);
+
+  // 무한 스크롤 통합 처리
+  useEffect(() => {
+    if (inView && !isSearching) {
+      if (isFilterActive && hasNextFilterPage && !isFetchingNextFilterPage) {
+        fetchNextFilterPage();
+      } else if (!isFilterActive && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+  }, [inView, isSearching, isFilterActive, hasNextFilterPage, isFetchingNextFilterPage, fetchNextFilterPage, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleFilterApply = (newFilters: any) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setIsFilterSheetOpen(false);
+    setIsSearching(false); // 필터 적용 시 검색 모드 종료 (필터 결과 우선)
+    trackEvent("search_page_filter_apply", newFilters);
+  };
+
+  const handleFilterReset = () => {
+    setFilters(DEFAULT_FILTERS);
+    setIsFilterSheetOpen(false);
+    trackEvent("search_page_filter_reset", {});
+  };
+
   const shouldShowBottomNav = !isSearchFocused && !isSearching;
 
   return (
@@ -266,6 +342,32 @@ export function SearchPage() {
           >
             <Search className="size-4 text-surface-400 stroke-[2.5px] shrink-0" />
             <div className="flex-1 flex items-center gap-2 ml-3 overflow-hidden">
+              {isFilterActive && !searchQueryDisplay && !isSearching && (() => {
+                const parts: string[] = [];
+                const cats = filters.categories || [];
+                if (cats.length === 1) parts.push(cats[0]);
+                else if (cats.length > 1) parts.push(`${cats[0]} +${cats.length - 1}`);
+                
+                const themes = filters.theme_codes || [];
+                if (themes.length > 0) parts.push(themes.map(getThemeNameByCode).join(", "));
+                
+                const priceLabel = getPriceLabel(filters.price_min, filters.price_max);
+                if (priceLabel) parts.push(priceLabel);
+                
+                const summaryText = parts.join(", ");
+                
+                return (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-[12px] font-medium shrink-0 max-w-[160px]">
+                    <span className="truncate">{summaryText}</span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleFilterReset(); }}
+                      className="hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5 transition-colors shrink-0"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                );
+              })()}
               <span className={cn(
                 "text-[14px] truncate",
                 searchQueryDisplay ? "text-surface-900 dark:text-white" : "text-surface-400"
@@ -283,9 +385,24 @@ export function SearchPage() {
             )}
           </div>
           {!isSearching && (
-            <button className="p-2 rounded-xl bg-surface-50 dark:bg-surface-900 flex items-center justify-center shrink-0">
-              <Camera className="size-5 text-surface-400" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsFilterSheetOpen(true)}
+                className={cn(
+                  "size-11 rounded-xl border flex items-center justify-center shrink-0 transition-colors",
+                  isFilterActive 
+                    ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900 dark:border-primary-800 dark:text-primary-400" 
+                    : "bg-surface-50 border-transparent text-surface-400 dark:bg-surface-900 active:bg-surface-100"
+                )}
+              >
+                <Filter className="size-5" />
+              </button>
+              {activeExtraFilterCount > 0 && (
+                <div className="absolute -top-1 -right-1 size-4 bg-primary-600 rounded-full flex items-center justify-center text-[9px] font-black text-white ring-2 ring-white dark:ring-surface-950">
+                  {activeExtraFilterCount}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </header>
@@ -415,6 +532,48 @@ export function SearchPage() {
               ))}
             </div>
           )
+        ) : isFilterActive ? (
+          /* 필터 결과 모드 */
+          isFilterLoading && filterResults.length === 0 ? (
+            <div className="flex flex-col gap-10">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex flex-col gap-3 animate-pulse">
+                  <div className="aspect-[16/9] w-full bg-surface-50 dark:bg-surface-900 rounded-xl" />
+                  <div className="h-4 w-1/2 bg-surface-50 dark:bg-surface-900 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : filterResults.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-40 text-center px-10">
+              <div className="size-20 bg-surface-50 dark:bg-surface-900 rounded-full flex items-center justify-center mb-6">
+                <Search className="size-10 text-surface-200 dark:text-surface-700" />
+              </div>
+              <h3 className="text-xl font-medium text-surface-900 dark:text-white mb-2 tracking-tight">
+                결과가 없습니다
+              </h3>
+              <p className="text-surface-400 dark:text-surface-500 text-[14px] font-medium">
+                필터 조건을 변경해보세요.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-0 pt-0.5 -mx-5">
+              {filterResults.map((place) => (
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  sourceLabel="필터 결과"
+                  sourceTitle={place.category}
+                  addedAt={place.created_at ? formatRelativeTime(place.created_at) : undefined}
+                  showPrice={true}
+                />
+              ))}
+              {(hasNextFilterPage || isFetchingNextFilterPage) && (
+                <div ref={ref} className="py-12 flex justify-center">
+                  <Loader2 className="size-6 text-primary-500 animate-spin" />
+                </div>
+              )}
+            </div>
+          )
         ) : (
           /* 기본 폴더 리스트 모드 */
           <>
@@ -452,6 +611,16 @@ export function SearchPage() {
       </main>
 
       {shouldShowBottomNav && <BottomNav />}
+
+      {/* 공용 필터 바텀 시트 */}
+      <ExploreFilterSheet 
+        isOpen={isFilterSheetOpen}
+        onClose={() => setIsFilterSheetOpen(false)}
+        filters={filters}
+        onApply={handleFilterApply}
+        onReset={handleFilterReset}
+        totalCount={isSearching ? searchResults.length : (isFilterActive ? filterResults.length : 0)}
+      />
     </div>
   );
 }
