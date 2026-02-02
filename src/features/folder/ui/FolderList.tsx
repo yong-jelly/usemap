@@ -14,12 +14,12 @@ export function FolderList({
   folders, 
   selectedFolderIds = [], 
   onFolderClick, 
-  showCheckbox = false,
+  showCheckbox = false, 
   showMoreOptions = false,
   onMoreClick
 }: FolderListProps) {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col">
       {folders.map(folder => (
         <FolderListItem
           key={folder.id}

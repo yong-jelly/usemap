@@ -77,26 +77,26 @@ export function MyFolderList() {
   return (
     <div className="flex flex-col gap-8 py-4">
       {/* 내 폴더 섹션 */}
-      <div className="flex flex-col gap-4">
-        <div className="px-5 flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-medium text-surface-900 dark:text-white">내 맛탐정 폴더</h2>
-            <p className="text-sm text-surface-500">내가 직접 관리하고 있는 맛집 리스트입니다.</p>
+      <div className="flex flex-col gap-2">
+        <div className="px-5 mb-2 flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-[17px] font-medium text-surface-900 dark:text-white tracking-tight">내 맛탐정 폴더</h2>
+            <p className="text-[13px] text-surface-400 font-normal">직접 관리하고 있는 맛집 리스트</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button 
               variant="outline" 
               size="sm"
-              className="rounded-full gap-1.5 bg-white dark:bg-surface-800 text-surface-600 border-surface-200 h-9 px-3 shadow-sm"
+              className="rounded-full gap-1.5 text-surface-600 h-8 px-3 shadow-sm border-none bg-surface-50 dark:bg-surface-900"
               onClick={handleCreateClick}
             >
-              <FolderPlus className="size-4" />
-              <span className="text-xs">맛탐정 생성</span>
+              <FolderPlus className="size-3.5" />
+              <span className="text-[12px] font-medium">생성</span>
             </Button>
           </div>
         </div>
 
-        <div className="px-4">
+        <div className="px-2">
           {myFolders && myFolders.length > 0 ? (
             <FolderList 
               folders={myFolders} 
