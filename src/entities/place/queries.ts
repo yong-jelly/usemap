@@ -24,6 +24,7 @@ export const placeKeys = {
   visitedHistory: (id: string) => [...placeKeys.all, "visitedHistory", id] as const,
   visitStats: (id: string) => [...placeKeys.all, "visitStats", id] as const,
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
+  socialContents: (filters: any) => [...placeKeys.all, "socialContents", filters] as const,
   regionContents: (filters: any) => [...placeKeys.all, "regionContents", filters] as const,
   featurePlaces: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domainOrSource] as const,
   featureInfo: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featureInfo", type, id, domainOrSource] as const,
@@ -408,6 +409,25 @@ export function useMyReviewsCounts() {
 }
 
 /**
+ * 소셜 게시글 목록을 지역별로 무한 스크롤 조회하는 Hook
+ */
+export function useSocialContents(filters: { service?: string | null }) {
+  return useInfiniteQuery({
+    queryKey: placeKeys.socialContents(filters),
+    queryFn: ({ pageParam = 0 }) => placeApi.getSocialContents({
+      service: filters.service,
+      limit: 20,
+      offset: pageParam,
+    }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+  });
+}
+
+/**
  * 커뮤니티 게시글 목록을 지역별로 무한 스크롤 조회하는 Hook
  */
 export function useCommunityContents(filters: { domain?: string | null }) {
@@ -449,7 +469,7 @@ export function useRegionContents(filters: { source?: string | null }) {
  * 피쳐별 상세 장소 목록을 무한 스크롤로 조회하는 Hook
  */
 export function useFeaturePlaces(params: { 
-  type: 'folder' | 'youtube' | 'community' | 'region';
+  type: 'folder' | 'youtube' | 'community' | 'region' | 'social';
   id: string;
   domain?: string | null;
   source?: string | null;
@@ -465,6 +485,8 @@ export function useFeaturePlaces(params: {
           return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam });
         case 'community':
           return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam });
+        case 'social':
+          return placeApi.getPlacesBySocialRegion({ regionName: params.id, service: params.domain, limit, offset: pageParam });
         case 'region':
           return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam });
       }
@@ -482,7 +504,7 @@ export function useFeaturePlaces(params: {
  * 피쳐 정보(폴더명, 채널명 등)를 조회하는 Hook
  */
 export function useFeatureInfo(params: { 
-  type: 'folder' | 'youtube' | 'community' | 'region'; 
+  type: 'folder' | 'youtube' | 'community' | 'region' | 'social'; 
   id: string;
   domain?: string | null;
   source?: string | null;
@@ -497,6 +519,8 @@ export function useFeatureInfo(params: {
           return placeApi.getYoutubeChannelInfo(params.id);
         case 'community':
           return placeApi.getCommunityRegionInfo(params.id);
+        case 'social':
+          return placeApi.getSocialRegionInfo(params.id);
         case 'region':
           return placeApi.getRegionInfo(params.id, params.source);
       }
@@ -509,7 +533,7 @@ export function useFeatureInfo(params: {
  * 피쳐별 지도용 전체 장소 목록을 조회하는 Hook (버튼 클릭 시 수동 조회)
  */
 export function useFeaturePlacesForMap(params: { 
-  type: 'folder' | 'youtube' | 'community' | 'region';
+  type: 'folder' | 'youtube' | 'community' | 'region' | 'social';
   id: string;
   domain?: string | null;
   source?: string | null;
@@ -525,6 +549,8 @@ export function useFeaturePlacesForMap(params: {
           return placeApi.getPlacesByYoutubeChannelForMap(params.id);
         case 'community':
           return placeApi.getPlacesByCommunityRegionForMap({ regionName: params.id, domain: params.domain });
+        case 'social':
+          return placeApi.getPlacesBySocialRegionForMap({ regionName: params.id, service: params.domain });
         case 'region':
           return placeApi.getPlacesByRegionForMap({ regionName: params.id, source: params.source });
       }

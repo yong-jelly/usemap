@@ -112,6 +112,7 @@ export function FeatureDetailPage() {
     if (type === 'folder') return 'naver_folder';
     if (type === 'youtube') return 'youtube_channel';
     if (type === 'community') return 'community_region';
+    if (type === 'social') return 'social_region';
     if (type === 'region') return 'region_recommend';
     return type;
   }, [type]);
@@ -461,13 +462,14 @@ export function FeatureDetailPage() {
     if (!typedInfo) return id || "";
     if (type === 'folder') return typedInfo.name;
     if (type === 'youtube') return typedInfo.channel_title;
-    if (type === 'community' || type === 'region') return `${id}지역`;
+    if (type === 'community' || type === 'region' || type === 'social') return `${id}지역`;
     return id || "";
   }, [typedInfo, type, id]);
 
   const headerSubtitle = useMemo(() => {
     if (type === 'youtube' || type === 'folder' || type === 'region') return `${(typedInfo?.place_count || places.length).toLocaleString()}개의 매장`;
     if (type === 'community') return "커뮤니티";
+    if (type === 'social') return "소셜";
     return "";
   }, [type, typedInfo, places.length]);
 

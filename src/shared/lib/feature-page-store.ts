@@ -5,6 +5,8 @@ interface FeaturePageState {
   scrollPositions: Record<string, number>;
   /** 커뮤니티 탭의 선택된 도메인 */
   communityDomain: string | null;
+  /** 소셜 탭의 선택된 서비스 */
+  socialService: string | null;
   /** 지역 탭의 선택된 소스 */
   regionSource: string | null;
   
@@ -12,6 +14,8 @@ interface FeaturePageState {
   setScrollPosition: (tab: string, position: number) => void;
   /** 커뮤니티 도메인 설정 */
   setCommunityDomain: (domain: string | null) => void;
+  /** 소셜 서비스 설정 */
+  setSocialService: (service: string | null) => void;
   /** 지역 소스 설정 */
   setRegionSource: (source: string | null) => void;
 }
@@ -23,6 +27,7 @@ interface FeaturePageState {
 export const useFeaturePageStore = create<FeaturePageState>((set) => ({
   scrollPositions: {},
   communityDomain: null,
+  socialService: null,
   regionSource: null,
   
   setScrollPosition: (tab, position) => 
@@ -31,5 +36,6 @@ export const useFeaturePageStore = create<FeaturePageState>((set) => ({
     })),
     
   setCommunityDomain: (domain) => set({ communityDomain: domain }),
+  setSocialService: (service) => set({ socialService: service }),
   setRegionSource: (source) => set({ regionSource: source }),
 }));

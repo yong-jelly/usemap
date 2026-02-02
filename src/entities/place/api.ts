@@ -7,6 +7,8 @@ import type {
   CommunityContent, 
   CommunityRegion,
   CommunityRegionInfo,
+  SocialRegion,
+  SocialRegionInfo,
   PlaceUserReview,
   Feature
 } from "./types";
@@ -319,6 +321,22 @@ export const placeApi = {
   },
 
   /**
+   * 소셜(인스타그램, 쓰레드) 게시글 목록을 지역별로 조회합니다 (v3).
+   */
+  getSocialContents: async (params: {
+    service?: string | null;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await apiClient.rpc<CommunityRegion>("v3_get_social_contents", {
+      p_service: params.service || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 커뮤니티 게시글 목록을 지역별로 조회합니다 (v2).
    */
   getCommunityContents: async (params: {
@@ -378,6 +396,20 @@ export const placeApi = {
   },
 
   /**
+   * 소셜 지역 상세 장소 목록을 조회합니다.
+   * v3: interaction, features, experience 배치 처리 최적화 버전
+   */
+  getPlacesBySocialRegion: async (params: { regionName: string; service?: string | null; limit?: number; offset?: number }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_social_region", {
+      p_region_name: params.regionName,
+      p_service: params.service || null,
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 커뮤니티 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
@@ -421,6 +453,16 @@ export const placeApi = {
   getYoutubeChannelInfo: async (channelId: string) => {
     const response = await apiClient.rpc<YoutubeChannel>("v2_get_youtube_channel_info", {
       p_channel_id: channelId,
+    });
+    return response.data[0];
+  },
+
+  /**
+   * 소셜 지역 정보를 조회합니다.
+   */
+  getSocialRegionInfo: async (regionName: string) => {
+    const response = await apiClient.rpc<CommunityRegionInfo>("v2_get_social_region_info", {
+      p_region_name: regionName,
     });
     return response.data[0];
   },
@@ -565,6 +607,26 @@ export const placeApi = {
       p_channel_id: channelId,
     });
     return response.data;
+  },
+
+  /**
+   * 소셜 지역 지도용 전체 장소 목록을 조회합니다.
+   */
+  getPlacesBySocialRegionForMap: async (params: { regionName: string; service?: string | null }) => {
+    // 별도 지도용 RPC 대신 목록 조회 RPC를 재사용 (limit 1000)
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place }>("v3_get_places_by_social_region", {
+      p_region_name: params.regionName,
+      p_service: params.service || null,
+      p_limit: 1000,
+      p_offset: 0,
+    });
+    
+    return response.data.map(item => ({
+      place_id: item.place_id,
+      name: item.place_data.name,
+      x: item.place_data.x.toString(),
+      y: item.place_data.y.toString()
+    }));
   },
 
   /**

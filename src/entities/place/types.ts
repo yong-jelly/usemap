@@ -155,7 +155,7 @@ export interface MyReview extends PlaceUserReview {
 export interface Feature {
   id: string;
   user_id: string;
-  platform_type: 'youtube' | 'community' | 'folder' | 'public_user';
+  platform_type: 'youtube' | 'community' | 'folder' | 'public_user' | 'social';
   content_url: string;
   title: string;
   metadata: any;
@@ -267,4 +267,36 @@ export interface CommunityRegion {
   region_name: string;
   place_count: number;
   preview_contents: CommunityContent[];
+}
+
+export interface SocialRegionInfo {
+  region_name: string;
+  place_count: number;
+  is_subscribed?: boolean;
+}
+
+export interface SocialContent {
+  id: string;
+  place_id: string;
+  place_name: string;
+  category: string;
+  thumbnail: string;
+  score: number;
+  review_count: number;
+  group1: string;
+  group2: string;
+  title: string;
+  content_url: string;
+  service: string;
+  published_at: string;
+  src?: string;
+  place_liked_count?: number;
+  place_reviews_count?: number;
+  features?: any[];
+}
+
+export interface SocialRegion {
+  region_name: string;
+  place_count: number;
+  preview_contents: SocialContent[];
 }

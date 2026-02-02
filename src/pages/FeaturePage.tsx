@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { useFeaturePageStore } from "@/shared/lib/feature-page-store";
-import { useNaverFolders, useYoutubeChannels, useCommunityContents, useRegionContents } from "@/entities/place/queries";
+import { useNaverFolders, useYoutubeChannels, useCommunityContents, useRegionContents, useSocialContents } from "@/entities/place/queries";
 import { useToggleFeatureSubscription, useMySubscriptions } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider, HorizontalScroll } from "@/shared/ui";
-import { Loader2, MapPin, Youtube, MessageSquare, Search } from "lucide-react";
+import { Loader2, MapPin, Youtube, MessageSquare, Search, Instagram } from "lucide-react";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 import { PageHeader } from "@/shared/ui/PageHeader";
@@ -27,6 +27,7 @@ export function FeaturePage() {
   const tabs = [
     { id: "detective", label: "맛탐정" },
     { id: "community", label: "커뮤니티" },
+    { id: "social", label: "소셜" },
     { id: "folder", label: "플레이스" },
     { id: "youtube", label: "유튜브" },
     { id: "region", label: "지역" },
@@ -70,6 +71,7 @@ export function FeaturePage() {
         <div className="pt-2" />
         {activeTab === "detective" && <DetectiveList />}
         {activeTab === "community" && <CommunityList />}
+        {activeTab === "social" && <SocialList />}
         {activeTab === "folder" && <NaverFolderList />}
         {activeTab === "youtube" && <YoutubeChannelList />}
         {activeTab === "region" && <RegionList />}
@@ -516,6 +518,121 @@ function CommunityList() {
                   items={region.preview_contents}
                   onItemClick={showPopup}
                   onMoreClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                  showMoreThreshold={10}
+                  showRating={false}
+                  snap={false}
+                />
+              </div>
+            </section>
+          ))}
+
+          {hasNextPage && (
+            <div ref={observerTarget} className="p-12 flex justify-center">
+              <Loader2 className="size-6 text-surface-300 animate-spin" />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 소셜 목록 렌더링 컴포넌트
+ */
+function SocialList() {
+  const navigate = useNavigate();
+  const { show: showPlaceModal } = usePlacePopup();
+  const { socialService: selectedService, setSocialService: setSelectedService } = useFeaturePageStore();
+  
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSocialContents({ 
+    service: selectedService,
+  });
+  
+  // 전역 상태 기반 모달: 부모 페이지 재마운트 없이 모달 열기
+  const showPopup = (id: string) => showPlaceModal(id);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0, rootMargin: '200px' }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const services = [
+    { id: null, label: "전체" },
+    { id: "instagram", label: "Instagram" },
+    { id: "threads", label: "Threads" },
+  ];
+
+  const regions = data?.pages.flatMap((page) => page) || [];
+
+  return (
+    <div className="py-4 flex flex-col gap-4">
+      <FeatureInfoNotice 
+        icon={Instagram} 
+        title="소셜 픽" 
+        description="인스타그램, 쓰레드에서 공유된 지역별 맛집입니다." 
+      />
+      {/* 서비스 필터 */}
+      <HorizontalScroll 
+        containerClassName="flex items-center gap-2 px-4 mb-2"
+        scrollAmount={150}
+        fadeEdges={false}
+      >
+        {services.map((service) => (
+          <button
+            key={service.id || 'all'}
+            onClick={() => setSelectedService(service.id)}
+            disabled={isLoading}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
+              selectedService === service.id 
+                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
+                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+              isLoading && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {service.label}
+          </button>
+        ))}
+      </HorizontalScroll>
+
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          {/* 지역별 섹션 */}
+          {regions.map(region => (
+            <section key={region.region_name} className="flex flex-col gap-2 px-4">
+              <FeatureRowHeader 
+                title={`${region.region_name}지역`}
+                count={region.place_count}
+                onTitleClick={() => navigate(`/feature/detail/social/${region.region_name}${selectedService ? `?domain=${selectedService}` : ''}`)}
+                subscribeType="social_region"
+                subscribeId={region.region_name}
+              />
+              <div className="-mx-4">
+                <PlaceSlider
+                  title=""
+                  items={region.preview_contents}
+                  onItemClick={showPopup}
+                  onMoreClick={() => navigate(`/feature/detail/social/${region.region_name}${selectedService ? `?domain=${selectedService}` : ''}`)}
                   showMoreThreshold={10}
                   showRating={false}
                   snap={false}
