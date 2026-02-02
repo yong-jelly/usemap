@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import { useMySubscriptions, useToggleFolderSubscription, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { Button } from "@/shared/ui";
-import { Loader2, ExternalLink, Bell, ChevronRight } from "lucide-react";
+import { Loader2, ExternalLink, User, Bell } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
@@ -72,66 +72,37 @@ export function SubscriptionList() {
     const displaySubscribed = sub.is_subscribed !== false;
     const displayThumbnail = sub.subscription_type === 'naver_folder' ? naverIcon : sub.thumbnail;
 
-    // 미리보기 이미지 스택 (애플 스타일)
-    const previewImages = sub.preview_places?.slice(0, 3).map((p: any) => 
-      p.image_urls?.[0] || p.images?.[0] || p.thumbnail
-    ).filter(Boolean) || [];
-
     return (
-      <div 
-        key={itemId} 
-        className="w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left cursor-pointer group hover:bg-surface-50 dark:hover:bg-surface-900"
-        onClick={() => handleNavigate(sub)}
-      >
-        {/* 썸네일/이미지 스택 */}
-        <div className="relative shrink-0">
-          {previewImages.length > 0 ? (
-            <div className="size-14 relative">
-              {previewImages.slice(0, 3).map((img: string, idx: number) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "absolute inset-0 rounded-xl overflow-hidden border border-white dark:border-surface-900 shadow-sm transition-transform duration-300",
-                    idx === 0 && "z-30 scale-100",
-                    idx === 1 && "z-20 translate-x-1.5 -translate-y-1 scale-[0.95] opacity-80 group-hover:translate-x-3 group-hover:-translate-y-2",
-                    idx === 2 && "z-10 translate-x-3 -translate-y-2 scale-[0.9] opacity-60 group-hover:translate-x-6 group-hover:-translate-y-4"
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-              ))}
-            </div>
+      <div key={itemId} className="flex items-center gap-4 p-4 hover:bg-surface-50 dark:hover:bg-surface-900/50 transition-colors">
+        {/* 썸네일/아이콘 */}
+        <div className="size-12 rounded-full bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden border border-surface-100 dark:border-surface-800">
+          {displayThumbnail ? (
+            <img src={displayThumbnail} alt={sub.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="size-14 rounded-2xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center overflow-hidden">
-              {displayThumbnail ? (
-                <img src={displayThumbnail} alt={sub.title} className="w-full h-full object-cover" />
-              ) : (
-                <Bell className="size-6 text-surface-300 stroke-[1.5]" />
-              )}
+            <div className="w-full h-full flex items-center justify-center text-surface-300">
+              <User className="size-5" />
             </div>
           )}
         </div>
 
         {/* 정보 */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-[10px] font-medium text-primary-500 uppercase tracking-wider">
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleNavigate(sub)}>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-primary-500 uppercase">
               {sub.subscription_type === 'folder' ? '맛탐정' : 
                sub.subscription_type === 'naver_folder' ? '플레이스' :
                sub.subscription_type === 'youtube_channel' ? '유튜브' : 
                sub.subscription_type === 'region_recommend' ? '지역추천' : '커뮤니티'}
             </span>
           </div>
-          <h4 className="text-[15px] font-medium text-surface-900 dark:text-white truncate tracking-tight">{sub.title}</h4>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[12px] text-surface-400 font-normal truncate">
-              {sub.description || (sub.place_count ? `장소 ${sub.place_count}개` : '업데이트 소식')}
-            </span>
-          </div>
+          <h4 className="font-medium text-[15px] text-surface-900 dark:text-white truncate">{sub.title}</h4>
+          {sub.description && (
+            <p className="text-xs text-surface-500 truncate mt-0.5">{sub.description}</p>
+          )}
         </div>
 
         {/* 액션 */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1">
           <Button 
             variant="outline"
             size="sm"
@@ -141,16 +112,24 @@ export function SubscriptionList() {
               handleUnsubscribe(sub);
             }}
             className={cn(
-              "rounded-full h-7 font-medium transition-all px-3 border-none",
+              "rounded-full h-8 font-medium transition-colors px-3",
               displaySubscribed 
-                ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400" 
-                : "bg-surface-100 text-surface-400 dark:bg-surface-800",
+                ? "bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/20 dark:border-primary-800" 
+                : "border-surface-200 dark:border-surface-700 text-surface-400",
               (isCooldown || isToggling) && "opacity-50 grayscale"
             )}
           >
-            <span className="text-[11px]">{displaySubscribed ? "구독중" : "구독"}</span>
+            <span className="text-xs">{displaySubscribed ? "구독중" : "구독"}</span>
           </Button>
-          <ChevronRight className="size-4 text-surface-200 group-hover:text-surface-400 transition-colors" />
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNavigate(sub);
+            }}
+            className="p-2 text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-full transition-colors"
+          >
+            <ExternalLink className="size-4" />
+          </button>
         </div>
       </div>
     );
@@ -160,36 +139,36 @@ export function SubscriptionList() {
     <div className="flex flex-col gap-8 py-4">
       {/* 지역 추천 섹션 (있는 경우에만 표시) */}
       {regionRecommendations.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <div className="px-5 mb-2">
-            <h2 className="text-[17px] font-medium text-surface-900 dark:text-white tracking-tight">지역 추천</h2>
-            <p className="text-[13px] text-surface-400 font-normal">구독 중인 지역별 맛집 소식</p>
+        <div className="flex flex-col gap-4">
+          <div className="px-5">
+            <h2 className="text-xl font-medium text-surface-900 dark:text-white">지역 추천</h2>
+            <p className="text-sm text-surface-500">구독 중인 지역별 맛집 소식입니다.</p>
           </div>
-          <div className="px-2 flex flex-col">
+          <div className="flex flex-col divide-y divide-surface-50 dark:divide-surface-900 border-t border-surface-50 dark:border-surface-900">
             {regionRecommendations.map(renderSubscriptionItem)}
           </div>
         </div>
       )}
 
       {/* 구독 섹션 */}
-      <div className="flex flex-col gap-2">
-        <div className="px-5 mb-2">
-          <h2 className="text-[17px] font-medium text-surface-900 dark:text-white tracking-tight">내가 구독중인 맛탐정</h2>
-          <p className="text-[13px] text-surface-400 font-normal">관심 있는 채널 및 폴더 업데이트</p>
+      <div className="flex flex-col gap-4">
+        <div className="px-5">
+          <h2 className="text-xl font-medium text-surface-900 dark:text-white">내가 구독중인 맛탐정</h2>
+          <p className="text-sm text-surface-500">관심 있는 채널이나 폴더에서 업데이트를 받아보고 있습니다.</p>
         </div>
 
         {otherSubscriptions.length > 0 ? (
-          <div className="px-2 flex flex-col">
+          <div className="flex flex-col divide-y divide-surface-50 dark:divide-surface-900 border-t border-surface-50 dark:border-surface-900">
             {otherSubscriptions.map(renderSubscriptionItem)}
           </div>
         ) : regionRecommendations.length === 0 ? (
-          <div className="mx-4 p-12 rounded-2xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-4 text-center">
-            <Bell className="size-12 text-surface-200" />
+          <div className="mx-5 p-10 rounded-xl bg-surface-50 dark:bg-surface-800/50 border border-dashed border-surface-200 dark:border-surface-700 flex flex-col items-center gap-3 text-center">
+            <Bell className="size-10 text-surface-300" />
             <div>
-              <p className="text-sm text-surface-900 dark:text-white">구독 중인 폴더가 없습니다</p>
-              <p className="text-xs text-surface-500 mt-1">트렌드 탭에서 마음에 드는 폴더를 구독해보세요!</p>
+              <p className="text-sm text-surface-600 dark:text-surface-300">구독 중인 폴더가 없습니다</p>
+              <p className="text-xs text-surface-400 mt-1">트렌드 탭에서 마음에 드는 폴더를 구독해보세요!</p>
             </div>
-            <Button onClick={() => navigate("/feature")} variant="outline" size="sm" className="mt-2 rounded-full px-6">
+            <Button onClick={() => navigate("/feature")} variant="outline" size="sm" className="rounded-full px-5">
               구독하러 가기
             </Button>
           </div>
