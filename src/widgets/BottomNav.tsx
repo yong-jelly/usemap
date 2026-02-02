@@ -26,12 +26,9 @@ export function BottomNav() {
   const scrollThreshold = 10;
 
   const navItems = [
-    ...(isAdmin(profile) ? [
-    { href: "/home", icon: House, label: "홈" }, 
+    ...(isAdmin(profile) ? [{ href: "/home", icon: House, label: "홈" }] : []),
     { href: "/feed", icon: GalleryVerticalEnd, label: "피드" },
-    // { href: "/explorer", icon: Search, label: "탐색" },
-    { href: "/search", icon: Search, label: "검색" }] : []),
-    
+    { href: "/search", icon: Search, label: "검색" },
     { href: "/feature", icon: HatGlasses, label: "맛탐정" },
     { href: "/profile", icon: User, label: "프로필" },
   ];
