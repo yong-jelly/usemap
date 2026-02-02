@@ -14,6 +14,9 @@ import { CategoryTab } from "./ExploreFilterSheet/CategoryTab";
 import { RegionTab } from "./ExploreFilterSheet/RegionTab";
 import { ThemeTab } from "./ExploreFilterSheet/ThemeTab";
 import { PriceTab } from "./ExploreFilterSheet/PriceTab";
+import { useUserLocations } from "@/entities/location";
+import { useUserStore } from "@/entities/user";
+import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
 
 interface ExploreFilterSheetProps {
   isOpen: boolean;
@@ -44,6 +47,12 @@ export function ExploreFilterSheet({
   const [selectedThemes, setSelectedThemes] = useState<string[]>(filters.theme_codes || []);
   const [selectedPriceMin, setSelectedPriceMin] = useState<number | null>(filters.price_min || null);
   const [selectedPriceMax, setSelectedPriceMax] = useState<number | null>(filters.price_max || null);
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
+
+  // 사용자 위치 데이터 조회
+  const { isAuthenticated } = useUserStore();
+  const { data: userLocations } = useUserLocations({}, { enabled: isOpen && isAuthenticated });
+  const hasUserLocation = userLocations && userLocations.length > 0;
 
   // 탭 변경 시 상단 스크롤
   useEffect(() => {
@@ -171,7 +180,8 @@ export function ExploreFilterSheet({
               selectedGroup2={selectedGroup2}
               onGroup1Select={handleGroup1Select}
               onGroup2Select={handleGroup2Select}
-              onLocationSelect={onLocationSelect}
+              hasUserLocation={hasUserLocation}
+              onLocationSettingClick={() => setIsLocationSheetOpen(true)}
             />
           )}
           {activeTab === "category" && (
@@ -222,6 +232,13 @@ export function ExploreFilterSheet({
           </Button>
         </DrawerFooter>
       </DrawerContent>
+
+      {/* 위치 설정 바텀 시트 */}
+      <LocationSettingSheet
+        isOpen={isLocationSheetOpen}
+        onClose={() => setIsLocationSheetOpen(false)}
+        onSelect={() => setIsLocationSheetOpen(false)}
+      />
     </Drawer>
   );
 }

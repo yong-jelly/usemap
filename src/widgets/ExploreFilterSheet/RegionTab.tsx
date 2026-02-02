@@ -2,15 +2,14 @@ import React from "react";
 import { cn } from "@/shared/lib/utils";
 import { REGION_DATA } from "@/shared/config/filter-constants";
 import { LocationGuideBox } from "@/features/location/ui/LocationGuideBox";
-import { useUserLocations } from "@/entities/location";
-import { useUserStore } from "@/entities/user";
 
 interface RegionTabProps {
   selectedGroup1: string | null;
   selectedGroup2: string | null;
   onGroup1Select: (group1: string) => void;
   onGroup2Select: (group2: string) => void;
-  onLocationSelect?: () => void;
+  hasUserLocation?: boolean;
+  onLocationSettingClick?: () => void;
 }
 
 export function RegionTab({ 
@@ -18,33 +17,33 @@ export function RegionTab({
   selectedGroup2, 
   onGroup1Select, 
   onGroup2Select,
-  onLocationSelect
+  hasUserLocation = true,
+  onLocationSettingClick
 }: RegionTabProps) {
   const currentGroup2List = REGION_DATA.find(r => r.group1 === selectedGroup1)?.group2_json || [];
-  
-  const { isAuthenticated } = useUserStore();
-  const { data: userLocations } = useUserLocations({}, { enabled: isAuthenticated });
-  const hasUserLocation = userLocations && userLocations.length > 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h3 className="text-[19px] font-medium text-surface-900 dark:text-white">지역 선택</h3>
-        <span className="text-[11px] font-medium text-surface-400 bg-surface-100 dark:bg-surface-800 px-2.5 py-1 rounded-full">시/도 및 시/군/구</span>
-      </div>
-
+      {/* 위치 미설정 시 가이드 박스 */}
       {!hasUserLocation && (
         <LocationGuideBox 
           title="내 주변 맛집을 찾아보세요"
           description="위치를 설정하면 가까운 거리순으로 맛집을 추천해드려요."
           buttonText="위치 설정하기"
           showButton={true}
-          onButtonClick={onLocationSelect}
-          className="mb-4"
+          onButtonClick={onLocationSettingClick}
         />
       )}
 
-      <div className="flex h-[50vh] -mx-6 overflow-hidden border-t-2 border-surface-100 dark:border-surface-800">
+      <div className="flex items-center gap-3">
+        <h3 className="text-[19px] font-medium text-surface-900 dark:text-white">지역 선택</h3>
+        <span className="text-[11px] font-medium text-surface-400 bg-surface-100 dark:bg-surface-800 px-2.5 py-1 rounded-full">시/도 및 시/군/구</span>
+      </div>
+
+      <div className={cn(
+        "flex -mx-6 overflow-hidden border-t-2 border-surface-100 dark:border-surface-800",
+        hasUserLocation ? "h-[50vh]" : "h-[40vh]"
+      )}>
         {/* Sidebar: 시/도 (group1) */}
         <div className="w-[100px] overflow-y-auto bg-white dark:bg-surface-900 border-r-2 border-surface-100 dark:border-surface-800 scrollbar-hide">
           {REGION_DATA.map((region) => {
