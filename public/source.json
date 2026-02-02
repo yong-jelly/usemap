@@ -1,0 +1,134 @@
+{
+  "featured_groups": [
+    {
+      "id": "f1",
+      "type": "youtube",
+      "name": "성시경의 먹을텐데",
+      "subtext": "세월이 증명한 국밥의 깊은 맛",
+      "count": "156개 장소",
+      "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop",
+      "icon": "https://yt3.googleusercontent.com/vQrdlCaT4Tx1AXJ8CLKOq_dJzYq-Y4X5_Z4_W_Z4_W_Z4_W_Z4_W=s176-c-k-c0x00ffffff-no-rj"
+    },
+    {
+      "id": "f2",
+      "type": "youtube",
+      "name": "쯔양 맛집 리스트",
+      "subtext": "전국 팔도 숨은 맛을 찾아서",
+      "count": "330개 장소",
+      "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop",
+      "icon": "https://yt3.googleusercontent.com/ytc/AIdro_k2yM_Kk8y_Kk8y_Kk8y_Kk8y=s176-c-k-c0x00ffffff-no-rj"
+    },
+    {
+      "id": "f3",
+      "type": "social",
+      "name": "신콕｜서울맛집",
+      "subtext": "지금 가장 감각적인 미식 공간",
+      "count": "24.9만 팔로워",
+      "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop",
+      "icon": "https://scontent-gmp1-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=ae9488&_nc_ohc=8_8_8_8_8_8&_nc_ht=scontent-gmp1-1.cdninstagram.com&oh=00_AfC_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8&oe=65B_8_8_8"
+    },
+    {
+      "id": "f4",
+      "type": "detective",
+      "name": "소문의 맛집",
+      "subtext": "진심을 담아 기록한 나만의 맛집",
+      "count": "30개 장소",
+      "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop",
+      "icon": null
+    }
+  ],
+  "places": [
+    {
+      "id": "p1",
+      "name": "우래옥",
+      "address": "서울 중구 주교동 118-1",
+      "region": "서울",
+      "thumbnail": "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20240424_281%2F17139209675822gK4q_JPEG%2FIMG_5460.jpeg",
+      "sourceCount": 15,
+      "aspect": "aspect-[3/4]",
+      "category": "평양냉면",
+      "owner_nickname": "성시경",
+      "owner_avatar_url": "https://yt3.googleusercontent.com/vQrdlCaT4Tx1AXJ8CLKOq_dJzYq-Y4X5_Z4_W_Z4_W_Z4_W_Z4_W=s176-c-k-c0x00ffffff-no-rj"
+    },
+    {
+      "id": "p2",
+      "name": "진미평양냉면",
+      "address": "서울 강남구 논현동 115-10",
+      "region": "서울",
+      "thumbnail": "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20230626_286%2F1687744388427gK4q_JPEG%2FIMG_5460.jpeg",
+      "sourceCount": 13,
+      "aspect": "aspect-square",
+      "category": "평양냉면",
+      "owner_nickname": "쯔양",
+      "owner_avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_k2yM_Kk8y_Kk8y_Kk8y_Kk8y=s176-c-k-c0x00ffffff-no-rj"
+    },
+    {
+      "id": "p3",
+      "name": "금돼지식당",
+      "address": "서울 중구 신당동 370-69",
+      "region": "서울",
+      "thumbnail": "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20210521_286%2F1621577388427gK4q_JPEG%2FIMG_5460.jpeg",
+      "sourceCount": 12,
+      "aspect": "aspect-[4/5]",
+      "category": "돼지고기구이",
+      "owner_nickname": "신콕",
+      "owner_avatar_url": "https://scontent-gmp1-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=ae9488&_nc_ohc=8_8_8_8_8_8&_nc_ht=scontent-gmp1-1.cdninstagram.com&oh=00_AfC_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8_8&oe=65B_8_8_8"
+    },
+    {
+      "id": "p4",
+      "name": "이문설렁탕",
+      "address": "서울 종로구 견지동 88",
+      "region": "서울",
+      "thumbnail": "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=800&auto=format&fit=crop",
+      "sourceCount": 11,
+      "aspect": "aspect-[3/2]",
+      "category": "설렁탕",
+      "owner_nickname": "맛탐정",
+      "memo": "100년 전통의 설렁탕 맛집입니다."
+    },
+    {
+      "id": "p5",
+      "name": "해운대암소갈비집",
+      "address": "부산 해운대구 중동",
+      "region": "부산",
+      "thumbnail": "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20220626_286%2F1656244388427gK4q_JPEG%2FIMG_5460.jpeg",
+      "sourceCount": 8,
+      "aspect": "aspect-square",
+      "category": "소갈비",
+      "owner_nickname": "부산맛집"
+    },
+    {
+      "id": "p6",
+      "name": "자매국수",
+      "address": "제주 제주시",
+      "region": "제주",
+      "thumbnail": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=800&auto=format&fit=crop",
+      "sourceCount": 7,
+      "aspect": "aspect-[4/3]",
+      "category": "고기국수",
+      "owner_nickname": "제주도민"
+    },
+    {
+      "id": "p7",
+      "name": "성심당",
+      "address": "대전 중구",
+      "region": "대전",
+      "thumbnail": "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20230521_286%2F1684577388427gK4q_JPEG%2FIMG_5460.jpeg",
+      "sourceCount": 25,
+      "aspect": "aspect-[2/3]",
+      "category": "베이커리",
+      "owner_nickname": "빵지순례"
+    },
+    {
+      "id": "p8",
+      "name": "엄지네포장마차",
+      "address": "강원 강릉시",
+      "region": "강원",
+      "thumbnail": "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?q=80&w=800&auto=format&fit=crop",
+      "sourceCount": 9,
+      "aspect": "aspect-square",
+      "category": "꼬막비빔밥",
+      "owner_nickname": "강릉맛집"
+    }
+  ]
+}

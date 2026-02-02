@@ -71,25 +71,22 @@ export function BottomNav() {
 
   return (
     <motion.nav
-      initial={{ y: 20, opacity: 0 }}
+      initial={{ y: 0, opacity: 1 }}
       animate={{ 
-        y: 0, 
-        x: "-50%",
-        opacity: isVisible ? 1 : 0.4,
-        scale: isVisible ? 1 : 0.97,
+        y: isVisible ? 0 : 60,
+        opacity: 1,
       }}
       transition={{
         type: "spring",
-        stiffness: 400,
+        stiffness: 300,
         damping: 30
       }}
-      className="fixed bottom-6 left-1/2 z-50 flex w-[75vw] max-w-[400px] items-center justify-center pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
     >
       <div 
         className={cn(
-          "relative flex w-full h-16 items-center justify-around rounded-full px-2 pointer-events-auto overflow-hidden",
-          "bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700",
-          "shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-opacity duration-200"
+          "relative flex w-full h-14 items-center justify-around px-4",
+          "transition-opacity duration-200"
         )}
       >
         {navItems.map((item) => {
@@ -119,23 +116,15 @@ export function BottomNav() {
               onClick={handleClick}
               className={cn(
                 "group relative flex h-full flex-1 flex-col items-center justify-center outline-none transition-colors",
-                isActive ? "text-neutral-950 dark:text-white" : "text-neutral-500 dark:text-neutral-400"
+                isActive ? "text-neutral-950 dark:text-white" : "text-neutral-400 dark:text-neutral-500"
               )}
             >
-              {/* 더 진해진 배경 하이라이트 */}
-              {isActive && (
-                <div className="absolute inset-0 mx-auto my-auto h-12 w-12 rounded-full bg-neutral-200/80 dark:bg-neutral-800" />
-              )}
-
-              <motion.div 
-                className="relative z-10"
-                whileTap={shouldReduceMotion ? {} : { scale: 0.92 }}
-              >
+              <div className="relative z-10">
                 <item.icon className={cn(
                   "h-6 w-6", 
-                  isActive ? "stroke-[2.8px]" : "stroke-[2.2px]"
+                  isActive ? "stroke-[2.5px]" : "stroke-[2px]"
                 )} />
-              </motion.div>
+              </div>
             </Link>
           );
         })}

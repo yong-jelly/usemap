@@ -68,7 +68,7 @@ export function CollectionCard({
             ))}
           </div>
         ) : mainImage ? (
-          <div className={cn("relative overflow-hidden", isTall ? "aspect-[3/4]" : "aspect-square")}>
+          <div className={cn("relative overflow-hidden", data.aspect || (isTall ? "aspect-[3/4]" : "aspect-square"))}>
             <img src={convertToNaverResizeImageUrl(mainImage)} alt={title} className="w-full h-full object-cover" loading="lazy" />
             {item.type === 'place' && data.popularity_score && (
               <div className="absolute top-3 right-3">
