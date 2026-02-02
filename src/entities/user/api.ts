@@ -30,9 +30,9 @@ export const userApi = {
     if (!user) throw new Error("Authentication required");
 
     const response = await apiClient.rpc<UserProfile>("v2_upsert_user_profile", {
-      p_nickname: data.nickname,
-      p_bio: data.bio,
-      p_profile_image_url: data.profile_image_url,
+      p_nickname: data.nickname ?? null,
+      p_bio: data.bio ?? null,
+      p_profile_image_url: data.profile_image_url ?? null,
       p_email: data.email || user.email,
     });
 

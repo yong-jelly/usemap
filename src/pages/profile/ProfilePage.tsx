@@ -8,6 +8,7 @@ import { MyReviewsTab } from "@/features/profile/ui/MyReviewsTab";
 import { MyFolderList } from "@/features/folder/ui/MyFolderList";
 import { SubscriptionList } from "@/features/folder/ui/SubscriptionList";
 import { SubscriberList } from "@/features/profile/ui/SubscriberList";
+import { AnalysisTab } from "@/features/profile/ui/AnalysisTab";
 import { useUserProfile } from "@/entities/user/queries";
 import { useEnsureDefaultFolder } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
@@ -45,6 +46,7 @@ export function ProfilePage() {
 
   const tabs = [
     { id: "profile", label: "프로필" },
+    { id: "analysis", label: "분석" },
     { id: "recent", label: "최근" },
     { id: "liked", label: "좋아요" },
     { id: "saved", label: "저장" },
@@ -96,6 +98,7 @@ export function ProfilePage() {
         className="flex-1 w-full max-w-lg mx-auto pt-24 pb-32"
       >
         {activeTab === "profile" && <ProfileHeader />}
+        {activeTab === "analysis" && <AnalysisTab />}
         {activeTab === "recent" && <RecentPlacesTab />}
         {activeTab === "liked" && <LikedPlacesTab />}
         {activeTab === "saved" && <SavedPlacesTab />}

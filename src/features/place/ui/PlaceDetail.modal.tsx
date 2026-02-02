@@ -877,11 +877,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                             추가
                           </button>
                         </div>
-                        <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                          <p className="text-sm text-surface-400">
-                            리뷰가 없습니다.
+                        <button 
+                          onClick={() => {
+                            if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                            setShowReviewForm(true);
+                          }}
+                          className="py-6 w-full text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors group"
+                        >
+                          <p className="text-sm text-surface-400 group-hover:text-primary-500 transition-colors">
+                            리뷰가 없습니다. 첫 리뷰를 작성해보세요!
                           </p>
-                        </div>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -992,9 +998,15 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                           />
                         ))
                       ) : (
-                        <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                          <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
-                        </div>
+                        <button 
+                          onClick={() => {
+                            if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                            setShowContentAddForm(true);
+                          }}
+                          className="py-6 w-full text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors group"
+                        >
+                          <p className="text-sm text-surface-400 group-hover:text-primary-500 transition-colors">콘텐츠가 없습니다. 관련 콘텐츠를 추가해보세요!</p>
+                        </button>
                       )
                     ) : (
                       <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">

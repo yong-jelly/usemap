@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userApi, type ProfileUpdateData } from "./api";
 import { useUserStore } from "./index";
+import { supabase } from "@/shared/lib/supabase";
+import type { UserPlacesStatsBucket, UserReviewAnalysisData } from "./types";
 
 export const userKeys = {
   all: ["user"] as const,
   profile: () => [...userKeys.all, "profile"] as const,
   subscribers: () => [...userKeys.all, "subscribers"] as const,
+  placesStats: (recreation: boolean) => [...userKeys.all, "placesStats", recreation] as const,
+  reviewAnalysis: () => [...userKeys.all, "reviewAnalysis"] as const,
 };
 
 /**
@@ -86,5 +90,31 @@ export function useMySubscribers() {
   return useQuery({
     queryKey: userKeys.subscribers(),
     queryFn: () => userApi.getMySubscribers(),
+  });
+}
+
+// 사용자 장소 통계 (지역별/카테고리별 선호도, 방문 실행력)
+export function useUserPlacesStats(recreation = false) {
+  return useQuery({
+    queryKey: userKeys.placesStats(recreation),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("v1_aggr_combine_user_places", {
+        recreation,
+      });
+      if (error) throw error;
+      return data?.[0] as UserPlacesStatsBucket | null;
+    },
+  });
+}
+
+// 사용자 리뷰 분석 (별점 분포, 태그, 카테고리, 최근 리뷰)
+export function useUserReviewAnalysis() {
+  return useQuery({
+    queryKey: userKeys.reviewAnalysis(),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("v2_aggr_review_user_places");
+      if (error) throw error;
+      return data as UserReviewAnalysisData | null;
+    },
   });
 }
