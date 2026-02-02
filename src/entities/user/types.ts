@@ -64,12 +64,46 @@ export interface RecentReview {
   review_content: string;
 }
 
+// 동반자 분석 타입
+export interface CompanionBreakdown {
+  companion: string;
+  count: number;
+  percentage: number;
+}
+
+export interface CompanionAnalysis {
+  total_visits: number;
+  breakdown: CompanionBreakdown[];
+}
+
+// 재방문 분석 타입
+export interface TopRevisitedPlace {
+  place_id: string;
+  place_name: string;
+  category: string;
+  group1: string;
+  group2: string;
+  group3: string;
+  visit_count: number;
+  last_visited_at: string;
+  first_visited_at: string;
+}
+
+export interface RevisitAnalysis {
+  total_unique_places: number;
+  revisited_places_count: number;
+  revisit_rate: number;
+  top_revisited: TopRevisitedPlace[];
+}
+
 export interface UserReviewAnalysisData {
   review_summary: ReviewSummary;
   rating_distribution: RatingDistribution[];
   tag_analysis: ReviewTagAnalysis[];
   category_analysis: CategoryAnalysis[];
   recent_reviews: RecentReview[];
+  companion_analysis: CompanionAnalysis;
+  revisit_analysis: RevisitAnalysis;
 }
 
 // ============================================

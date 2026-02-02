@@ -3,6 +3,7 @@ import { usePlacePopup } from "@/shared/lib/place-popup";
 import { MyPreferencesChart } from "./MyPreferencesChart";
 import { MyVisitRatioCard } from "./MyVisitRatioCard";
 import { MyReviewsAnalysisCard } from "./MyReviewsAnalysisCard";
+import { RevisitAnalysisCard } from "./RevisitAnalysisCard";
 import { Loader2 } from "lucide-react";
 
 export function AnalysisTab() {
@@ -12,16 +13,27 @@ export function AnalysisTab() {
 
   if (isPlacesLoading || isReviewLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="flex min-h-[50vh] items-center justify-center bg-white dark:bg-surface-950">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-4 space-y-3">
+    <div className="min-h-screen bg-white dark:bg-surface-950 px-4 py-4 space-y-4">
+      {/* 취향 분석 */}
       <MyPreferencesChart bucket={placesStats} />
+      
+      {/* 방문 실행력 */}
       <MyVisitRatioCard bucket={placesStats} />
+      
+      {/* 재방문 분석 */}
+      <RevisitAnalysisCard 
+        data={reviewAnalysis?.revisit_analysis} 
+        onPlaceClick={showPlaceModal} 
+      />
+      
+      {/* 리뷰 분석 */}
       <MyReviewsAnalysisCard 
         data={reviewAnalysis} 
         onPlaceClick={showPlaceModal} 

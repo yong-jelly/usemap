@@ -46,7 +46,6 @@ export function ProfilePage() {
 
   const tabs = [
     { id: "profile", label: "프로필" },
-    { id: "analysis", label: "분석" },
     { id: "recent", label: "최근" },
     { id: "liked", label: "좋아요" },
     { id: "saved", label: "저장" },
@@ -55,6 +54,7 @@ export function ProfilePage() {
     { id: "folder", label: "맛탐정" },
     { id: "subscription", label: "구독" },
     { id: "subscribers", label: "구독자" },
+    { id: "analysis", label: "분석" },
   ];
 
   const handleTabChange = (newTabId: string) => {

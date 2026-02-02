@@ -18,8 +18,6 @@ interface VisitRatioData {
   visitedFromLiked: number;
   visitedFromSaved: number;
   visitedFromRecommended: number;
-  insights: string[];
-  timestamp: string;
 }
 
 export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
@@ -33,34 +31,24 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
       id: 'ratio-1',
       title: '내 방문 실행력 분석',
       period: '전체 기간',
-      // 총 추천 장소 수
       totalRecommendedRestaurants: bucket?.bucket_data_jsonb?.total_features_count ?? 0,
-      // 좋아요한 장소 수
       myLikedRestaurants:
         bucket?.bucket_data_jsonb?.v1_aggr_user_places_region_stats?.reduce(
           (sum, stat) => sum + stat.liked,
           0,
         ) ?? 0,
-      // 저장한 장소 수
       mySavedRestaurants:
         bucket?.bucket_data_jsonb?.v1_aggr_user_places_region_stats?.reduce(
           (sum, stat) => sum + stat.saved,
           0,
         ) ?? 0,
-      // 방문한 장소 수
       myVisitedRestaurants: totalVisitedPlaces,
-      // 방문후 좋아요
       visitedFromLiked: bucket?.bucket_data_jsonb?.total_liked_places_visited ?? 0,
-      // 방문후 저장
       visitedFromSaved: bucket?.bucket_data_jsonb?.total_saved_places_visited ?? 0,
-      // 추천 장소 수 중 방문한 장소 수
       visitedFromRecommended: bucket?.bucket_data_jsonb?.total_featured_place_visited ?? 0,
-      insights: [],
-      timestamp: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
     };
   }, [bucket]);
 
-  // 방문 비율 계산
   const likedVisitRatio = card.myLikedRestaurants > 0 
     ? (card.visitedFromLiked / card.myLikedRestaurants) * 100 
     : 0;
@@ -73,12 +61,10 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
     ? (card.visitedFromRecommended / card.totalRecommendedRestaurants) * 100
     : 0;
 
-  // 실행력 점수 계산 (가중 평균)
   const executionScore = useMemo(() => {
     const likedWeight = 0.4;
     const savedWeight = 0.4;
     const totalWeight = 0.2;
-
     return (
       likedVisitRatio * likedWeight + savedVisitRatio * savedWeight + totalVisitRatio * totalWeight
     );
@@ -92,13 +78,12 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
   }
 
   function getProgressColor(percentage: number): string {
-    if (percentage >= 70) return 'bg-gray-800';
-    if (percentage >= 50) return 'bg-gray-600';
-    if (percentage >= 30) return 'bg-gray-500';
-    return 'bg-gray-400';
+    if (percentage >= 70) return 'bg-primary-500';
+    if (percentage >= 50) return 'bg-primary-400';
+    if (percentage >= 30) return 'bg-surface-500';
+    return 'bg-surface-400';
   }
 
-  // 인사이트 생성
   const insights = useMemo(() => {
     const calculatedInsights: string[] = [];
 
@@ -122,42 +107,41 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
   }, [savedVisitRatio, likedVisitRatio, totalVisitRatio, executionScore]);
 
   return (
-    <article className="mb-3 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-2xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900">
       {/* 헤더 */}
       <header className="p-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1">
-              <Target className="h-3 w-3 text-gray-600" />
-              <span className="text-xs font-medium text-gray-700">방문 비율</span>
+            <div className="flex items-center gap-1.5 rounded-lg bg-surface-100 dark:bg-surface-800 px-2.5 py-1.5">
+              <Target className="h-3.5 w-3.5 text-surface-500 dark:text-surface-400" />
+              <span className="text-xs font-medium text-surface-700 dark:text-surface-300">방문 비율</span>
             </div>
-            <div className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1">
-              <span className="text-xs font-medium text-gray-600">{card.period}</span>
+            <div className="flex items-center gap-1 rounded-lg bg-surface-100 dark:bg-surface-800 px-2.5 py-1.5">
+              <span className="text-xs font-medium text-surface-500 dark:text-surface-400">{card.period}</span>
             </div>
           </div>
-          <TrendingUp className="h-4 w-4 text-gray-400" />
+          <TrendingUp className="h-4 w-4 text-surface-400 dark:text-surface-500" />
         </div>
       </header>
 
       <div className="p-4 pt-0">
-        {/* 타이틀 */}
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">{card.title}</h3>
+        <h3 className="mb-4 text-lg font-semibold text-surface-900 dark:text-white">{card.title}</h3>
 
         {/* 방문 현황 요약 */}
-        <div className="mb-4 rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-sm font-medium text-gray-700">내 방문 현황</h4>
+        <div className="mb-4 rounded-xl bg-surface-50 dark:bg-surface-800 p-4">
+          <h4 className="mb-3 text-sm font-medium text-surface-600 dark:text-surface-400">내 방문 현황</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-gray-900">{card.myVisitedRestaurants}</p>
-              <p className="text-xs text-gray-500">총 방문</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">{card.myVisitedRestaurants}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">총 방문</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{card.myLikedRestaurants}</p>
-              <p className="text-xs text-gray-500">좋아요</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">{card.myLikedRestaurants}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">좋아요</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{card.mySavedRestaurants}</p>
-              <p className="text-xs text-gray-500">저장</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">{card.mySavedRestaurants}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">저장</p>
             </div>
           </div>
         </div>
@@ -166,26 +150,23 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Heart className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-900">좋아요 → 방문</span>
+              <Heart className="h-4 w-4 text-rose-500" />
+              <span className="text-sm font-medium text-surface-900 dark:text-white">좋아요 → 방문</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-gray-900">{likedVisitRatio.toFixed(1)}%</span>
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-500">
+              <span className="text-sm font-bold text-surface-900 dark:text-white">{likedVisitRatio.toFixed(1)}%</span>
+              <span className="rounded-lg bg-surface-100 dark:bg-surface-800 px-2 py-1 text-xs text-surface-500 dark:text-surface-400">
                 {getRatioLevel(likedVisitRatio)}
               </span>
             </div>
           </div>
-          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
             <div
-              className={cn(
-                getProgressColor(likedVisitRatio),
-                "h-full rounded-full transition-all duration-500"
-              )}
+              className={cn(getProgressColor(likedVisitRatio), "h-full rounded-full")}
               style={{ width: `${likedVisitRatio}%` }}
             ></div>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-surface-500 dark:text-surface-400">
             <span>방문 {card.visitedFromLiked}</span>
             <span>좋아요 {card.myLikedRestaurants}</span>
           </div>
@@ -195,26 +176,23 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Bookmark className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-900">저장 → 방문</span>
+              <Bookmark className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium text-surface-900 dark:text-white">저장 → 방문</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-gray-900">{savedVisitRatio.toFixed(1)}%</span>
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-500">
+              <span className="text-sm font-bold text-surface-900 dark:text-white">{savedVisitRatio.toFixed(1)}%</span>
+              <span className="rounded-lg bg-surface-100 dark:bg-surface-800 px-2 py-1 text-xs text-surface-500 dark:text-surface-400">
                 {getRatioLevel(savedVisitRatio)}
               </span>
             </div>
           </div>
-          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
             <div
-              className={cn(
-                getProgressColor(savedVisitRatio),
-                "h-full rounded-full transition-all duration-500"
-              )}
+              className={cn(getProgressColor(savedVisitRatio), "h-full rounded-full")}
               style={{ width: `${savedVisitRatio}%` }}
             ></div>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-surface-500 dark:text-surface-400">
             <span>방문 {card.visitedFromSaved}</span>
             <span>저장 {card.mySavedRestaurants}</span>
           </div>
@@ -224,45 +202,42 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-900">전체 추천 → 방문</span>
+              <MapPin className="h-4 w-4 text-primary-500" />
+              <span className="text-sm font-medium text-surface-900 dark:text-white">전체 추천 → 방문</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-gray-900">{totalVisitRatio.toFixed(1)}%</span>
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-500">
+              <span className="text-sm font-bold text-surface-900 dark:text-white">{totalVisitRatio.toFixed(1)}%</span>
+              <span className="rounded-lg bg-surface-100 dark:bg-surface-800 px-2 py-1 text-xs text-surface-500 dark:text-surface-400">
                 {getRatioLevel(totalVisitRatio)}
               </span>
             </div>
           </div>
-          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
             <div
-              className={cn(
-                getProgressColor(totalVisitRatio),
-                "h-full rounded-full transition-all duration-500"
-              )}
+              className={cn(getProgressColor(totalVisitRatio), "h-full rounded-full")}
               style={{ width: `${totalVisitRatio}%` }}
             ></div>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-surface-500 dark:text-surface-400">
             <span>방문 {card.visitedFromRecommended}</span>
             <span>추천 {card.totalRecommendedRestaurants}</span>
           </div>
         </div>
 
         {/* 비교 분석 */}
-        <div className="mb-4 rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-sm font-medium text-gray-700">비교 분석</h4>
+        <div className="mb-4 rounded-xl bg-surface-50 dark:bg-surface-800 p-4">
+          <h4 className="mb-3 text-sm font-medium text-surface-600 dark:text-surface-400">비교 분석</h4>
           <div className="space-y-2">
-            <div className="flex items-center justify-between rounded border bg-white p-2">
-              <span className="text-sm text-gray-600">저장 vs 좋아요</span>
-              <span className="text-sm font-medium text-gray-900">
+            <div className="flex items-center justify-between rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 p-3">
+              <span className="text-sm text-surface-600 dark:text-surface-400">저장 vs 좋아요</span>
+              <span className="text-sm font-medium text-surface-900 dark:text-white">
                 {savedVisitRatio > likedVisitRatio ? '저장' : '좋아요'}가{' '}
                 {Math.abs(savedVisitRatio - likedVisitRatio).toFixed(1)}%p 높음
               </span>
             </div>
-            <div className="flex items-center justify-between rounded border bg-white p-2">
-              <span className="text-sm text-gray-600">실행력 점수</span>
-              <span className="text-sm font-medium text-gray-900">
+            <div className="flex items-center justify-between rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 p-3">
+              <span className="text-sm text-surface-600 dark:text-surface-400">실행력 점수</span>
+              <span className="text-sm font-medium text-surface-900 dark:text-white">
                 {executionScore.toFixed(1)}점 / 100점
               </span>
             </div>
@@ -270,13 +245,13 @@ export function MyVisitRatioCard({ bucket }: MyVisitRatioCardProps) {
         </div>
 
         {/* 인사이트 */}
-        <div className="rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-sm font-medium text-gray-700">인사이트</h4>
+        <div className="rounded-xl bg-surface-50 dark:bg-surface-800 p-4">
+          <h4 className="mb-3 text-sm font-medium text-surface-600 dark:text-surface-400">인사이트</h4>
           <div className="space-y-2">
             {insights.map((insight) => (
               <div key={insight} className="flex items-center gap-2 text-xs">
-                <div className="h-2 w-2 rounded-full bg-gray-800"></div>
-                <span className="text-gray-600">{insight}</span>
+                <div className="h-2 w-2 rounded-full bg-primary-500"></div>
+                <span className="text-surface-600 dark:text-surface-300">{insight}</span>
               </div>
             ))}
           </div>

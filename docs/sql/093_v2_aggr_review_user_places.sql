@@ -27,6 +27,8 @@ DECLARE
     tag_reviews JSONB;          -- 태그별 리뷰 분석
     category_reviews JSONB;     -- 카테고리별 리뷰 분석
     recent_reviews JSONB;       -- 최근 리뷰 목록
+    companion_analysis JSONB;   -- 동반자 분석
+    revisit_analysis JSONB;     -- 재방문 분석
     
     -- 리뷰 현황 계산용 변수
     total_reviews BIGINT;       -- 총 리뷰 개수
@@ -236,7 +238,102 @@ BEGIN
     LEFT JOIN review_tags rt ON rrd.id = rt.review_id;  -- 태그 정보와 조인
 
     -- ==============================================================================
-    -- 7단계: 최종 결과 반환
+    -- 7단계: 동반자 분석 (혼밥 vs 동반 식사 패턴)
+    -- ==============================================================================
+    
+    WITH companion_stats AS (
+        SELECT 
+            COALESCE(NULLIF(TRIM(companion), ''), '기록없음') as companion_type,
+            COUNT(*) as visit_count
+        FROM tbl_visited
+        WHERE user_id = target_user_id
+        GROUP BY COALESCE(NULLIF(TRIM(companion), ''), '기록없음')
+    ),
+    total_visits AS (
+        SELECT COUNT(*) as total FROM tbl_visited WHERE user_id = target_user_id
+    )
+    SELECT 
+        COALESCE(
+            jsonb_build_object(
+                'total_visits', (SELECT total FROM total_visits),
+                'breakdown', COALESCE(
+                    (SELECT jsonb_agg(
+                        jsonb_build_object(
+                            'companion', companion_type,
+                            'count', visit_count,
+                            'percentage', CASE 
+                                WHEN (SELECT total FROM total_visits) = 0 THEN 0 
+                                ELSE ROUND((visit_count::NUMERIC / (SELECT total FROM total_visits)) * 100, 1) 
+                            END
+                        ) ORDER BY visit_count DESC
+                    ) FROM companion_stats),
+                    '[]'::jsonb
+                )
+            ),
+            jsonb_build_object('total_visits', 0, 'breakdown', '[]'::jsonb)
+        )
+    INTO companion_analysis;
+
+    -- ==============================================================================
+    -- 8단계: 재방문 분석 (단골 장소 TOP 10)
+    -- ==============================================================================
+    
+    WITH revisit_stats AS (
+        SELECT 
+            v.place_id,
+            p.name as place_name,
+            p.category,
+            p.group1,
+            p.group2,
+            p.group3,
+            COUNT(*) as visit_count,
+            MAX(v.visited_at) as last_visited_at,
+            MIN(v.visited_at) as first_visited_at
+        FROM tbl_visited v
+        JOIN tbl_place p ON v.place_id = p.id
+        WHERE v.user_id = target_user_id
+        GROUP BY v.place_id, p.name, p.category, p.group1, p.group2, p.group3
+        HAVING COUNT(*) >= 2
+        ORDER BY COUNT(*) DESC, MAX(v.visited_at) DESC
+        LIMIT 10
+    ),
+    total_unique_places AS (
+        SELECT COUNT(DISTINCT place_id) as total FROM tbl_visited WHERE user_id = target_user_id
+    ),
+    revisited_places_count AS (
+        SELECT COUNT(*) as cnt FROM (
+            SELECT place_id FROM tbl_visited WHERE user_id = target_user_id GROUP BY place_id HAVING COUNT(*) >= 2
+        ) sq
+    )
+    SELECT 
+        jsonb_build_object(
+            'total_unique_places', (SELECT total FROM total_unique_places),
+            'revisited_places_count', (SELECT cnt FROM revisited_places_count),
+            'revisit_rate', CASE 
+                WHEN (SELECT total FROM total_unique_places) = 0 THEN 0 
+                ELSE ROUND(((SELECT cnt FROM revisited_places_count)::NUMERIC / (SELECT total FROM total_unique_places)) * 100, 1) 
+            END,
+            'top_revisited', COALESCE(
+                (SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'place_id', place_id,
+                        'place_name', place_name,
+                        'category', category,
+                        'group1', group1,
+                        'group2', group2,
+                        'group3', group3,
+                        'visit_count', visit_count,
+                        'last_visited_at', TO_CHAR(last_visited_at, 'YYYY. MM. DD'),
+                        'first_visited_at', TO_CHAR(first_visited_at, 'YYYY. MM. DD')
+                    ) ORDER BY visit_count DESC, last_visited_at DESC
+                ) FROM revisit_stats),
+                '[]'::jsonb
+            )
+        )
+    INTO revisit_analysis;
+
+    -- ==============================================================================
+    -- 9단계: 최종 결과 반환
     -- ==============================================================================
     
     -- 모든 분석 결과를 하나의 JSON 객체로 결합하여 반환
@@ -245,7 +342,9 @@ BEGIN
         'rating_distribution', rating_distribution, -- 별점 분포
         'tag_analysis', tag_reviews,               -- 태그별 분석
         'category_analysis', category_reviews,     -- 카테고리별 분석
-        'recent_reviews', recent_reviews          -- 최근 리뷰 목록
+        'recent_reviews', recent_reviews,          -- 최근 리뷰 목록
+        'companion_analysis', companion_analysis,  -- 동반자 분석
+        'revisit_analysis', revisit_analysis       -- 재방문 분석
     );
 
 EXCEPTION

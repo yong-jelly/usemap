@@ -9,14 +9,8 @@ import {
   Unlock
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { safeFormatDate } from "@/shared/lib/date";
-import type { 
-  UserReviewAnalysisData, 
-  ReviewStats, 
-  ReviewFeeling 
-} from "@/entities/user/types";
+import type { UserReviewAnalysisData } from "@/entities/user/types";
 
-// 타입 호환성을 위한 로컬 인터페이스 정의
 interface ReviewStatsLocal {
   totalReviews: number;
   averageRating: number;
@@ -55,7 +49,6 @@ export function MyReviewsAnalysisCard({
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // 데이터 가공
   const card = useMemo(() => {
     if (!data) return null;
 
@@ -87,19 +80,16 @@ export function MyReviewsAnalysisCard({
       period: '전체 기간',
       stats,
       recentReviews: data.recent_reviews,
-      timestamp: new Date().toISOString()
     };
   }, [data]);
 
   const hasNoData = !card || card.stats.totalReviews === 0;
 
-  // 인사이트 생성 로직
   const dynamicInsights = useMemo(() => {
     if (!card) return [];
     const insights: string[] = [];
     const { stats } = card;
 
-    // 평균 별점 인사이트
     if (stats.averageRating >= 4.0) {
       insights.push(`평균 별점 ${stats.averageRating.toFixed(1)}점으로 대체로 만족스러운 리뷰 작성`);
     } else if (stats.averageRating >= 3.0) {
@@ -108,7 +98,6 @@ export function MyReviewsAnalysisCard({
       insights.push(`평균 별점 ${stats.averageRating.toFixed(1)}점으로 까다로운 기준의 리뷰 작성`);
     }
 
-    // 가장 많이 선택한 느낌 인사이트
     if (stats.topFeelings.length >= 2) {
       const topTwo = stats.topFeelings.slice(0, 2);
       insights.push(
@@ -116,7 +105,6 @@ export function MyReviewsAnalysisCard({
       );
     }
 
-    // 부정적 느낌 비율 인사이트
     const negativeFeelings = stats.topFeelings.filter((f) =>
       ['bad_atmosphere', 'bad_taste', 'bad_service'].includes(f.name)
     );
@@ -126,21 +114,6 @@ export function MyReviewsAnalysisCard({
       insights.push(`부정적 느낌 선택은 ${negativePercentage.toFixed(0)}%로 매우 낮음`);
     } else if (negativePercentage >= 20) {
       insights.push(`부정적 느낌 선택이 ${negativePercentage.toFixed(0)}%로 비교적 높음`);
-    }
-
-    // 식사 동반자 선호도 인사이트
-    const companionFeelings = stats.topFeelings.filter((f) =>
-      ['with_family', 'with_gf', 'alone'].includes(f.name)
-    );
-    if (companionFeelings.length > 0) {
-      const topCompanion = companionFeelings[0];
-      if (topCompanion.name === 'with_family') {
-        insights.push('가족과 함께하는 식사를 선호하는 편');
-      } else if (topCompanion.name === 'with_gf') {
-        insights.push('연인과 함께하는 식사를 선호하는 편');
-      } else if (topCompanion.name === 'alone') {
-        insights.push('혼자 식사하는 것을 선호하는 편');
-      }
     }
 
     return insights.slice(0, 5);
@@ -160,26 +133,26 @@ export function MyReviewsAnalysisCard({
 
   if (isLoading && !card) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="mb-4 h-8 w-8 animate-spin text-gray-400" />
-        <h4 className="mb-2 text-base font-medium text-gray-900">리뷰 데이터를 불러오는 중...</h4>
-        <p className="text-center text-sm text-gray-500">잠시만 기다려주세요</p>
-      </div>
+      <article className="overflow-hidden rounded-2xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900 p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary-500" />
+          <h4 className="mb-2 text-base font-medium text-surface-900 dark:text-white">리뷰 데이터를 불러오는 중...</h4>
+          <p className="text-center text-sm text-surface-500 dark:text-surface-400">잠시만 기다려주세요</p>
+        </div>
+      </article>
     );
   }
 
   if (hasNoData) {
     return (
-      <article className="mb-3 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm p-4">
+      <article className="overflow-hidden rounded-2xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900 p-4">
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="mb-4 rounded-full bg-gray-100 p-4">
-            <FileText className="h-8 w-8 text-gray-400" />
+          <div className="mb-4 rounded-full bg-surface-100 dark:bg-surface-800 p-4">
+            <FileText className="h-8 w-8 text-surface-400 dark:text-surface-500" />
           </div>
-          <h4 className="mb-2 text-base font-medium text-gray-900">아직 작성한 리뷰가 없어요</h4>
-          <p className="mb-4 text-center text-sm text-gray-500">
+          <h4 className="mb-2 text-base font-medium text-surface-900 dark:text-white">아직 작성한 리뷰가 없어요</h4>
+          <p className="mb-4 text-center text-sm text-surface-500 dark:text-surface-400">
             맛집을 방문하고 첫 리뷰를 작성해보세요!
-            <br />
-            당신의 소중한 경험을 다른 사람들과 공유해보세요.
           </p>
         </div>
       </article>
@@ -187,76 +160,75 @@ export function MyReviewsAnalysisCard({
   }
 
   return (
-    <article className="mb-3 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-2xl border border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900">
       {/* 헤더 */}
       <header className="p-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1">
-              <Star className="h-3 w-3 text-gray-600" />
-              <span className="text-xs font-medium text-gray-700">내 리뷰</span>
+            <div className="flex items-center gap-1.5 rounded-lg bg-surface-100 dark:bg-surface-800 px-2.5 py-1.5">
+              <Star className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs font-medium text-surface-700 dark:text-surface-300">내 리뷰</span>
             </div>
-            <div className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1">
-              <span className="text-xs font-medium text-gray-700">{card?.period}</span>
+            <div className="flex items-center gap-1 rounded-lg bg-surface-100 dark:bg-surface-800 px-2.5 py-1.5">
+              <span className="text-xs font-medium text-surface-500 dark:text-surface-400">{card?.period}</span>
             </div>
           </div>
-          <Calendar className="h-4 w-4 text-gray-400" />
+          <Calendar className="h-4 w-4 text-surface-400 dark:text-surface-500" />
         </div>
       </header>
 
       <div className="p-4 pt-0">
-        {/* 타이틀 */}
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">{card?.title}</h3>
+        <h3 className="mb-4 text-lg font-semibold text-surface-900 dark:text-white">{card?.title}</h3>
 
         {/* 리뷰 요약 */}
-        <div className="mb-4 rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-sm font-medium text-gray-700">리뷰 현황</h4>
+        <div className="mb-4 rounded-xl bg-surface-50 dark:bg-surface-800 p-4">
+          <h4 className="mb-3 text-sm font-medium text-surface-600 dark:text-surface-400">리뷰 현황</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-gray-900">{card?.stats.totalReviews}</p>
-              <p className="text-xs text-gray-500">작성한 리뷰</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">{card?.stats.totalReviews}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">작성한 리뷰</p>
             </div>
             <div>
               <div className="flex items-center justify-center gap-1">
-                <Star className="h-4 w-4 text-gray-600" />
-                <p className="text-2xl font-bold text-gray-900">{card?.stats.averageRating.toFixed(1)}</p>
+                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                <p className="text-2xl font-bold text-surface-900 dark:text-white">{card?.stats.averageRating.toFixed(1)}</p>
               </div>
-              <p className="text-xs text-gray-500">평균 별점</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">평균 별점</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
                 {Math.round(
                   ((card!.stats.ratingDistribution[4] + card!.stats.ratingDistribution[5]) /
                     card!.stats.totalReviews) *
                     100,
                 )}%
               </p>
-              <p className="text-xs text-gray-500">만족도</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">만족도</p>
             </div>
           </div>
         </div>
 
         {/* 별점 분포 */}
         <div className="mb-4">
-          <h4 className="mb-3 font-medium text-gray-900">별점 분포</h4>
+          <h4 className="mb-3 font-medium text-surface-900 dark:text-white">별점 분포</h4>
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((rating) => (
               <div key={rating} className="flex items-center gap-3">
                 <div className="flex w-12 items-center gap-1">
-                  <Star className="h-3 w-3 text-gray-600" />
-                  <span className="text-sm text-gray-600">{rating}</span>
+                  <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                  <span className="text-sm text-surface-600 dark:text-surface-400">{rating}</span>
                 </div>
                 <div className="relative flex-1">
-                  <div className="h-4 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-4 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
                     <div
-                      className="h-full rounded-full bg-gray-600 transition-all duration-500"
+                      className="h-full rounded-full bg-amber-500"
                       style={{
                         width: `${(card!.stats.ratingDistribution[rating as 1|2|3|4|5] / card!.stats.totalReviews) * 100}%`
                       }}
                     ></div>
                   </div>
                 </div>
-                <div className="w-8 text-right text-xs text-gray-500">
+                <div className="w-8 text-right text-xs text-surface-500 dark:text-surface-400">
                   {card!.stats.ratingDistribution[rating as 1|2|3|4|5]}
                 </div>
               </div>
@@ -265,167 +237,154 @@ export function MyReviewsAnalysisCard({
         </div>
 
         {/* 주요 평가 */}
-        <div className="mb-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">주요 평가</h4>
-            {card!.stats.topFeelings.length > 6 && (
-              <button
-                onClick={() => setShowAllFeelings(!showAllFeelings)}
-                className="flex items-center gap-1 text-xs text-gray-600 transition-colors hover:text-gray-800"
-              >
-                <span>
-                  {showAllFeelings ? '접기' : `+${card!.stats.topFeelings.length - 6}개 더보기`}
-                </span>
-                <ChevronDown
-                  className={cn("h-3 w-3 transform transition-transform", showAllFeelings && "rotate-180")}
-                />
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {displayedFeelings?.map((feeling) => (
-              <div key={feeling.id} className="flex items-center justify-between rounded bg-gray-100 p-2 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">{getFeelingEmoji(feeling.name)}</span>
-                  <span className="text-sm font-medium">{getFeelingLabel(feeling.name)}</span>
+        {card!.stats.topFeelings.length > 0 && (
+          <div className="mb-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="font-medium text-surface-900 dark:text-white">주요 평가</h4>
+              {card!.stats.topFeelings.length > 6 && (
+                <button
+                  onClick={() => setShowAllFeelings(!showAllFeelings)}
+                  className="flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400"
+                >
+                  <span>{showAllFeelings ? '접기' : `+${card!.stats.topFeelings.length - 6}개 더보기`}</span>
+                  <ChevronDown className={cn("h-3 w-3", showAllFeelings && "rotate-180")} />
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {displayedFeelings?.map((feeling) => (
+                <div key={feeling.id} className="flex items-center justify-between rounded-xl bg-surface-50 dark:bg-surface-800 p-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{getFeelingEmoji(feeling.name)}</span>
+                    <span className="text-sm font-medium text-surface-700 dark:text-surface-300">{getFeelingLabel(feeling.name)}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-bold text-surface-900 dark:text-white">{feeling.count}</span>
+                    <span className="text-xs text-surface-500 dark:text-surface-400">({feeling.percentage}%)</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-bold text-gray-900">{feeling.count}</span>
-                  <span className="text-xs text-gray-500">({feeling.percentage}%)</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 카테고리별 리뷰 */}
-        <div className="mb-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">카테고리별 리뷰</h4>
-            {card!.stats.categoryBreakdown.length > 5 && (
-              <button
-                onClick={() => setShowAllCategories(!showAllCategories)}
-                className="flex items-center gap-1 text-xs text-gray-600 transition-colors hover:text-gray-800"
-              >
-                <span>
-                  {showAllCategories ? '접기' : `+${card!.stats.categoryBreakdown.length - 5}개 더보기`}
-                </span>
-                <ChevronDown
-                  className={cn("h-3 w-3 transform transition-transform", showAllCategories && "rotate-180")}
-                />
-              </button>
-            )}
-          </div>
-          <div className="space-y-2">
-            {displayedCategories?.map((category) => (
-              <div key={category.category} className="flex items-center justify-between rounded bg-gray-100 p-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900">{category.category}</span>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 text-gray-600" />
-                    <span className="text-xs text-gray-600">{category.averageRating.toFixed(1)}</span>
+        {card!.stats.categoryBreakdown.length > 0 && (
+          <div className="mb-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="font-medium text-surface-900 dark:text-white">카테고리별 리뷰</h4>
+              {card!.stats.categoryBreakdown.length > 5 && (
+                <button
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400"
+                >
+                  <span>{showAllCategories ? '접기' : `+${card!.stats.categoryBreakdown.length - 5}개 더보기`}</span>
+                  <ChevronDown className={cn("h-3 w-3", showAllCategories && "rotate-180")} />
+                </button>
+              )}
+            </div>
+            <div className="space-y-2">
+              {displayedCategories?.map((category) => (
+                <div key={category.category} className="flex items-center justify-between rounded-xl bg-surface-50 dark:bg-surface-800 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-surface-900 dark:text-white">{category.category}</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                      <span className="text-xs text-surface-500 dark:text-surface-400">{category.averageRating.toFixed(1)}</span>
+                    </div>
                   </div>
+                  <span className="text-sm text-surface-600 dark:text-surface-400">{category.count}개</span>
                 </div>
-                <span className="text-sm text-gray-600">{category.count}개</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 최근 리뷰 */}
-        <div className="mb-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h4 className="font-semibold text-gray-900">최근 리뷰 Top 10</h4>
+        {card!.recentReviews.length > 0 && (
+          <div className="mb-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h4 className="font-semibold text-surface-900 dark:text-white">최근 리뷰 Top 10</h4>
+              {card!.recentReviews.length > 3 && (
+                <button
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  className="flex items-center gap-1 text-xs text-surface-500 dark:text-surface-400"
+                >
+                  <span>{showAllReviews ? '접기' : `+${card!.recentReviews.length - 3}개 더보기`}</span>
+                  <ChevronDown className={cn("h-3 w-3", showAllReviews && "rotate-180")} />
+                </button>
+              )}
             </div>
-            {card!.recentReviews.length > 3 && (
-              <button
-                onClick={() => setShowAllReviews(!showAllReviews)}
-                className="flex items-center gap-1 text-xs text-gray-600 transition-colors hover:text-gray-800"
-              >
-                <span>{showAllReviews ? '접기' : `+${card!.recentReviews.length - 3}개 더보기`}</span>
-                <ChevronDown
-                  className={cn("h-3 w-3 transform transition-transform", showAllReviews && "rotate-180")}
-                />
-              </button>
-            )}
-          </div>
-          <div className="space-y-4">
-            {displayedReviews?.map((review) => (
-              <div
-                key={review.created_date + review.place_id}
-                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow-md cursor-pointer"
-                onClick={() => onPlaceClick(review.place_id)}
-              >
-                {/* 상단 정보 영역 */}
-                <div className="mb-3 flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      {review.is_private ? (
-                        <Lock className="h-3 w-3 stroke-gray-400" />
-                      ) : (
-                        <Unlock className="h-3 w-3 stroke-gray-400 text-gray-400" />
-                      )}
-                      <h5 className="text-base font-semibold text-gray-900">
-                        {review.place_name}
-                      </h5>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 text-gray-300 fill-current" />
-                        <span className="ml-1 text-xs font-medium text-gray-700">{review.score}</span>
+            <div className="space-y-3">
+              {displayedReviews?.map((review) => (
+                <div
+                  key={review.created_date + review.place_id}
+                  className="relative overflow-hidden rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-4 active:bg-surface-50 dark:active:bg-surface-700"
+                  onClick={() => onPlaceClick(review.place_id)}
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        {review.is_private ? (
+                          <Lock className="h-3 w-3 text-surface-400" />
+                        ) : (
+                          <Unlock className="h-3 w-3 text-surface-400" />
+                        )}
+                        <h5 className="text-base font-semibold text-surface-900 dark:text-white">
+                          {review.place_name}
+                        </h5>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                          <span className="text-xs font-medium text-surface-700 dark:text-surface-300">{review.score}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1 text-xs text-surface-500 dark:text-surface-400">
+                        <span>{review.category}</span>
+                        <span>•</span>
+                        <span>{review.group1} {review.group2} {review.group3}</span>
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-1 text-xs text-gray-500">
-                      <span>{review.category}</span>
-                      <span>•</span>
-                      <span>{review.group1} {review.group2} {review.group3}</span>
+                    <span className="text-xs text-surface-400 dark:text-surface-500">{review.created_date}</span>
+                  </div>
+
+                  {review.tags && review.tags.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-1">
+                      {review.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 rounded-lg bg-surface-100 dark:bg-surface-700 px-2 py-1 text-xs text-surface-600 dark:text-surface-300"
+                        >
+                          <span className="text-xs">{getFeelingEmoji(tag)}</span>
+                          <span>{getFeelingLabel(tag)}</span>
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-400">
-                      {review.created_date}
-                    </span>
-                  </div>
+                  )}
+
+                  {review.review_content && (
+                    <div className="relative">
+                      <div className="absolute top-0 left-0 h-full w-1 rounded-full bg-primary-300 dark:bg-primary-600"></div>
+                      <div className="pl-4">
+                        <p className="text-sm leading-relaxed text-surface-600 dark:text-surface-400 line-clamp-2">
+                          "{review.review_content}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* 느낌 태그 */}
-                {review.tags && review.tags.length > 0 && (
-                  <div className="mb-3 flex flex-wrap gap-1">
-                    {review.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs text-gray-600"
-                      >
-                        <span className="text-xs">{getFeelingEmoji(tag)}</span>
-                        <span>{getFeelingLabel(tag)}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* 리뷰 내용 */}
-                {review.review_content && (
-                  <div className="relative">
-                    <div className="absolute top-0 left-0 h-full w-1 rounded-full bg-gray-300"></div>
-                    <div className="pl-4">
-                      <p className="text-sm leading-relaxed text-gray-600 line-clamp-2">
-                        "{review.review_content}"
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 인사이트 */}
-        <div className="rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-sm font-medium text-gray-700">리뷰 인사이트</h4>
+        <div className="rounded-xl bg-surface-50 dark:bg-surface-800 p-4">
+          <h4 className="mb-3 text-sm font-medium text-surface-600 dark:text-surface-400">리뷰 인사이트</h4>
           <div className="space-y-2">
             {dynamicInsights.map((insight) => (
               <div key={insight} className="flex items-center gap-2 text-xs">
-                <div className="h-2 w-2 rounded-full bg-gray-600"></div>
-                <span className="text-gray-600">{insight}</span>
+                <div className="h-2 w-2 rounded-full bg-primary-500"></div>
+                <span className="text-surface-600 dark:text-surface-300">{insight}</span>
               </div>
             ))}
           </div>
@@ -435,7 +394,6 @@ export function MyReviewsAnalysisCard({
   );
 }
 
-// 헬퍼 함수들
 function getFeelingEmoji(feeling: string): string {
   const emojiMap: Record<string, string> = {
     local: '🏠',
