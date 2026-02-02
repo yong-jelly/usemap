@@ -9,12 +9,14 @@ import {
   DrawerClose
 } from "@/shared/ui/Drawer";
 import { Button } from "@/shared/ui";
-import { Navigation, Trash2, MapPin, Loader2, Info } from "lucide-react";
+import { Navigation, Trash2, MapPin, Loader2 } from "lucide-react";
 import { useUserLocations, useSaveLocation, useDeleteLocation } from "@/entities/location";
 import { useUserStore } from "@/entities/user";
 import { getCurrentLocation } from "@/shared/lib/location";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { toast } from "sonner";
+
+import { LocationGuideBox } from "./LocationGuideBox";
 
 interface LocationSettingSheetProps {
   isOpen: boolean;
@@ -80,14 +82,12 @@ export function LocationSettingSheet({
 
         <div className="px-4 py-2 space-y-6">
           {/* 가이드 메시지 영역 */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex gap-3">
-            <Info className="size-5 text-blue-500 shrink-0 mt-0.5" />
-            <div className="text-[13px] text-blue-700 dark:text-blue-300 leading-relaxed">
-              <p className="mb-1">위치 정보 수집 안내</p>
-              <p>• 브라우저의 위치 권한 요청이 뜨면 <span className="underline text-blue-600 dark:text-blue-400">'허용'</span>을 눌러주세요.</p>
-              <p>• 거리순 정렬은 저장된 위치 정보를 기반으로 계산됩니다.</p>
-            </div>
-          </div>
+          <LocationGuideBox 
+            description={[
+              "• 브라우저의 위치 권한 요청이 뜨면 '허용'을 눌러주세요.",
+              "• 거리순 정렬은 저장된 위치 정보를 기반으로 계산됩니다."
+            ]}
+          />
 
           {/* 현재 위치 저장 버튼 */}
           <Button 

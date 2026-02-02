@@ -23,6 +23,10 @@ import { usePlacePopup } from "@/shared/lib/place-popup";
 import { ExploreFilterSheet } from "@/widgets/ExploreFilterSheet";
 import { usePlacesByFilters } from "@/entities/place/queries";
 import { getPriceLabel, getThemeNameByCode } from "@/shared/config/filter-constants";
+import { useUserLocations } from "@/entities/location";
+import { LocationGuideBox } from "@/features/location/ui/LocationGuideBox";
+import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
+import { useUserStore } from "@/entities/user";
 
 // 필터 상태 인터페이스
 interface ExplorerFilterState {
@@ -193,8 +197,13 @@ export function SearchPage() {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
   
+  const { isAuthenticated } = useUserStore();
+  const { data: userLocations } = useUserLocations({}, { enabled: isAuthenticated });
+  const hasUserLocation = userLocations && userLocations.length > 0;
+
   const { history, saveToHistory, clearHistory, removeFromHistory } = useSearchHistory();
   const { setBottomNavVisible } = useUIStore();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -270,6 +279,7 @@ export function SearchPage() {
     setSearchQuery("");
     setSearchQueryDisplay("");
     setSearchResults([]);
+    setFilters(DEFAULT_FILTERS); // 필터도 초기화
   };
 
   const folders = data?.pages.flat() || [];
@@ -497,6 +507,17 @@ export function SearchPage() {
 
       {/* 메인 콘텐츠 영역 */}
       <main className="px-5 max-w-lg mx-auto mt-8">
+        {!isSearching && !isFilterActive && !hasUserLocation && (
+          <LocationGuideBox 
+            className="mb-6"
+            title="내 주변 맛집을 찾아보세요"
+            description="위치를 설정하면 가까운 거리순으로 맛집을 추천해드려요."
+            buttonText="위치 설정하기"
+            showButton={true}
+            onButtonClick={() => setIsLocationSheetOpen(true)}
+          />
+        )}
+
         {isSearching ? (
           /* 검색 결과 모드 */
           isSearchLoading ? (
@@ -620,6 +641,13 @@ export function SearchPage() {
         onApply={handleFilterApply}
         onReset={handleFilterReset}
         totalCount={isSearching ? searchResults.length : (isFilterActive ? filterResults.length : 0)}
+      />
+
+      {/* 위치 설정 바텀 시트 */}
+      <LocationSettingSheet
+        isOpen={isLocationSheetOpen}
+        onClose={() => setIsLocationSheetOpen(false)}
+        onSelect={() => setIsLocationSheetOpen(false)}
       />
     </div>
   );
