@@ -127,7 +127,7 @@ export function HomePage() {
             {/* Stories: 맛탐정(유저) 및 소스 브리핑 */}
             <div className="px-4 mb-2 flex items-center justify-between">
               <h2 className="text-xs text-surface-500 font-medium uppercase tracking-wider">
-                Active Detectives
+                활동 중인 맛탐정
               </h2>
             </div>
             <StoriesSection isLoading={isDiscoverLoading}>
@@ -136,6 +136,7 @@ export function HomePage() {
                   key={`user-${user.id || i}`}
                   image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
                   label={user.nickname || '사용자'}
+                  badge={user.unread_count}
                   onClick={() => navigate(`/profile/${user.id}`)}
                 />
               ))}
