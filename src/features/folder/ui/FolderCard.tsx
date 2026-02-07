@@ -81,7 +81,7 @@ export function FolderCard({
   }, [folder.updated_at, folder.created_at]);
 
   return (
-    <section className="flex flex-col gap-3 px-4 py-2">
+    <section className="flex flex-col gap-3 px-4 pt-4 pb-0">
       {/* 제목 영역: 프로필 + 타이틀 + 개수 */}
       <div className="flex items-center gap-2.5 overflow-hidden">
         {showOwner && (
@@ -181,6 +181,7 @@ export function FolderCard({
           showMoreThreshold={5}
           showRating={false}
           snap={false}
+          className="mb-4"
         />
       </div>
     </section>

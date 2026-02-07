@@ -84,7 +84,7 @@ export function UserSharedFolderPage() {
         {folders.length > 0 ? (
           <div className="flex flex-col divide-y divide-surface-100 dark:divide-surface-800">
             {folders.map((folder) => (
-              <div key={folder.id} className="py-4">
+              <div key={folder.id}>
                 <FolderCard folder={folder} showOwner={false} />
               </div>
             ))}

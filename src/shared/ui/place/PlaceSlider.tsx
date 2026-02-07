@@ -26,9 +26,10 @@ export function PlaceSlider({
   showMoreThreshold = 10,
   showRating = false,
   snap = false,
-}: PlaceSliderProps) {
+  className,
+}: PlaceSliderProps & { className?: string }) {
   return (
-    <div className="flex flex-col gap-3.5 mb-6">
+    <div className={cn("flex flex-col gap-3.5 mb-6", className)}>
       {(title || countLabel) && (
         <div className="flex items-end justify-between gap-2 px-4">
           <h3 
