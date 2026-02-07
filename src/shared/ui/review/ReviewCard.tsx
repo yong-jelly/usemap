@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Star, Lock, Pencil, Trash2, MapPin } from "lucide-react";
 import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { safeFormatDate } from "@/shared/lib/date";
@@ -43,12 +44,13 @@ export function ReviewCard({
 }: ReviewCardProps) {
   const { user_id, user_profile, created_at, score, review_content, tags, images, is_private } = review;
   const place_data = 'place_data' in review ? review.place_data : undefined;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (variant === "compact") {
     return (
       <article 
         className={cn(
-          "flex-shrink-0 w-72 p-4 rounded-xl border shadow-sm transition-colors",
+          "flex-shrink-0 w-72 h-[210px] p-4 rounded-xl border shadow-sm transition-colors flex flex-col",
           is_private 
             ? "bg-surface-50/50 dark:bg-surface-900/50 border-surface-100 dark:border-surface-800" 
             : "bg-white dark:bg-surface-900 border-surface-50 dark:border-surface-900",
@@ -174,8 +176,8 @@ export function ReviewCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex flex-wrap gap-1 mt-2 min-w-0 flex-1">
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex flex-wrap gap-1 min-w-0 flex-1">
             {tags && tags.length > 0 && tags.slice(0, 2).map((tag) => (
               <span
                 key={tag.code}
@@ -276,9 +278,23 @@ export function ReviewCard({
           </div>
         )}
 
-        <p className="text-[14px] text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-line font-medium">
+        <p className={cn(
+          "text-[14px] text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-line font-medium",
+          !isExpanded && "line-clamp-3"
+        )}>
           {review_content}
         </p>
+        {review_content.length > 100 && (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            className="text-[13px] text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 font-medium w-fit"
+          >
+            {isExpanded ? "접기" : "더보기"}
+          </button>
+        )}
 
         {images && images.length > 0 && (
           <div 

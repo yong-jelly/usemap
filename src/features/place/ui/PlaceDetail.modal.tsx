@@ -913,7 +913,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     ) : (
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium">방문 리뷰</h3>
+                          <h3 className="text-lg font-medium">리뷰</h3>
                           <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg">
                             <button 
                               onClick={removeTestReview}

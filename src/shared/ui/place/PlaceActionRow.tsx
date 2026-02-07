@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle, MapPinCheck, ClipboardCheck, BadgeCheck, Share2 } from "lucide-react";
+import { MapPin, MessageCircle, MapPinCheck, ClipboardCheck, BadgeCheck, Share2, Award } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface PlaceActionRowProps {
@@ -70,13 +70,13 @@ export function PlaceActionRow({
           onClick={onVisitClick}
           className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
         >
-          <BadgeCheck className="size-4" /> 방문 {visitCount}
+          <BadgeCheck className="size-4" /> 다녀왔어요 {visitCount}
         </button>
         <button 
           onClick={onFeaturesClick}
           className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
         >
-          <Share2 className="size-4" /> 출처 {featuresCount}
+          <Award className="size-4" /> 출처 {featuresCount}
         </button>
       </div>
 
