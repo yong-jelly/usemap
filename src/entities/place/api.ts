@@ -33,7 +33,7 @@ export const placeApi = {
    * ID 기반 장소 상세 데이터 조회 및 최근 본 장소 기록
    */
   getPlaceByIdWithRecentView: async (placeId: string) => {
-    const response = await apiClient.rpc<Place>("v1_get_place_by_id_with_set_recent_view", {
+    const response = await apiClient.rpc<Place>("v2_get_place_detail", {
       p_business_id: placeId,
     });
     return response.data[0];

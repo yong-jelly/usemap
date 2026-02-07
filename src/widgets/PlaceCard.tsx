@@ -14,7 +14,14 @@ import {
   Sparkles,
   CookingPot,
   Users,
-  Navigation
+  Navigation,
+  ThumbsUp,
+  Utensils,
+  Smile,
+  Clock,
+  Car,
+  Map,
+  Sparkle
 } from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
@@ -341,6 +348,41 @@ export function PlaceCard({
             )}
           </div>
         </div>
+
+        {/* 테마(Themes) 정보 - 음식점 특징 강조 */}
+        {/* {place.themes && place.themes.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {place.themes
+              .filter((t: any) => t.count > 0)
+              .sort((a: any, b: any) => b.count - a.count)
+              .slice(0, 4)
+              .map((theme: any) => {
+                const getThemeIcon = (code: string) => {
+                  switch (code) {
+                    case 'taste': return <Utensils className="size-3" />;
+                    case 'service': return <Smile className="size-3" />;
+                    case 'mood': return <Sparkle className="size-3" />;
+                    case 'waitingtime': return <Clock className="size-3" />;
+                    case 'parking': return <Car className="size-3" />;
+                    case 'total': return <ThumbsUp className="size-3" />;
+                    case 'location': return <Map className="size-3" />;
+                    default: return <Sparkles className="size-3" />;
+                  }
+                };
+
+                return (
+                  <div 
+                    key={theme.code}
+                    className="flex items-center gap-1 px-2 py-1 bg-surface-100 dark:bg-surface-900 rounded-md text-[12px] font-medium text-surface-700 dark:text-surface-300 border border-surface-200/50 dark:border-surface-800"
+                  >
+                    {getThemeIcon(theme.code)}
+                    <span>{theme.label}</span>
+                    <span className="text-[10px] text-surface-400 font-normal">{theme.count}</span>
+                  </div>
+                );
+              })}
+          </div>
+        )} */}
 
         {/* 코멘트 표시 - SNS 스타일 */}
         {comment && (

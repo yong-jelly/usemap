@@ -21,7 +21,14 @@ import {
   ChevronUp,
   Folder,
   MessageCircle,
-  Users
+  Users,
+  Utensils,
+  Smile,
+  Sparkle,
+  Clock,
+  Car,
+  ThumbsUp,
+  Map
 } from "lucide-react";
 import { 
   usePlaceByIdWithRecentView, 
@@ -68,6 +75,7 @@ import {
 } from "@/shared/api/edge-function";
 import { uploadReviewImage } from "@/shared/lib/storage";
 import type { PlaceUserReview, Feature, ReviewTag, ReviewImage } from "@/entities/place/types";
+import { VOTED_KEYWORD_MAP, KEYWORD_CATEGORY_COLORS } from "@/entities/place/constants";
 
 /**
  * 장소 상세 모달 컴포넌트
@@ -517,14 +525,23 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-surface-100" />
           </button>
           
-          {isAdmin(currentUser) && (
+          <div className="flex items-center gap-1">
             <button 
-              onClick={() => setShowDeletePlaceConfirm(true)}
-              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg text-rose-500 transition-colors"
+              onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
+              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
             >
-              <Trash2 className="size-5" />
+              <Share2 className="size-5 text-surface-700 dark:text-surface-300" />
             </button>
-          )}
+
+            {isAdmin(currentUser) && (
+              <button 
+                onClick={() => setShowDeletePlaceConfirm(true)}
+                className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg text-rose-500 transition-colors"
+              >
+                <Trash2 className="size-5" />
+              </button>
+            )}
+          </div>
         </header>
 
         <div 
@@ -632,12 +649,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                         ? "fill-emerald-500 text-emerald-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
-                  </button>
-                  <button 
-                    onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
-                    className="p-2 active:opacity-60 transition-opacity"
-                  >
-                    <Share2 className="size-6 text-surface-700 dark:text-surface-300" />
                   </button>
                 </div>
               </div>
@@ -1020,6 +1031,41 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           </>
           )}
         </div>
+
+        {/* 하단 스티키 - 방문자 리뷰 키워드 */}
+        {details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
+          const sortedKeywords = [...details.voted_keyword.details]
+            .filter((t: any) => t.count > 0)
+            .sort((a: any, b: any) => b.count - a.count)
+            .slice(0, 5);
+          
+          const totalCount = details.voted_keyword.details.reduce((sum: number, t: any) => sum + t.count, 0);
+
+          if (sortedKeywords.length === 0) return null;
+
+          return (
+            <footer className="relative z-20 bg-white/80 dark:bg-surface-950/80 backdrop-blur-md border-t border-surface-100 dark:border-surface-800 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+              <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide no-wrap">
+                {sortedKeywords.map((keyword: any) => {
+                  const mappedInfo = VOTED_KEYWORD_MAP[keyword.code];
+                  const displayLabel = mappedInfo?.label || keyword.displayName || keyword.label;
+                  const percentage = Math.round((keyword.count / totalCount) * 100);
+
+                  return (
+                    <div key={keyword.code} className="flex items-center gap-1 shrink-0">
+                      {keyword.iconUrl && (
+                        <img src={keyword.iconUrl} alt="" className="size-3 object-contain flex-shrink-0" />
+                      )}
+                      <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 whitespace-nowrap">
+                        {displayLabel} {percentage}%
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </footer>
+          );
+        })()}
       </div>
 
       <Dialog open={!!showDeleteReviewConfirm} onOpenChange={(open) => !open && setShowDeleteReviewConfirm(null)}>

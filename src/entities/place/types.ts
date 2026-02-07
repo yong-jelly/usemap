@@ -24,6 +24,19 @@ export interface Place {
   image_urls?: string[];
   static_map_url?: string;
   themes?: string[];
+  voted_keyword?: { 
+    details: {
+      code: string; 
+      label: string; 
+      count: number;
+      displayName?: string;
+      iconUrl?: string;
+      iconCode?: string;
+    }[];
+    userCount: number;
+    totalCount: number;
+    reviewCount: number;
+  };
   visitor_review_medias_total?: number;
   visitor_review_stats?: any;
   menus?: any[];
