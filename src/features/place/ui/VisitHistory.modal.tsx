@@ -150,13 +150,14 @@ export function VisitHistoryModal({ placeId, placeName, onClose }: VisitHistoryM
               onClick={handleBackClick} 
               className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800"
             >
-              <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
+              {/* <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" /> */}
+              <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-surface-100" />
             </button>
             <div className="ml-3 flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-surface-900 dark:text-surface-50 truncate">
+              {/* <h1 className="text-lg font-bold text-surface-900 dark:text-surface-50 truncate">
                 {getHeaderTitle()}
-              </h1>
-              <p className="text-[11px] text-surface-400 truncate">{placeName}</p>
+              </h1> */}
+              {/* <p className="text-[11px] text-surface-400 truncate">{placeName}</p> */}
             </div>
             
             {/* 우측 상단 버튼 */}

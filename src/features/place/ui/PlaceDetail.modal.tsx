@@ -1175,10 +1175,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             setShowDeleteReviewConfirm(reviewId);
             // Modal stays open, dialog appears on top (hopefully)
           }}
-          onWrite={() => {
-            setShowReviewForm(true);
-            setShowAllReviews(false);
-          }}
+          // onWrite={() => {
+          //   setShowReviewForm(true);
+          //   setShowAllReviews(false);
+          // }}
         />
       )}
 

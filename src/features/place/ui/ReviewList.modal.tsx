@@ -14,7 +14,7 @@ interface ReviewListModalProps {
   onClose: () => void;
   onEdit: (reviewId: string) => void;
   onDelete: (reviewId: string) => void;
-  onWrite: () => void;
+  // onWrite: () => void;
 }
 
 export function ReviewListModal({
@@ -67,21 +67,22 @@ export function ReviewListModal({
               onClick={onClose} 
               className="p-1.5 -ml-1.5 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800"
             >
-              <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
+              {/* <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" /> */}
+              <ChevronLeft className="h-6 w-6 text-surface-900 dark:text-surface-100" />
             </button>
             <div className="ml-3 flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-surface-900 dark:text-surface-50 truncate">
+              {/* <h1 className="text-lg font-bold text-surface-900 dark:text-surface-50 truncate">
                 리뷰 <span className="text-primary-500">{reviews.length}</span>
-              </h1>
-              <p className="text-[11px] text-surface-400 truncate">{placeName}</p>
+              </h1> */}
+              {/* <p className="text-[11px] text-surface-400 truncate">{placeName}</p> */}
             </div>
             
-            <button 
+            {/* <button 
               onClick={onWrite}
               className="px-3 py-1.5 text-sm font-bold text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950/30 rounded-lg"
             >
               작성
-            </button>
+            </button> */}
           </header>
 
           {/* 메인 영역 */}
