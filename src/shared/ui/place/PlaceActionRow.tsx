@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle, MapPinCheck } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface PlaceActionRowProps {
@@ -6,6 +6,8 @@ interface PlaceActionRowProps {
   placeId: string;
   /** 리뷰 개수 */
   reviewsCount?: number;
+  /** 방문 횟수 */
+  visitCount?: number;
   /** 유튜브 콘텐츠 개수 (선택) */
   youtubeCount?: number;
   /** 플레이스(네이버폴더) 콘텐츠 개수 (선택) */
@@ -18,6 +20,8 @@ interface PlaceActionRowProps {
   showStats?: boolean;
   /** 리뷰 클릭 핸들러 */
   onReviewClick?: () => void;
+  /** 방문 클릭 핸들러 */
+  onVisitClick?: () => void;
   /** 추가 클래스 */
   className?: string;
 }
@@ -29,12 +33,14 @@ interface PlaceActionRowProps {
 export function PlaceActionRow({
   placeId,
   reviewsCount = 0,
+  visitCount = 0,
   youtubeCount = 0,
   placeCount = 0,
   detectiveCount = 0,
   communityCount = 0,
   showStats = false,
   onReviewClick,
+  onVisitClick,
   className
 }: PlaceActionRowProps) {
   return (
@@ -53,6 +59,12 @@ export function PlaceActionRow({
           className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
         >
           <MessageCircle className="size-4" /> 리뷰 {reviewsCount}
+        </button>
+        <button 
+          onClick={onVisitClick}
+          className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
+        >
+          <MapPinCheck className="size-4" /> 방문 {visitCount}
         </button>
       </div>
 

@@ -47,6 +47,7 @@ import {
 import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
 import { VisitHistoryModal } from "./VisitHistory.modal";
+import { ReviewListModal } from "./ReviewList.modal";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { 
   Button, 
@@ -94,8 +95,90 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const placeId = placeIdFromStore || placeIdFromUrl;
 
   const { data: details, isLoading: isDetailsLoading } = usePlaceByIdWithRecentView(placeId!);
-  const { data: reviews = [] } = usePlaceUserReviews(placeId!);
+  const { data: serverReviews = [] } = usePlaceUserReviews(placeId!);
+  const [testReviews, setTestReviews] = useState<PlaceUserReview[]>([]);
+  
+  const reviews = useMemo(() => [...testReviews, ...serverReviews], [testReviews, serverReviews]);
+
   const { data: placeFeaturesData = [], refetch: refetchFeatures } = usePlaceFeatures(placeId!);
+  
+  // 테스트용 랜덤 리뷰 생성 함수
+  const addRandomReviews = (count: number) => {
+    const contents = [
+      "최근 먹은 돈가스중에 최고.. 진짜 맛있당",
+      "분위기가 너무 좋아요! 데이트 코스로 강추",
+      "사장님이 친절하시고 양도 많아요",
+      "웨이팅이 좀 있지만 기다릴만한 가치가 있음",
+      "커피 향이 너무 좋네요. 조용히 작업하기 좋습니다",
+      "가성비 대박... 이 가격에 이 퀄리티라니",
+      "인테리어가 예뻐서 사진 찍기 좋아요",
+      "음식이 깔끔하고 정갈하게 나옵니다",
+      "재방문 의사 200%!!",
+      "주차가 좀 불편하지만 맛은 보장합니다",
+      "여기 정말 대단해요. 처음 방문했을 때부터 분위기에 압도당했는데, 음식 맛을 보고 나니 왜 사람들이 줄을 서서 기다리는지 단번에 이해가 가더라고요. 특히 시그니처 메뉴인 돈가스는 겉바속촉의 정석이었고, 함께 나오는 소스와의 조화가 일품이었습니다. 직원분들도 너무 친절하셔서 식사 내내 기분이 좋았네요. 다음에는 부모님 모시고 꼭 다시 오고 싶습니다. 공간이 조금 협소하긴 하지만 그게 오히려 아늑한 느낌을 줘서 좋았어요. 강력 추천합니다!",
+      "친구들과 함께 방문했는데 모두가 만족한 식사였습니다. 인테리어가 세련되어서 사진 찍기에도 너무 좋고, 조명 하나하나 신경 쓴 게 느껴지더라고요. 메뉴 구성도 다양해서 선택의 폭이 넓었고, 저희가 주문한 모든 음식이 기대 이상이었습니다. 특히 재료의 신선함이 입안 가득 느껴져서 건강한 한 끼를 먹은 기분이에요. 가격대가 조금 있는 편이지만 그만큼의 가치를 충분히 한다고 생각합니다. 주말에는 사람이 많으니 미리 예약하고 가시는 걸 추천드려요. 재방문 의사 100%입니다!",
+      "혼자서 조용히 시간을 보내고 싶어 찾은 곳인데 정말 탁월한 선택이었습니다. 잔잔하게 흐르는 음악과 은은한 커피 향이 마음을 편안하게 해주더라고요. 사장님께서 직접 로스팅하신다는 원두는 산미와 바디감이 적절히 조화되어 제가 딱 좋아하는 스타일이었습니다. 함께 주문한 디저트도 너무 달지 않고 담백해서 커피와 찰떡궁합이었네요. 노트북 작업을 하기에도 콘센트 위치가 적절하고 의자도 편안해서 시간 가는 줄 모르고 머물렀습니다. 앞으로 저만의 아지트가 될 것 같은 느낌이에요. 조용한 분위기를 선호하시는 분들께 강추합니다."
+    ];
+    const nicknames = ["우왕굳", "맛잘알", "프로혼밥러", "데이트장인", "카페투어", "맛집탐방", "동네주민"];
+    const ageGroups = ["10s", "20s", "30s", "40s", "50s+"];
+    const genders = ["M", "F"];
+    
+    const newReviews: PlaceUserReview[] = Array.from({ length: count }).map(() => {
+      const baseContent = contents[Math.floor(Math.random() * contents.length)];
+      // 100~500자 사이로 만들기 위해 내용 반복 및 조합
+      let finalContent = baseContent;
+      while (finalContent.length < 150) {
+        finalContent += " " + contents[Math.floor(Math.random() * contents.length)];
+      }
+      if (finalContent.length > 500) {
+        finalContent = finalContent.substring(0, 497) + "...";
+      }
+
+      return {
+        id: Math.random().toString(36).substring(2, 11),
+        user_id: "test-user-id",
+        place_id: placeId!,
+        review_content: finalContent,
+        score: Math.floor(Math.random() * 5) + 1,
+        media_urls: null,
+        gender_code: genders[Math.floor(Math.random() * genders.length)] as "M" | "F",
+        age_group_code: ageGroups[Math.floor(Math.random() * ageGroups.length)] as any,
+        is_private: false,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_my_review: false,
+        tags: [
+          { code: "again", group: "추천", label: "또 오고싶음", is_positive: true },
+          { code: "good_atmosphere", group: "분위기", label: "분위기 최고", is_positive: true },
+          { code: "good_taste", group: "맛", label: "맛 최고", is_positive: true }
+        ].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 3) + 1),
+        user_profile: {
+          nickname: nicknames[Math.floor(Math.random() * nicknames.length)],
+          gender_code: genders[Math.floor(Math.random() * genders.length)] as "M" | "F",
+          age_group_code: ageGroups[Math.floor(Math.random() * ageGroups.length)],
+          profile_image_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random().toString(36).substring(7)}`
+        },
+        images: Math.random() > 0.5 ? [
+          {
+            id: Math.random().toString(36).substring(2, 11),
+            image_path: "b75408a1-c1cf-43b6-b6f1-3b7288745b62/new/1770269036226.jpeg"
+          }
+        ] : [],
+        is_drinking: Math.random() > 0.8,
+        drinking_bottles: Math.floor(Math.random() * 3) + 1
+      };
+    });
+
+    setTestReviews(prev => {
+      const combined = [...newReviews, ...prev];
+      return combined.slice(0, 100);
+    });
+  };
+
+  const removeTestReview = () => {
+    setTestReviews(prev => prev.slice(1));
+  };
   
   // 관련 콘텐츠는 v1_get_place_features (placeFeaturesData)만 사용
   const allFeatures = placeFeaturesData;
@@ -656,56 +739,15 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <PlaceActionRow 
                 placeId={placeId!}
                 reviewsCount={details?.interaction?.place_reviews_count || 0}
+                visitCount={visitStats?.visit_count || 0}
                 onReviewClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onVisitClick={() => setShowVisitHistoryModal(true)}
                 youtubeCount={youtubeFeatures.length}
                 placeCount={folderFeatures.length}
                 detectiveCount={publicUserFeatures.length}
                 communityCount={communityFeatures.length + socialFeatures.length}
                 showStats={false}
               />
-
-              {/* 방문 기록 영역 */}
-              <div className="mb-4">
-                {visitStats && visitStats.visit_count > 0 ? (
-                  <button
-                    onClick={() => setShowVisitHistoryModal(true)}
-                    className="w-full flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 transition-all active:scale-[0.98]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-full bg-primary-500 flex items-center justify-center shadow-sm shadow-primary-200">
-                        <MapPinCheck className="size-5 text-white" />
-                      </div>
-                      <div className="flex flex-col items-start text-left">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-[16px] font-medium text-primary-900 dark:text-primary-100">
-                            {visitStats.visit_count}회 방문
-                          </span>
-                        </div>
-                        <span className="text-[12px] text-primary-600/70 dark:text-primary-400">
-                          마지막 방문 {safeFormatDate(visitStats.last_visited_at)}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="size-5 text-primary-400" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => isAuthenticated ? setShowVisitHistoryModal(true) : alert('로그인이 필요합니다.')}
-                    className="w-full flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 transition-all active:scale-[0.98]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-full bg-white dark:bg-surface-800 flex items-center justify-center border-2 border-dashed border-surface-200 dark:border-surface-700">
-                        <MapPin className="size-5 text-surface-400" />
-                      </div>
-                      <div className="flex flex-col items-start text-left">
-                        <span className="text-[15px] font-medium text-surface-900 dark:text-surface-100">여기 다녀오셨나요?</span>
-                        <span className="text-[12px] text-surface-500">나만의 방문 기록을 남겨보세요</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="size-5 text-surface-300" />
-                  </button>
-                )}
-              </div>
 
               <PlaceFeatureTags 
                 place={{ ...details, features: allFeatures }}
@@ -765,12 +807,37 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                           방문 리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
                         </h3>
                         <div className="flex items-center gap-3">
+                          {/* UI/UX 테스트용 버튼 */}
+                          <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg mr-2">
+                            <button 
+                              onClick={removeTestReview}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="리뷰 1개 제거"
+                            >
+                              -
+                            </button>
+                            <button 
+                              onClick={() => addRandomReviews(1)}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="랜덤 리뷰 1개 추가"
+                            >
+                              +
+                            </button>
+                            <button 
+                              onClick={() => addRandomReviews(5)}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="랜덤 리뷰 5개 추가"
+                            >
+                              *
+                            </button>
+                          </div>
+
                           {publicReviewsCount > 5 && (
                             <button 
-                              onClick={() => setShowAllReviews(!showAllReviews)} 
+                              onClick={() => setShowAllReviews(true)} 
                               className="text-[13px] font-medium text-primary-600"
                             >
-                              {showAllReviews ? "접기" : `전체보기 (${publicReviewsCount})`}
+                              전체보기 ({publicReviewsCount})
                             </button>
                           )}
                           {!showReviewForm && (
@@ -806,56 +873,24 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     </div>
                     
                     {filteredReviews.length > 0 ? (
-                      showAllReviews ? (
-                        <div className="space-y-3 px-4">
-                          {filteredReviews.map(review => (
-                            <div 
-                              key={review.id} 
-                              id={`review-${review.id}`}
-                              className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-4 shadow-sm"
-                            >
-                              <ReviewCard
-                                review={review}
-                                isMyReview={review.is_my_review}
-                                onEdit={() => setEditingReviewId(review.id)}
-                                onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                                onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                                onImageClick={(images, index) => setImageViewerState({
-                                  isOpen: true,
-                                  images,
-                                  initialIndex: index
-                                })}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                          {filteredReviews.map(review => (
-                            <div
-                              key={review.id}
-                              className="flex-shrink-0 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-3 shadow-sm"
-                            >
-                              <ReviewCard
-                                variant="compact"
-                                review={review}
-                                isMyReview={review.is_my_review}
-                                onEdit={() => {
-                                  setShowAllReviews(true);
-                                  setEditingReviewId(review.id);
-                                }}
-                                onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                                onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                                onImageClick={(images, index) => setImageViewerState({
-                                  isOpen: true,
-                                  images,
-                                  initialIndex: index
-                                })}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )
+                      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+                        {filteredReviews.map(review => (
+                          <ReviewCard
+                            key={review.id}
+                            variant="compact"
+                            review={review}
+                            isMyReview={review.is_my_review}
+                            onEdit={() => setEditingReviewId(review.id)}
+                            onDelete={() => setShowDeleteReviewConfirm(review.id)}
+                            onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
+                            onImageClick={(images, index) => setImageViewerState({
+                              isOpen: true,
+                              images,
+                              initialIndex: index
+                            })}
+                          />
+                        ))}
+                      </div>
                     ) : (
                       <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
                         <p className="text-sm text-surface-400">
@@ -877,16 +912,29 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-medium">방문 리뷰</h3>
-                          <button 
-                            onClick={() => {
-                              if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                              setShowReviewForm(true);
-                            }}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
-                          >
-                            <Plus className="size-3.5" />
-                            추가
-                          </button>
+                          <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg">
+                            <button 
+                              onClick={removeTestReview}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="리뷰 1개 제거"
+                            >
+                              -
+                            </button>
+                            <button 
+                              onClick={() => addRandomReviews(1)}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="랜덤 리뷰 1개 추가"
+                            >
+                              +
+                            </button>
+                            <button 
+                              onClick={() => addRandomReviews(5)}
+                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                              title="랜덤 리뷰 5개 추가"
+                            >
+                              *
+                            </button>
+                          </div>
                         </div>
                         <button 
                           onClick={() => {
@@ -1108,6 +1156,27 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           placeId={placeId!} 
           placeName={details?.name || ""} 
           onClose={() => setShowVisitHistoryModal(false)} 
+        />
+      )}
+
+      {showAllReviews && (
+        <ReviewListModal
+          placeId={placeId!}
+          placeName={details?.name || ""}
+          reviews={reviews}
+          onClose={() => setShowAllReviews(false)}
+          onEdit={(reviewId) => {
+            setEditingReviewId(reviewId);
+            setShowAllReviews(false);
+          }}
+          onDelete={(reviewId) => {
+            setShowDeleteReviewConfirm(reviewId);
+            // Modal stays open, dialog appears on top (hopefully)
+          }}
+          onWrite={() => {
+            setShowReviewForm(true);
+            setShowAllReviews(false);
+          }}
         />
       )}
 
