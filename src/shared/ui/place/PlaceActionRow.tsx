@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle, MapPinCheck } from "lucide-react";
+import { MapPin, MessageCircle, MapPinCheck, ClipboardCheck, BadgeCheck, Share2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface PlaceActionRowProps {
@@ -8,6 +8,8 @@ interface PlaceActionRowProps {
   reviewsCount?: number;
   /** 방문 횟수 */
   visitCount?: number;
+  /** 출처(콘텐츠) 개수 */
+  featuresCount?: number;
   /** 유튜브 콘텐츠 개수 (선택) */
   youtubeCount?: number;
   /** 플레이스(네이버폴더) 콘텐츠 개수 (선택) */
@@ -22,6 +24,8 @@ interface PlaceActionRowProps {
   onReviewClick?: () => void;
   /** 방문 클릭 핸들러 */
   onVisitClick?: () => void;
+  /** 출처 클릭 핸들러 */
+  onFeaturesClick?: () => void;
   /** 추가 클래스 */
   className?: string;
 }
@@ -34,6 +38,7 @@ export function PlaceActionRow({
   placeId,
   reviewsCount = 0,
   visitCount = 0,
+  featuresCount = 0,
   youtubeCount = 0,
   placeCount = 0,
   detectiveCount = 0,
@@ -41,6 +46,7 @@ export function PlaceActionRow({
   showStats = false,
   onReviewClick,
   onVisitClick,
+  onFeaturesClick,
   className
 }: PlaceActionRowProps) {
   return (
@@ -64,7 +70,13 @@ export function PlaceActionRow({
           onClick={onVisitClick}
           className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
         >
-          <MapPinCheck className="size-4" /> 방문 {visitCount}
+          <BadgeCheck className="size-4" /> 방문 {visitCount}
+        </button>
+        <button 
+          onClick={onFeaturesClick}
+          className="flex items-center gap-1.5 text-surface-600 dark:text-surface-400 text-[13px] font-bold"
+        >
+          <Share2 className="size-4" /> 출처 {featuresCount}
         </button>
       </div>
 

@@ -740,8 +740,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 placeId={placeId!}
                 reviewsCount={details?.interaction?.place_reviews_count || 0}
                 visitCount={visitStats?.visit_count || 0}
+                featuresCount={details?.features?.length || 0}
                 onReviewClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
                 onVisitClick={() => setShowVisitHistoryModal(true)}
+                onFeaturesClick={() => document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' })}
                 youtubeCount={youtubeFeatures.length}
                 placeCount={folderFeatures.length}
                 detectiveCount={publicUserFeatures.length}
@@ -804,7 +806,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <div className="flex flex-col gap-3 px-4 mb-4">
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium flex items-center gap-2">
-                          방문 리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
+                          리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
                         </h3>
                         <div className="flex items-center gap-3">
                           {/* UI/UX 테스트용 버튼 */}
@@ -981,7 +983,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </section>
               )}
 
-              <section className="px-4 py-6 relative border-t border-surface-50 dark:border-surface-900">
+              <section id="content-section" className="px-4 py-6 relative border-t border-surface-50 dark:border-surface-900">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium">관련 콘텐츠</h3>
                   
