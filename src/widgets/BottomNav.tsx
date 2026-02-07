@@ -81,11 +81,12 @@ export function BottomNav() {
         stiffness: 300,
         damping: 30
       }}
-      className="fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
     >
       <div 
         className={cn(
-          "relative flex w-full h-14 items-center justify-around px-4",
+          "relative flex w-full max-w-lg h-14 items-center justify-around px-4 pointer-events-auto",
+          "border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950",
           "transition-opacity duration-200"
         )}
       >

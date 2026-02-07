@@ -18,7 +18,7 @@ export function StoryBox({
   const renderBadge = () => {
     if (badge === 'youtube') {
       return (
-        <div className="absolute top-1 right-1 px-1 rounded-sm bg-red-500 flex items-center justify-center shadow-sm">
+        <div className="absolute top-1 right-1 px-1 rounded-sm bg-red-500 flex items-center justify-center shadow-sm z-20">
           <span className="text-[7px] text-white font-bold">YT</span>
         </div>
       );
@@ -27,7 +27,7 @@ export function StoryBox({
     if (typeof badge === 'number' && badge > 0) {
       const displayCount = badge > 99 ? '99+' : badge.toString();
       return (
-        <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 flex items-center justify-center shadow-sm border border-white dark:border-surface-900 z-10">
+        <div className="absolute top-[-4px] right-[-4px] min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 flex items-center justify-center shadow-sm border-2 border-white dark:border-surface-950 z-20">
           <span className="text-[10px] text-white font-bold leading-none">
             {displayCount}
           </span>
@@ -39,7 +39,7 @@ export function StoryBox({
   };
 
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1.5 flex-shrink-0 group">
+    <button onClick={onClick} className="relative flex flex-col items-center gap-1.5 flex-shrink-0 group">
       <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
         <img
           src={image}
@@ -48,7 +48,6 @@ export function StoryBox({
           loading="lazy"
           decoding="async"
         />
-        {renderBadge()}
         {/* 이름 오버레이 (박스 하단) */}
         <div className="absolute inset-x-0 bottom-0 bg-black/40 py-1 px-1">
           <span className="text-[9px] text-white font-medium truncate block text-center leading-none">
@@ -56,6 +55,8 @@ export function StoryBox({
           </span>
         </div>
       </div>
+      {/* 배지를 박스 밖으로 띄우기 위해 button 레벨에 배치 */}
+      {renderBadge()}
     </button>
   );
 }
@@ -68,8 +69,8 @@ export function StoriesSection({
   children: React.ReactNode 
 }) {
   return (
-    <section className="py-4 px-4">
-      <div className="flex gap-3 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <section className="py-1">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pt-1.5 pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
         {isLoading ? (
           [...Array(6)].map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0">

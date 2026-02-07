@@ -13,11 +13,11 @@ export function PopularPlacesSection({ places, onPlaceClick }: PopularPlacesSect
   if (!places || places.length === 0) return null;
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <div className="flex items-center justify-between px-4 mb-4">
         <div className="flex items-center gap-2">
           <Flame className="size-4 text-rose-500" />
-          <h2 className="text-base font-bold text-surface-900 dark:text-white">인기</h2>
+          <h2 className="text-base font-medium text-surface-900 dark:text-white">인기</h2>
         </div>
         <button onClick={() => navigate("/feature")} className="text-xs text-surface-400 flex items-center gap-0.5">
           더보기 <ChevronRight className="size-3" />

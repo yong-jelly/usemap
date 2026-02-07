@@ -64,7 +64,7 @@ export function HeroSection({ publicFolders }: { publicFolders: any[] }) {
   if (!publicFolders || publicFolders.length === 0) return null;
 
   return (
-    <section className="mb-8 overflow-hidden">
+    <section className="mb-6 overflow-hidden">
       <div className="flex gap-4 px-4 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
         {publicFolders.slice(0, 5).map((folder: any) => (
           <div key={folder.id} className="flex-shrink-0 w-[320px]">

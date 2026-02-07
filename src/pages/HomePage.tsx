@@ -19,7 +19,7 @@ import { useUserLocations } from "@/entities/location";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
-import { Loader2, Bell, MapPin, Info, LayoutGrid } from "lucide-react";
+import { Loader2, Bell, MapPin, Info, LayoutGrid, ChevronRight } from "lucide-react";
 
 import { SourceContent } from "@/features/home/ui/SourceContent";
 
@@ -105,60 +105,72 @@ export function HomePage() {
 
       <main className="pt-24">
         {activeTab !== 'source' && (
-          <>
-            {/* 대시보드 상단: 위치 및 상태 브리핑 */}
-            <section className="px-4 mb-8">
+          <div className="flex flex-col gap-6 pb-32">
+            {/* 1. 위치 브리핑 섹션 (최상단) */}
+            <section className="px-4">
               <div 
                 onClick={() => setIsLocationSheetOpen(true)}
-                className="flex items-center justify-between p-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 cursor-pointer transition-all"
+                className="flex items-center justify-between p-4 rounded-2xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 cursor-pointer transition-all active:scale-[0.98]"
               >
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-base font-medium text-surface-900 dark:text-white">
-                    {selectedLocation ? `${userLocations?.[0]?.nearest_place_name || '현재 위치'} 주변` : '위치 설정'}
-                  </h3>
-                  <p className="text-[11px] text-surface-500">
-                    {selectedLocation ? '주변 맛집의 기록을 확인해보세요' : '거리순 정렬과 주변 탐색이 가능해집니다'}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                    <MapPin className="size-5 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="text-sm font-medium text-surface-900 dark:text-white">
+                      {selectedLocation ? `${userLocations?.[0]?.nearest_place_name || '현재 위치'} 주변` : '위치 설정'}
+                    </h3>
+                    <p className="text-[11px] text-surface-500">
+                      {selectedLocation ? '주변 맛집의 기록을 확인해보세요' : '거리순 정렬과 주변 탐색이 가능해집니다'}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs text-surface-400 font-medium">변경</span>
+                <ChevronRight className="size-4 text-surface-300" />
               </div>
             </section>
 
-            {/* Stories: 맛탐정(유저) 및 소스 브리핑 */}
-            <div className="px-4 mb-2 flex items-center justify-between">
-              <h2 className="text-xs text-surface-500 font-medium uppercase tracking-wider">
-                활동 중인 맛탐정
-              </h2>
-            </div>
-            <StoriesSection isLoading={isDiscoverLoading}>
-              {discoverData?.users?.map((user: any, i: number) => (
-                <StoryBox
-                  key={`user-${user.id || i}`}
-                  image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
-                  label={user.nickname || '사용자'}
-                  badge={user.unread_count}
-                  onClick={() => navigate(`/profile/${user.id}`)}
-                />
-              ))}
-            </StoriesSection>
-          </>
+            {/* 2. 활동 중인 맛탐정 섹션 */}
+            <section>
+              <div className="px-4 mb-3 flex items-center justify-between">
+                <h2 className="text-base font-medium text-surface-900 dark:text-white">
+                  활동 중인 맛탐정
+                </h2>
+                <button onClick={() => navigate("/feature")} className="text-xs text-surface-400 flex items-center gap-0.5">
+                  전체보기 <ChevronRight className="size-3" />
+                </button>
+              </div>
+              <StoriesSection isLoading={isDiscoverLoading}>
+                {discoverData?.users?.map((user: any, i: number) => (
+                  <StoryBox
+                    key={`user-${user.id || i}`}
+                    image={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id || i + 100}`}
+                    label={user.nickname || '사용자'}
+                    badge={user.unread_count}
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  />
+                ))}
+              </StoriesSection>
+            </section>
+
+            {/* 3. 메인 콘텐츠 (ForYou, Following) */}
+            {activeTab === "foryou" ? (
+              <ForYouContent
+                discoverData={discoverData}
+                publicFolders={publicFolders}
+                isLoading={isDiscoverLoading || isPublicFoldersLoading}
+                onPlaceClick={showPlaceModal}
+                selectedLocation={selectedLocation}
+              />
+            ) : (
+              <FollowingContent
+                onPlaceClick={showPlaceModal}
+              />
+            )}
+          </div>
         )}
 
-        {/* Main Content */}
-        {activeTab === "foryou" ? (
-          <ForYouContent
-            discoverData={discoverData}
-            publicFolders={publicFolders}
-            isLoading={isDiscoverLoading || isPublicFoldersLoading}
-            onPlaceClick={showPlaceModal}
-            selectedLocation={selectedLocation}
-          />
-        ) : activeTab === "source" ? (
+        {activeTab === 'source' && (
           <SourceContent />
-        ) : (
-          <FollowingContent
-            onPlaceClick={showPlaceModal}
-          />
         )}
       </main>
 
@@ -192,6 +204,7 @@ function ForYouContent({
   onPlaceClick: (id: string) => void;
   selectedLocation: any;
 }) {
+  const navigate = useNavigate();
   const mixedContent = useMemo(() => {
     if (isLoading || !publicFolders) return [];
     const items: any[] = [];
@@ -219,37 +232,32 @@ function ForYouContent({
   }
 
   return (
-    <div className="pb-32">
+    <div className="">
       {/* 아카이브 큐레이션 섹션 */}
-      <div className="px-4 mt-10 mb-4 flex items-center justify-between">
+      <div className="px-4 mb-4 flex items-center justify-between">
         <h2 className="text-base font-medium text-surface-900 dark:text-white">추천 아카이브</h2>
-        {selectedLocation && (
-          <span className="text-[10px] text-primary-600 font-medium uppercase tracking-tight">
-            Nearby First
-          </span>
-        )}
+        <button onClick={() => navigate("/feature")} className="text-xs text-surface-400 flex items-center gap-0.5">
+          더보기 <ChevronRight className="size-3" />
+        </button>
       </div>
       
       <HeroSection publicFolders={publicFolders} />
       
       {/* 인기 음식점 섹션: 맥락 강조 */}
-      <div className="px-4 mt-12 mb-4">
-        <h2 className="text-base font-medium text-surface-900 dark:text-white">
-          많이 저장된 장소
-        </h2>
-      </div>
       <PopularPlacesSection
         places={discoverData?.popularPlaces}
         onPlaceClick={onPlaceClick}
       />
       
       {/* 발견하기 섹션: 다양한 소스 탐색 */}
-      <div className="px-4 mt-12 mb-4">
+      <div className="px-4 mt-2 mb-4">
         <h2 className="text-base font-medium text-surface-900 dark:text-white">
           새로운 기록 발견
         </h2>
       </div>
-      <DiscoverGrid items={mixedContent.slice(1)} onPlaceClick={onPlaceClick} />
+      <div className="px-4">
+        <DiscoverGrid items={mixedContent.slice(1)} onPlaceClick={onPlaceClick} />
+      </div>
     </div>
   );
 }
