@@ -13,6 +13,7 @@ export * from "./ConfirmDialog";
 export * from "./Skeleton";
 export * from "./HorizontalScroll";
 export * from "./FloatingViewToggleButton";
+export * from "./VisitedFilterTab";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";
 

@@ -2,16 +2,16 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate, useLocation } from "react-router";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap, useDeleteNaverFolder } from "@/entities/place/queries";
+import { useFeaturePlaces, useFeatureInfo, useFeaturePlacesForMap, useDeleteNaverFolder, useFeatureVisitedCount } from "@/entities/place/queries";
 import { useMySubscriptions, useToggleFeatureSubscription } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets/PlaceCard";
-import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink } from "lucide-react";
+import { List, Map as MapIcon, Loader2, RotateCcw, ExternalLink, CheckCircle, X } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton } from "@/shared/ui";
+import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton, VisitedFilterTab } from "@/shared/ui";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
@@ -39,11 +39,22 @@ export function FeatureDetailPage() {
   };
 
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [showVisitedOnly, setShowVisitedOnly] = useState(false);
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
   const initialZoom = useRef<number | null>(null);
   const initialCenter = useRef<[number, number] | null>(null);
   
+  // URL type을 subscription_type으로 변환
+  const subscriptionType = useMemo(() => {
+    if (type === 'folder') return 'naver_folder';
+    if (type === 'youtube') return 'youtube_channel';
+    if (type === 'community') return 'community_region';
+    if (type === 'social') return 'social_region';
+    if (type === 'region') return 'region_recommend';
+    return type;
+  }, [type]);
+
   const { 
     data, 
     fetchNextPage, 
@@ -53,6 +64,22 @@ export function FeatureDetailPage() {
   } = useFeaturePlaces({ 
     type: type as any, 
     id: id || "", 
+    domain,
+    source,
+    visitedOnly: showVisitedOnly
+  });
+
+  const { data: visitedCountData } = useFeatureVisitedCount({
+    type: subscriptionType || "",
+    id: id || "",
+    domain,
+    source,
+    enabled: !!id && !!subscriptionType
+  });
+
+  const { data: info } = useFeatureInfo({ 
+    type: type as any, 
+    id: id || "",
     domain,
     source
   });
@@ -99,23 +126,6 @@ export function FeatureDetailPage() {
       }
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, viewMode]);
-
-    const { data: info } = useFeatureInfo({ 
-    type: type as any, 
-    id: id || "",
-    domain,
-    source
-  });
-  
-  // URL type을 subscription_type으로 변환
-  const subscriptionType = useMemo(() => {
-    if (type === 'folder') return 'naver_folder';
-    if (type === 'youtube') return 'youtube_channel';
-    if (type === 'community') return 'community_region';
-    if (type === 'social') return 'social_region';
-    if (type === 'region') return 'region_recommend';
-    return type;
-  }, [type]);
   
   // 구독 정보 조회
   const { data: subscriptions } = useMySubscriptions();
@@ -175,10 +185,29 @@ export function FeatureDetailPage() {
   const places = useMemo(() => {
     return data?.pages.flatMap(page => page) || [];
   }, [data]);
+
+  // 서버 사이드 필터링을 사용하므로 filteredPlaces는 places와 동일
+  const filteredPlaces = places;
   
   // 지도에 표시할 장소: 지도 데이터가 있으면 사용, 아니면 기존 places 사용
   const mapPlaces = useMemo(() => {
     if (featureMapPlaces && featureMapPlaces.length > 0) {
+      if (showVisitedOnly) {
+        // 지도 데이터는 전체 데이터이므로 클라이언트에서 필터링 필요
+        // 하지만 featureMapPlaces에는 experience 정보가 없음.
+        // 따라서 현재 로드된 places(이미 필터링됨)에 있는 ID만 남기거나,
+        // 별도로 visited ID 목록을 가져와야 함.
+        // 여기서는 places가 이미 visitedOnly=true로 필터링된 상태라면 places의 ID를 사용.
+        // 만약 showVisitedOnly가 true인데 places가 아직 로드되지 않았다면?
+        // places는 서버에서 필터링된 결과이므로 이를 기준으로 지도도 필터링하는 것이 안전함.
+        const visitedIds = new Set(places.map((p: any) => p.place_id));
+        return featureMapPlaces.filter(p => visitedIds.has(p.place_id)).map(p => ({
+          id: p.place_id,
+          name: p.name,
+          x: p.x,
+          y: p.y
+        }));
+      }
       return featureMapPlaces.map(p => ({
         id: p.place_id,
         name: p.name,
@@ -186,8 +215,13 @@ export function FeatureDetailPage() {
         y: p.y
       }));
     }
-    return places;
-  }, [featureMapPlaces, places]);
+    return filteredPlaces.map((p: any) => ({
+      id: p.place_id,
+      name: p.place_data.name,
+      x: p.place_data.x,
+      y: p.place_data.y
+    }));
+  }, [featureMapPlaces, places, filteredPlaces, showVisitedOnly]);
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -568,6 +602,14 @@ export function FeatureDetailPage() {
                       </span>
                     </div>
                   </div>
+                  <VisitedFilterTab
+                    totalCount={visitedCountData?.total_count || 0}
+                    visitedCount={visitedCountData?.visited_count || 0}
+                    showVisitedOnly={showVisitedOnly}
+                    onToggle={setShowVisitedOnly}
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-2">
                   {type === 'folder' && typedInfo?.share_id && (
                     <button
                       onClick={() => {
@@ -598,14 +640,28 @@ export function FeatureDetailPage() {
               </div>
 
               <div className="flex flex-col">
-                {places.map((item: any) => (
-                  <PlaceCard 
-                    key={item.place_id} 
-                    place={item.place_data} 
-                    showPrice={true}
-                    addedAt={item.published_at ? item.published_at : undefined}
-                  />
-                ))}
+                {filteredPlaces.length === 0 && showVisitedOnly ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
+                    <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                      <CheckCircle className="size-10 text-surface-200" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-surface-900 dark:text-white">방문한 장소가 없습니다</p>
+                      <p className="text-sm text-surface-500 mt-1">
+                        아직 방문 체크한 장소가 없어요.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  filteredPlaces.map((item: any) => (
+                    <PlaceCard 
+                      key={item.place_id} 
+                      place={item.place_data} 
+                      showPrice={true}
+                      addedAt={item.published_at ? item.published_at : undefined}
+                    />
+                  ))
+                )}
               </div>
               
               {hasNextPage && (
@@ -640,6 +696,16 @@ export function FeatureDetailPage() {
               }}
             />
           </div>
+          
+          {viewMode === "list" && showVisitedOnly && (
+             <div className="pointer-events-auto bg-primary-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-bottom-2">
+               <CheckCircle className="size-4" />
+               <span>방문한 곳만 보는 중</span>
+               <button onClick={() => setShowVisitedOnly(false)} className="ml-1 p-0.5 hover:bg-primary-600 rounded-full">
+                 <X className="size-3" />
+               </button>
+             </div>
+          )}
           
           {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
             <button

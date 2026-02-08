@@ -61,6 +61,24 @@ export const placeApi = {
   },
 
   /**
+   * Feature 페이지별 방문 카운트를 조회합니다.
+   */
+  getFeatureVisitedCount: async (params: {
+    type: 'naver_folder' | 'youtube' | 'community' | 'social' | 'region' | 'folder';
+    id: string;
+    domain?: string | null;
+    source?: string | null;
+  }) => {
+    const response = await apiClient.rpc<{ total_count: number; visited_count: number }>("v1_count_visited_in_feature", {
+      p_feature_type: params.type,
+      p_feature_id: params.id,
+      p_domain: params.domain || null,
+      p_source: params.source || null,
+    });
+    return response.data?.[0] || { total_count: 0, visited_count: 0 };
+  },
+
+  /**
    * 사용자 리뷰를 저장하거나 수정합니다.
    */
   upsertUserReview: async (params: {
@@ -373,11 +391,12 @@ export const placeApi = {
    * 네이버 폴더 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number }) => {
+  getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number; visitedOnly?: boolean }) => {
     const response = await apiClient.rpc<{ place_id: string; place_data: Place }>("v3_get_places_by_naver_folder", {
       p_folder_id: parseInt(params.folderId),
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },
@@ -386,11 +405,12 @@ export const placeApi = {
    * 유튜브 채널 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number }) => {
+  getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number; visitedOnly?: boolean }) => {
     const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_youtube_channel", {
       p_channel_id: params.channelId,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },
@@ -399,12 +419,13 @@ export const placeApi = {
    * 소셜 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesBySocialRegion: async (params: { regionName: string; service?: string | null; limit?: number; offset?: number }) => {
+  getPlacesBySocialRegion: async (params: { regionName: string; service?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
     const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_social_region", {
       p_region_name: params.regionName,
       p_service: params.service || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },
@@ -413,12 +434,13 @@ export const placeApi = {
    * 커뮤니티 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number }) => {
+  getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
     const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_community_region", {
       p_region_name: params.regionName,
       p_domain: params.domain || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },
@@ -427,12 +449,13 @@ export const placeApi = {
    * 통합 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByRegion: async (params: { regionName: string; source?: string | null; limit?: number; offset?: number }) => {
+  getPlacesByRegion: async (params: { regionName: string; source?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
     const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; src: string }>("v3_get_places_by_region", {
       p_region_name: params.regionName,
       p_source: params.source || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },

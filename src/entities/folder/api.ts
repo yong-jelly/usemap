@@ -148,11 +148,13 @@ export const folderApi = {
     folderId: string;
     limit?: number;
     offset?: number;
+    visitedOnly?: boolean;
   }) => {
     const response = await apiClient.rpc<FolderPlace>("v1_get_folder_places", {
       p_folder_id: params.folderId,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
+      p_visited_only: params.visitedOnly || false,
     });
     return response.data;
   },

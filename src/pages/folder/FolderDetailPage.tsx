@@ -15,13 +15,14 @@ import {
   useToggleFolderSubscription,
   useMySubscriptions,
   useRemovePlaceFromFolder,
-  useImportPlaceToFolder
+  useImportPlaceToFolder,
+  useFolderVisitedCount
 } from "@/entities/folder/queries";
 
 import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
-import { Button, Input, FloatingViewToggleButton } from "@/shared/ui";
+import { Button, Input, FloatingViewToggleButton, VisitedFilterTab } from "@/shared/ui";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { 
   Plus, 
@@ -274,6 +275,7 @@ export function FolderDetailPage() {
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
   const [showImportInput, setShowImportInput] = useState(false);
+  const [showVisitedOnly, setShowVisitedOnly] = useState(false);
   const [importInput, setImportInput] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
   const [importDebug, setImportDebug] = useState<Record<string, any> | null>(null);
@@ -296,7 +298,9 @@ export function FolderDetailPage() {
     hasNextPage, 
     isFetchingNextPage, 
     isLoading: isPlacesLoading 
-  } = useFolderPlaces(id!);
+  } = useFolderPlaces(id!, showVisitedOnly);
+
+  const { data: visitedCountData } = useFolderVisitedCount(id!, !!id);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -437,17 +441,27 @@ export function FolderDetailPage() {
     return placesData?.pages.flatMap(page => page) || [];
   }, [placesData]);
 
+  // 서버 사이드 필터링을 사용하므로 filteredPlaces는 places와 동일
+  const filteredPlaces = places;
+
   const mapPlaces = useMemo(() => {
     if (folderMapPlaces && folderMapPlaces.length > 0) {
+      if (showVisitedOnly) {
+        // 지도 데이터는 전체 데이터이므로 클라이언트에서 필터링 필요
+        // places는 서버에서 필터링된 결과이므로 이를 기준으로 지도도 필터링하는 것이 안전함.
+        const visitedIds = new Set(places.map((p: any) => p.place_id));
+        return folderMapPlaces.filter(p => visitedIds.has(p.place_id));
+      }
       return folderMapPlaces;
     }
-    return places.map(p => ({
+    
+    return filteredPlaces.map((p: any) => ({
       place_id: p.place_id,
       name: p.place_data.name,
       x: p.place_data.x,
       y: p.place_data.y
     }));
-  }, [folderMapPlaces, places]);
+  }, [folderMapPlaces, places, filteredPlaces, showVisitedOnly]);
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -859,6 +873,12 @@ export function FolderDetailPage() {
 
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-2">
+                      <VisitedFilterTab
+                        totalCount={visitedCountData?.total_count || 0}
+                        visitedCount={visitedCountData?.visited_count || 0}
+                        showVisitedOnly={showVisitedOnly}
+                        onToggle={setShowVisitedOnly}
+                      />
                       <Button 
                         size="sm" 
                         variant="outline"
@@ -870,7 +890,7 @@ export function FolderDetailPage() {
                         title={showThumbnails ? "리스트 뷰로 보기" : "썸네일 뷰로 보기"}
                       >
                         {showThumbnails ? <LayoutGrid className="size-4" /> : <List className="size-4" />}
-                        <span>{showThumbnails ? "썸네일" : "리스트"}</span>
+                        {/* <span>{showThumbnails ? "썸네일" : "리스트"}</span> */}
                       </Button>
                       {canEdit && (
                         <Button 
@@ -879,7 +899,7 @@ export function FolderDetailPage() {
                           className="gap-1.5 font-bold h-9 px-4 rounded-full"
                         >
                           <Plus className="size-4" />
-                          맛집추가
+                          {/* 맛집추가 */}
                         </Button>
                       )}
                     </div>
@@ -896,7 +916,6 @@ export function FolderDetailPage() {
                           className="gap-1.5 font-bold h-9 px-4 rounded-full"
                         >
                           <Download className="size-4" />
-                          네이버 Import
                         </Button>
 
                         {showImportInput && (
@@ -963,79 +982,93 @@ export function FolderDetailPage() {
               {/* 장소 목록 */}
               <div className="flex flex-col pb-20">
                 {places.length > 0 ? (
-                  showThumbnails ? (
-                    <div className="grid grid-cols-3 gap-0.5 bg-white dark:bg-surface-950">
-                      {places.map((item: any, index: number) => {
-                        const place = item.place_data;
-                        const images = place.images || place.image_urls || place.place_images || (place.thumbnail ? [place.thumbnail] : []);
-                        return (
-                          <PlaceThumbnail
-                            key={`${item.place_id}-${index}`}
-                            placeId={item.place_id}
-                            name={place.name}
-                            thumbnail={images[0]}
-                            group2={place.group2}
-                            group3={place.group3}
-                            category={place.category}
-                            features={place.features}
-                            interaction={place.interaction}
-                            onClick={showPlaceModal}
-                          />
-                        );
-                      })}
+                  filteredPlaces.length === 0 && showVisitedOnly ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
+                      <div className="p-6 rounded-full bg-surface-50 dark:bg-surface-900">
+                        <CheckCircle className="size-10 text-surface-200" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-surface-900 dark:text-white">방문한 장소가 없습니다</p>
+                        <p className="text-sm text-surface-500 mt-1">
+                          아직 방문 체크한 장소가 없어요.
+                        </p>
+                      </div>
                     </div>
                   ) : (
-                    <>
-                      {places.map((item: any) => (
-                        <div key={item.place_id} className="flex flex-col bg-white dark:bg-surface-950 overflow-hidden">
-                          <PlaceCard 
-                            place={item.place_data} 
-                            showPrice={true}
-                            showThumbnail={true}
-                            addedAt={formatKoreanDate(item.added_at)}
-                            hideShadow={true}
-                          />
-                          {/* 메모 표시 및 편집 UI */}
-                          <div className="px-5 pb-5">
-                            {item.comment ? (
-                              <div className="flex flex-col gap-2">
-                                <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
-                                  <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap">
-                                    {item.comment}
-                                  </p>
+                    showThumbnails ? (
+                      <div className="grid grid-cols-3 gap-0.5 bg-white dark:bg-surface-950">
+                        {filteredPlaces.map((item: any, index: number) => {
+                          const place = item.place_data;
+                          const images = place.images || place.image_urls || place.place_images || (place.thumbnail ? [place.thumbnail] : []);
+                          return (
+                            <PlaceThumbnail
+                              key={`${item.place_id}-${index}`}
+                              placeId={item.place_id}
+                              name={place.name}
+                              thumbnail={images[0]}
+                              group2={place.group2}
+                              group3={place.group3}
+                              category={place.category}
+                              features={place.features}
+                              interaction={place.interaction}
+                              onClick={showPlaceModal}
+                            />
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <>
+                        {filteredPlaces.map((item: any) => (
+                          <div key={item.place_id} className="flex flex-col bg-white dark:bg-surface-950 overflow-hidden">
+                            <PlaceCard 
+                              place={item.place_data} 
+                              showPrice={true}
+                              showThumbnail={true}
+                              addedAt={formatKoreanDate(item.added_at)}
+                              hideShadow={true}
+                            />
+                            {/* 메모 표시 및 편집 UI */}
+                            <div className="px-5 pb-5">
+                              {item.comment ? (
+                                <div className="flex flex-col gap-2">
+                                  <div className="p-3 bg-surface-50 dark:bg-surface-800 rounded-xl">
+                                    <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap">
+                                      {item.comment}
+                                    </p>
+                                  </div>
+                                  {canEdit && (
+                                    <button
+                                      onClick={() => handleEditComment(item.place_id, item.place_data, item.comment, item.added_at, item.updated_at)}
+                                      className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
+                                    >
+                                      메모 수정
+                                    </button>
+                                  )}
                                 </div>
-                                {canEdit && (
+                              ) : (
+                                canEdit && (
                                   <button
-                                    onClick={() => handleEditComment(item.place_id, item.place_data, item.comment, item.added_at, item.updated_at)}
-                                    className="text-xs text-primary-600 dark:text-primary-400 font-bold self-end hover:underline"
+                                    onClick={() => handleEditComment(item.place_id, item.place_data, undefined, item.added_at, item.updated_at)}
+                                    className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                                   >
-                                    메모 수정
+                                    + 메모 추가
                                   </button>
-                                )}
+                                )
+                              )}
+                            </div>
+                            {folderInfo?.permission === 'invite' && (
+                              <div className="px-5 pb-5">
+                                <FolderReviewSection 
+                                  folderId={id!}
+                                  placeId={item.place_id}
+                                  placeName={item.place_data.name}
+                                />
                               </div>
-                            ) : (
-                              canEdit && (
-                                <button
-                                  onClick={() => handleEditComment(item.place_id, item.place_data, undefined, item.added_at, item.updated_at)}
-                                  className="text-xs text-surface-400 dark:text-surface-500 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                                >
-                                  + 메모 추가
-                                </button>
-                              )
                             )}
                           </div>
-                          {folderInfo?.permission === 'invite' && (
-                            <div className="px-5 pb-5">
-                              <FolderReviewSection 
-                                folderId={id!}
-                                placeId={item.place_id}
-                                placeName={item.place_data.name}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </>
+                        ))}
+                      </>
+                    )
                   )
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
@@ -1079,6 +1112,16 @@ export function FolderDetailPage() {
             />
           </div>
           
+          {viewMode === "list" && showVisitedOnly && (
+             <div className="pointer-events-auto bg-primary-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-bottom-2">
+               <CheckCircle className="size-4" />
+               <span>방문한 곳만 보는 중</span>
+               <button onClick={() => setShowVisitedOnly(false)} className="ml-1 p-0.5 hover:bg-primary-600 rounded-full">
+                 <X className="size-3" />
+               </button>
+             </div>
+          )}
+
           {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
             <button
               onClick={() => {

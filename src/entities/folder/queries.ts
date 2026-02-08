@@ -1,17 +1,19 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { folderApi } from "./api";
+import { placeApi } from "@/entities/place/api";
 
 export const folderKeys = {
   all: ["folder"] as const,
   list: (type: 'public' | 'my' | 'user' | 'my_and_public') => [...folderKeys.all, "list", type] as const,
   userList: (userId: string) => [...folderKeys.list('user'), userId] as const,
   details: (id: string) => [...folderKeys.all, "details", id] as const,
-  places: (id: string) => [...folderKeys.all, "places", id] as const,
+  places: (id: string, visitedOnly?: boolean) => [...folderKeys.all, "places", id, visitedOnly] as const,
   placesForMap: (id: string) => [...folderKeys.all, "placesForMap", id] as const,
   access: (id: string) => [...folderKeys.all, "access", id] as const,
   inviteHistory: (id: string) => [...folderKeys.all, "inviteHistory", id] as const,
   reviews: (folderId: string, placeId?: string) => 
     [...folderKeys.all, "reviews", folderId, placeId] as const,
+  visitedCount: (id: string) => [...folderKeys.all, "visitedCount", id] as const,
 };
 
 /**
@@ -311,17 +313,31 @@ export function useEnsureDefaultFolder() {
 /**
  * 폴더 내 장소 목록 무한 스크롤 조회
  */
-export function useFolderPlaces(folderId: string) {
+export function useFolderPlaces(folderId: string, visitedOnly?: boolean) {
   return useInfiniteQuery({
-    queryKey: folderKeys.places(folderId),
+    queryKey: folderKeys.places(folderId, visitedOnly),
     queryFn: ({ pageParam = 0 }) => 
-      folderApi.getFolderPlaces({ folderId, limit: 20, offset: pageParam }),
+      folderApi.getFolderPlaces({ folderId, limit: 20, offset: pageParam, visitedOnly }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < 20) return undefined;
       return allPages.length * 20;
     },
     enabled: !!folderId,
+  });
+}
+
+/**
+ * 폴더 방문 카운트 조회
+ */
+export function useFolderVisitedCount(folderId: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: folderKeys.visitedCount(folderId),
+    queryFn: () => placeApi.getFeatureVisitedCount({
+      type: 'folder',
+      id: folderId,
+    }),
+    enabled: enabled && !!folderId,
   });
 }
 

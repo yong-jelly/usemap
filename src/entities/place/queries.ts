@@ -26,9 +26,10 @@ export const placeKeys = {
   communityContents: (filters: any) => [...placeKeys.all, "communityContents", filters] as const,
   socialContents: (filters: any) => [...placeKeys.all, "socialContents", filters] as const,
   regionContents: (filters: any) => [...placeKeys.all, "regionContents", filters] as const,
-  featurePlaces: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featurePlaces", type, id, domainOrSource] as const,
+  featurePlaces: (type: string, id: string, domainOrSource?: string | null, visitedOnly?: boolean) => [...placeKeys.all, "featurePlaces", type, id, domainOrSource, visitedOnly] as const,
   featureInfo: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featureInfo", type, id, domainOrSource] as const,
   featurePlacesForMap: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featurePlacesForMap", type, id, domainOrSource] as const,
+  featureVisitedCount: (type: string, id: string, domainOrSource?: string | null) => [...placeKeys.all, "featureVisitedCount", type, id, domainOrSource] as const,
 };
 
 /**
@@ -473,22 +474,24 @@ export function useFeaturePlaces(params: {
   id: string;
   domain?: string | null;
   source?: string | null;
+  visitedOnly?: boolean;
 }) {
   return useInfiniteQuery({
-    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain || params.source),
+    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain || params.source, params.visitedOnly),
     queryFn: ({ pageParam = 0 }) => {
       const limit = 20;
+      const visitedOnly = params.visitedOnly;
       switch (params.type) {
         case 'folder':
-          return placeApi.getPlacesByNaverFolder({ folderId: params.id, limit, offset: pageParam });
+          return placeApi.getPlacesByNaverFolder({ folderId: params.id, limit, offset: pageParam, visitedOnly });
         case 'youtube':
-          return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam });
+          return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam, visitedOnly });
         case 'community':
-          return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam });
+          return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam, visitedOnly });
         case 'social':
-          return placeApi.getPlacesBySocialRegion({ regionName: params.id, service: params.domain, limit, offset: pageParam });
+          return placeApi.getPlacesBySocialRegion({ regionName: params.id, service: params.domain, limit, offset: pageParam, visitedOnly });
         case 'region':
-          return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam });
+          return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam, visitedOnly });
       }
     },
     initialPageParam: 0,
@@ -497,6 +500,28 @@ export function useFeaturePlaces(params: {
       return allPages.length * 20;
     },
     enabled: !!params.id,
+  });
+}
+
+/**
+ * 피쳐별 방문 카운트를 조회하는 Hook
+ */
+export function useFeatureVisitedCount(params: {
+  type: string;
+  id: string;
+  domain?: string | null;
+  source?: string | null;
+  enabled?: boolean;
+}) {
+  return useQuery({
+    queryKey: placeKeys.featureVisitedCount(params.type, params.id, params.domain || params.source),
+    queryFn: () => placeApi.getFeatureVisitedCount({
+      type: params.type as any,
+      id: params.id,
+      domain: params.domain,
+      source: params.source,
+    }),
+    enabled: (params.enabled ?? true) && !!params.id,
   });
 }
 
