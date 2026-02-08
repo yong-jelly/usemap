@@ -706,13 +706,18 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
                 
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={handleToggleLike} className="p-2 active:opacity-60 transition-opacity">
+                  <button onClick={handleToggleLike} className="flex items-center gap-1 p-2 active:opacity-60 transition-opacity">
                     <Heart className={cn(
                       "size-6", 
                       details?.interaction?.is_liked 
                         ? "fill-rose-500 text-rose-500" 
                         : "text-surface-700 dark:text-surface-300"
                     )} />
+                    {details?.interaction?.place_liked_count && details.interaction.place_liked_count > 0 ? (
+                      <span className="text-sm font-medium text-surface-900 dark:text-white">
+                        {details.interaction.place_liked_count}
+                      </span>
+                    ) : null}
                   </button>
                   <button onClick={handleToggleSave} className="p-2 active:opacity-60 transition-opacity">
                     <Bookmark className={cn(
@@ -739,7 +744,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <PlaceActionRow 
                 placeId={placeId!}
                 reviewsCount={details?.interaction?.place_reviews_count || 0}
-                visitCount={visitStats?.visit_count || 0}
+                visitCount={details?.interaction?.visit_count || visitStats?.visit_count || 0}
                 featuresCount={details?.features?.length || 0}
                 onReviewClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
                 onVisitClick={() => setShowVisitHistoryModal(true)}

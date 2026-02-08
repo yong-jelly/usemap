@@ -180,9 +180,11 @@ export async function uploadReviewImage(
     // HEIC 변환 시도
     const processedFile = await ensureWebFriendlyImage(file);
 
+    // 파일명 생성: timestamp + random suffix로 동시 업로드 시 충돌 방지
     const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
     const extension = processedFile.name.split(".").pop() || "jpg";
-    const fileName = `${timestamp}.${extension}`;
+    const fileName = `${timestamp}-${randomSuffix}.${extension}`;
     const filePath = `${userId}/${reviewId}/${fileName}`;
 
     const { error } = await supabase.storage

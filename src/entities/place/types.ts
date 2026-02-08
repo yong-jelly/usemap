@@ -51,6 +51,8 @@ export interface Place {
     place_reviews_count: number;
     is_commented: boolean;
     is_reviewed: boolean;
+    visit_count: number;
+    last_visited_at: string | null;
   };
   features?: Feature[];
   experience?: {

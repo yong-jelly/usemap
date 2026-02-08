@@ -101,7 +101,7 @@ export function ReviewForm({
     const filesToAdd = files.slice(0, remainingSlot);
     
     const processedFilesToAdd = await Promise.all(
-      filesToAdd.map(async (file) => {
+      filesToAdd.map(async (file, index) => {
         if (file.type.includes("heic") || file.name.toLowerCase().endsWith(".heic")) {
           try {
             const heic2any = (await import("heic2any")).default;
@@ -111,9 +111,12 @@ export function ReviewForm({
               quality: 0.7
             });
             const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
-            return new File([convertedBlob], file.name.replace(/\.heic$/i, ".jpg"), {
+            // iOS에서 동일한 파일명 부여 문제 방지: 인덱스 추가
+            const baseName = file.name.replace(/\.heic$/i, "");
+            const uniqueName = `${baseName}-${Date.now()}-${index}.jpg`;
+            return new File([convertedBlob], uniqueName, {
               type: "image/jpeg",
-              lastModified: new Date().getTime() // 변환된 파일은 새로운 파일로 취급
+              lastModified: file.lastModified // 원본 lastModified 유지
             });
           } catch (error) {
             console.error("HEIC preview conversion failed:", error);
@@ -124,30 +127,12 @@ export function ReviewForm({
       })
     );
 
-    // 중복 파일 필터링 (기존 새 파일 + 기존 업로드된 이미지와 비교)
-    const uniqueNewFiles = processedFilesToAdd.filter(newFile => {
-      // 1. 현재 추가된 새 파일들과 비교
-      const isDuplicateInNew = reviewFiles.some(
-        existing => existing.name === newFile.name && existing.size === newFile.size
-      );
-      // 2. 기존 서버 이미지들과 비교 (파일명만으로 체크해야 함 - 서버 이미지는 size 정보가 없을 수 있음)
-      // 정확한 비교를 위해선 서버 이미지 메타데이터가 필요하지만, 일단 파일명으로 1차 필터링
-      const isDuplicateInExisting = existingImages
-        .filter(img => !deletedImageIds.includes(img.id))
-        .some(existing => existing.image_path.split('/').pop() === newFile.name);
-
-      return !isDuplicateInNew && !isDuplicateInExisting;
-    });
-
-    if (uniqueNewFiles.length === 0) {
-      e.target.value = '';
-      return;
-    }
-
-    const newFiles = [...reviewFiles, ...uniqueNewFiles];
+    // 파일명 기반 중복 체크 제거 (iOS에서 다른 파일에 같은 이름 부여 문제)
+    // 서버에서 고유 파일명(timestamp-randomSuffix)을 생성하므로 클라이언트 중복 체크 불필요
+    const newFiles = [...reviewFiles, ...processedFilesToAdd];
     setReviewFiles(newFiles);
 
-    const newPreviews = uniqueNewFiles.map(file => URL.createObjectURL(file));
+    const newPreviews = processedFilesToAdd.map(file => URL.createObjectURL(file));
     setReviewPreviews(prev => [...prev, ...newPreviews]);
     
     e.target.value = '';
