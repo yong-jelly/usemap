@@ -293,7 +293,7 @@ export function FeedPage() {
       />
 
       <main className={cn(
-        "flex-1 flex flex-col pt-[80px]"
+        "flex-1 flex flex-col pt-14"
       )}>
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
