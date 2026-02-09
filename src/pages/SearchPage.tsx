@@ -193,30 +193,10 @@ export function SearchPage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
 
-  const loadingMessages = [
-    "맛집 지도를 펼치는 중...",
-    "숨은 보석 같은 곳을 찾고 있어요",
-    "맛있는 냄새를 따라가는 중 킁킁",
-    "가장 핫한 장소들만 모으고 있어요",
-    "잠시만요! 메뉴판 정독 중입니다",
-    "검색 결과가 거의 다 구워졌어요"
-  ];
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isSearchLoading) {
-      interval = setInterval(() => {
-        setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-      }, 2000);
-    }
-    return () => clearInterval(interval);
-  }, [isSearchLoading]);
-  
   const { isAuthenticated } = useUserStore();
 
   const { history, saveToHistory, clearHistory, removeFromHistory } = useSearchHistory();
@@ -539,21 +519,11 @@ export function SearchPage() {
         {isSearching ? (
           /* 검색 결과 모드 */
           isSearchLoading ? (
-            <div className="flex flex-col items-center justify-center py-32 gap-6">
-              <div className="relative">
-                <Loader2 className="size-10 text-primary-500 animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center animate-bounce">
-                  <span className="text-lg">🍳</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <p className="text-[15px] font-semibold text-surface-900 dark:text-white transition-all duration-500">
-                  {loadingMessages[loadingMessageIndex]}
-                </p>
-                <p className="text-[12px] font-medium text-surface-400 animate-pulse uppercase tracking-[0.2em]">
-                  Searching...
-                </p>
-              </div>
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+              <Loader2 className="size-8 text-primary-500 animate-spin" />
+              <p className="text-[14px] font-medium text-surface-300 animate-pulse uppercase tracking-widest">
+                검색중...
+              </p>
             </div>
           ) : searchResults.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-40 text-center px-10">
