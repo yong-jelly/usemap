@@ -1,0 +1,55 @@
+# Git Workflow Guide (Main/Dev)
+
+이 프로젝트는 `main` 브랜치를 배포용으로, `dev` 브랜치를 개발용으로 사용합니다.
+
+## 1. 브랜치 전략
+- `main`: 프로덕션 배포용 브랜치 (안정된 상태 유지)
+- `dev`: 개발 통합 브랜치 (기능 개발 완료 후 머지)
+- `feature/*`: 개별 기능 개발 브랜치 (선택 사항)
+
+## 2. 주요 명령어
+
+### 개발 시작 시 (dev 브랜치에서 작업)
+```bash
+# dev 브랜치로 이동
+git checkout dev
+
+# 최신 코드 가져오기
+git pull origin dev
+```
+
+### 작업 완료 후 커밋 및 푸시
+```bash
+# 변경사항 추가
+git add .
+
+# 커밋
+git commit -m "feat: 새로운 기능 추가"
+
+# 원격 dev 브랜치에 푸시
+git push origin dev
+```
+
+### 배포 시 (dev -> main 머지)
+```bash
+# main 브랜치로 이동
+git checkout main
+
+# dev 브랜치의 내용을 main으로 머지
+git merge dev
+
+# 원격 main 브랜치에 푸시 (배포 트리거)
+git push origin main
+
+# 다시 개발을 위해 dev로 이동
+git checkout dev
+```
+
+### 브랜치 생성 및 이동 (최초 1회)
+```bash
+# 현재 상태에서 dev 브랜치 생성 및 이동
+git checkout -b dev
+
+# 원격에 dev 브랜치 생성 및 연결
+git push -u origin dev
+```
