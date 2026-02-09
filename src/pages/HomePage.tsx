@@ -22,6 +22,7 @@ import naverIcon from "@/assets/images/naver-map-logo.png";
 import { Loader2, Bell, MapPin, Info, LayoutGrid, ChevronRight } from "lucide-react";
 
 import { SourceContent } from "@/features/home/ui/SourceContent";
+import { MainHeader } from "@/widgets";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -97,10 +98,11 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-white dark:bg-surface-950">
       {/* Header */}
-      <PageHeader 
+      <MainHeader 
         tabs={tabs} 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
+        title="홈"
       />
 
       <main className="pt-24">

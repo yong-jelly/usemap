@@ -35,7 +35,12 @@ export function PageHeader({ tabs, activeTab, onTabChange, basePath, title, acti
           <div className="relative flex items-center justify-between px-4 h-14">
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               {typeof title === "string" ? (
-                <h1 className="text-lg font-medium text-surface-900 dark:text-white">{title}</h1>
+                <h1 className="text-lg font-medium text-surface-900 dark:text-white relative">
+                  {title}
+                  {tabs.length === 0 && (
+                    <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                  )}
+                </h1>
               ) : (
                 title
               )}
