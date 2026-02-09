@@ -4,6 +4,7 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { PageHeader, TabItem } from "@/shared/ui/PageHeader";
 import { ReactNode } from "react";
+import { cn } from "@/shared/lib/utils";
 
 interface MainHeaderProps {
   tabs: TabItem[];
@@ -46,7 +47,12 @@ export function MainHeader({
   const profileButton = (
     <button 
       onClick={handleProfileClick}
-      className="p-1 text-surface-900 dark:text-white focus:outline-none"
+      className={cn(
+        "p-1 focus:outline-none",
+        isAuthenticated 
+          ? "text-surface-900 dark:text-white" 
+          : "text-surface-500 dark:text-surface-400"
+      )}
     >
       {isAuthenticated && profile?.profile_image_url ? (
         <div className="size-8 rounded-full ring-2 ring-surface-200 dark:ring-surface-700 overflow-hidden">
