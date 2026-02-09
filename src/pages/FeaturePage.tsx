@@ -9,7 +9,7 @@ import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { DetectiveList } from "@/features/folder/ui/DetectiveList";
 import { cn } from "@/shared/lib/utils";
 import { Button, PlaceSlider, HorizontalScroll } from "@/shared/ui";
-import { Loader2, MapPin, Youtube, MessageSquare, Search, Instagram } from "lucide-react";
+import { Loader2, MapPin, Youtube, MessageSquare, Search, Instagram, Bell, CircleUser } from "lucide-react";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 import { PageHeader } from "@/shared/ui/PageHeader";
@@ -57,17 +57,55 @@ export function FeaturePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeTab, setScrollPosition]);
 
+  const { isAuthenticated, profile } = useUserStore();
+  const { openLogin } = useAuthModalStore();
+
+  const handleProfileClick = () => {
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+    navigate("/profile");
+  };
+
   return (
     <div className="flex flex-col min-h-dvh bg-white dark:bg-surface-950">
       {/* 상단 헤더 */}
       <PageHeader 
         tabs={tabs} 
         activeTab={activeTab} 
-        basePath="/feature" 
+        basePath="/feature"
+        title="탐색"
+        actions={
+          <>
+            <button 
+              onClick={() => navigate("/search")}
+              className="p-1 text-surface-500 dark:text-surface-400 focus:outline-none"
+            >
+              <Search className="size-6" />
+            </button>
+            <button 
+              onClick={handleProfileClick}
+              className="p-1 text-surface-900 dark:text-white focus:outline-none"
+            >
+              {isAuthenticated && profile?.profile_image_url ? (
+                <div className="size-7 rounded-full ring-2 ring-surface-100 dark:ring-surface-800 overflow-hidden">
+                  <img 
+                    src={profile.profile_image_url} 
+                    alt="프로필" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <CircleUser className="size-7" />
+              )}
+            </button>
+          </>
+        }
       />
 
       {/* 컨텐츠 영역: 활성 탭만 렌더링 */}
-      <main className="flex-1 w-full max-w-lg mx-auto pt-24 pb-32 bg-white dark:bg-surface-950 min-h-dvh">
+      <main className="flex-1 w-full max-w-lg mx-auto pt-28 pb-32 bg-white dark:bg-surface-950 min-h-dvh">
         <div className="pt-2" />
         {activeTab === "detective" && <DetectiveList />}
         {activeTab === "community" && <CommunityList />}

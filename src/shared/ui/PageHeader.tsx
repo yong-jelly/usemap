@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 
@@ -12,9 +13,11 @@ interface PageHeaderProps {
   activeTab: string;
   onTabChange?: (tabId: string) => void;
   basePath?: string;
+  title?: ReactNode;
+  actions?: ReactNode;
 }
 
-export function PageHeader({ tabs, activeTab, onTabChange, basePath }: PageHeaderProps) {
+export function PageHeader({ tabs, activeTab, onTabChange, basePath, title, actions }: PageHeaderProps) {
   const navigate = useNavigate();
 
   const handleTabClick = (tabId: string) => {
@@ -26,11 +29,25 @@ export function PageHeader({ tabs, activeTab, onTabChange, basePath }: PageHeade
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 pointer-events-none">
-      <div className="max-w-lg mx-auto pointer-events-auto bg-white/95 dark:bg-surface-950/95 backdrop-blur-md border-b border-surface-100 dark:border-surface-800">
-        <div className="px-5 pt-8 pb-4">
+    <header className="fixed top-0 inset-x-0 z-40">
+      <div className="max-w-lg mx-auto bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
+        {(title || actions) && (
+          <div className="relative flex items-center justify-between px-4 h-14">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              {typeof title === "string" ? (
+                <h1 className="text-lg font-medium text-surface-900 dark:text-white">{title}</h1>
+              ) : (
+                title
+              )}
+            </div>
+            <div className="ml-auto flex items-center gap-3 relative z-10">
+              {actions}
+            </div>
+          </div>
+        )}
+        <div className="px-0">
           <HorizontalScroll 
-            containerClassName="flex items-center gap-6 pb-3"
+            containerClassName="flex items-center gap-4 px-4"
             scrollAmount={200}
             fadeEdges={false}
           >
@@ -39,15 +56,15 @@ export function PageHeader({ tabs, activeTab, onTabChange, basePath }: PageHeade
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
                 className={cn(
-                  "text-xl font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
+                  "py-3 text-sm font-medium transition-colors relative whitespace-nowrap flex-shrink-0",
                   activeTab === tab.id 
                     ? "text-surface-900 dark:text-white" 
-                    : "text-surface-300 dark:text-surface-700"
+                    : "text-surface-400 dark:text-surface-500"
                 )}
               >
                 {tab.label}
                 {activeTab === tab.id && (
-                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-surface-900 dark:bg-white rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-surface-900 dark:bg-white" />
                 )}
               </button>
             ))}
