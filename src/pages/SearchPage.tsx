@@ -189,6 +189,7 @@ function ArchiveFolderCard({ folder }: { folder: any }) {
 }
 
 export function SearchPage() {
+  const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchQueryDisplay, setSearchQueryDisplay] = useState("");
@@ -338,6 +339,20 @@ export function SearchPage() {
       {/* 상단 스티키 검색바 (아이콘 + 텍스트) */}
       <header className="sticky top-0 z-30 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800">
         <div className="max-w-lg mx-auto h-[72px] flex items-center px-5 gap-3">
+          {!isSearching && (
+            <button 
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate("/feature");
+                }
+              }}
+              className="mr-1 p-2 -ml-2 active:scale-90 transition-transform"
+            >
+              <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
+            </button>
+          )}
           {isSearching && (
             <button onClick={exitSearch} className="mr-1 p-2 -ml-2 active:scale-90 transition-transform">
               <ChevronLeft className="size-6 text-surface-900 dark:text-white" />

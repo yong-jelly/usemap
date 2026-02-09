@@ -28,9 +28,7 @@ export function BottomNav() {
   const navItems = [
     ...(isAdmin(profile) ? [{ href: "/home", icon: House, label: "홈" }] : []),
     { href: "/feed", icon: GalleryVerticalEnd, label: "피드" },
-    { href: "/search", icon: Search, label: "검색" },
     { href: "/feature", icon: HatGlasses, label: "맛탐정" },
-    { href: "/profile", icon: User, label: "프로필" },
   ];
 
   useEffect(() => {

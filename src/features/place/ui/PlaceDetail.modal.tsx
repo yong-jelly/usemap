@@ -62,7 +62,8 @@ import {
   MenuCard,
   FeatureCard,
   PlaceActionRow,
-  PlaceFeatureTags
+  PlaceFeatureTags,
+  PlaceSourceHighlight
 } from "@/shared/ui";
 import { ReviewForm } from "./ReviewForm";
 import { ContentForm } from "./ContentForm";
@@ -97,6 +98,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const { data: details, isLoading: isDetailsLoading } = usePlaceByIdWithRecentView(placeId!);
   const { data: serverReviews = [] } = usePlaceUserReviews(placeId!);
   const [testReviews, setTestReviews] = useState<PlaceUserReview[]>([]);
+  const [testFeatures, setTestFeatures] = useState<Feature[]>([]);
   
   const reviews = useMemo(() => [...testReviews, ...serverReviews], [testReviews, serverReviews]);
 
@@ -179,9 +181,64 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const removeTestReview = () => {
     setTestReviews(prev => prev.slice(1));
   };
+
+  // 테스트용 랜덤 Feature 생성 함수
+  const addRandomFeature = (type: 'youtube' | 'folder' | 'public_user' | 'community') => {
+    const newFeature: Feature = {
+      id: Math.random().toString(36).substring(2, 11),
+      user_id: "test-user",
+      platform_type: type,
+      content_url: "https://example.com",
+      title: "",
+      metadata: {},
+      created_at: new Date().toISOString()
+    };
+
+    if (type === 'youtube') {
+      const channels = [
+        { title: "성시경 SUNG SI KYUNG", sub: 1850000, name: "성시경의 먹을텐데" },
+        { title: "최자로드 Choiza Road", sub: 450000, name: "최자로드" },
+        { title: "김사원세끼", sub: 320000, name: "노포 맛집 탐방" },
+        { title: "맛상무", sub: 650000, name: "솔직 후기" },
+        { title: "정육왕 MeatCreator", sub: 890000, name: "고기 맛집" }
+      ];
+      const channel = channels[Math.floor(Math.random() * channels.length)];
+      newFeature.title = `${channel.name} - 이 집은 진짜입니다. 꼭 가보세요!`;
+      newFeature.metadata = {
+        channelTitle: channel.title,
+        subscriberCount: channel.sub,
+        thumbnails: { medium: { url: `https://picsum.photos/320/180?random=${Math.random()}` } }
+      };
+    } else if (type === 'folder') {
+      const folders = ["서울 노포 맛집", "데이트 코스 추천", "가성비 점심", "혼밥하기 좋은 곳", "디저트 성지"];
+      newFeature.title = folders[Math.floor(Math.random() * folders.length)];
+      newFeature.metadata = {
+        placeCount: Math.floor(Math.random() * 500) + 10
+      };
+    } else if (type === 'public_user') {
+      const users = ["맛탐정 코난", "미식가 A", "푸드파이터", "빵순이", "면식수행"];
+      newFeature.title = "이 유저의 추천";
+      newFeature.metadata = {
+        nickname: users[Math.floor(Math.random() * users.length)],
+        followerCount: Math.floor(Math.random() * 10000) + 50,
+        profileImageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
+      };
+    } else if (type === 'community') {
+      const communities = ["clien.net", "damoang.net", "bobaedream.co.kr"];
+      const domain = communities[Math.floor(Math.random() * communities.length)];
+      newFeature.title = "여기 가보신 분 계신가요? 대박입니다";
+      newFeature.metadata = { domain };
+    }
+
+    setTestFeatures(prev => [newFeature, ...prev]);
+  };
+
+  const removeTestFeature = () => {
+    setTestFeatures(prev => prev.slice(1));
+  };
   
   // 관련 콘텐츠는 v1_get_place_features (placeFeaturesData)만 사용
-  const allFeatures = placeFeaturesData;
+  const allFeatures = useMemo(() => [...testFeatures, ...placeFeaturesData], [testFeatures, placeFeaturesData]);
 
   const { data: myFolders = [] } = useMyFolders({ placeId: placeId! });
   const { data: visitStats } = useVisitStats(placeId!);
@@ -756,17 +813,32 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 showStats={false}
               />
 
-              <PlaceFeatureTags 
-                place={{ ...details, features: allFeatures }}
-                className="mt-2"
-                onFolderClick={(e, folder) => {
-                  e.stopPropagation();
-                  if (placeIdFromStore) {
-                    usePlacePopup.setState({ isOpen: false, placeId: null });
+              {/* UI/UX 테스트용 버튼 (개발 모드에서만 보이거나 임시로 배치) */}
+              <div className="flex gap-1 mb-2 overflow-x-auto scrollbar-hide py-1">
+                <button onClick={() => addRandomFeature('youtube')} className="px-2 py-1 bg-red-100 text-red-700 text-[10px] rounded whitespace-nowrap">+유튜브</button>
+                <button onClick={() => addRandomFeature('folder')} className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] rounded whitespace-nowrap">+폴더</button>
+                <button onClick={() => addRandomFeature('public_user')} className="px-2 py-1 bg-violet-100 text-violet-700 text-[10px] rounded whitespace-nowrap">+맛탐정</button>
+                <button onClick={() => addRandomFeature('community')} className="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] rounded whitespace-nowrap">+커뮤니티</button>
+                <button onClick={removeTestFeature} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] rounded whitespace-nowrap">-제거</button>
+              </div>
+
+              <PlaceSourceHighlight 
+                features={allFeatures}
+                className="mt-2 mb-4"
+                onFeatureClick={(feature) => {
+                  if (feature.platform_type === 'folder') {
+                    if (placeIdFromStore) {
+                      usePlacePopup.setState({ isOpen: false, placeId: null });
+                    }
+                    navigate(`/feature/detail/folder/${feature.id}`, { replace: true });
+                  } else {
+                    window.open(feature.content_url, '_blank');
                   }
-                  navigate(`/feature/detail/folder/${folder.id}`, { replace: true });
                 }}
               />
+
+              {/* 기존 태그 컴포넌트는 하위 호환성을 위해 유지하되, 출처 관련 태그는 숨김 처리 필요할 수 있음 */}
+              {/* <PlaceFeatureTags ... /> */}
             </div>
 
             <div className="space-y-8 py-4">

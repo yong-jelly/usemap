@@ -34,30 +34,44 @@ export function MainHeader({
     navigate("/profile");
   };
 
-  const defaultActions = (
+  const searchButton = (
+    <button 
+      onClick={() => navigate("/search")}
+      className="p-1 text-surface-500 dark:text-surface-400 focus:outline-none"
+    >
+      <Search className="size-6" />
+    </button>
+  );
+
+  const profileButton = (
+    <button 
+      onClick={handleProfileClick}
+      className="p-1 text-surface-900 dark:text-white focus:outline-none"
+    >
+      {isAuthenticated && profile?.profile_image_url ? (
+        <div className="size-8 rounded-full ring-2 ring-surface-200 dark:ring-surface-700 overflow-hidden">
+          <img 
+            src={profile.profile_image_url} 
+            alt="프로필" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <CircleUser className="size-8" />
+      )}
+    </button>
+  );
+
+  const resolvedActions = actions ? (
     <>
-      <button 
-        onClick={() => navigate("/search")}
-        className="p-1 text-surface-500 dark:text-surface-400 focus:outline-none"
-      >
-        <Search className="size-6" />
-      </button>
-      <button 
-        onClick={handleProfileClick}
-        className="p-1 text-surface-900 dark:text-white focus:outline-none"
-      >
-        {isAuthenticated && profile?.profile_image_url ? (
-          <div className="size-7 rounded-full ring-2 ring-surface-100 dark:ring-surface-800 overflow-hidden">
-            <img 
-              src={profile.profile_image_url} 
-              alt="프로필" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
-          <CircleUser className="size-7" />
-        )}
-      </button>
+      {searchButton}
+      {actions}
+      {profileButton}
+    </>
+  ) : (
+    <>
+      {searchButton}
+      {profileButton}
     </>
   );
 
@@ -68,7 +82,7 @@ export function MainHeader({
       onTabChange={onTabChange}
       basePath={basePath}
       title={title}
-      actions={actions || defaultActions}
+      actions={resolvedActions}
     />
   );
 }

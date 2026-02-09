@@ -21,6 +21,8 @@ import { TrendPage } from "@/pages/TrendPage";
 import { WelcomePage } from "@/pages/WelcomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
+import { RankingPage } from "@/pages/ranking/RankingPage";
+
 // Auth Pages
 import { LoginModal } from "@/pages/auth/Login.modal";
 import { SignupPage } from "@/pages/auth/SignupPage";
@@ -91,6 +93,7 @@ function RootLayout() {
   const isFeatureDetailPage = pathname.includes("/feature/detail/") || 
     (pathname.startsWith("/folder/") && !pathname.includes("/folder/create")) ||
     pathname.startsWith("/p/user/") ||
+    pathname.startsWith("/profile") ||
     pathname.startsWith("/tool/");
   const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
@@ -148,6 +151,10 @@ const router = createBrowserRouter([
       {
         path: "explore2",
         element: <ExplorePage />,
+      },
+      {
+        path: "ranking",
+        element: <RankingPage />,
       },
       {
         path: "explorer",

@@ -228,73 +228,10 @@ export function FeedPage() {
     <div 
       className="flex flex-col min-h-dvh bg-white dark:bg-surface-950"
     >
-      {/* 상단 헤더 - 타이포 중심 */}
-      <MainHeader 
-        tabs={[]}
-        activeTab=""
-        title="피드"
-        actions={
-          isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              {/* 정렬 전환 버튼 */}
-              <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
-                <button 
-                  onClick={handleSortByRecent}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'recent' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-                  )}
-                >
-                  최신순
-                </button>
-                <button 
-                  onClick={handleSortByDistance}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'distance' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-                  )}
-                >
-                  거리순
-                </button>
-              </div>
+      {/* 상단 헤더 - /feature와 동일한 탭 형태 (타이틀 + 검색 + 프로필) */}
+      <MainHeader tabs={[]} activeTab="" title="피드" />
 
-              {/* 위치 설정 버튼 */}
-              <button 
-                onClick={() => setIsLocationSheetOpen(true)}
-                className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  selectedLocation 
-                    ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
-                    : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
-                )}
-              >
-                <MapPin className="size-5" />
-              </button>
-
-              {/* 레이아웃 토글 버튼 (우측 끝) */}
-              <button 
-                onClick={handleLayoutToggle}
-                className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  layout === 'grid' 
-                    ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
-                    : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
-                )}
-              >
-                <LayoutGrid className="size-4" />
-              </button>
-            </div>
-          ) : undefined
-        }
-      />
-
-      <main className={cn(
-        "flex-1 flex flex-col pt-14"
-      )}>
+      <main className="flex-1 flex flex-col pt-14">
         {!isAuthenticated && (
           <div className="flex flex-col gap-8 pb-20">
             {/* 로그인 가이드 - 심플 버전 */}
@@ -366,7 +303,60 @@ export function FeedPage() {
         )}
 
         {isAuthenticated && (
-          isLoading ? (
+          <>
+            {/* 필터 컨트롤 - 콘텐츠 영역 상단 */}
+            <div className="px-4 py-3 flex items-center justify-between border-b border-surface-100 dark:border-surface-800 mb-2">
+              <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
+                <button 
+                  onClick={handleSortByRecent}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    sortBy === 'recent' 
+                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
+                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
+                  )}
+                >
+                  최신순
+                </button>
+                <button 
+                  onClick={handleSortByDistance}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    sortBy === 'distance' 
+                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
+                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
+                  )}
+                >
+                  거리순
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsLocationSheetOpen(true)}
+                  className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    selectedLocation 
+                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
+                      : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
+                  )}
+                >
+                  <MapPin className="size-5" />
+                </button>
+                <button 
+                  onClick={handleLayoutToggle}
+                  className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    layout === 'grid' 
+                      ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
+                      : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
+                  )}
+                >
+                  <LayoutGrid className="size-4" />
+                </button>
+              </div>
+            </div>
+
+            {isLoading ? (
             <div className="flex-1 flex items-center justify-center">
               <Loader2 className="size-8 animate-spin text-surface-300" />
             </div>
@@ -471,6 +461,8 @@ export function FeedPage() {
               </button>
             </div>
           )
+        }
+          </>
         )}
       </main>
       

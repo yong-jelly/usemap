@@ -23,6 +23,7 @@ export * from "./place/PlaceSliderCard";
 export * from "./place/PlaceThumbnail";
 export * from "./place/PlaceActionRow";
 export * from "./place/PlaceFeatureTags";
+export * from "./place/PlaceSourceHighlight";
 export * from "./ImageViewer/ImageViewer";
 export * from "./review";
 export * from "./menu";

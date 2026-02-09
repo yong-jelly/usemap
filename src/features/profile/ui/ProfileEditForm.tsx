@@ -149,14 +149,14 @@ export const ProfileEditForm = forwardRef((props, ref) => {
         <button 
           type="button"
           onClick={handleRandomAvatar}
-          className="flex items-center gap-1.5 text-[11px] font-medium text-primary-600 uppercase tracking-wider hover:underline bg-primary-50 px-3 py-1.5 rounded-full transition-colors"
+          className="flex items-center gap-1.5 text-[11px] font-medium text-primary-600 tracking-wider hover:underline bg-primary-50 px-3 py-1.5 rounded-full transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           랜덤 아바타
         </button>
         
         <div className="text-center">
-          <p className="text-[11px] font-medium text-surface-400 uppercase tracking-widest leading-none">
+          <p className="text-[11px] font-medium text-surface-400 tracking-widest leading-none">
             {authUser?.email || "이메일 정보 없음"}
           </p>
         </div>
@@ -165,7 +165,7 @@ export const ProfileEditForm = forwardRef((props, ref) => {
       {/* 닉네임 입력 */}
       <div className="space-y-3">
         <label className="block text-[14px] font-medium text-surface-900 dark:text-white ml-1">
-          표시 이름
+          닉네임
         </label>
         <Input
           value={nickname}
@@ -175,13 +175,15 @@ export const ProfileEditForm = forwardRef((props, ref) => {
           maxLength={30}
           className="h-14 px-5 rounded-2xl bg-surface-50 dark:bg-surface-900 border-none ring-1 ring-surface-200 dark:ring-surface-700 focus:ring-2 focus:ring-primary-500 transition-all text-[17px] font-medium"
         />
-        <p className="text-xs text-surface-400 ml-1">2~30자 사이로 입력해주세요</p>
+        <div className="flex justify-end text-xs text-surface-400 px-1">
+          <span>{nickname.length}/30</span>
+        </div>
       </div>
 
       {/* 소개 입력 */}
       <div className="space-y-3">
         <label className="block text-[14px] font-medium text-surface-900 dark:text-white ml-1">
-          소개
+          소개 (선택)
         </label>
         <textarea
           value={bio}
@@ -190,8 +192,7 @@ export const ProfileEditForm = forwardRef((props, ref) => {
           placeholder="자신을 소개해주세요 (최대 200자)"
           maxLength={200}
         />
-        <div className="flex justify-between text-xs text-surface-400 px-1">
-          <span>소개는 선택 항목입니다</span>
+        <div className="flex justify-end text-xs text-surface-400 px-1">
           <span>{bio.length}/200</span>
         </div>
       </div>

@@ -13,6 +13,10 @@ export interface Theme {
 
 export const THEMES: Theme[] = [
   { code: 'food_good', theme_name: '음식맛', display_name: '음식이 맛있어요', emoji: '😋' },
+  { code: 'bread_good', theme_name: '빵지순례', display_name: '빵이 맛있어요', emoji: '🍞' },
+  { code: 'dessert_good', theme_name: '디저트', display_name: '디저트가 맛있어요', emoji: '🍰' },
+  { code: 'meat_good', theme_name: '고기맛집', display_name: '고기가 맛있어요', emoji: '🥩' },
+  { code: 'coffee_good', theme_name: '커피맛집', display_name: '커피가 맛있어요', emoji: '☕' },
   { code: 'large', theme_name: '음식양', display_name: '양이 많아요', emoji: '🍚' },
   { code: 'special_menu', theme_name: '특별메뉴', display_name: '특별한 메뉴가 있어요', emoji: '✨' },
   { code: 'eat_alone', theme_name: '혼밥', display_name: '혼밥하기 좋아요', emoji: '🧘' },
