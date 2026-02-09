@@ -219,15 +219,11 @@ export function SearchPage() {
     }
   }, [inView, hasNextPage, fetchNextPage, isSearching]);
 
-  // 검색 모드 또는 결과 표시 중일 때 하단 네비게이션 숨기기
+  // 검색 페이지에서는 항상 하단 네비게이션 숨기기
   useEffect(() => {
-    if (isSearchFocused || isSearching) {
-      setBottomNavVisible(false);
-    } else {
-      setBottomNavVisible(true);
-    }
+    setBottomNavVisible(false);
     return () => setBottomNavVisible(true);
-  }, [isSearchFocused, isSearching, setBottomNavVisible]);
+  }, [setBottomNavVisible]);
 
   const handleSearch = useCallback(async (query: string) => {
     const trimmed = query.trim();
@@ -326,7 +322,13 @@ export function SearchPage() {
     trackEvent("search_page_filter_reset", {});
   };
 
-  const shouldShowBottomNav = !isSearchFocused && !isSearching;
+  const handleBack = () => {
+    if (window.history.length > 2) { // 1은 현재 페이지, 2 이상이어야 이전 페이지가 있음
+      navigate(-1);
+    } else {
+      navigate("/feature");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-surface-950 pb-24">
@@ -335,13 +337,7 @@ export function SearchPage() {
         <div className="max-w-lg mx-auto h-[72px] flex items-center px-5 gap-3">
           {!isSearching && (
             <button 
-              onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate("/feature");
-                }
-              }}
+              onClick={handleBack}
               className="mr-1 p-2 -ml-2 active:scale-90 transition-transform"
             >
               <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
@@ -432,7 +428,7 @@ export function SearchPage() {
           <div className="max-w-lg mx-auto w-full flex flex-col h-full bg-white dark:bg-surface-950">
             <div className="h-[72px] flex items-center px-5 gap-4 border-b border-surface-50 dark:border-surface-900">
               <button 
-                onClick={() => setIsSearchFocused(false)}
+                onClick={handleBack}
                 className="p-2 -ml-2 active:scale-90 transition-transform"
               >
                 <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
@@ -628,8 +624,6 @@ export function SearchPage() {
           </>
         )}
       </main>
-
-      {shouldShowBottomNav && <BottomNav />}
 
       {/* 공용 필터 바텀 시트 */}
       <ExploreFilterSheet 
