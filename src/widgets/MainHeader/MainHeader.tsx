@@ -63,7 +63,7 @@ export function MainHeader({
           />
         </div>
       ) : (
-        <CircleUser className="size-6" />
+        <CircleUser className="size-7" />
       )}
     </button>
   );
