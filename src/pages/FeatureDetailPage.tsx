@@ -697,16 +697,6 @@ export function FeatureDetailPage() {
             />
           </div>
           
-          {viewMode === "list" && showVisitedOnly && (
-             <div className="pointer-events-auto bg-primary-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-bottom-2">
-               <CheckCircle className="size-4" />
-               <span>방문한 곳만 보는 중</span>
-               <button onClick={() => setShowVisitedOnly(false)} className="ml-1 p-0.5 hover:bg-primary-600 rounded-full">
-                 <X className="size-3" />
-               </button>
-             </div>
-          )}
-          
           {viewMode === "map" && showResetButton && initialZoom.current !== null && initialCenter.current !== null && (
             <button
               onClick={() => {
