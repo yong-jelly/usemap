@@ -107,7 +107,7 @@ export function HomePage() {
 
       <main className="pt-24">
         {activeTab !== 'source' && (
-          <div className="flex flex-col gap-6 pb-32">
+          <div className="flex flex-col gap-6 pb-10">
             {/* 1. 위치 브리핑 섹션 (최상단) */}
             <section className="px-4">
               <div 
@@ -230,7 +230,7 @@ function ForYouContent({
   }, [publicFolders, discoverData, isLoading]);
 
   if (isLoading) {
-    return <div className="px-4 pb-32"><GridSkeleton /></div>;
+    return <div className="px-4 pb-10"><GridSkeleton /></div>;
   }
 
   return (
@@ -458,7 +458,7 @@ function FollowingContent({
   }
 
   if (isLoading) {
-    return <div className="px-4 pb-32"><GridSkeleton /></div>;
+    return <div className="px-4 pb-10"><GridSkeleton /></div>;
   }
 
   if (feedItems.length === 0) {
@@ -480,7 +480,7 @@ function FollowingContent({
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-10">
       {/* Controls */}
       <div className="px-4 mb-4 flex items-center justify-between">
          <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">

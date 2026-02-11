@@ -233,7 +233,7 @@ export function FeedPage() {
 
       <main className="flex-1 flex flex-col pt-14">
         {!isAuthenticated && (
-          <div className="flex flex-col gap-8 pb-20">
+          <div className="flex flex-col gap-8 pb-10">
             {/* 로그인 가이드 - 심플 버전 */}
             <div className="px-5 pt-6">
               <button 
@@ -362,7 +362,7 @@ export function FeedPage() {
             </div>
           ) : feedItems.length > 0 ? (
             <div className={cn(
-              "flex-1 pb-20 bg-white dark:bg-surface-950",
+              "flex-1 pb-10 bg-white dark:bg-surface-950",
               layout === 'feed' ? "flex flex-col" : "grid grid-cols-3 gap-0.5"
             )}>
               {/* 위치 가이드 메시지 (거리순 정렬인데 위치 정보가 없을 때) */}

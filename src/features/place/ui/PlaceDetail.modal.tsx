@@ -822,9 +822,63 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 <button onClick={removeTestFeature} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] rounded whitespace-nowrap">-제거</button>
               </div>
 
+              {/* Why people save this - Voted Keywords */}
+              {details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
+                const sortedKeywords = [...details.voted_keyword.details]
+                  .filter((t: any) => t.count > 0)
+                  .sort((a: any, b: any) => b.count - a.count)
+                  .slice(0, 5);
+                
+                const totalCount = details.voted_keyword.details.reduce((sum: number, t: any) => sum + t.count, 0);
+
+                if (sortedKeywords.length === 0) return null;
+
+                return (
+                  <div className="mt-2 mb-3">
+                    <span className="text-[13px] font-bold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
+                      사람들이 이곳을 저장하는 이유
+                    </span>
+                    <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide">
+                      {sortedKeywords.map((keyword: any) => {
+                        const mappedInfo = VOTED_KEYWORD_MAP[keyword.code];
+                        const displayLabel = mappedInfo?.label || keyword.displayName || keyword.label;
+                        const percentage = Math.round((keyword.count / totalCount) * 100);
+                        const category = mappedInfo?.category || '기타';
+                        
+                        // 카테고리별 배경색
+                        const bgColors: Record<string, string> = {
+                          '맛/품질': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+                          '가격/양': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+                          '분위기': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                          '편의/서비스': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+                          '상황/목적': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                        };
+                        const bgColor = bgColors[category] || 'bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300';
+
+                        return (
+                          <div 
+                            key={keyword.code} 
+                            className={cn(
+                              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap shrink-0",
+                              bgColor
+                            )}
+                          >
+                            {keyword.iconUrl && (
+                              <img src={keyword.iconUrl} alt="" className="size-4 object-contain" />
+                            )}
+                            <span>{displayLabel}</span>
+                            <span className="opacity-70">({percentage}%)</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <PlaceSourceHighlight 
                 features={allFeatures}
-                className="mt-2 mb-4"
+                className="mb-4"
                 onFeatureClick={(feature) => {
                   if (feature.platform_type === 'folder') {
                     if (placeIdFromStore) {
@@ -1159,40 +1213,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           )}
         </div>
 
-        {/* 하단 스티키 - 방문자 리뷰 키워드 */}
-        {details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
-          const sortedKeywords = [...details.voted_keyword.details]
-            .filter((t: any) => t.count > 0)
-            .sort((a: any, b: any) => b.count - a.count)
-            .slice(0, 5);
-          
-          const totalCount = details.voted_keyword.details.reduce((sum: number, t: any) => sum + t.count, 0);
-
-          if (sortedKeywords.length === 0) return null;
-
-          return (
-            <footer className="relative z-20 bg-white/80 dark:bg-surface-950/80 backdrop-blur-md border-t border-surface-100 dark:border-surface-800 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
-              <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide no-wrap">
-                {sortedKeywords.map((keyword: any) => {
-                  const mappedInfo = VOTED_KEYWORD_MAP[keyword.code];
-                  const displayLabel = mappedInfo?.label || keyword.displayName || keyword.label;
-                  const percentage = Math.round((keyword.count / totalCount) * 100);
-
-                  return (
-                    <div key={keyword.code} className="flex items-center gap-1 shrink-0">
-                      {keyword.iconUrl && (
-                        <img src={keyword.iconUrl} alt="" className="size-3 object-contain flex-shrink-0" />
-                      )}
-                      <span className="text-[10px] font-medium text-surface-600 dark:text-surface-400 whitespace-nowrap">
-                        {displayLabel} {percentage}%
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </footer>
-          );
-        })()}
       </div>
 
       <Dialog open={!!showDeleteReviewConfirm} onOpenChange={(open) => !open && setShowDeleteReviewConfirm(null)}>

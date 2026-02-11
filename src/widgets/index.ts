@@ -4,6 +4,7 @@
  */
 export * from "./Header";
 export * from "./MainHeader/MainHeader";
-export * from "./BottomNav";
+// export * from "./BottomNav"; // Deprecated
 export * from "./PlaceCard";
 export * from "./ExploreFilterSheet";
+export * from "./Sidebar/Sidebar";

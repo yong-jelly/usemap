@@ -26,10 +26,11 @@ interface TabsProps {
 /**
  * 공통 탭 컴포넌트
  * 여러 콘텐츠를 전환하며 표시할 때 사용합니다.
+ * YouTube 스타일의 Pill 버튼 형식을 사용합니다.
  */
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn("flex border-b border-surface-200 dark:border-surface-800 overflow-x-auto overflow-y-hidden scrollbar-hide pb-1", className)}>
+    <div className={cn("flex gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide py-1", className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -40,17 +41,13 @@ export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
               onChange(tab.id);
             }}
             className={cn(
-              "flex-1 min-w-[80px] py-3 text-sm font-medium transition-colors relative whitespace-nowrap",
+              "px-3 py-1.5 text-sm font-medium transition-colors relative whitespace-nowrap rounded-lg flex-shrink-0",
               isActive 
-                ? "text-blue-600 dark:text-blue-400" 
-                : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
+                ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
+                : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700"
             )}
           >
             {tab.label}
-            {/* 활성화된 탭 하단 바 표시 */}
-            {isActive && (
-              <div className="absolute bottom-0 inset-x-0 h-0.5 bg-blue-600 dark:bg-blue-400 animate-in fade-in slide-in-from-bottom-1 duration-200" />
-            )}
           </button>
         );
       })}

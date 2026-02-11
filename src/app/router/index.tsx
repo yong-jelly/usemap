@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider, Outlet, useLocation, Navigate } from "react-router";
-import { Header, BottomNav } from "@/widgets";
+import { Header, Sidebar } from "@/widgets";
 import { trackPageView } from "@/shared/lib/gtm";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { AuthModal } from "@/features/auth/ui/AuthModal";
@@ -87,15 +87,6 @@ function PageViewTracker() {
  */
 function RootLayout() {
   const { isOpen: isPlaceModalOpen, placeId: modalPlaceId } = usePlacePopup();
-  const { pathname } = useLocation();
-  const { isBottomNavVisible } = useUIStore();
-
-  const isFeatureDetailPage = pathname.includes("/feature/detail/") || 
-    (pathname.startsWith("/folder/") && !pathname.includes("/folder/create")) ||
-    pathname.startsWith("/p/user/") ||
-    pathname.startsWith("/profile") ||
-    pathname.startsWith("/tool/");
-  const showBottomNav = !isFeatureDetailPage && isBottomNavVisible;
   
   return (
     <div className="min-h-dvh bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
@@ -103,14 +94,15 @@ function RootLayout() {
       <PageViewTracker />
       {/* <Header /> */}
       {/* 메인 모바일 뷰 컨테이너 (최대 너비 512px) */}
-      {/* <main className="pt-14 pb-14 max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800"> */}
       <main className={cn(
-        "max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800",
-        showBottomNav ? "pb-32" : "pb-0"
+        "relative max-w-lg mx-auto min-h-dvh bg-white dark:bg-surface-900 shadow-soft-lg border-x border-surface-100 dark:border-surface-800 overflow-x-clip",
+        "pb-0"
       )}>
         <Outlet />
+        {/* Sidebar: 콘텐츠 영역 내부에서 열림 */}
+        <Sidebar />
       </main>
-      {showBottomNav && <BottomNav />}
+      
       <AuthModal />
       <Toaster position="top-center" expand={false} richColors />
       
