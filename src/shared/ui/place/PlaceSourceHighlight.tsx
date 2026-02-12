@@ -116,11 +116,11 @@ export function PlaceSourceHighlight({
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      {/* 소셜 언급 */}
+      {/* 미디어 언급 */}
       {hasAnySocialSource && (
         <div>
           <span className="text-[13px] font-bold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-            소셜 언급
+            미디어 언급
           </span>
           <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide">
             {/* 유튜브 */}

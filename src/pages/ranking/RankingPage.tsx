@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
+import { MainHeader } from "@/widgets";
 import { ThemeSelector } from "./ui/ThemeSelector";
 import { RegionSelector } from "./ui/RegionSelector";
 import { RankingList, RankingPlace } from "./ui/RankingList";
@@ -74,32 +74,23 @@ export function RankingPage() {
 
   return (
     <div className="min-h-dvh bg-surface-50 dark:bg-surface-950 pb-20">
-      <DetailHeader 
-        type="place" 
-        title="테마 랭킹" 
-        onBack={() => window.history.back()} 
-      />
+      <MainHeader tabs={[]} activeTab="" title="랭킹" />
       
-      <div className="bg-white dark:bg-surface-900 sticky top-0 z-20 shadow-sm">
-        <ThemeSelector 
-          selectedTheme={selectedTheme} 
-          onSelectTheme={setSelectedTheme} 
-        />
-        <RegionSelector 
-          selectedRegion={selectedRegion} 
-          onSelectRegion={setSelectedRegion} 
-        />
-        
-        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-950 border-b border-surface-200 dark:border-surface-800 text-sm text-surface-500">
-          <span className="font-bold text-primary-600">{getThemeNameByCode(selectedTheme)}</span>
-          <span> 테마의 </span>
-          <span className="font-bold text-surface-900 dark:text-surface-100">{selectedRegion}</span>
-          <span> 랭킹입니다.</span>
+      <div className="pt-14">
+        <div className="bg-white dark:bg-surface-900 sticky top-14 z-20 shadow-sm">
+          <ThemeSelector 
+            selectedTheme={selectedTheme} 
+            onSelectTheme={setSelectedTheme} 
+          />
+          <RegionSelector 
+            selectedRegion={selectedRegion} 
+            onSelectRegion={setSelectedRegion} 
+          />
         </div>
-      </div>
 
-      <div className="mt-2">
-        <RankingList places={places} isLoading={isLoading} />
+        <div className="mt-2">
+          <RankingList places={places} isLoading={isLoading} />
+        </div>
       </div>
     </div>
   );

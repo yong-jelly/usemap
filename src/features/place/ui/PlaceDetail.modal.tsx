@@ -836,7 +836,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 return (
                   <div className="mt-2 mb-3">
                     <span className="text-[13px] font-bold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
-                      사람들이 이곳을 저장하는 이유
+                      이곳의 매력 포인트
                     </span>
                     <div className="flex items-center gap-2 mt-2 overflow-x-auto scrollbar-hide">
                       {sortedKeywords.map((keyword: any) => {
@@ -895,7 +895,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               {/* <PlaceFeatureTags ... /> */}
             </div>
 
-            <div className="space-y-8 py-4">
+            <div className="space-y-4 py-4">
               {/* {details?.road && (
                 <div className="px-4">
                   <div className="p-4 bg-surface-50 dark:bg-surface-900 rounded-xl">
@@ -904,187 +904,138 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               )} */}
 
-              <section id="review-section" className="py-2">
-                {editingReviewId || showReviewForm ? (
-                  // 수정 중이거나 작성 중일 때는 폼만 표시
-                  <div className="px-4 mb-4">
-                    {editingReviewId && filteredReviews.find(r => r.id === editingReviewId) ? (
-                      <ReviewForm
-                        initialRating={filteredReviews.find(r => r.id === editingReviewId)!.score}
-                        initialComment={filteredReviews.find(r => r.id === editingReviewId)!.review_content}
-                        initialTagCodes={filteredReviews.find(r => r.id === editingReviewId)!.tags.map(t => t.code)}
-                        initialIsPrivate={filteredReviews.find(r => r.id === editingReviewId)!.is_private}
-                        initialDate={filteredReviews.find(r => r.id === editingReviewId)!.created_at?.split('T')[0]}
-                        initialIsDrinking={filteredReviews.find(r => r.id === editingReviewId)!.is_drinking ?? false}
-                        initialBottles={filteredReviews.find(r => r.id === editingReviewId)!.drinking_bottles ?? 1}
-                        initialImages={filteredReviews.find(r => r.id === editingReviewId)!.images || []}
-                        availableTags={availableTags}
-                        isUploading={isUploading}
-                        onSubmit={(data) => handleSaveEditReview(editingReviewId, data)}
-                        onCancel={resetReviewForm}
-                      />
-                    ) : showReviewForm ? (
-                      <ReviewForm
-                        availableTags={availableTags}
-                        isUploading={isUploading}
-                        onSubmit={handleSaveReview}
-                        onCancel={resetReviewForm}
-                      />
-                    ) : null}
-                  </div>
-                ) : publicReviewsCount > 0 ? (
-                  <>
-                    <div className="flex flex-col gap-3 px-4 mb-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium flex items-center gap-2">
-                          리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
-                        </h3>
-                        <div className="flex items-center gap-3">
-                          {/* UI/UX 테스트용 버튼 */}
-                          <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg mr-2">
-                            <button 
-                              onClick={removeTestReview}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="리뷰 1개 제거"
+              {(editingReviewId || showReviewForm || publicReviewsCount > 0) && (
+                <section id="review-section" className="py-2">
+                  {editingReviewId || showReviewForm ? (
+                    // 수정 중이거나 작성 중일 때는 폼만 표시
+                    <div className="px-4 mb-4">
+                      {editingReviewId && filteredReviews.find(r => r.id === editingReviewId) ? (
+                        <ReviewForm
+                          initialRating={filteredReviews.find(r => r.id === editingReviewId)!.score}
+                          initialComment={filteredReviews.find(r => r.id === editingReviewId)!.review_content}
+                          initialTagCodes={filteredReviews.find(r => r.id === editingReviewId)!.tags.map(t => t.code)}
+                          initialIsPrivate={filteredReviews.find(r => r.id === editingReviewId)!.is_private}
+                          initialDate={filteredReviews.find(r => r.id === editingReviewId)!.created_at?.split('T')[0]}
+                          initialIsDrinking={filteredReviews.find(r => r.id === editingReviewId)!.is_drinking ?? false}
+                          initialBottles={filteredReviews.find(r => r.id === editingReviewId)!.drinking_bottles ?? 1}
+                          initialImages={filteredReviews.find(r => r.id === editingReviewId)!.images || []}
+                          availableTags={availableTags}
+                          isUploading={isUploading}
+                          onSubmit={(data) => handleSaveEditReview(editingReviewId, data)}
+                          onCancel={resetReviewForm}
+                        />
+                      ) : showReviewForm ? (
+                        <ReviewForm
+                          availableTags={availableTags}
+                          isUploading={isUploading}
+                          onSubmit={handleSaveReview}
+                          onCancel={resetReviewForm}
+                        />
+                      ) : null}
+                    </div>
+                  ) : publicReviewsCount > 0 ? (
+                    <>
+                      <div className="flex flex-col gap-3 px-4 mb-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-medium flex items-center gap-2">
+                            리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
+                          </h3>
+                          <div className="flex items-center gap-3">
+                            {/* UI/UX 테스트용 버튼 */}
+                            <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg mr-2">
+                              <button 
+                                onClick={removeTestReview}
+                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                                title="리뷰 1개 제거"
+                              >
+                                -
+                              </button>
+                              <button 
+                                onClick={() => addRandomReviews(1)}
+                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                                title="랜덤 리뷰 1개 추가"
+                              >
+                                +
+                              </button>
+                              <button 
+                                onClick={() => addRandomReviews(5)}
+                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
+                                title="랜덤 리뷰 5개 추가"
+                              >
+                                *
+                              </button>
+                            </div>
+
+                            {publicReviewsCount > 5 && (
+                              <button 
+                                onClick={() => setShowAllReviews(true)} 
+                                className="text-[13px] font-medium text-primary-600"
+                              >
+                                전체보기 ({publicReviewsCount})
+                              </button>
+                            )}
+                            {!showReviewForm && (
+                              <button 
+                                onClick={() => {
+                                  if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                                  setShowReviewForm(true);
+                                }}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
+                              >
+                                <Plus className="size-3.5" />
+                                추가
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {isAuthenticated && myReview && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
+                              className={cn(
+                                "px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
+                                showOnlyMyReviews 
+                                  ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
+                                  : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
+                              )}
                             >
-                              -
-                            </button>
-                            <button 
-                              onClick={() => addRandomReviews(1)}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="랜덤 리뷰 1개 추가"
-                            >
-                              +
-                            </button>
-                            <button 
-                              onClick={() => addRandomReviews(5)}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="랜덤 리뷰 5개 추가"
-                            >
-                              *
+                              내 리뷰만 보기
                             </button>
                           </div>
-
-                          {publicReviewsCount > 5 && (
-                            <button 
-                              onClick={() => setShowAllReviews(true)} 
-                              className="text-[13px] font-medium text-primary-600"
-                            >
-                              전체보기 ({publicReviewsCount})
-                            </button>
-                          )}
-                          {!showReviewForm && (
-                            <button 
-                              onClick={() => {
-                                if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                                setShowReviewForm(true);
-                              }}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
-                            >
-                              <Plus className="size-3.5" />
-                              추가
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </div>
                       
-                      {isAuthenticated && myReview && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
-                            className={cn(
-                              "px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
-                              showOnlyMyReviews 
-                                ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
-                                : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
-                            )}
-                          >
-                            내 리뷰만 보기
-                          </button>
+                      {filteredReviews.length > 0 ? (
+                        <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+                          {filteredReviews.map(review => (
+                            <ReviewCard
+                              key={review.id}
+                              variant="compact"
+                              review={review}
+                              isMyReview={review.is_my_review}
+                              onEdit={() => setEditingReviewId(review.id)}
+                              onDelete={() => setShowDeleteReviewConfirm(review.id)}
+                              onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
+                              onImageClick={(images, index) => setImageViewerState({
+                                isOpen: true,
+                                images,
+                                initialIndex: index
+                              })}
+                            />
+                          ))}
                         </div>
-                      )}
-                    </div>
-                    
-                    {filteredReviews.length > 0 ? (
-                      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                        {filteredReviews.map(review => (
-                          <ReviewCard
-                            key={review.id}
-                            variant="compact"
-                            review={review}
-                            isMyReview={review.is_my_review}
-                            onEdit={() => setEditingReviewId(review.id)}
-                            onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                            onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                            onImageClick={(images, index) => setImageViewerState({
-                              isOpen: true,
-                              images,
-                              initialIndex: index
-                            })}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                        <p className="text-sm text-surface-400">
-                          작성한 리뷰가 없습니다
-                        </p>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="px-4 mb-4">
-                    {showReviewForm ? (
-                      <ReviewForm
-                        availableTags={availableTags}
-                        isUploading={isUploading}
-                        onSubmit={handleSaveReview}
-                        onCancel={resetReviewForm}
-                      />
-                    ) : (
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium">리뷰</h3>
-                          <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg">
-                            <button 
-                              onClick={removeTestReview}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="리뷰 1개 제거"
-                            >
-                              -
-                            </button>
-                            <button 
-                              onClick={() => addRandomReviews(1)}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="랜덤 리뷰 1개 추가"
-                            >
-                              +
-                            </button>
-                            <button 
-                              onClick={() => addRandomReviews(5)}
-                              className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                              title="랜덤 리뷰 5개 추가"
-                            >
-                              *
-                            </button>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => {
-                            if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                            setShowReviewForm(true);
-                          }}
-                          className="py-6 w-full text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors group"
-                        >
-                          <p className="text-sm text-surface-400 group-hover:text-primary-500 transition-colors">
-                            리뷰가 없습니다. 첫 리뷰를 작성해보세요!
+                      ) : publicReviewsCount > 0 ? (
+                        <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                          <p className="text-sm text-surface-400">
+                            작성한 리뷰가 없습니다
                           </p>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </section>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+                </section>
+              )}
 
               {Array.isArray(details?.menus) && details.menus.length > 0 && (
                 <section className="py-2">

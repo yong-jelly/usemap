@@ -30,7 +30,7 @@ export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorPro
               )}
             >
               <span className="mr-1">{theme.emoji}</span>
-              {theme.display_name}
+              {theme.theme_name}
             </button>
           ))}
         </div>

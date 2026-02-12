@@ -110,6 +110,22 @@ export function useMyFeed(
 }
 
 /**
+ * 구독 피드 무한 스크롤 조회
+ */
+export function useSubscriptionFeed(options: { enabled?: boolean } = {}) {
+  return useInfiniteQuery({
+    queryKey: [...folderKeys.all, "subscriptionFeed"],
+    queryFn: ({ pageParam = 0 }) => folderApi.getSubscriptionFeed({ limit: 20, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length < 20) return undefined;
+      return allPages.length * 20;
+    },
+    ...options,
+  });
+}
+
+/**
  * 공개 피드 조회 (타입별)
  */
 export function usePublicFeed(

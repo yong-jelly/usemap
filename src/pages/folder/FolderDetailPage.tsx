@@ -88,6 +88,15 @@ function InviteCodeInput({
             'INVALID_CODE': '초대 코드가 올바르지 않습니다.',
             'CODE_EXPIRED': '초대 코드가 만료되었습니다.',
           };
+          
+          if (result.error === 'LOGIN_REQUIRED') {
+            const { openLogin } = useAuthModalStore.getState();
+            if (window.confirm('초대 코드가 확인되었습니다. 폴더를 구독하고 입장하시려면 로그인이 필요합니다. 로그인하시겠습니까?')) {
+              openLogin();
+            }
+            return;
+          }
+
           setErrorMsg(errorMessages[result.error || ''] || '알 수 없는 오류가 발생했습니다.');
         }
       },
@@ -829,23 +838,10 @@ export function FolderDetailPage() {
               </Button>
             </div>
           ) : access?.access === 'INVITE_CODE_REQUIRED' ? (
-            !isAuthenticated ? (
-              <div className="flex flex-col items-center justify-center py-40 p-6 text-center">
-                <div className="p-6 rounded-full bg-primary-100 dark:bg-primary-900/20 mb-6">
-                  <Key className="size-12 text-primary-500" />
-                </div>
-                <h2 className="text-2xl font-bold mb-2">로그인이 필요합니다</h2>
-                <p className="text-surface-500 mb-8">이 폴더에 접근하려면 로그인 후 초대 코드를 입력해주세요.</p>
-                <Button onClick={() => openLogin()} className="font-bold">
-                  로그인하기
-                </Button>
-              </div>
-            ) : (
-              <InviteCodeInput 
-                folderId={id!} 
-                onSuccess={() => refetchAccess()} 
-              />
-            )
+            <InviteCodeInput 
+              folderId={id!} 
+              onSuccess={() => refetchAccess()} 
+            />
           ) : (
             <>
               {/* 폴더 정보 요약 */}

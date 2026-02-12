@@ -228,6 +228,17 @@ export const folderApi = {
   },
 
   /**
+   * 구독 피드 조회 (최신순, 구독한 소스만)
+   */
+  getSubscriptionFeed: async (params: { limit?: number; offset?: number } = {}) => {
+    const response = await apiClient.rpc<any>("v1_get_subscription_feed", {
+      p_limit: params.limit || 20,
+      p_offset: params.offset || 0,
+    });
+    return response.data;
+  },
+
+  /**
    * 기본 폴더 생성 (필요시)
    */
   ensureDefaultFolder: async () => {

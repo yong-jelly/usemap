@@ -42,6 +42,9 @@ import { UserSharedFolderPage } from "@/pages/profile/UserSharedFolderPage";
 import { FolderCreatePage } from "@/pages/folder/FolderCreatePage";
 import { FolderDetailPage } from "@/pages/folder/FolderDetailPage";
 
+// My Pages
+import { SubscriptionFeedPage } from "@/pages/my/SubscriptionFeedPage";
+
 // Place Pages
 import { PlaceDetailPage } from "@/pages/place/PlaceDetailPage";
 import { PlaceDetailModal } from "@/features/place/ui/PlaceDetail.modal";
@@ -208,6 +211,11 @@ const router = createBrowserRouter([
           { path: "create", element: <FolderCreatePage /> },
           { path: ":id", element: <FolderDetailPage /> },
         ],
+      },
+      // My Pages
+      {
+        path: "my/feed/subscription",
+        element: <SubscriptionFeedPage />,
       },
       // 장소 상세 페이지 라우트
       {
