@@ -649,6 +649,19 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     return names[domain] || domain;
   };
 
+  const handleReviewClick = () => {
+    if (publicReviewsCount === 0) {
+      if (!isAuthenticated) return alert('로그인이 필요합니다.');
+      setShowReviewForm(true);
+      // 스크롤을 리뷰 섹션으로 이동
+      setTimeout(() => {
+        document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" />
@@ -803,7 +816,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 reviewsCount={details?.interaction?.place_reviews_count || 0}
                 visitCount={details?.interaction?.visit_count || visitStats?.visit_count || 0}
                 featuresCount={details?.features?.length || 0}
-                onReviewClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onReviewClick={handleReviewClick}
                 onVisitClick={() => setShowVisitHistoryModal(true)}
                 onFeaturesClick={() => document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' })}
                 youtubeCount={youtubeFeatures.length}
@@ -904,7 +917,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               )} */}
 
-              {(editingReviewId || showReviewForm || publicReviewsCount > 0) && (
+              {(editingReviewId || showReviewForm || publicReviewsCount > 0) ? (
                 <section id="review-section" className="py-2">
                   {editingReviewId || showReviewForm ? (
                     // 수정 중이거나 작성 중일 때는 폼만 표시
@@ -1034,6 +1047,25 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                       ) : null}
                     </>
                   ) : null}
+                </section>
+              ) : (
+                <section id="review-section" className="py-2 px-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium">리뷰</h3>
+                    <button 
+                      onClick={() => {
+                        if (!isAuthenticated) return alert('로그인이 필요합니다.');
+                        setShowReviewForm(true);
+                      }}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
+                    >
+                      <Plus className="size-3.5" />
+                      첫 리뷰 작성하기
+                    </button>
+                  </div>
+                  <div className="py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                    <p className="text-sm text-surface-400">아직 작성된 리뷰가 없습니다.</p>
+                  </div>
                 </section>
               )}
 
