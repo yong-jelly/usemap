@@ -579,13 +579,23 @@ export const placeApi = {
 
   /**
    * 장소 ID 목록으로 상세 정보 목록을 조회합니다.
+   * 클라이언트에서 정렬: features 개수 많은 순 → created_at 최신순
    * @param placeIds 장소 ID 배열
    */
   listPlacesByIds: async (placeIds: string[]) => {
     const response = await apiClient.rpc<{ place_data: Place }>("v1_list_places_by_ids", {
       p_place_ids: placeIds,
     });
-    return response.data;
+    const data = response.data ?? [];
+    data.sort((a, b) => {
+      const aFeatures = a.place_data?.features?.length ?? 0;
+      const bFeatures = b.place_data?.features?.length ?? 0;
+      if (bFeatures !== aFeatures) return bFeatures - aFeatures;
+      const aAt = a.place_data?.created_at ?? "";
+      const bAt = b.place_data?.created_at ?? "";
+      return new Date(bAt).getTime() - new Date(aAt).getTime();
+    });
+    return data;
   },
 
   /**

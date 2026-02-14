@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useIntersection } from "@/shared/lib/use-intersection";
 import { useNavigate } from "react-router";
 import { 
@@ -9,6 +9,117 @@ import {
   History,
   Loader2
 } from "lucide-react";
+
+/**
+ * 검색 포커스 오버레이 - 입력 시 SearchPage 전체 리렌더 방지로 키보드 딜레이 완화
+ */
+function SearchFocusOverlay({
+  onSearch,
+  onBack,
+  history,
+  clearHistory,
+  removeFromHistory,
+}: {
+  onSearch: (query: string) => void;
+  onBack: () => void;
+  history: string[];
+  clearHistory: () => void;
+  removeFromHistory: (item: string) => void;
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-white dark:bg-surface-950 p-0 flex flex-col">
+      <div className="max-w-lg mx-auto w-full flex flex-col h-full bg-white dark:bg-surface-950">
+        <div className="h-[72px] flex items-center px-5 gap-4 border-b border-surface-50 dark:border-surface-900">
+          <button 
+            onClick={onBack}
+            className="p-2 -ml-2 active:scale-90 transition-transform"
+          >
+            <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
+          </button>
+          <div className="flex-1 relative flex items-center">
+            <Search className="absolute left-4 size-4 text-surface-300 stroke-[2px]" />
+            <input 
+              ref={inputRef}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && searchQuery.trim() && onSearch(searchQuery.trim())}
+              placeholder="지역과 음식점 검색"
+              className="w-full h-12 pl-11 pr-10 rounded-xl bg-surface-50 dark:bg-surface-900 border-none text-[16px] outline-none"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 p-1 rounded-full bg-surface-200">
+                <X className="size-3 text-white" />
+              </button>
+            )}
+          </div>
+          <button 
+            onClick={() => searchQuery.trim() && onSearch(searchQuery.trim())}
+            disabled={!searchQuery.trim()}
+            className="text-sm font-medium text-primary-600 disabled:text-surface-300"
+          >
+            검색
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-10">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <History className="size-4 text-surface-400" />
+                <h3 className="text-xs font-medium text-surface-400 uppercase tracking-widest">최근 검색어</h3>
+              </div>
+              {history.length > 0 && (
+                <button 
+                  onClick={clearHistory} 
+                  className="text-[11px] font-medium text-surface-400 uppercase tracking-tight"
+                >
+                  전체 삭제
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {history.length > 0 ? (
+                history.slice(0, 10).map((h, i) => (
+                  <div 
+                    key={i} 
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800"
+                  >
+                    <button 
+                      onClick={() => {
+                        setSearchQuery(h);
+                        inputRef.current?.focus();
+                      }}
+                      className="text-sm font-medium text-surface-700 dark:text-surface-300"
+                    >
+                      {h}
+                    </button>
+                    <button 
+                      onClick={() => removeFromHistory(h)}
+                      className="text-[10px] text-surface-300 font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="w-full flex flex-col items-center justify-center py-10">
+                  <p className="text-sm text-surface-300 font-medium">최근 검색 기록이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 import { useMyAndPublicFolders } from "@/entities/folder/queries";
 import { BottomNav } from "@/widgets/BottomNav";
 import { PlaceCard } from "@/widgets/PlaceCard";
@@ -188,7 +299,6 @@ function ArchiveFolderCard({ folder }: { folder: any }) {
 export function SearchPage() {
   const navigate = useNavigate();
   const { show: showPlaceModal } = usePlacePopup();
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchQueryDisplay, setSearchQueryDisplay] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -201,7 +311,6 @@ export function SearchPage() {
 
   const { history, saveToHistory, clearHistory, removeFromHistory } = useSearchHistory();
   const { setBottomNavVisible } = useUIStore();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { 
     data, 
@@ -229,7 +338,6 @@ export function SearchPage() {
     const trimmed = query.trim();
     if (!trimmed) return;
     
-    setSearchQuery(trimmed);
     setSearchQueryDisplay(trimmed);
     saveToHistory(trimmed);
     setIsSearchFocused(false);
@@ -349,10 +457,7 @@ export function SearchPage() {
             </button>
           )}
           <div 
-            onClick={() => {
-              setIsSearchFocused(true);
-              setTimeout(() => inputRef.current?.focus(), 50);
-            }}
+            onClick={() => setIsSearchFocused(true)}
             className="flex-1 flex items-center h-12 rounded-xl bg-surface-50 dark:bg-surface-900 px-4 transition-all cursor-pointer overflow-hidden"
           >
             <Search className="size-4 text-surface-400 stroke-[2.5px] shrink-0" />
@@ -422,92 +527,15 @@ export function SearchPage() {
         </div>
       </header>
 
-      {/* --- 검색 포커스 모드 (아이콘 + 텍스트) --- */}
+      {/* 검색 포커스 모드 - 입력 시 SearchPage 리렌더 없이 오버레이만 갱신하여 키보드 딜레이 완화 */}
       {isSearchFocused && (
-        <div className="fixed inset-0 z-[60] bg-white dark:bg-surface-950 p-0 flex flex-col">
-          <div className="max-w-lg mx-auto w-full flex flex-col h-full bg-white dark:bg-surface-950">
-            <div className="h-[72px] flex items-center px-5 gap-4 border-b border-surface-50 dark:border-surface-900">
-              <button 
-                onClick={handleBack}
-                className="p-2 -ml-2 active:scale-90 transition-transform"
-              >
-                <ChevronLeft className="size-6 text-surface-900 dark:text-white" />
-              </button>
-              <div className="flex-1 relative flex items-center">
-                <Search className="absolute left-4 size-4 text-surface-300 stroke-[2px]" />
-                <input 
-                  ref={inputRef}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-                  placeholder="지역과 음식점 검색"
-                  className="w-full h-12 pl-11 pr-10 rounded-xl bg-surface-50 dark:bg-surface-900 border-none text-[16px] outline-none"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 p-1 rounded-full bg-surface-200">
-                    <X className="size-3 text-white" />
-                  </button>
-                )}
-              </div>
-              <button 
-                onClick={() => handleSearch(searchQuery)}
-                disabled={!searchQuery.trim()}
-                className="text-sm font-medium text-primary-600 disabled:text-surface-300"
-              >
-                검색
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-10">
-              <div>
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-2">
-                    <History className="size-4 text-surface-400" />
-                    <h3 className="text-xs font-medium text-surface-400 uppercase tracking-widest">최근 검색어</h3>
-                  </div>
-                  {history.length > 0 && (
-                    <button 
-                      onClick={clearHistory} 
-                      className="text-[11px] font-medium text-surface-400 uppercase tracking-tight"
-                    >
-                      전체 삭제
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {history.length > 0 ? (
-                    history.slice(0, 10).map((h, i) => (
-                      <div 
-                        key={i} 
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800"
-                      >
-                        <button 
-                          onClick={() => {
-                            setSearchQuery(h);
-                            inputRef.current?.focus();
-                          }}
-                          className="text-sm font-medium text-surface-700 dark:text-surface-300"
-                        >
-                          {h}
-                        </button>
-                        <button 
-                          onClick={() => removeFromHistory(h)}
-                          className="text-[10px] text-surface-300 font-bold"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="w-full flex flex-col items-center justify-center py-10">
-                      <p className="text-sm text-surface-300 font-medium">최근 검색 기록이 없습니다.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SearchFocusOverlay
+          onSearch={handleSearch}
+          onBack={handleBack}
+          history={history}
+          clearHistory={clearHistory}
+          removeFromHistory={removeFromHistory}
+        />
       )}
 
       {/* 메인 콘텐츠 영역 */}
