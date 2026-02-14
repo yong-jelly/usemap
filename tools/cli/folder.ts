@@ -20,7 +20,7 @@
  * 
  * 예시:
  *   - bun run tools/cli/folder.ts https://naver.me/5R4ugqWr --managed=true
- *   - bun run tools/cli/folder.ts --all --filter-food=false
+ *   - bun run tools/cli/folder.ts --all --filter-food=true
  */
 
 import { resolveShareId } from '../shared/utils';
@@ -29,6 +29,26 @@ import { crawlAndSyncPlaces } from './place';
 import { classifyPlaces, fetchFolderData, syncFolderToDb } from './folder-shared';
 
 import { sql } from '../shared/db';
+
+/**
+ * 적용된 옵션 설정을 로그에 출력
+ */
+function logActiveOptions(opts: { filterFood: boolean; managed?: boolean; updateAll?: boolean }) {
+    console.log('');
+    console.log('─ 적용 옵션 ─');
+    if (opts.filterFood) {
+        console.log('  • filter-food=true : 비음식점 제외 (음식점 220036 + 떡,한과만 tbl_naver_folder_place에 연결)');
+    } else {
+        console.log('  • filter-food=false: 필터링 없음 (모든 장소를 폴더에 연결)');
+    }
+    if (opts.managed !== undefined) {
+        console.log(`  • managed=${opts.managed} : ${opts.managed ? '서비스 관리용 폴더' : '일반 폴더'}`);
+    }
+    if (opts.updateAll) {
+        console.log('  • --all : DB에 등록된 전체 폴더 일괄 처리');
+    }
+    console.log('');
+}
 
 /**
  * 음식점 여부를 판별하여 음식점 place_id 목록 반환
@@ -137,7 +157,12 @@ async function main() {
     // 인자가 하나도 없거나 --all 옵션이 있는 경우 전체 업데이트 시도
     if (updateAll || (!input && args.length === 0)) {
         console.log('--- DB에 등록된 모든 네이버 폴더 최신화 시작 ---');
-        
+        logActiveOptions({
+            filterFood,
+            updateAll: true,
+            ...(args.some(a => a.startsWith('--managed=')) && { managed }),
+        });
+
         try {
             // DB에서 모든 share_id와 url 정보를 가져옴
             const folders = await sql`
@@ -149,7 +174,7 @@ async function main() {
             if (folders.length === 0) {
                 console.log('최신화할 폴더가 DB에 없습니다.');
             } else {
-                console.log(`총 ${folders.length}개의 폴더를 처리합니다. (filterFood: ${filterFood})`);
+                console.log(`총 ${folders.length}개의 폴더를 처리합니다.`);
                 for (const f of folders) {
                     // DB에 저장된 managed 상태를 기본으로 하되, 
                     // CLI 인자로 명시했다면 해당 값을 우선 적용
@@ -162,6 +187,7 @@ async function main() {
         }
     } else if (input) {
         // 특정 폴더만 처리
+        logActiveOptions({ filterFood, managed });
         await processFolder(input, managed, filterFood);
     } else {
         console.log('사용법:');
