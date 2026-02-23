@@ -8,8 +8,8 @@ import type { PlaceUserReview, MyReview } from "@/entities/place/types";
 interface ReviewCardProps {
   /** 리뷰 데이터 */
   review: PlaceUserReview | MyReview;
-  /** 표시 스타일 변형 */
-  variant?: "compact" | "full";
+  /** 표시 스타일 변형: compact=가로스크롤, feed=1열피드, grid=2열그리드, full=상세 */
+  variant?: "compact" | "feed" | "grid" | "full";
   /** 본인 리뷰 여부 (수정/삭제 버튼 노출) */
   isMyReview?: boolean;
   /** 수정/삭제 버튼 노출 여부 (기본 true) */
@@ -193,6 +193,237 @@ export function ReviewCard({
           {is_private && (
             <Lock className="size-3 text-surface-400 ml-2" />
           )}
+        </div>
+    </article>
+  );
+  }
+
+  if (variant === "feed") {
+    return (
+      <article
+        className={cn(
+          "flex gap-3 p-4 rounded-xl border bg-white dark:bg-surface-900 border-surface-100 dark:border-surface-800",
+          onCardClick && "cursor-pointer active:scale-[0.99]"
+        )}
+        onClick={() => onCardClick?.(review.place_id)}
+      >
+        {images && images.length > 0 && (
+          <div
+            className="relative flex-shrink-0 size-[72px] rounded-lg overflow-hidden border border-surface-100 dark:border-surface-800 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              const allFullImages = images.map(
+                (image) => getReviewImageUrl(image.image_path, "full") || ""
+              );
+              onImageClick?.(allFullImages, 0);
+            }}
+          >
+            <img
+              src={getReviewImageUrl(images[0].image_path, "thumbnail")}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+              alt="리뷰"
+            />
+            {images.length > 1 && (
+              <div className="absolute bottom-0 right-0 bg-black/50 text-[10px] text-white px-1 rounded-tl">
+                +{images.length - 1}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <img
+              src={getAvatarUrl(user_profile?.profile_image_url) || "/default-avatar.png"}
+              className={cn(
+                "size-8 rounded-full bg-surface-100 object-cover shrink-0",
+                onProfileClick && "cursor-pointer"
+              )}
+              loading="lazy"
+              decoding="async"
+              alt={user_profile?.nickname || "익명"}
+              onClick={(e) => {
+                if (onProfileClick) {
+                  e.stopPropagation();
+                  onProfileClick(user_id);
+                }
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={cn(
+                    "font-medium text-[13px] truncate",
+                    onProfileClick && "cursor-pointer hover:underline"
+                  )}
+                  onClick={(e) => {
+                    if (onProfileClick) {
+                      e.stopPropagation();
+                      onProfileClick(user_id);
+                    }
+                  }}
+                >
+                  {user_profile?.nickname || "익명"}
+                </span>
+                <span className="text-[11px] text-surface-400 shrink-0">
+                  {safeFormatDate(created_at, { year: 'numeric', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5 text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={cn(
+                      "size-2.5",
+                      i < score ? "fill-current" : "text-surface-100 dark:text-surface-800"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+            {isMyReview && showActions && (
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.();
+                  }}
+                  className="p-1 text-surface-400 hover:text-primary-500"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete?.();
+                  }}
+                  className="p-1 text-surface-400 hover:text-rose-500"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+          <p className={cn(
+            "text-[13px] text-surface-600 dark:text-surface-400 leading-relaxed",
+            !isExpanded && "line-clamp-3"
+          )}>
+            {review_content}
+          </p>
+          {review_content.length > 80 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className="text-[12px] text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 font-medium w-fit"
+            >
+              {isExpanded ? "접기" : "더보기"}
+            </button>
+          )}
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex flex-wrap gap-1 min-w-0">
+              {tags && tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag.code}
+                  className="text-[10px] font-medium text-surface-500 dark:text-surface-400 bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded truncate max-w-[72px]"
+                >
+                  #{tag.label}
+                </span>
+              ))}
+              {tags && tags.length > 2 && (
+                <span className="text-[10px] text-surface-400">+{tags.length - 2}</span>
+              )}
+            </div>
+            {is_private && <Lock className="size-3 text-surface-400 shrink-0" />}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  if (variant === "grid") {
+    const firstImage = images?.[0];
+    return (
+      <article
+        className={cn(
+          "flex flex-col overflow-hidden",
+          onCardClick && "cursor-pointer active:scale-[0.99]"
+        )}
+        onClick={() => onCardClick?.(review.place_id)}
+      >
+        <div
+          className={cn(
+            "aspect-square bg-surface-100 dark:bg-surface-800",
+            firstImage && "cursor-pointer"
+          )}
+          onClick={(e) => {
+            if (firstImage && onImageClick) {
+              e.stopPropagation();
+              const allFullImages = images!.map(
+                (img) => getReviewImageUrl(img.image_path, "full") || ""
+              );
+              onImageClick(allFullImages, 0);
+            }
+          }}
+        >
+          {firstImage ? (
+            <img
+              src={getReviewImageUrl(firstImage.image_path, "thumbnail")}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+              alt="리뷰"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Star className="size-8 text-amber-400/50" />
+            </div>
+          )}
+        </div>
+        <div className="p-2.5 flex flex-col gap-1">
+          <div className="flex items-center gap-0.5 text-amber-400">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={cn(
+                  "size-2.5",
+                  i < score ? "fill-current" : "text-surface-100 dark:text-surface-800"
+                )}
+              />
+            ))}
+          </div>
+          <p className="text-[11px] text-surface-600 dark:text-surface-400 line-clamp-2 leading-tight">
+            {review_content}
+          </p>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[10px] text-surface-400 truncate">
+              {user_profile?.nickname || "익명"}
+            </span>
+            {isMyReview && showActions && (
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.();
+                  }}
+                  className="p-0.5 text-surface-400 hover:text-primary-500"
+                >
+                  <Pencil className="size-3" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete?.();
+                  }}
+                  className="p-0.5 text-surface-400 hover:text-rose-500"
+                >
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </article>
     );

@@ -17,8 +17,6 @@ import {
   Heart,
   Bookmark,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
   Folder,
   MessageCircle,
   Users,
@@ -48,6 +46,7 @@ import { useMyFolders } from "@/entities/folder/queries";
 import { FolderSelectionModal } from "./FolderSelection.modal";
 import { VisitHistoryModal } from "./VisitHistory.modal";
 import { ReviewListModal } from "./ReviewList.modal";
+import { PlaceCommentSheet } from "@/widgets/PlaceCommentSheet";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { 
   Button, 
@@ -263,7 +262,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [activeContentTab, setActiveContentTab] = useState<'all' | 'youtube' | 'community'>('all');
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [showAllMenus, setShowAllMenus] = useState(false);
   const [showOnlyMyReviews, setShowOnlyMyReviews] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [isRequestProcessing, setIsRequestProcessing] = useState(false);
@@ -285,6 +283,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const maxRetries = 10;
 
   const [isUploading, setIsUploading] = useState(false);
+
+  const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState<'menu' | 'review' | 'content'>('review');
+  const initialTabSetForPlace = useRef<string | null>(null);
 
   const [imageViewerState, setImageViewerState] = useState<{
     isOpen: boolean;
@@ -332,15 +334,23 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   }, [details]);
 
   useEffect(() => {
+    if (placeId) initialTabSetForPlace.current = null;
     setCurrentImageIndex(0);
     setShowReviewForm(false);
     setShowAllReviews(false);
-    setShowAllMenus(false);
     setEditingReviewId(null);
     setActiveContentTab('all');
     setShowContentAddForm(false);
     setContentUrlInput('');
   }, [placeId]);
+
+  useEffect(() => {
+    if (!details || details.id !== placeId) return;
+    if (initialTabSetForPlace.current === placeId) return;
+    initialTabSetForPlace.current = placeId;
+    const hasMenus = Array.isArray(details.menus) && details.menus.length > 0;
+    setActiveDetailTab(hasMenus ? 'menu' : 'review');
+  }, [placeId, details]);
 
   useEffect(() => {
     const slider = imageSliderRef.current;
@@ -396,12 +406,32 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const publicReviewsCount = useMemo(() => reviews.filter(r => !r.is_private || r.is_my_review).length, [reviews]);
   const myReview = useMemo(() => reviews.find(r => r.is_my_review), [reviews]);
   const displayedReviews = useMemo(() => showAllReviews ? filteredReviews : filteredReviews.slice(0, 5), [filteredReviews, showAllReviews]);
+
+  const reviewSummary = useMemo(() => {
+    if (filteredReviews.length === 0) return null;
+    const avgScore = filteredReviews.reduce((s, r) => s + r.score, 0) / filteredReviews.length;
+    const fiveStarCount = filteredReviews.filter(r => r.score === 5).length;
+    const fiveStarRatio = fiveStarCount / filteredReviews.length;
+    const tagCounts: Record<string, { label: string; count: number }> = {};
+    filteredReviews.forEach(r => {
+      r.tags?.forEach(t => {
+        const cur = tagCounts[t.code] || { label: t.label, count: 0 };
+        tagCounts[t.code] = { ...cur, count: cur.count + 1 };
+      });
+    });
+    const topTags = Object.entries(tagCounts)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 3)
+      .map(([, v]) => v.label);
+    return { avgScore, fiveStarRatio, fiveStarCount, topTags };
+  }, [filteredReviews]);
+
+  const representativeReviews = useMemo(() => filteredReviews.slice(0, 2), [filteredReviews]);
   
-  const MAX_VISIBLE_MENUS = 6;
   const visibleMenus = useMemo(() => {
     if (!Array.isArray(details?.menus)) return [];
-    return showAllMenus ? details.menus : details.menus.slice(0, MAX_VISIBLE_MENUS);
-  }, [details?.menus, showAllMenus]);
+    return details.menus;
+  }, [details?.menus]);
 
   const hasDemographics = !!(currentUser?.gender_code && currentUser?.age_group_code);
 
@@ -650,15 +680,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   };
 
   const handleReviewClick = () => {
+    setActiveDetailTab('review');
     if (publicReviewsCount === 0) {
       if (!isAuthenticated) return alert('로그인이 필요합니다.');
       setShowReviewForm(true);
-      // 스크롤을 리뷰 섹션으로 이동
       setTimeout(() => {
         document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } else {
-      document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
     }
   };
 
@@ -679,6 +711,17 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           </button>
           
           <div className="flex items-center gap-1">
+            <button 
+              onClick={handleToggleSave}
+              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
+            >
+              <Bookmark className={cn(
+                "size-6", 
+                details?.interaction?.is_saved 
+                  ? "fill-amber-500 text-amber-500" 
+                  : "text-surface-700 dark:text-surface-300"
+              )} />
+            </button>
             <button 
               onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
               className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
@@ -760,54 +803,22 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             </div>
 
             <div className="px-4 pt-4 pb-4 border-b border-surface-50">
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <h1 className="text-2xl font-medium text-surface-900 dark:text-white truncate">{details?.name}</h1>
+                    <h1 className="text-2xl font-semibold text-surface-900 dark:text-white truncate">{details?.name}</h1>
+                    <span className="text-sm text-surface-500 shrink-0">{details?.group1} {details?.group2}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm mb-2">
-                    <span className="font-medium text-surface-500">{details?.group1} {details?.group2} {details?.group3}</span>
-                    <span className="text-surface-200">|</span>
-                    <div className="flex items-center gap-0.5 font-medium text-amber-500">
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <div className="flex items-center gap-0.5 font-semibold text-amber-500">
                       <Star className="size-4 fill-current" />
                       {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
                     </div>
+                    <span className="text-surface-300">·</span>
+                    <span className="text-surface-600 dark:text-surface-400">리뷰 {details?.interaction?.place_reviews_count || 0}</span>
+                    <span className="text-surface-300">·</span>
+                    <span className="text-surface-600 dark:text-surface-400">음식이 맛있어요 · 신선한 재료</span>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={handleToggleLike} className="flex items-center gap-1 p-2 active:opacity-60 transition-opacity">
-                    <Heart className={cn(
-                      "size-6", 
-                      details?.interaction?.is_liked 
-                        ? "fill-rose-500 text-rose-500" 
-                        : "text-surface-700 dark:text-surface-300"
-                    )} />
-                    {details?.interaction?.place_liked_count && details.interaction.place_liked_count > 0 ? (
-                      <span className="text-sm font-medium text-surface-900 dark:text-white">
-                        {details.interaction.place_liked_count}
-                      </span>
-                    ) : null}
-                  </button>
-                  <button onClick={handleToggleSave} className="p-2 active:opacity-60 transition-opacity">
-                    <Bookmark className={cn(
-                      "size-6", 
-                      details?.interaction?.is_saved 
-                        ? "fill-amber-500 text-amber-500" 
-                        : "text-surface-700 dark:text-surface-300"
-                    )} />
-                  </button>
-                  <button 
-                    onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
-                    className="p-2 active:opacity-60 transition-opacity"
-                  >
-                    <Folder className={cn(
-                      "size-6", 
-                      isSavedToAnyFolder 
-                        ? "fill-emerald-500 text-emerald-500" 
-                        : "text-surface-700 dark:text-surface-300"
-                    )} />
-                  </button>
                 </div>
               </div>
 
@@ -818,7 +829,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 featuresCount={details?.features?.length || 0}
                 onReviewClick={handleReviewClick}
                 onVisitClick={() => setShowVisitHistoryModal(true)}
-                onFeaturesClick={() => document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onFeaturesClick={() => {
+                  setActiveDetailTab('content');
+                  setTimeout(() => document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' }), 50);
+                }}
                 youtubeCount={youtubeFeatures.length}
                 placeCount={folderFeatures.length}
                 detectiveCount={publicUserFeatures.length}
@@ -908,294 +922,325 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               {/* <PlaceFeatureTags ... /> */}
             </div>
 
-            <div className="space-y-4 py-4">
-              {/* {details?.road && (
-                <div className="px-4">
-                  <div className="p-4 bg-surface-50 dark:bg-surface-900 rounded-xl">
-                    <p className="text-[14px] leading-relaxed text-surface-600 dark:text-surface-400 whitespace-pre-line">{details.road}</p>
-                  </div>
-                </div>
-              )} */}
+            {/* 탭 바 */}
+            <div className="flex items-center px-4 py-2 border-b border-surface-100 dark:border-surface-800 bg-surface-50/50 dark:bg-surface-900/50">
+              <button
+                onClick={() => setActiveDetailTab('menu')}
+                className={cn(
+                  "flex-1 py-2.5 text-[13px] font-medium",
+                  activeDetailTab === 'menu'
+                    ? "text-surface-900 dark:text-white border-b-2 border-surface-700 dark:border-surface-400"
+                    : "text-surface-500 dark:text-surface-400"
+                )}
+              >
+                메뉴
+              </button>
+              <button
+                onClick={() => setActiveDetailTab('review')}
+                className={cn(
+                  "flex-1 py-2.5 text-[13px] font-medium",
+                  activeDetailTab === 'review'
+                    ? "text-surface-900 dark:text-white border-b-2 border-surface-700 dark:border-surface-400"
+                    : "text-surface-500 dark:text-surface-400"
+                )}
+              >
+                리뷰 {publicReviewsCount}
+              </button>
+              <button
+                onClick={() => setActiveDetailTab('content')}
+                className={cn(
+                  "flex-1 py-2.5 text-[13px] font-medium",
+                  activeDetailTab === 'content'
+                    ? "text-surface-900 dark:text-white border-b-2 border-surface-700 dark:border-surface-400"
+                    : "text-surface-500 dark:text-surface-400"
+                )}
+              >
+                관련 콘텐츠
+              </button>
+            </div>
 
-              {(editingReviewId || showReviewForm || publicReviewsCount > 0) ? (
-                <section id="review-section" className="py-2">
-                  {editingReviewId || showReviewForm ? (
-                    // 수정 중이거나 작성 중일 때는 폼만 표시
-                    <div className="px-4 mb-4">
-                      {editingReviewId && filteredReviews.find(r => r.id === editingReviewId) ? (
-                        <ReviewForm
-                          initialRating={filteredReviews.find(r => r.id === editingReviewId)!.score}
-                          initialComment={filteredReviews.find(r => r.id === editingReviewId)!.review_content}
-                          initialTagCodes={filteredReviews.find(r => r.id === editingReviewId)!.tags.map(t => t.code)}
-                          initialIsPrivate={filteredReviews.find(r => r.id === editingReviewId)!.is_private}
-                          initialDate={filteredReviews.find(r => r.id === editingReviewId)!.created_at?.split('T')[0]}
-                          initialIsDrinking={filteredReviews.find(r => r.id === editingReviewId)!.is_drinking ?? false}
-                          initialBottles={filteredReviews.find(r => r.id === editingReviewId)!.drinking_bottles ?? 1}
-                          initialImages={filteredReviews.find(r => r.id === editingReviewId)!.images || []}
-                          availableTags={availableTags}
-                          isUploading={isUploading}
-                          onSubmit={(data) => handleSaveEditReview(editingReviewId, data)}
-                          onCancel={resetReviewForm}
-                        />
-                      ) : showReviewForm ? (
-                        <ReviewForm
-                          availableTags={availableTags}
-                          isUploading={isUploading}
-                          onSubmit={handleSaveReview}
-                          onCancel={resetReviewForm}
-                        />
-                      ) : null}
-                    </div>
-                  ) : publicReviewsCount > 0 ? (
-                    <>
-                      <div className="flex flex-col gap-3 px-4 mb-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium flex items-center gap-2">
-                            리뷰 <span className="text-primary-500 font-medium">{publicReviewsCount}</span>
-                          </h3>
-                          <div className="flex items-center gap-3">
-                            {/* UI/UX 테스트용 버튼 */}
-                            <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg mr-2">
-                              <button 
-                                onClick={removeTestReview}
-                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                                title="리뷰 1개 제거"
-                              >
-                                -
-                              </button>
-                              <button 
-                                onClick={() => addRandomReviews(1)}
-                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                                title="랜덤 리뷰 1개 추가"
-                              >
-                                +
-                              </button>
-                              <button 
-                                onClick={() => addRandomReviews(5)}
-                                className="size-7 flex items-center justify-center bg-white dark:bg-surface-700 rounded shadow-sm text-surface-600 active:scale-90"
-                                title="랜덤 리뷰 5개 추가"
-                              >
-                                *
-                              </button>
-                            </div>
-
-                            {publicReviewsCount > 5 && (
-                              <button 
-                                onClick={() => setShowAllReviews(true)} 
-                                className="text-[13px] font-medium text-primary-600"
-                              >
-                                전체보기 ({publicReviewsCount})
-                              </button>
-                            )}
-                            {!showReviewForm && (
-                              <button 
-                                onClick={() => {
-                                  if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                                  setShowReviewForm(true);
-                                }}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
-                              >
-                                <Plus className="size-3.5" />
-                                추가
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {isAuthenticated && myReview && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)}
-                              className={cn(
-                                "px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
-                                showOnlyMyReviews 
-                                  ? "bg-primary-500 border-primary-500 text-white shadow-sm shadow-primary-100" 
-                                  : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-500"
-                              )}
-                            >
-                              내 리뷰만 보기
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {filteredReviews.length > 0 ? (
-                        <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                          {filteredReviews.map(review => (
-                            <ReviewCard
-                              key={review.id}
-                              variant="compact"
-                              review={review}
-                              isMyReview={review.is_my_review}
-                              onEdit={() => setEditingReviewId(review.id)}
-                              onDelete={() => setShowDeleteReviewConfirm(review.id)}
-                              onProfileClick={(userId) => navigate(`/p/user/${userId}`)}
-                              onImageClick={(images, index) => setImageViewerState({
-                                isOpen: true,
-                                images,
-                                initialIndex: index
-                              })}
-                            />
-                          ))}
-                        </div>
-                      ) : publicReviewsCount > 0 ? (
-                        <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                          <p className="text-sm text-surface-400">
-                            작성한 리뷰가 없습니다
-                          </p>
-                        </div>
-                      ) : null}
-                    </>
-                  ) : null}
-                </section>
-              ) : (
-                <section id="review-section" className="py-2 px-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium">리뷰</h3>
-                    <button 
-                      onClick={() => {
-                        if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                        setShowReviewForm(true);
-                      }}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-transform"
-                    >
-                      <Plus className="size-3.5" />
-                      첫 리뷰 작성하기
-                    </button>
-                  </div>
-                  <div className="py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                    <p className="text-sm text-surface-400">아직 작성된 리뷰가 없습니다.</p>
-                  </div>
-                </section>
-              )}
-
-              {Array.isArray(details?.menus) && details.menus.length > 0 && (
+            <div className="py-4">
+              {activeDetailTab === 'menu' && (
                 <section className="py-2">
-                  <div className="flex items-center justify-between px-4 mb-3">
-                    <h3 className="text-lg font-medium">메뉴</h3>
-                    <button 
-                      onClick={() => setShowAllMenus(!showAllMenus)} 
-                      className="text-surface-400 p-1"
-                    >
-                      {showAllMenus ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
-                    </button>
-                  </div>
-                  
-                  {showAllMenus ? (
+                  {Array.isArray(details?.menus) && details.menus.length > 0 ? (
                     <div className="grid grid-cols-3 gap-3 px-4">
                       {visibleMenus.map((menu: any, index: number) => (
                         <MenuCard key={index} menu={menu} variant="grid" />
                       ))}
                     </div>
                   ) : (
-                    <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
-                      {visibleMenus.map((menu: any, index: number) => (
-                        <MenuCard key={index} menu={menu} variant="compact" />
-                      ))}
+                    <div className="px-4 py-12 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                      <Utensils className="size-12 mx-auto mb-3 text-surface-300" />
+                      <p className="text-sm text-surface-400">메뉴 정보가 없습니다.</p>
                     </div>
                   )}
                 </section>
               )}
 
-              <section id="content-section" className="px-4 py-6 relative border-t border-surface-50 dark:border-surface-900">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium">관련 콘텐츠</h3>
-                  
-                  <div className="flex items-center gap-2">
-                    {!showContentAddForm && isAuthenticated && (
-                      <button 
-                        onClick={() => setShowContentAddForm(true)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[12px] font-medium rounded-lg active:scale-95 transition-all"
-                      >
-                        <Plus className="size-3.5" />
-                        추가
-                      </button>
-                    )}
+              {activeDetailTab === 'review' && (
+                <section id="review-section" className="py-2">
+                  {(editingReviewId || showReviewForm || publicReviewsCount > 0) ? (
+                    editingReviewId || showReviewForm ? (
+                      <div className="px-4 mb-4">
+                        {editingReviewId && filteredReviews.find(r => r.id === editingReviewId) ? (
+                          <ReviewForm
+                            initialRating={filteredReviews.find(r => r.id === editingReviewId)!.score}
+                            initialComment={filteredReviews.find(r => r.id === editingReviewId)!.review_content}
+                            initialTagCodes={filteredReviews.find(r => r.id === editingReviewId)!.tags.map(t => t.code)}
+                            initialIsPrivate={filteredReviews.find(r => r.id === editingReviewId)!.is_private}
+                            initialDate={filteredReviews.find(r => r.id === editingReviewId)!.created_at?.split('T')[0]}
+                            initialIsDrinking={filteredReviews.find(r => r.id === editingReviewId)!.is_drinking ?? false}
+                            initialBottles={filteredReviews.find(r => r.id === editingReviewId)!.drinking_bottles ?? 1}
+                            initialImages={filteredReviews.find(r => r.id === editingReviewId)!.images || []}
+                            availableTags={availableTags}
+                            isUploading={isUploading}
+                            onSubmit={(data) => handleSaveEditReview(editingReviewId, data)}
+                            onCancel={resetReviewForm}
+                          />
+                        ) : showReviewForm ? (
+                          <ReviewForm
+                            availableTags={availableTags}
+                            isUploading={isUploading}
+                            onSubmit={handleSaveReview}
+                            onCancel={resetReviewForm}
+                          />
+                        ) : null}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Review Header Bar */}
+                        <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-white dark:bg-surface-950 border-b border-surface-100 dark:border-surface-800 mb-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[14px] font-medium text-surface-700 dark:text-surface-300">리뷰 {publicReviewsCount}</span>
+                            <div className="flex items-center gap-2">
+                              {isAuthenticated && myReview && (
+                                <button onClick={() => setShowOnlyMyReviews(!showOnlyMyReviews)} className={cn("px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border", showOnlyMyReviews ? "bg-primary-500 border-primary-500 text-white" : "bg-surface-100 dark:bg-surface-800 border-transparent text-surface-500")}>
+                                  내 리뷰
+                                </button>
+                              )}
+                              {!showReviewForm && (
+                                <button onClick={() => { if (!isAuthenticated) return alert('로그인이 필요합니다.'); setShowReviewForm(true); }} className="flex items-center gap-1 px-3 py-1.5 bg-primary-500 text-white text-[12px] font-medium rounded-lg active:scale-95">
+                                  <Plus className="size-3.5" /> 작성
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
-                    {!showContentAddForm && hasBothTypes && (
-                      <div className="flex bg-surface-100 dark:bg-surface-900 p-0.5 rounded-lg">
-                      <button 
-                        onClick={() => setActiveContentTab('all')}
-                        className={cn(
-                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
-                          activeContentTab === 'all' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+                        {/* Review Summary */}
+                        {reviewSummary && (
+                          <div className="px-4 mb-4">
+                            <div className="rounded-xl bg-surface-50 dark:bg-surface-900/50 border border-surface-100 dark:border-surface-800 p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-0.5 text-amber-400">
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star key={s} className={cn("size-4", s <= Math.round(reviewSummary.avgScore) ? "fill-current" : "text-surface-200 dark:text-surface-700")} />
+                                  ))}
+                                </div>
+                                <span className="text-[15px] font-bold text-surface-900 dark:text-white">{reviewSummary.avgScore.toFixed(1)}</span>
+                                <span className="text-[12px] text-surface-400">({publicReviewsCount}개)</span>
+                              </div>
+                              {reviewSummary.fiveStarRatio > 0 && (
+                                <div className="h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden mb-3">
+                                  <div className="h-full bg-amber-400 rounded-full" style={{ width: `${reviewSummary.fiveStarRatio * 100}%` }} />
+                                </div>
+                              )}
+                              {reviewSummary.topTags.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {reviewSummary.topTags.map((label) => (
+                                    <span key={label} className="text-[11px] font-medium text-surface-500 dark:text-surface-400 bg-surface-100 dark:bg-surface-800 px-2 py-1 rounded-lg"
+                                    >#{label}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         )}
-                      >전체</button>
-                      <button 
-                        onClick={() => setActiveContentTab('youtube')}
-                        className={cn(
-                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
-                          activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+
+                        {/* 대표 리뷰 1~2개 (1열 피드) */}
+                        {representativeReviews.length > 0 ? (
+                          <div className="flex flex-col gap-3 px-4">
+                            {representativeReviews.map(review => (
+                              <ReviewCard key={review.id} variant="feed" review={review} isMyReview={review.is_my_review} onEdit={() => setEditingReviewId(review.id)} onDelete={() => setShowDeleteReviewConfirm(review.id)} onProfileClick={(userId) => navigate(`/p/user/${userId}`)} onImageClick={(images, index) => setImageViewerState({ isOpen: true, images, initialIndex: index })} />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="mx-4 py-8 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
+                            <p className="text-sm text-surface-400">작성한 리뷰가 없습니다</p>
+                          </div>
                         )}
-                      >유튜브</button>
-                      <button 
-                        onClick={() => setActiveContentTab('community')}
-                        className={cn(
-                          "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all", 
-                          activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-400"
+
+                        {/* 전체보기 버튼 */}
+                        {publicReviewsCount > 2 && (
+                          <div className="px-4 mt-4">
+                            <button onClick={() => setShowAllReviews(true)} className="w-full py-3 rounded-xl border border-surface-200 dark:border-surface-700 text-[14px] font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-900/50 active:scale-[0.99]">
+                              전체보기 ({publicReviewsCount})
+                            </button>
+                          </div>
                         )}
-                      >커뮤니티</button>
+
+                        {/* Dev: 테스트 리뷰 추가/제거 */}
+                        {import.meta.env.DEV && (
+                          <div className="flex items-center justify-end gap-1 px-4 mt-2">
+                            <div className="flex items-center gap-1 bg-surface-100 dark:bg-surface-800 p-1 rounded-lg">
+                              <button onClick={removeTestReview} className="size-6 flex items-center justify-center bg-white dark:bg-surface-700 rounded text-surface-500 text-[11px]" title="리뷰 1개 제거">-</button>
+                              <button onClick={() => addRandomReviews(1)} className="size-6 flex items-center justify-center bg-white dark:bg-surface-700 rounded text-surface-500 text-[11px]" title="랜덤 리뷰 1개 추가">+</button>
+                              <button onClick={() => addRandomReviews(5)} className="size-6 flex items-center justify-center bg-white dark:bg-surface-700 rounded text-surface-500 text-[11px]" title="랜덤 리뷰 5개 추가">*</button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )
+                  ) : (
+                    <div className="px-4 py-8">
+                      <div className="flex flex-col items-center justify-center py-12 px-6 rounded-2xl bg-surface-50/80 dark:bg-surface-900/30 border border-dashed border-surface-200 dark:border-surface-800">
+                        <div className="size-16 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center mb-4">
+                          <MessageCircle className="size-8 text-surface-400 dark:text-surface-500" />
+                        </div>
+                        <p className="text-[15px] font-medium text-surface-700 dark:text-surface-300 mb-1">아직 리뷰가 없어요</p>
+                        <p className="text-[13px] text-surface-500 dark:text-surface-400 mb-6 text-center max-w-[260px]">첫 리뷰로 분위기·추천 메뉴를 남겨주세요. 추천 메뉴·대기·분위기 중 하나만 적어도 충분해요</p>
+                        <div className="flex flex-col gap-3 w-full max-w-[240px]">
+                          <button
+                            onClick={() => { if (!isAuthenticated) return alert('로그인이 필요합니다.'); setShowReviewForm(true); }}
+                            className="px-5 py-2.5 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-[14px] font-medium active:scale-[0.98] transition-all"
+                          >
+                            리뷰 작성하기
+                          </button>
+                          <button
+                            onClick={() => { if (!isAuthenticated) return alert('로그인이 필요합니다.'); setShowReviewForm(true); }}
+                            className="text-[12px] text-surface-400 hover:text-surface-600 dark:hover:text-surface-300"
+                          >
+                            사진만 올리기
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2 mt-6">
+                          {['분위기', '맛', '대기', '가격대'].map((prompt) => (
+                            <button
+                              key={prompt}
+                              onClick={() => { if (!isAuthenticated) return alert('로그인이 필요합니다.'); setShowReviewForm(true); }}
+                              className="px-3 py-1.5 rounded-full text-[12px] font-medium bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 border border-surface-200 dark:border-surface-700 hover:bg-surface-200 dark:hover:bg-surface-700 active:scale-95"
+                            >
+                              {prompt} 어땠어요?
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-              </div>
+                </section>
+              )}
 
-                {showContentAddForm ? (
-                  <div className="mb-6">
-                    <ContentForm 
-                      isProcessing={isRequestProcessing}
-                      error={contentFormError}
-                      onSubmit={async (url) => {
-                        await handleAddFeature(url);
-                      }}
-                      onCancel={() => {
-                        setShowContentAddForm(false);
-                        setContentUrlInput('');
-                        setContentFormError(null);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {hasAnyContent ? (
-                      displayFeatures.length > 0 ? (
-                        displayFeatures.map((feature: Feature) => (
-                          <FeatureCard 
-                            key={feature.id} 
-                            feature={feature} 
-                            getPlatformName={getPlatformName}
-                            isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.auth_user_id}
-                            onDelete={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setShowDeleteFeatureConfirm(feature.id);
-                            }}
-                          />
-                        ))
-                      ) : (
-                        <button 
-                          onClick={() => {
-                            if (!isAuthenticated) return alert('로그인이 필요합니다.');
-                            setShowContentAddForm(true);
-                          }}
-                          className="py-6 w-full text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800 hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors group"
-                        >
-                          <p className="text-sm text-surface-400 group-hover:text-primary-500 transition-colors">콘텐츠가 없습니다. 관련 콘텐츠를 추가해보세요!</p>
-                        </button>
-                      )
-                    ) : (
-                      <div className="py-6 text-center bg-surface-50 dark:bg-surface-900/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-800">
-                        <p className="text-sm text-surface-400">콘텐츠가 없습니다.</p>
+              {activeDetailTab === 'content' && (
+                <section id="content-section" className="px-4 py-6 relative">
+                  {showContentAddForm ? (
+                    <div className="mb-4">
+                      <ContentForm 
+                        isProcessing={isRequestProcessing}
+                        error={contentFormError}
+                        onSubmit={async (url) => {
+                          await handleAddFeature(url);
+                        }}
+                        onCancel={() => {
+                          setShowContentAddForm(false);
+                          setContentUrlInput('');
+                          setContentFormError(null);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between gap-3 mb-4">
+                        {hasBothTypes && (
+                          <div className="flex bg-surface-100 dark:bg-surface-900 p-1 rounded-xl">
+                            <button onClick={() => setActiveContentTab('all')} className={cn("px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all", activeContentTab === 'all' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-500")}>전체</button>
+                            <button onClick={() => setActiveContentTab('youtube')} className={cn("px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all", activeContentTab === 'youtube' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-500")}>유튜브</button>
+                            <button onClick={() => setActiveContentTab('community')} className={cn("px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all", activeContentTab === 'community' ? "bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 shadow-sm" : "text-surface-500")}>커뮤니티</button>
+                          </div>
+                        )}
+                        {isAuthenticated && (
+                          <button onClick={() => setShowContentAddForm(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-[13px] font-medium active:scale-[0.98] transition-all shrink-0">
+                            <Plus className="size-4" /> 추가
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
-              </section>
+                      {hasAnyContent && displayFeatures.length > 0 ? (
+                        <div className="flex flex-col gap-3">
+                          {displayFeatures.map((feature: Feature) => (
+                            <FeatureCard 
+                              key={feature.id} 
+                              feature={feature} 
+                              getPlatformName={getPlatformName}
+                              isOwner={isAdmin(currentUser) || feature.user_id === currentUser?.auth_user_id}
+                              onDelete={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowDeleteFeatureConfirm(feature.id);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-16 px-6 rounded-2xl bg-surface-50/80 dark:bg-surface-900/30">
+                          <div className="size-16 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center mb-4">
+                            <Globe className="size-8 text-surface-400 dark:text-surface-500" />
+                          </div>
+                          <p className="text-[15px] font-medium text-surface-700 dark:text-surface-300 mb-1">관련 콘텐츠가 없어요</p>
+                          <p className="text-[13px] text-surface-500 dark:text-surface-400 mb-6 text-center">유튜브, 커뮤니티 링크를 추가해보세요</p>
+                          {isAuthenticated ? (
+                            <button onClick={() => setShowContentAddForm(true)} className="px-5 py-2.5 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-[14px] font-medium active:scale-[0.98] transition-all">
+                              콘텐츠 추가하기
+                            </button>
+                          ) : (
+                            <p className="text-[12px] text-surface-400">로그인 후 추가할 수 있어요</p>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </section>
+              )}
             </div>
           </>
           )}
         </div>
 
+        {/* 하단 고정 영역 */}
+        {!showLoading && (
+          <div className="shrink-0 bg-white dark:bg-surface-950 border-t border-surface-100 dark:border-surface-800 px-4 py-3 pb-safe">
+            <div className="flex items-center gap-2">
+              <a 
+                href={`https://map.naver.com/p/entry/place/${placeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-[2] flex items-center justify-center gap-2 bg-[#4D4DFF] hover:bg-[#4040FF] text-white py-3.5 rounded-2xl transition-all active:scale-[0.98]"
+              >
+                <Map className="size-5" />
+                <span className="text-[15px] font-medium">길찾기</span>
+              </a>
+              <button 
+                onClick={() => setShowCommentSheet(true)}
+                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
+                title="댓글"
+              >
+                <MessageCircle className="size-6" />
+              </button>
+              <button 
+                onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
+                title="폴더"
+              >
+                <Folder className={cn("size-6", isSavedToAnyFolder && "text-emerald-500 fill-current")} />
+              </button>
+              <button 
+                onClick={handleToggleLike}
+                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
+                title="좋아요"
+              >
+                <Heart className={cn("size-6", details?.interaction?.is_liked && "text-rose-500 fill-current")} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Dialog open={!!showDeleteReviewConfirm} onOpenChange={(open) => !open && setShowDeleteReviewConfirm(null)}>
@@ -1253,12 +1298,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           }}
           onDelete={(reviewId) => {
             setShowDeleteReviewConfirm(reviewId);
-            // Modal stays open, dialog appears on top (hopefully)
           }}
-          // onWrite={() => {
-          //   setShowReviewForm(true);
-          //   setShowAllReviews(false);
-          // }}
+          onWrite={() => {
+            setShowReviewForm(true);
+            setShowAllReviews(false);
+          }}
         />
       )}
 
@@ -1267,6 +1311,13 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         initialIndex={imageViewerState.initialIndex}
         isOpen={imageViewerState.isOpen}
         onClose={() => setImageViewerState(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <PlaceCommentSheet 
+        isOpen={showCommentSheet}
+        onClose={() => setShowCommentSheet(false)}
+        placeId={placeId!}
+        placeName={details?.name || ""}
       />
     </div>,
     document.body

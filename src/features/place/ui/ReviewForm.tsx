@@ -179,131 +179,124 @@ export function ReviewForm({
     <div className="flex flex-col rounded-2xl bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden">
       {/* 1. 핵심 입력 섹션 (별점 + 날짜 + 코멘트) */}
       <div className="p-5 space-y-5">
-        {/* 상단: 별점 & 날짜 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <button 
-                key={s} 
-                onClick={() => setRating(s)} 
-                className="p-1 -ml-1 first:ml-0 active:scale-90 transition-transform"
+        {/* 상단: 별점 */}
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <button
+              key={s}
+              onClick={() => setRating(s)}
+              className="p-1 -ml-1 first:ml-0 active:scale-90 transition-transform"
+              disabled={isUploading}
+            >
+              <Star className={cn(
+                "size-7",
+                s <= rating ? "text-amber-400 fill-amber-400" : "text-surface-200 dark:text-surface-700"
+              )} />
+            </button>
+          ))}
+          {rating > 0 && (
+            <span className="ml-2 text-[15px] font-bold text-amber-500">{rating}점</span>
+          )}
+        </div>
+
+        {/* 한줄 후기 입력 */}
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="무엇이 좋/아쉬웠나요? 한 문장도 OK"
+          className="w-full h-28 bg-transparent border-none resize-none text-[16px] leading-relaxed text-surface-900 dark:text-surface-100 placeholder:text-surface-400 focus:ring-0 p-0"
+          maxLength={500}
+          disabled={isUploading}
+        />
+
+        {/* 사진 첨부 (Step 1 - 선택) */}
+        <div className="space-y-2">
+          <span className="text-[12px] text-surface-400">사진 {totalImageCount}/5 (선택)</span>
+          <div
+            className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide"
+            style={{
+              willChange: 'scroll-position',
+              WebkitOverflowScrolling: 'touch',
+              transform: 'translateZ(0)',
+            }}
+          >
+            <label className={cn(
+              "flex-shrink-0 size-16 flex flex-col items-center justify-center rounded-xl bg-surface-50 dark:bg-surface-800 border border-dashed border-surface-300 dark:border-surface-700 text-surface-400 cursor-pointer active:scale-95 transition-all",
+              isUploading && "opacity-50 cursor-not-allowed"
+            )}>
+              <Camera className="size-5 mb-0.5" />
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
                 disabled={isUploading}
-              >
-                <Star className={cn(
-                  "size-7", 
-                  s <= rating ? "text-amber-400 fill-amber-400" : "text-surface-200 dark:text-surface-700"
-                )} />
-              </button>
+              />
+            </label>
+            {existingImages.filter(img => !deletedImageIds.includes(img.id)).map((img) => (
+              <div key={img.id} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
+                <img
+                  src={getReviewImageUrl(img.image_path, "thumbnail")}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                  alt="리뷰"
+                />
+                <button
+                  onClick={() => removeExistingImage(img.id)}
+                  className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
+                  disabled={isUploading}
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
             ))}
-            {rating > 0 && (
-              <span className="ml-2 text-[15px] font-bold text-amber-500">{rating}점</span>
-            )}
+            {reviewPreviews.map((preview, index) => (
+              <div key={`new-${index}`} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
+                <img
+                  src={preview}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                  alt="새 이미지"
+                />
+                <button
+                  onClick={() => removeNewImage(index)}
+                  className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
+                  disabled={isUploading}
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
           </div>
-          
-          <div className="flex items-center gap-2 bg-surface-50 dark:bg-surface-800 px-3 py-1.5 rounded-lg">
-            <Calendar className="size-3.5 text-surface-400" />
+        </div>
+      </div>
+
+      {/* 2. 추가 설정 토글 (태그, 방문일, 비공개, 음주) */}
+      <button
+        onClick={() => setShowOptions(!showOptions)}
+        className="flex items-center justify-center gap-1.5 py-3 border-t border-surface-100 dark:border-surface-800 text-[13px] font-medium text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
+      >
+        <span>태그, 방문일, 추가 설정</span>
+        {showOptions ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+      </button>
+
+      {/* 3. 추가 설정 섹션 */}
+      {showOptions && (
+        <div className="p-5 pt-2 space-y-6 border-t border-surface-100 dark:border-surface-800 bg-surface-50/50 dark:bg-surface-900/50">
+            {/* 방문일 */}
+          <div className="flex items-center gap-2 bg-surface-50 dark:bg-surface-800 px-3 py-2 rounded-lg w-fit">
+            <Calendar className="size-4 text-surface-400" />
             <input
               type="date"
               value={visitDate}
               onChange={(e) => setVisitDate(e.target.value)}
-              className="text-[13px] font-medium bg-transparent border-none outline-none text-surface-600 dark:text-surface-300 p-0 cursor-pointer text-right min-w-[110px]"
+              className="text-[13px] font-medium bg-transparent border-none outline-none text-surface-600 dark:text-surface-300 p-0 cursor-pointer"
               disabled={isUploading}
               max={new Date().toISOString().split('T')[0]}
             />
-          </div>
-        </div>
-
-        {/* 코멘트 입력 */}
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="이 장소는 어떠셨나요? 후기를 남겨주세요."
-          className="w-full h-32 bg-transparent border-none resize-none text-[16px] leading-relaxed text-surface-900 dark:text-surface-100 placeholder:text-surface-400 focus:ring-0 p-0"
-          maxLength={500}
-          disabled={isUploading}
-        />
-      </div>
-
-      {/* 2. 추가 옵션 토글 버튼 */}
-      <button 
-        onClick={() => setShowOptions(!showOptions)}
-        className="flex items-center justify-center gap-1.5 py-3 border-t border-surface-100 dark:border-surface-800 text-[13px] font-medium text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
-      >
-        <span>사진, 태그, 추가 설정</span>
-        {showOptions ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-      </button>
-
-      {/* 3. 추가 옵션 섹션 (사진, 태그, 설정) */}
-      {showOptions && (
-        <div className="p-5 pt-2 space-y-6 border-t border-surface-100 dark:border-surface-800 bg-surface-50/50 dark:bg-surface-900/50">
-          
-          {/* 사진 첨부 */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-surface-500">사진 첨부</span>
-              <span className="text-[11px] text-surface-400">{totalImageCount}/5</span>
-            </div>
-            <div 
-              className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide"
-              style={{ 
-                willChange: 'scroll-position',
-                WebkitOverflowScrolling: 'touch',
-                transform: 'translateZ(0)',
-              }}
-            >
-              <label className={cn(
-                "flex-shrink-0 size-16 flex flex-col items-center justify-center rounded-xl bg-white dark:bg-surface-800 border border-dashed border-surface-300 dark:border-surface-700 text-surface-400 cursor-pointer active:scale-95 transition-all",
-                isUploading && "opacity-50 cursor-not-allowed"
-              )}>
-                <Camera className="size-5 mb-0.5" />
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*" 
-                  multiple 
-                  onChange={handleImageChange} 
-                  disabled={isUploading}
-                />
-              </label>
-              
-              {existingImages.filter(img => !deletedImageIds.includes(img.id)).map((img) => (
-                <div key={img.id} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
-                  <img 
-                    src={getReviewImageUrl(img.image_path, "thumbnail")} 
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover" 
-                    alt="리뷰" 
-                  />
-                  <button 
-                    onClick={() => removeExistingImage(img.id)}
-                    className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
-                    disabled={isUploading}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </div>
-              ))}
-
-              {reviewPreviews.map((preview, index) => (
-                <div key={`new-${index}`} className="relative flex-shrink-0 size-16 rounded-xl overflow-hidden shadow-sm border border-surface-200 dark:border-surface-700">
-                  <img 
-                    src={preview} 
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover" 
-                    alt="새 이미지" 
-                  />
-                  <button 
-                    onClick={() => removeNewImage(index)}
-                    className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full text-white"
-                    disabled={isUploading}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* 태그 선택 */}
@@ -416,7 +409,7 @@ export function ReviewForm({
           )}
           disabled={isUploading || !comment.trim()}
         >
-          {isUploading ? <Loader2 className="size-5 animate-spin text-white" /> : (isEditMode ? "수정 완료" : "작성 완료")}
+          {isUploading ? <Loader2 className="size-5 animate-spin text-white" /> : (isEditMode ? "수정 완료" : "올리기")}
         </Button>
       </div>
     </div>
