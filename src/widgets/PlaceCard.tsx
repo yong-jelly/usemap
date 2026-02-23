@@ -21,12 +21,15 @@ import {
   Clock,
   Car,
   Map,
-  Sparkle
+  Sparkle,
+  UserStar,
+  UserRoundPen
 } from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { useToggleLike, useToggleSave } from "@/entities/place/queries";
 import { PlaceFeatureTags } from "@/shared/ui";
+import { PlaceCommentSheet } from "./PlaceCommentSheet";
 
 interface PlaceCardProps {
   place: any;
@@ -72,6 +75,7 @@ export function PlaceCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFoldersExpanded, setIsFoldersExpanded] = useState(false);
   const [isCommentExpanded, setIsCommentExpanded] = useState(false);
+  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -292,13 +296,16 @@ export function PlaceCard({
 
           {/* 댓글 + 숫자 (채워지는 컬러 없음) */}
           <button 
-            onClick={() => showPopup(place.id)} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCommentSheetOpen(true);
+            }} 
             className="flex items-center gap-1.5 active:opacity-60 transition-opacity"
           >
             <MessageCircle className="size-[26px] text-surface-800 dark:text-surface-200" />
-            {(place.interaction?.place_reviews_count ?? 0) > 0 && (
+            {(place.interaction?.place_comment_count ?? 0) > 0 && (
               <span className="text-[13px] font-medium text-surface-800 dark:text-surface-200">
-                {place.interaction.place_reviews_count}
+                {place.interaction.place_comment_count}
               </span>
             )}
           </button>
@@ -316,17 +323,31 @@ export function PlaceCard({
         </div>
 
         {/* 북마크 */}
-        <button 
-          onClick={handleSave} 
-          className="flex items-center active:opacity-60 transition-opacity"
-        >
-          <Bookmark className={cn(
-            "size-[26px] transition-colors", 
-            isSaved 
-              ? "fill-amber-500 text-amber-500" 
-              : "text-surface-800 dark:text-surface-200"
-          )} />
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            {isReviewed ? (
+              <UserRoundPen className="size-[26px] text-primary-500 fill-primary-500/10" />
+            ) : (
+              <UserStar className="size-[26px] text-surface-800 dark:text-surface-200" />
+            )}
+            {(place.interaction?.place_review_count ?? 0) > 0 && (
+              <span className="text-[13px] font-medium text-surface-800 dark:text-surface-200">
+                {place.interaction.place_review_count}
+              </span>
+            )}
+          </div>
+          <button 
+            onClick={handleSave} 
+            className="flex items-center active:opacity-60 transition-opacity"
+          >
+            <Bookmark className={cn(
+              "size-[26px] transition-colors", 
+              isSaved 
+                ? "fill-amber-500 text-amber-500" 
+                : "text-surface-800 dark:text-surface-200"
+            )} />
+          </button>
+        </div>
       </div>
 
         <div className="cursor-pointer" onClick={() => showPopup(place.id)}>
@@ -413,6 +434,13 @@ export function PlaceCard({
           className="mt-4"
         />
       </div>
+
+      <PlaceCommentSheet 
+        isOpen={isCommentSheetOpen}
+        onClose={() => setIsCommentSheetOpen(false)}
+        placeId={place.id}
+        placeName={place.name}
+      />
     </article>
   );
 }

@@ -175,7 +175,7 @@ BEGIN
                 WHERE EXISTS (SELECT 1 FROM public.tbl_place p WHERE p.id = rfi.pid)
                 ORDER BY pid, added_time DESC
             ) sub
-            ORDER BY added_time DESC
+            ORDER BY added_time DESC, pid
             LIMIT p_limit OFFSET p_offset
         ),
         
@@ -378,7 +378,7 @@ BEGIN
         LEFT JOIN place_interactions pi ON pi.place_id = tf.pid
         LEFT JOIN place_experiences pe ON pe.place_id = tf.pid
         LEFT JOIN place_features pfeat ON pfeat.place_id = tf.pid
-        ORDER BY tf.added_time DESC;
+        ORDER BY tf.added_time DESC, tf.pid;
 
     -- =========================================================
     -- Distance Path: 거리순 정렬 → 바운딩 박스 사전 필터링

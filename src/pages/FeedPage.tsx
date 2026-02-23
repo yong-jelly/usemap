@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useInView } from "react-intersection-observer";
 import { useMyFeed, usePublicFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { PlaceCard } from "@/widgets";
@@ -118,7 +119,11 @@ export function FeedPage() {
     { enabled: !isAuthenticated }
   );
 
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const { ref: observerRef, inView } = useInView({
+    threshold: 0,
+    rootMargin: "400px",
+    triggerOnce: false,
+  });
 
   const communityMap: Record<string, string> = {
     'clien.net': '클리앙',
@@ -202,27 +207,11 @@ export function FeedPage() {
 
   const feedItems = data?.pages.flatMap(page => page) || [];
 
+  // 무한 스크롤: 뷰포트에 감지되면 다음 페이지 로드
   useEffect(() => {
-    if (!isAuthenticated || !hasNextPage || isFetchingNextPage) return;
-
-    const currentTarget = observerTarget.current;
-    if (!currentTarget) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1, rootMargin: '400px' }
-    );
-
-    observer.observe(currentTarget);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage, sortBy, feedItems.length]);
+    if (!isAuthenticated || !inView || !hasNextPage || isFetchingNextPage) return;
+    fetchNextPage();
+  }, [isAuthenticated, inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div 
@@ -394,7 +383,7 @@ export function FeedPage() {
               {feedItems.map((item: any, idx: number) => renderFeedItem(item, idx))}
               
               <div 
-                ref={observerTarget} 
+                ref={observerRef} 
                 className={cn(
                   "py-12 flex justify-center",
                   layout === 'grid' && "col-span-3",

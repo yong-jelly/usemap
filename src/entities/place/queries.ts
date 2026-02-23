@@ -10,6 +10,7 @@ export const placeKeys = {
   reviews: (id: string) => [...placeKeys.all, "reviews", id] as const,
   analysis: (id: string) => [...placeKeys.all, "analysis", id] as const,
   userReviews: (id: string) => [...placeKeys.all, "userReviews", id] as const,
+  placeComments: (id: string) => [...placeKeys.all, "placeComments", id] as const,
   features: (id: string) => [...placeKeys.all, "features", id] as const,
   list: (tab: string, group1?: string | null) => [...placeKeys.all, "list", tab, group1] as const,
   filters: (filters: any) => [...placeKeys.all, "filters", filters] as const,
@@ -68,12 +69,75 @@ export function usePlaceReviews(id: string, limit?: number) {
 
 /**
  * 특정 장소의 사용자 리뷰 목록을 조회하는 Hook
+ * @param options.enabled - false면 쿼리 비활성화 (시트/모달 열릴 때만 조회 권장)
  */
-export function usePlaceUserReviews(id: string, limit?: number) {
+export function usePlaceUserReviews(id: string, limit?: number, options?: { enabled?: boolean }) {
   return useQuery({
+    ...options,
     queryKey: placeKeys.userReviews(id),
     queryFn: () => placeApi.getUserReviews(id, limit),
-    enabled: !!id,
+    enabled: (options?.enabled ?? true) && !!id,
+  });
+}
+
+/**
+ * 장소 댓글 목록을 조회하는 Hook
+ * @param options.enabled - 시트 노출 시점에만 조회하려면 isOpen일 때 true
+ */
+export function usePlaceComments(placeId: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: placeKeys.placeComments(placeId),
+    queryFn: () => placeApi.listPlaceComments(placeId),
+    enabled: (options?.enabled ?? true) && !!placeId,
+  });
+}
+
+/**
+ * 장소 댓글 생성 Mutation Hook
+ */
+export function useCreatePlaceComment(placeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: { content: string; parentCommentId?: string | null; commentLevel?: number }) =>
+      placeApi.createPlaceComment({
+        p_business_id: placeId,
+        p_content: params.content,
+        p_parent_comment_id: params.parentCommentId ?? null,
+        p_comment_level: params.commentLevel ?? 0,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.placeComments(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.all });
+    },
+  });
+}
+
+/**
+ * 장소 댓글 삭제 Mutation Hook
+ */
+export function useDeletePlaceComment(placeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => placeApi.deletePlaceComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.placeComments(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.details(placeId) });
+      queryClient.invalidateQueries({ queryKey: placeKeys.all });
+    },
+  });
+}
+
+/**
+ * 장소 댓글 좋아요 토글 Mutation Hook
+ */
+export function useTogglePlaceCommentLike(placeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => placeApi.togglePlaceCommentLike(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: placeKeys.placeComments(placeId) });
+    },
   });
 }
 

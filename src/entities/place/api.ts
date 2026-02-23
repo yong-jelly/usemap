@@ -578,6 +578,62 @@ export const placeApi = {
   },
 
   /**
+   * 장소 댓글 목록을 중첩 구조로 조회합니다 (v2).
+   */
+  listPlaceComments: async (placeId: string) => {
+    const response = await apiClient.rpc<any>("v2_list_place_comments", {
+      p_place_id: placeId,
+    });
+    const data = response.data;
+    if (!data) return [];
+    if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) return data[0];
+    return Array.isArray(data) ? data : [];
+  },
+
+  /**
+   * 장소에 댓글 또는 답글을 생성합니다.
+   */
+  createPlaceComment: async (params: {
+    p_business_id: string;
+    p_content: string;
+    p_parent_comment_id?: string | null;
+    p_comment_level?: number;
+  }) => {
+    const response = await apiClient.rpc<any>("v1_create_comment_for_place", {
+      p_business_id: params.p_business_id,
+      p_content: params.p_content,
+      p_title: null,
+      p_image_paths: null,
+      p_parent_comment_id: params.p_parent_comment_id ?? null,
+      p_comment_level: params.p_comment_level ?? 0,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0];
+  },
+
+  /**
+   * 장소 댓글을 소프트 삭제합니다 (본인 댓글만).
+   */
+  deletePlaceComment: async (commentId: string) => {
+    const response = await apiClient.rpc<boolean>("v1_delete_place_comment", {
+      p_comment_id: commentId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0] ?? false;
+  },
+
+  /**
+   * 장소 댓글 좋아요를 토글합니다.
+   */
+  togglePlaceCommentLike: async (commentId: string) => {
+    const response = await apiClient.rpc<boolean>("v1_toggle_comment_like_for_place", {
+      p_comment_id: commentId,
+    });
+    if (response.meta.code !== 200) throw new Error(response.meta.message);
+    return response.data[0] ?? false;
+  },
+
+  /**
    * 장소 ID 목록으로 상세 정보 목록을 조회합니다.
    * 클라이언트에서 정렬: features 개수 많은 순 → created_at 최신순
    * @param placeIds 장소 ID 배열
