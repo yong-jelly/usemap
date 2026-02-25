@@ -24,6 +24,8 @@ export interface Folder {
   owner_nickname?: string;
   owner_avatar_url?: string;
   is_place_in_folder?: boolean;
+  /** 최근 저장된 place의 썸네일 1개 URL (images[0] 또는 place_images[0]), 없으면 null */
+  thumbnail_url?: string | null;
   preview_places?: (Partial<Place> & { thumbnail?: string; score?: number; review_count?: number })[];
   is_mine?: boolean;
 }

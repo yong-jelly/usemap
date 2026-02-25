@@ -30,6 +30,8 @@ import { cn } from "@/shared/lib/utils";
 import { useToggleLike, useToggleSave } from "@/entities/place/queries";
 import { PlaceFeatureTags } from "@/shared/ui";
 import { PlaceCommentSheet } from "./PlaceCommentSheet";
+import { SaveToCollectionSheet } from "./SaveToCollectionSheet";
+import { toast } from "sonner";
 
 interface PlaceCardProps {
   place: any;
@@ -76,6 +78,7 @@ export function PlaceCard({
   const [isFoldersExpanded, setIsFoldersExpanded] = useState(false);
   const [isCommentExpanded, setIsCommentExpanded] = useState(false);
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+  const [isCollectionSheetOpen, setIsCollectionSheetOpen] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -95,15 +98,49 @@ export function PlaceCard({
     });
   };
 
-  const handleSave = (e: React.MouseEvent) => {
+  const handleSave = (e: React.MouseEvent, openSheetAfter = false) => {
     e.stopPropagation();
     const newStatus = !isSaved;
     setIsSaved(newStatus);
-    toggleSaveMutation.mutate({ 
-      savedId: place.id, 
-      savedType: 'place', 
-      refId: place.id 
-    });
+    toggleSaveMutation.mutate(
+      {
+        savedId: place.id,
+        savedType: "place",
+        refId: place.id,
+      },
+      {
+        onSuccess: () => {
+          if (newStatus && openSheetAfter) {
+            setIsCollectionSheetOpen(true);
+          } else if (newStatus && !openSheetAfter) {
+            toast("저장됨", {
+              action: {
+                label: "컬렉션에 저장",
+                onClick: () => setIsCollectionSheetOpen(true),
+              },
+              duration: 3000,
+            });
+          }
+        },
+        onError: () => {
+          setIsSaved(!newStatus);
+          toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+        },
+      }
+    );
+  };
+
+  const handleFolderOrSave = (e: React.MouseEvent, openSheet: boolean) => {
+    e.stopPropagation();
+    if (openSheet) {
+      if (isSaved) {
+        setIsCollectionSheetOpen(true);
+      } else {
+        handleSave(e, true);
+      }
+    } else {
+      handleSave(e, false);
+    }
   };
   
   const folders = (place.features || []).filter((f: any) => f.platform_type === "folder");
@@ -336,16 +373,18 @@ export function PlaceCard({
               </span>
             )}
           </div>
-          <button 
-            onClick={handleSave} 
+          <button
+            onClick={(e) => handleFolderOrSave(e, true)}
             className="flex items-center active:opacity-60 transition-opacity"
           >
-            <Bookmark className={cn(
-              "size-[26px] transition-colors", 
-              isSaved 
-                ? "fill-amber-500 text-amber-500" 
-                : "text-surface-800 dark:text-surface-200"
-            )} />
+            <Bookmark
+              className={cn(
+                "size-[26px] transition-colors",
+                isSaved
+                  ? "fill-amber-500 text-amber-500"
+                  : "text-surface-800 dark:text-surface-200"
+              )}
+            />
           </button>
         </div>
       </div>
@@ -435,11 +474,21 @@ export function PlaceCard({
         />
       </div>
 
-      <PlaceCommentSheet 
+      <PlaceCommentSheet
         isOpen={isCommentSheetOpen}
         onClose={() => setIsCommentSheetOpen(false)}
         placeId={place.id}
         placeName={place.name}
+      />
+      <SaveToCollectionSheet
+        isOpen={isCollectionSheetOpen}
+        onClose={() => setIsCollectionSheetOpen(false)}
+        placeId={place.id}
+        placeName={place.name}
+        placeThumbnail={
+          (place.images?.[0] || place.image_urls?.[0] || place.thumbnail) ?? undefined
+        }
+        isPlaceSaved={isSaved}
       />
     </article>
   );

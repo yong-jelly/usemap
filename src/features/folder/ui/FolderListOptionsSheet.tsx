@@ -1,11 +1,10 @@
-import { Share2, Edit3, Trash2, X } from "lucide-react";
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle, 
+import { Share2, Edit3, Trash2 } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
   DrawerDescription,
-  Button 
 } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import type { Folder } from "@/entities/folder/types";
@@ -73,40 +72,41 @@ export function FolderListOptionsSheet({
       onOpenChange={(open) => !open && onClose()}
       dismissible={dismissible}
     >
-      <DrawerContent className="bg-white dark:bg-surface-900 border-t-2 border-[#2B4562]/10 shadow-none rounded-t-[32px] max-w-lg mx-auto">
-        <DrawerHeader className="px-6 py-5 relative flex items-center justify-center">
-          <DrawerTitle className="text-lg text-surface-900 dark:text-white text-center">
+      <DrawerContent className="flex flex-col bg-white dark:bg-surface-950 border-surface-200 dark:border-surface-800 outline-none rounded-t-[28px] shadow-2xl max-w-lg mx-auto">
+        <DrawerHeader className="flex flex-col items-center justify-center px-4 py-4 pb-3 border-b border-surface-100 dark:border-surface-800 shrink-0">
+          <DrawerTitle className="text-[15px] font-bold text-surface-900 dark:text-white mt-1">
             {folder.title}
           </DrawerTitle>
           <DrawerDescription className="sr-only">
             폴더 관리 옵션을 선택하세요.
           </DrawerDescription>
-          <button 
-            onClick={onClose}
-            className="absolute right-6 p-2 -mr-2 text-surface-400 hover:text-surface-600 transition-colors"
-          >
-            <X className="size-6" />
-          </button>
         </DrawerHeader>
 
-        <div className="mx-6 border-b border-surface-100 dark:border-surface-800" />
-
-        <div className="px-4 py-6 pb-10 flex flex-col gap-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={item.onClick}
-              className={cn(
-                "w-full flex items-center gap-4 p-4 rounded-2xl transition-colors",
-                item.variant === "danger"
-                  ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
-                  : "text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800"
-              )}
-            >
-              <item.icon className="size-6" />
-              <span className="text-lg">{item.label}</span>
-            </button>
-          ))}
+        <div
+          className="flex-1 overflow-y-auto min-h-0 overscroll-contain px-4 py-4 pb-10"
+          style={{
+            willChange: "scroll-position",
+            WebkitOverflowScrolling: "touch",
+            transform: "translateZ(0)",
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={item.onClick}
+                className={cn(
+                  "w-full flex items-center gap-4 p-4 rounded-xl transition-colors",
+                  item.variant === "danger"
+                    ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                    : "text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800"
+                )}
+              >
+                <item.icon className="size-5" />
+                <span className="text-[15px] font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

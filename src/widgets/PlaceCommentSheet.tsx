@@ -256,7 +256,7 @@ export function PlaceCommentSheet({ isOpen, onClose, placeId, placeName: _placeN
   return (
     <>
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="h-[85vh] flex flex-col bg-white dark:bg-surface-950 border-surface-200 dark:border-surface-800 outline-none">
+        <DrawerContent className="h-[85vh] flex flex-col bg-white dark:bg-surface-950 border-surface-200 dark:border-surface-800 outline-none rounded-t-[28px] shadow-2xl max-w-lg mx-auto">
           <DrawerHeader className="relative flex flex-col items-center justify-center pb-3 border-b border-surface-100 dark:border-surface-800 shrink-0">
             <DrawerTitle className="text-[15px] font-bold text-surface-900 dark:text-white mt-1">
               댓글

@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router";
 import { useMyFolders } from "@/entities/folder/queries";
 import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
+import { convertToNaverResizeImageUrl } from "@/shared/lib";
+import { Folder } from "lucide-react";
 
 export function FolderCardList() {
   const navigate = useNavigate();
@@ -40,20 +42,40 @@ export function FolderCardList() {
         transform: 'translateZ(0)',
       }}
     >
-      {folders.map((folder) => (
-        <button
-          key={folder.id}
-          onClick={() => navigate(`/folder/${folder.id}`)}
-          className="flex flex-col justify-center w-[160px] h-[80px] p-4 rounded-xl bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 shrink-0 text-left group"
-        >
-          <h3 className="text-sm font-medium text-surface-900 dark:text-white truncate mb-0.5">
-            {folder.title}
-          </h3>
-          <p className="text-xs text-surface-500 dark:text-surface-400">
-            장소 {folder.place_count}개
-          </p>
-        </button>
-      ))}
+      {folders.map((folder) => {
+        const hasThumbnail = !!folder.thumbnail_url;
+        return (
+          <button
+            key={folder.id}
+            onClick={() => navigate(`/folder/${folder.id}`)}
+            className="flex w-[160px] h-[80px] rounded-xl bg-white dark:bg-surface-900 border border-surface-100 dark:border-surface-800 shrink-0 overflow-hidden group"
+          >
+            <div className="w-20 h-full flex-shrink-0 bg-surface-100 dark:bg-surface-800 overflow-hidden">
+              {hasThumbnail ? (
+                <img
+                  src={convertToNaverResizeImageUrl(folder.thumbnail_url!)}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Folder className="size-8 text-surface-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 flex flex-col justify-center p-3 min-w-0 text-left">
+              <h3 className="text-sm font-medium text-surface-900 dark:text-white truncate mb-0.5">
+                {folder.title}
+              </h3>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                장소 {folder.place_count}개
+              </p>
+            </div>
+          </button>
+        );
+      })}
     </HorizontalScroll>
   );
 }

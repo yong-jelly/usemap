@@ -1,5 +1,6 @@
 import { Check, MoreHorizontal, Folder as FolderIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { convertToNaverResizeImageUrl } from "@/shared/lib";
 import type { Folder, FolderPermission } from "@/entities/folder/types";
 import { useUserStore } from "@/entities/user";
 
@@ -41,14 +42,24 @@ export function FolderListItem({
         isSelected && "bg-primary-50/50 dark:bg-primary-900/10"
       )}
     >
-      {/* 폴더 아이콘 */}
+      {/* 폴더 아이콘 / 썸네일 */}
       <div className={cn(
-        "size-[48px] rounded-xl flex items-center justify-center shrink-0 transition-colors",
-        isSelected
+        "size-[48px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-colors",
+        !folder.thumbnail_url && (isSelected
           ? "bg-primary-500 text-white"
-          : "bg-surface-100 dark:bg-surface-800 text-surface-400"
+          : "bg-surface-100 dark:bg-surface-800 text-surface-400")
       )}>
-        <FolderIcon className="size-6 fill-current opacity-80" />
+        {folder.thumbnail_url ? (
+          <img
+            src={convertToNaverResizeImageUrl(folder.thumbnail_url)}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <FolderIcon className="size-6 fill-current opacity-80" />
+        )}
       </div>
 
       {/* 텍스트 정보 */}

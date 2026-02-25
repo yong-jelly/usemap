@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { 
   Clock, 
   Heart, 
+  FolderOpen,
   Bookmark, 
   MapPin, 
   MessageSquare, 
@@ -62,6 +63,11 @@ export function ProfileMenuSection() {
         icon={Heart} 
         label="좋아요" 
         onClick={() => handleNavigation("/profile/liked", "click_liked")} 
+      />
+      <MenuItem 
+        icon={FolderOpen} 
+        label="콜렉션" 
+        onClick={() => handleNavigation("/profile/folder", "click_collection")} 
       />
       <MenuItem 
         icon={Bookmark} 

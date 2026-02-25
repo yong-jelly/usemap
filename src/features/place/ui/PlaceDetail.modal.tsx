@@ -17,7 +17,6 @@ import {
   Heart,
   Bookmark,
   ChevronRight,
-  Folder,
   MessageCircle,
   Users,
   Utensils,
@@ -43,10 +42,10 @@ import {
   useInvalidatePlaceFeatures
 } from "@/entities/place/queries";
 import { useMyFolders } from "@/entities/folder/queries";
-import { FolderSelectionModal } from "./FolderSelection.modal";
 import { VisitHistoryModal } from "./VisitHistory.modal";
 import { ReviewListModal } from "./ReviewList.modal";
 import { PlaceCommentSheet } from "@/widgets/PlaceCommentSheet";
+import { SaveToCollectionSheet } from "@/widgets/SaveToCollectionSheet";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { 
   Button, 
@@ -69,6 +68,7 @@ import { ContentForm } from "./ContentForm";
 import { cn } from "@/shared/lib/utils";
 import { safeFormatDate } from "@/shared/lib/date";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
+import { toast } from "sonner";
 import { 
   requestYouTubeMetaService, 
   requestCommunityMetaService,
@@ -274,7 +274,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [ageGroup, setAgeGroup] = useState<string | null>(null);
   const [showDemographicsForm, setShowDemographicsForm] = useState(false);
 
-  const [showFolderModal, setShowFolderModal] = useState(false);
   const [showVisitHistoryModal, setShowVisitHistoryModal] = useState(false);
   const [showContentAddForm, setShowContentAddForm] = useState(false);
   const [contentUrlInput, setContentUrlInput] = useState('');
@@ -285,6 +284,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const [showSaveToCollectionSheet, setShowSaveToCollectionSheet] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<'menu' | 'review' | 'content'>('review');
   const initialTabSetForPlace = useRef<string | null>(null);
 
@@ -440,9 +440,24 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
     toggleLikeMutation.mutate({ likedId: placeId!, likedType: 'place', refId: placeId! });
   };
 
-  const handleToggleSave = () => {
+  const handleFolderOrSaveBookmark = () => {
     if (!isAuthenticated) return alert('로그인이 필요합니다.');
-    toggleSaveMutation.mutate({ savedId: placeId!, savedType: 'place', refId: placeId! });
+    const isSaved = details?.interaction?.is_saved ?? isSavedToAnyFolder;
+    if (isSaved) {
+      setShowSaveToCollectionSheet(true);
+    } else {
+      toggleSaveMutation.mutate(
+        { savedId: placeId!, savedType: 'place', refId: placeId! },
+        {
+          onSuccess: () => {
+            setShowSaveToCollectionSheet(true);
+          },
+          onError: () => {
+            toast.error('저장에 실패했습니다. 다시 시도해주세요.');
+          },
+        }
+      );
+    }
   };
 
   useEffect(() => {
@@ -711,17 +726,6 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           </button>
           
           <div className="flex items-center gap-1">
-            <button 
-              onClick={handleToggleSave}
-              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
-            >
-              <Bookmark className={cn(
-                "size-6", 
-                details?.interaction?.is_saved 
-                  ? "fill-amber-500 text-amber-500" 
-                  : "text-surface-700 dark:text-surface-300"
-              )} />
-            </button>
             <button 
               onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
               className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
@@ -1225,11 +1229,16 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 <MessageCircle className="size-6" />
               </button>
               <button 
-                onClick={() => isAuthenticated ? setShowFolderModal(true) : alert('로그인이 필요합니다.')}
+                onClick={() => handleFolderOrSaveBookmark()}
                 className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
-                title="폴더"
+                title="저장"
               >
-                <Folder className={cn("size-6", isSavedToAnyFolder && "text-emerald-500 fill-current")} />
+                <Bookmark className={cn(
+                  "size-6",
+                  (details?.interaction?.is_saved ?? isSavedToAnyFolder)
+                    ? "fill-amber-500 text-amber-500"
+                    : "text-surface-500 dark:text-surface-400"
+                )} />
               </button>
               <button 
                 onClick={handleToggleLike}
@@ -1276,7 +1285,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         </DialogContent>
       </Dialog>
 
-      {showFolderModal && <FolderSelectionModal placeId={placeId!} onClose={() => setShowFolderModal(false)} onCloseAll={handleClose} />}
+      <SaveToCollectionSheet
+        isOpen={showSaveToCollectionSheet}
+        onClose={() => setShowSaveToCollectionSheet(false)}
+        placeId={placeId!}
+        placeName={details?.name || ""}
+        placeThumbnail={allImages[0]}
+        isPlaceSaved={details?.interaction?.is_saved ?? isSavedToAnyFolder}
+      />
       
       {showVisitHistoryModal && (
         <VisitHistoryModal 

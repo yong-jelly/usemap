@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ProfileHeader } from "@/features/profile/ui/ProfileHeader";
 import { RecentPlacesTab } from "@/features/profile/ui/RecentPlacesTab";
 import { LikedPlacesTab } from "@/features/profile/ui/LikedPlacesTab";
@@ -11,11 +11,10 @@ import { SubscriberList } from "@/features/profile/ui/SubscriberList";
 import { AnalysisTab } from "@/features/profile/ui/AnalysisTab";
 import { ProfileStatsSection } from "@/features/profile/ui/ProfileStatsSection";
 import { ProfileMenuSection } from "@/features/profile/ui/ProfileMenuSection";
-import { FolderCardList } from "@/features/profile/ui/FolderCardList";
 import { useUserProfile } from "@/entities/user/queries";
 import { useEnsureDefaultFolder } from "@/entities/folder/queries";
 import { useUserStore } from "@/entities/user";
-import { Loader2, ChevronLeft, Settings, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, Settings, Plus } from "lucide-react";
 import { useNavigate, useParams, Navigate } from "react-router";
 import { cn } from "@/shared/lib/utils";
 
@@ -27,6 +26,7 @@ export function ProfilePage() {
   const { mutate: ensureDefaultFolder } = useEnsureDefaultFolder();
   
   const activeTab = tab || "profile";
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
 
   // 페이지 마운트 시 window 스크롤 초기화
   useEffect(() => {
@@ -75,7 +75,7 @@ export function ProfilePage() {
       case "saved": return "저장";
       case "visited": return "방문";
       case "reviews": return "내 리뷰";
-      case "folder": return "맛탐정";
+      case "folder": return "콜렉션";
       case "subscription": return "구독";
       case "subscribers": return "구독자";
       case "analysis": return "분석";
@@ -108,18 +108,6 @@ export function ProfilePage() {
 
         {/* 메뉴 리스트 */}
         <ProfileMenuSection />
-
-        {/* 컬렉션 (맛탐정) */}
-        <div className="mt-4">
-          <button 
-            onClick={() => navigate("/profile/folder")}
-            className="flex items-center justify-between w-full px-5 py-4"
-          >
-            <h2 className="text-lg font-medium text-surface-900 dark:text-white">맛탐정 폴더</h2>
-            <ChevronRight className="w-5 h-5 text-surface-300 dark:text-surface-600" />
-          </button>
-          <FolderCardList />
-        </div>
       </div>
     );
   }
@@ -128,16 +116,26 @@ export function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-neutral-900">
       {/* 서브 페이지 헤더 */}
-      <header className="sticky top-0 z-10 bg-white dark:bg-neutral-900 border-b border-surface-100 dark:border-surface-800 flex items-center px-4 h-14">
-        <button 
-          onClick={() => navigate("/profile")}
-          className="p-2 -ml-2 text-surface-900 dark:text-white mr-2"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <h1 className="text-lg font-medium text-surface-900 dark:text-white">
-          {getTabTitle(activeTab)}
-        </h1>
+      <header className="sticky top-0 z-10 bg-white dark:bg-neutral-900 border-b border-surface-100 dark:border-surface-800 flex items-center justify-between px-4 h-14">
+        <div className="flex items-center min-w-0 flex-1">
+          <button 
+            onClick={() => navigate("/profile")}
+            className="p-2 -ml-2 text-surface-900 dark:text-white mr-2 shrink-0"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-lg font-medium text-surface-900 dark:text-white truncate">
+            {getTabTitle(activeTab)}
+          </h1>
+        </div>
+        {activeTab === "folder" && (
+          <button
+            onClick={() => setShowCreateFolderModal(true)}
+            className="p-2 -mr-2 text-surface-900 dark:text-white shrink-0"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        )}
       </header>
 
       {/* 컨텐츠 영역 */}
@@ -148,7 +146,13 @@ export function ProfilePage() {
         {activeTab === "saved" && <SavedPlacesTab />}
         {activeTab === "visited" && <VisitedPlacesTab />}
         {activeTab === "reviews" && <MyReviewsTab />}
-        {activeTab === "folder" && <MyFolderList />}
+        {activeTab === "folder" && (
+          <MyFolderList
+            createModalOpen={showCreateFolderModal}
+            onOpenCreateModal={() => setShowCreateFolderModal(true)}
+            onCloseCreateModal={() => setShowCreateFolderModal(false)}
+          />
+        )}
         {activeTab === "subscription" && <SubscriptionList />}
         {activeTab === "subscribers" && <SubscriberList />}
       </div>

@@ -179,7 +179,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
             <ChevronLeft className="h-5 w-5 text-surface-600 dark:text-surface-400" />
           </button>
           <h1 className="ml-3 text-lg font-medium text-surface-900 dark:text-surface-50 flex-1">
-            새 맛탐정 폴더
+            콜렉션 만들기
           </h1>
           <Button 
             variant="ghost" 
@@ -200,7 +200,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-surface-900 dark:text-white">
-                폴더 제목 (필수)
+                제목 (필수)
               </label>
               <Input 
                 value={title}
@@ -227,7 +227,7 @@ export function FolderCreateModal({ onClose, onSuccess }: FolderCreateModalProps
               <textarea 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="이 폴더에 대해 설명해주세요."
+                placeholder="이 콜렉션에 대해 설명해주세요."
                 maxLength={50}
                 className="w-full p-4 rounded-xl bg-surface-50 dark:bg-surface-900 border border-surface-100 dark:border-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none h-24 text-base"
               />
