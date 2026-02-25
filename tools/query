@@ -47,3 +47,16 @@ FROM date_series ds
 LEFT JOIN daily_registrations dr ON ds.registration_date = dr.registration_date
 ORDER BY ds.registration_date;
 "
+
+# 최근 14일 검색 기록 목록 (tbl_search_history)
+psql "postgresql://postgres.xyqpggpilgcdsawuvpzn:ZNDqDunnaydr0aFQ@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres" -c "
+SELECT 
+    id, 
+    user_id, 
+    keyword, 
+    result,
+    created_at AT TIME ZONE 'Asia/Seoul' as created_at_kst
+FROM public.tbl_search_history 
+WHERE created_at >= NOW() - INTERVAL '14 days'
+ORDER BY created_at DESC;
+"
