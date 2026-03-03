@@ -167,6 +167,19 @@ export interface MyReview extends PlaceUserReview {
   };
 }
 
+/** collection.places 항목: 최근 추가된 음식점과 썸네일 */
+export interface FeatureCollectionPlace {
+  url: string;
+  place_name?: string;
+}
+
+/** 그룹별 요약 정보 (프론트 중복 제거 및 UI 표시용) */
+export interface FeatureCollection {
+  key: string;
+  name: string;
+  places: FeatureCollectionPlace[];
+}
+
 export interface Feature {
   id: string;
   user_id: string;
@@ -175,6 +188,7 @@ export interface Feature {
   title: string;
   metadata: any;
   created_at: string;
+  collection?: FeatureCollection | null;
 }
 
 export interface PlaceDetails {

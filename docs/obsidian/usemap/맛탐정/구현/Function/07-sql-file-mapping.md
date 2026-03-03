@@ -69,6 +69,8 @@ docs/sql 내 함수 정의 위치. psql로 검증 시 참고.
 | 092_create_v2_get_social_region_info.sql | v2_get_social_region_info |
 | 093_v2_aggr_review_user_places.sql | v2_aggr_review_user_places |
 | 095_update_v1_get_place_features_to_match_v2.sql | v1_get_place_features (업데이트) |
+| 100_update_v1_get_place_features_add_recent.sql | v1_get_place_features (업데이트, recent 등 추가) |
+| 101_update_v1_get_place_features_collection.sql | v1_get_place_features (업데이트, collection 컬럼으로 통합) |
 | 097_create_v2_comment_functions.sql | v2_list_place_comments |
 | 098_update_comment_levels.sql | v2_list_place_comments (업데이트) |
 | 099_update_v1_list_my_folders_add_thumbnail.sql | v1_list_my_folders (업데이트) |

@@ -361,7 +361,7 @@ export function PlaceCard({
 
         {/* 북마크 */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
+          {/* <div className="flex items-center gap-1.5">
             {isReviewed ? (
               <UserRoundPen className="size-[26px] text-primary-500 fill-primary-500/10" />
             ) : (
@@ -372,7 +372,7 @@ export function PlaceCard({
                 {place.interaction.place_review_count}
               </span>
             )}
-          </div>
+          </div> */}
           <button
             onClick={(e) => handleFolderOrSave(e, true)}
             className="flex items-center active:opacity-60 transition-opacity"

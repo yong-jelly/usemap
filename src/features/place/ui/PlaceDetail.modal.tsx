@@ -64,6 +64,7 @@ import {
   PlaceFeatureTags,
   PlaceSourceHighlight
 } from "@/shared/ui";
+import { PlaceIncludedCollections } from "./PlaceIncludedCollections";
 import { ReviewForm } from "./ReviewForm";
 import { ContentForm } from "./ContentForm";
 import { cn } from "@/shared/lib/utils";
@@ -289,6 +290,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showTestButtons, setShowTestButtons] = useState(false);
+  const [showCharmAndMedia, setShowCharmAndMedia] = useState(false);
   const [showSaveToCollectionSheet, setShowSaveToCollectionSheet] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<'menu' | 'review' | 'content'>('review');
   const initialTabSetForPlace = useRef<string | null>(null);
@@ -822,16 +824,27 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
             <div className="px-4 pt-4 pb-4 border-b border-surface-50">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <h1 
-                      className="text-2xl font-semibold text-surface-900 dark:text-white truncate cursor-pointer active:opacity-60"
-                      onClick={() => setShowTestButtons(!showTestButtons)}
-                    >
-                      {details?.name}
-                    </h1>
-                    <span className="text-sm text-surface-500 shrink-0">{details?.group1} {details?.group2}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-sm">
+                  <h1 
+                    className="text-2xl font-semibold text-surface-900 dark:text-white truncate cursor-pointer active:opacity-60 mb-1"
+                    onClick={() => {
+                      setShowCharmAndMedia(prev => !prev);
+                      if (import.meta.env.DEV) setShowTestButtons(prev => !prev);
+                    }}
+                  >
+                    {details?.name}
+                  </h1>
+                  {(details?.road_address || details?.address) && (
+                    <p className="text-sm text-surface-500 mb-1 flex items-center gap-1">
+                      <MapPin className="size-3.5 shrink-0" />
+                      {details?.road_address || details?.address}
+                    </p>
+                  )}
+                  {/* {(details?.group1 || details?.group2 || details?.group3) && (
+                    <p className="text-sm text-surface-400">
+                      {[details?.group1, details?.group2, details?.group3].filter(Boolean).join(" · ")}
+                    </p>
+                  )} */}
+                  {/* <div className="flex items-center gap-1.5 text-sm">
                     <div className="flex items-center gap-0.5 font-semibold text-amber-500">
                       <Star className="size-4 fill-current" />
                       {details?.visitor_reviews_score?.toFixed(1) || "0.0"}
@@ -840,11 +853,11 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                     <span className="text-surface-600 dark:text-surface-400">리뷰 {details?.interaction?.place_reviews_count || 0}</span>
                     <span className="text-surface-300">·</span>
                     <span className="text-surface-600 dark:text-surface-400">음식이 맛있어요 · 신선한 재료</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
-              <PlaceActionRow 
+              {/* <PlaceActionRow 
                 placeId={placeId!}
                 reviewsCount={details?.interaction?.place_reviews_count || 0}
                 visitCount={details?.interaction?.visit_count || visitStats?.visit_count || 0}
@@ -860,16 +873,16 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 detectiveCount={publicUserFeatures.length}
                 communityCount={communityFeatures.length + socialFeatures.length}
                 showStats={false}
-              />
-              {/* 주요 액션 섹션: 5개 버튼 (가운데 정렬) */}
+              /> */}
+              {/* 주요 액션 섹션: 좋아요, 저장, 댓글, 네이버 (박스 없음) */}
               <div className="px-4 mb-6 flex justify-center gap-2">
                 <button 
                   onClick={handleToggleLike}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl transition-all active:scale-95 w-[64px]",
+                    "flex flex-col items-center justify-center gap-1.5 py-2 w-[64px] transition-all active:scale-95",
                     details?.interaction?.is_liked 
-                      ? "bg-rose-50 dark:bg-rose-950/20 text-rose-500" 
-                      : "bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400"
+                      ? "text-rose-500" 
+                      : "text-surface-600 dark:text-surface-400"
                   )}
                 >
                   <Heart className={cn("size-5", details?.interaction?.is_liked && "fill-current")} />
@@ -879,10 +892,10 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 <button 
                   onClick={() => handleFolderOrSaveBookmark()}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl transition-all active:scale-95 w-[64px]",
+                    "flex flex-col items-center justify-center gap-1.5 py-2 w-[64px] transition-all active:scale-95",
                     (details?.interaction?.is_saved ?? isSavedToAnyFolder)
-                      ? "bg-amber-50 dark:bg-amber-950/20 text-amber-500" 
-                      : "bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400"
+                      ? "text-amber-500" 
+                      : "text-surface-600 dark:text-surface-400"
                   )}
                 >
                   <Bookmark className={cn("size-5", (details?.interaction?.is_saved ?? isSavedToAnyFolder) && "fill-current")} />
@@ -891,7 +904,7 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
 
                 <button 
                   onClick={() => setShowCommentSheet(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400 transition-all active:scale-95 w-[64px]"
+                  className="flex flex-col items-center justify-center gap-1.5 py-2 w-[64px] text-surface-600 dark:text-surface-400 transition-all active:scale-95"
                 >
                   <MessageCircle className="size-5" />
                   <span className="text-[10px] font-medium">댓글</span>
@@ -901,9 +914,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                   href={`https://map.naver.com/p/entry/place/${placeId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400 transition-all active:scale-95 w-[64px]"
+                  className="flex flex-col items-center justify-center gap-1.5 py-2 w-[64px] text-surface-600 dark:text-surface-400 transition-all active:scale-95"
                 >
-                  {/* <Map className="size-5" /> */}
                   <MapPin className="size-5" />
                   <span className="text-[10px] font-medium">네이버</span>
                 </a>
@@ -919,8 +931,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 </div>
               )}
 
-              {/* Why people save this - Voted Keywords */}
-              {details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
+              {/* Why people save this - Voted Keywords (음식점 이름 클릭 시 노출) */}
+              {showCharmAndMedia && details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
                 const sortedKeywords = [...details.voted_keyword.details]
                   .filter((t: any) => t.count > 0)
                   .sort((a: any, b: any) => b.count - a.count)
@@ -973,20 +985,27 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 );
               })()}
 
-              <PlaceSourceHighlight 
+              {allFeatures.length > 0 && (
+              <PlaceIncludedCollections
                 features={allFeatures}
-                className="mb-4"
+                placeImages={details?.images || details?.image_urls || []}
                 onFeatureClick={(feature) => {
                   if (feature.platform_type === 'folder') {
                     if (placeIdFromStore) {
                       usePlacePopup.setState({ isOpen: false, placeId: null });
                     }
                     navigate(`/feature/detail/folder/${feature.id}`, { replace: true });
-                  } else {
+                  } else if (feature.platform_type === 'public_user') {
+                    if (placeIdFromStore) {
+                      usePlacePopup.setState({ isOpen: false, placeId: null });
+                    }
+                    navigate(`/folder/${feature.id}`);
+                  } else if (feature.content_url) {
                     window.open(feature.content_url, '_blank');
                   }
                 }}
               />
+              )}
 
               {/* 기존 태그 컴포넌트는 하위 호환성을 위해 유지하되, 출처 관련 태그는 숨김 처리 필요할 수 있음 */}
               {/* <PlaceFeatureTags ... /> */}
