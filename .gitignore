@@ -44,3 +44,6 @@ postgres.session.sql
 
 # Supabase local temp
 supabase/.temp
+
+# MCP config (API 키 등 민감 정보 포함)
+.cursor/mcp.json

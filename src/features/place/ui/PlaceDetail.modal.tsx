@@ -25,7 +25,8 @@ import {
   Clock,
   Car,
   ThumbsUp,
-  Map
+  Map,
+  ExternalLink
 } from "lucide-react";
 import { 
   usePlaceByIdWithRecentView, 
@@ -77,6 +78,8 @@ import {
 import { uploadReviewImage } from "@/shared/lib/storage";
 import type { PlaceUserReview, Feature, ReviewTag, ReviewImage } from "@/entities/place/types";
 import { VOTED_KEYWORD_MAP, KEYWORD_CATEGORY_COLORS } from "@/entities/place/constants";
+
+import { PlaceActionSheet } from "@/widgets/PlaceActionSheet";
 
 /**
  * 장소 상세 모달 컴포넌트
@@ -284,6 +287,8 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [showTestButtons, setShowTestButtons] = useState(false);
   const [showSaveToCollectionSheet, setShowSaveToCollectionSheet] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<'menu' | 'review' | 'content'>('review');
   const initialTabSetForPlace = useRef<string | null>(null);
@@ -727,6 +732,14 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           
           <div className="flex items-center gap-1">
             <button 
+              onClick={() => setShowActionSheet(true)}
+              className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
+              title="추가"
+            >
+              <Plus className="size-6 text-surface-900 dark:text-surface-100" />
+            </button>
+
+            <button 
               onClick={() => navigator.share && navigator.share({ title: details?.name, url: window.location.href })} 
               className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
             >
@@ -810,7 +823,12 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <h1 className="text-2xl font-semibold text-surface-900 dark:text-white truncate">{details?.name}</h1>
+                    <h1 
+                      className="text-2xl font-semibold text-surface-900 dark:text-white truncate cursor-pointer active:opacity-60"
+                      onClick={() => setShowTestButtons(!showTestButtons)}
+                    >
+                      {details?.name}
+                    </h1>
                     <span className="text-sm text-surface-500 shrink-0">{details?.group1} {details?.group2}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm">
@@ -843,15 +861,63 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 communityCount={communityFeatures.length + socialFeatures.length}
                 showStats={false}
               />
+              {/* 주요 액션 섹션: 5개 버튼 (가운데 정렬) */}
+              <div className="px-4 mb-6 flex justify-center gap-2">
+                <button 
+                  onClick={handleToggleLike}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl transition-all active:scale-95 w-[64px]",
+                    details?.interaction?.is_liked 
+                      ? "bg-rose-50 dark:bg-rose-950/20 text-rose-500" 
+                      : "bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400"
+                  )}
+                >
+                  <Heart className={cn("size-5", details?.interaction?.is_liked && "fill-current")} />
+                  <span className="text-[10px] font-medium">좋아요</span>
+                </button>
 
-              {/* UI/UX 테스트용 버튼 (개발 모드에서만 보이거나 임시로 배치) */}
-              <div className="flex gap-1 mb-2 overflow-x-auto scrollbar-hide py-1">
-                <button onClick={() => addRandomFeature('youtube')} className="px-2 py-1 bg-red-100 text-red-700 text-[10px] rounded whitespace-nowrap">+유튜브</button>
-                <button onClick={() => addRandomFeature('folder')} className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] rounded whitespace-nowrap">+폴더</button>
-                <button onClick={() => addRandomFeature('public_user')} className="px-2 py-1 bg-violet-100 text-violet-700 text-[10px] rounded whitespace-nowrap">+맛탐정</button>
-                <button onClick={() => addRandomFeature('community')} className="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] rounded whitespace-nowrap">+커뮤니티</button>
-                <button onClick={removeTestFeature} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] rounded whitespace-nowrap">-제거</button>
+                <button 
+                  onClick={() => handleFolderOrSaveBookmark()}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl transition-all active:scale-95 w-[64px]",
+                    (details?.interaction?.is_saved ?? isSavedToAnyFolder)
+                      ? "bg-amber-50 dark:bg-amber-950/20 text-amber-500" 
+                      : "bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400"
+                  )}
+                >
+                  <Bookmark className={cn("size-5", (details?.interaction?.is_saved ?? isSavedToAnyFolder) && "fill-current")} />
+                  <span className="text-[10px] font-medium">저장</span>
+                </button>
+
+                <button 
+                  onClick={() => setShowCommentSheet(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400 transition-all active:scale-95 w-[64px]"
+                >
+                  <MessageCircle className="size-5" />
+                  <span className="text-[10px] font-medium">댓글</span>
+                </button>
+
+                <a 
+                  href={`https://map.naver.com/p/entry/place/${placeId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400 transition-all active:scale-95 w-[64px]"
+                >
+                  {/* <Map className="size-5" /> */}
+                  <MapPin className="size-5" />
+                  <span className="text-[10px] font-medium">네이버</span>
+                </a>
               </div>
+              {/* UI/UX 테스트용 버튼 (개발 모드에서만 보이거나 임시로 배치) */}
+              {showTestButtons && (
+                <div className="flex gap-1 mb-2 overflow-x-auto scrollbar-hide py-1 animate-in fade-in slide-in-from-top-1">
+                  <button onClick={() => addRandomFeature('youtube')} className="px-2 py-1 bg-red-100 text-red-700 text-[10px] rounded whitespace-nowrap">+유튜브</button>
+                  <button onClick={() => addRandomFeature('folder')} className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] rounded whitespace-nowrap">+폴더</button>
+                  <button onClick={() => addRandomFeature('public_user')} className="px-2 py-1 bg-violet-100 text-violet-700 text-[10px] rounded whitespace-nowrap">+맛탐정</button>
+                  <button onClick={() => addRandomFeature('community')} className="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] rounded whitespace-nowrap">+커뮤니티</button>
+                  <button onClick={removeTestFeature} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] rounded whitespace-nowrap">-제거</button>
+                </div>
+              )}
 
               {/* Why people save this - Voted Keywords */}
               {details?.voted_keyword?.details && details.voted_keyword.details.length > 0 && (() => {
@@ -1208,48 +1274,28 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
           )}
         </div>
 
-        {/* 하단 고정 영역 */}
-        {!showLoading && (
+        {/* 하단 고정 영역 숨김 (상단 액션 섹션으로 통합) */}
+        {/* {!showLoading && (
           <div className="shrink-0 bg-white dark:bg-surface-950 border-t border-surface-100 dark:border-surface-800 px-4 py-3 pb-safe">
             <div className="flex items-center gap-2">
-              <a 
-                href={`https://map.naver.com/p/entry/place/${placeId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-[2] flex items-center justify-center gap-2 bg-[#4D4DFF] hover:bg-[#4040FF] text-white py-3.5 rounded-2xl transition-all active:scale-[0.98]"
-              >
-                <Map className="size-5" />
-                <span className="text-[15px] font-medium">길찾기</span>
-              </a>
               <button 
                 onClick={() => setShowCommentSheet(true)}
-                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 bg-surface-100 dark:bg-surface-800 text-surface-900 dark:text-white py-3.5 rounded-2xl transition-all active:scale-[0.98]"
                 title="댓글"
               >
-                <MessageCircle className="size-6" />
+                <MessageCircle className="size-5" />
+                <span className="text-[15px] font-medium">댓글 {details?.interaction?.place_reviews_count || 0}</span>
               </button>
               <button 
-                onClick={() => handleFolderOrSaveBookmark()}
-                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
-                title="저장"
+                onClick={() => setShowActionSheet(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white py-3.5 rounded-2xl transition-all active:scale-[0.98]"
               >
-                <Bookmark className={cn(
-                  "size-6",
-                  (details?.interaction?.is_saved ?? isSavedToAnyFolder)
-                    ? "fill-amber-500 text-amber-500"
-                    : "text-surface-500 dark:text-surface-400"
-                )} />
-              </button>
-              <button 
-                onClick={handleToggleLike}
-                className="size-[52px] flex items-center justify-center rounded-2xl border border-surface-200 dark:border-surface-800 text-surface-900 dark:text-white active:bg-surface-50 transition-colors"
-                title="좋아요"
-              >
-                <Heart className={cn("size-6", details?.interaction?.is_liked && "text-rose-500 fill-current")} />
+                <Plus className="size-5" />
+                <span className="text-[15px] font-medium">기록하기</span>
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       <Dialog open={!!showDeleteReviewConfirm} onOpenChange={(open) => !open && setShowDeleteReviewConfirm(null)}>
@@ -1334,6 +1380,31 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
         onClose={() => setShowCommentSheet(false)}
         placeId={placeId!}
         placeName={details?.name || ""}
+      />
+
+      <PlaceActionSheet
+        isOpen={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        placeName={details?.name || ""}
+        onAddReview={() => {
+          if (!isAuthenticated) return alert('로그인이 필요합니다.');
+          setShowReviewForm(true);
+          setTimeout(() => {
+            document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }}
+        onAddVisit={() => {
+          if (!isAuthenticated) return alert('로그인이 필요합니다.');
+          setShowVisitHistoryModal(true);
+        }}
+        onAddContent={() => {
+          if (!isAuthenticated) return alert('로그인이 필요합니다.');
+          setActiveDetailTab('content');
+          setShowContentAddForm(true);
+          setTimeout(() => {
+            document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }}
       />
     </div>,
     document.body

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "obsidian-local-rest-api-mcp"],
+      "env": {
+        "OBSIDIAN_API_KEY": "Obsidian 설정 > Local REST API에서 발급한 API 키",
+        "OBSIDIAN_API_URL": "http://127.0.0.1:27123"
+      }
+    }
+  }
+}

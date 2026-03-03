@@ -19,7 +19,7 @@
  *   --filter-food=true/false: 비음식점 필터링 (기본값: true). true인 경우 음식점(카테고리 코드 220036 등)만 DB에 연결함.
  * 
  * 예시:
- *   - bun run tools/cli/folder.ts https://naver.me/5R4ugqWr --managed=true
+ *   - bun run tools/cli/folder.ts 5cbc15faec91402eaf098041df3b1d38
  *   - bun run tools/cli/folder.ts --all --filter-food=true
  */
 

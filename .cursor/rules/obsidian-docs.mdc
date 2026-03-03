@@ -1,0 +1,79 @@
+---
+description: Obsidian 문서 생성 및 Local REST API / MCP 연동 가이드
+globs: docs/obsidian/**/*.md
+alwaysApply: true
+---
+
+# Obsidian 문서 작성 규칙
+
+이 프로젝트의 Obsidian 보관함(`docs/obsidian/usemap`)에 문서를 생성·수정할 때 다음 규칙을 따름.
+
+## 1. 문서 작성 표준
+
+- `docs/**/*.md`에 적용되는 [markdown-standard](.cursor/rules/markdown-standard.mdc) 규칙을 준수함.
+- 최상단에 `생성일: YYYY-MM-DD` 표기.
+- 설계 구조는 ASCII 기반 텍스트 다이어그램으로 표현.
+- 명사형/단축 어투 사용 ("~함", "~임").
+
+## 2. 보관함 경로
+
+- **Vault 경로**: `docs/obsidian/usemap/`
+- **파일 경로**: `{filename}` 또는 `폴더/{filename}` 형태로 지정.
+
+## 3. Local REST API
+
+Obsidian Local REST API 플러그인으로 노트 생성·수정 가능.
+
+| 항목 | 값 |
+|------|-----|
+| Base URL (HTTPS) | `https://127.0.0.1:27124` |
+| Base URL (HTTP) | `http://127.0.0.1:27123` |
+| 인증 | `Authorization: Bearer {API_KEY}` 헤더 |
+
+### 주요 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| PUT | `/vault/{filename}` | 새 파일 생성 또는 기존 파일 전체 덮어쓰기 |
+| POST | `/vault/{filename}` | 기존 파일에 내용 추가 |
+| GET | `/vault/{filename}` | 파일 내용 조회 |
+| PATCH | `/vault/{filename}` | 파일 일부 수정 |
+| DELETE | `/vault/{filename}` | 파일 삭제 |
+| POST | `/search/` | 보관함 검색 |
+
+### 요청 예시 (curl)
+
+```bash
+# 노트 생성/수정
+curl -X PUT "https://127.0.0.1:27124/vault/새문서.md" \
+  -H "Authorization: Bearer {API_KEY}" \
+  -H "Content-Type: text/markdown" \
+  -d "생성일: 2026-03-03
+
+# 제목
+내용..."
+```
+
+## 4. MCP 연동
+
+Cursor에서 Obsidian MCP 서버를 사용하면 AI가 보관함 노트를 읽고 쓸 수 있음.
+
+- **설정 파일**: `.cursor/mcp.json`
+- **서버**: `obsidian-local-rest-api-mcp` (npx)
+- **사전 조건**: Obsidian 실행 + Local REST API 플러그인 활성화
+
+### 사용 가능 도구 (MCP)
+
+- `list_directory` - 디렉터리 목록
+- `read_file` - 파일 읽기
+- `write_file` - 파일 생성/덮어쓰기
+- `create_or_update_note` - 노트 생성 또는 업데이트
+- `search_vault` - 보관함 검색
+- `find_related_notes` - 관련 노트 찾기
+
+문서 생성·수정 요청 시 MCP 도구를 우선 사용하고, 불가 시 REST API 호출을 안내함.
+
+### 보안 참고
+
+- `mcp.json`에 API 키가 포함되므로 공개 저장소에 커밋하지 않음.
+- `.cursor/mcp.json`을 `.gitignore`에 추가하거나, 팀 공유 시 `.cursor/mcp.json.example` 템플릿만 커밋함.
