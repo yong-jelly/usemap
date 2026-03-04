@@ -14,6 +14,7 @@ export * from "./Skeleton";
 export * from "./HorizontalScroll";
 export * from "./FloatingViewToggleButton";
 export * from "./VisitedFilterTab";
+export * from "./SortToggle";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";
 

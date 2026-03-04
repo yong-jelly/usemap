@@ -22,7 +22,9 @@ import {
 import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
-import { Button, Input, FloatingViewToggleButton, VisitedFilterTab } from "@/shared/ui";
+import { Button, Input, FloatingViewToggleButton, VisitedFilterTab, SortToggle } from "@/shared/ui";
+import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
+import { usePlaceSort } from "@/shared/hooks/usePlaceSort";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { 
   Plus, 
@@ -280,7 +282,6 @@ export function FolderDetailPage() {
   const [showThumbnails, setShowThumbnails] = useState(true);
   const [showInviteHistory, setShowInviteHistory] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [mapDataRequested, setMapDataRequested] = useState(false);
   const [showResetButton, setShowResetButton] = useState(false);
   const [showImportInput, setShowImportInput] = useState(false);
@@ -298,6 +299,16 @@ export function FolderDetailPage() {
   const initialZoom = useRef<number | null>(null);
   const initialCenter = useRef<[number, number] | null>(null);
 
+  const {
+    sortBy,
+    selectedLocation,
+    isLocationSheetOpen,
+    setIsLocationSheetOpen,
+    handleSortByRecent,
+    handleSortByDistance,
+    handleLocationSelect,
+  } = usePlaceSort();
+
   // 접근 권한 체크
   const { data: access, isLoading: isAccessLoading, refetch: refetchAccess } = useFolderAccess(id!);
 
@@ -307,7 +318,11 @@ export function FolderDetailPage() {
     hasNextPage, 
     isFetchingNextPage, 
     isLoading: isPlacesLoading 
-  } = useFolderPlaces(id!, showVisitedOnly);
+  } = useFolderPlaces(id!, showVisitedOnly, {
+    sortBy,
+    userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
+    userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
+  });
 
   const { data: visitedCountData } = useFolderVisitedCount(id!, !!id);
 
@@ -975,6 +990,19 @@ export function FolderDetailPage() {
                 )}
               </div>
 
+              {/* 정렬 컨트롤 (로그인 유저만) */}
+              {places.length > 0 && isAuthenticated && (
+                <div className="px-4 py-3 flex items-center justify-between border-b border-surface-100 dark:border-surface-800">
+                  <SortToggle
+                    sortBy={sortBy}
+                    onSortByRecent={handleSortByRecent}
+                    onSortByDistance={handleSortByDistance}
+                    onLocationClick={() => setIsLocationSheetOpen(true)}
+                    hasLocation={!!selectedLocation}
+                  />
+                </div>
+              )}
+
               {/* 장소 목록 */}
               <div className="flex flex-col pb-20">
                 {places.length > 0 ? (
@@ -1022,6 +1050,7 @@ export function FolderDetailPage() {
                               showThumbnail={true}
                               addedAt={formatKoreanDate(item.added_at)}
                               hideShadow={true}
+                              distance={item.distance_meters}
                             />
                             {/* 메모 표시 및 편집 UI */}
                             <div className="px-5 pb-5">
@@ -1153,6 +1182,13 @@ export function FolderDetailPage() {
           onClose={() => setShowInviteHistory(false)} 
         />
       )}
+
+      <LocationSettingSheet
+        isOpen={isLocationSheetOpen}
+        onClose={() => setIsLocationSheetOpen(false)}
+        onSelect={handleLocationSelect}
+        selectedId={selectedLocation?.id}
+      />
 
       <style>{`
         .cluster-label-marker,

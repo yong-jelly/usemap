@@ -391,12 +391,15 @@ export const placeApi = {
    * 네이버 폴더 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number; visitedOnly?: boolean }) => {
-    const response = await apiClient.rpc<{ place_id: string; place_data: Place }>("v3_get_places_by_naver_folder", {
+  getPlacesByNaverFolder: async (params: { folderId: string; limit?: number; offset?: number; visitedOnly?: boolean; sortBy?: string; userLat?: number | null; userLng?: number | null }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; distance_meters?: number }>("v3_get_places_by_naver_folder", {
       p_folder_id: parseInt(params.folderId),
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },
@@ -405,12 +408,15 @@ export const placeApi = {
    * 유튜브 채널 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number; visitedOnly?: boolean }) => {
-    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_youtube_channel", {
+  getPlacesByYoutubeChannel: async (params: { channelId: string; limit?: number; offset?: number; visitedOnly?: boolean; sortBy?: string; userLat?: number | null; userLng?: number | null }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; distance_meters?: number }>("v3_get_places_by_youtube_channel", {
       p_channel_id: params.channelId,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },
@@ -419,13 +425,16 @@ export const placeApi = {
    * 소셜 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesBySocialRegion: async (params: { regionName: string; service?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
-    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_social_region", {
+  getPlacesBySocialRegion: async (params: { regionName: string; service?: string | null; limit?: number; offset?: number; visitedOnly?: boolean; sortBy?: string; userLat?: number | null; userLng?: number | null }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; distance_meters?: number }>("v3_get_places_by_social_region", {
       p_region_name: params.regionName,
       p_service: params.service || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },
@@ -434,13 +443,16 @@ export const placeApi = {
    * 커뮤니티 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
-    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string }>("v3_get_places_by_community_region", {
+  getPlacesByCommunityRegion: async (params: { regionName: string; domain?: string | null; limit?: number; offset?: number; visitedOnly?: boolean; sortBy?: string; userLat?: number | null; userLng?: number | null }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; distance_meters?: number }>("v3_get_places_by_community_region", {
       p_region_name: params.regionName,
       p_domain: params.domain || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },
@@ -449,13 +461,16 @@ export const placeApi = {
    * 통합 지역 상세 장소 목록을 조회합니다.
    * v3: interaction, features, experience 배치 처리 최적화 버전
    */
-  getPlacesByRegion: async (params: { regionName: string; source?: string | null; limit?: number; offset?: number; visitedOnly?: boolean }) => {
-    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; src: string }>("v3_get_places_by_region", {
+  getPlacesByRegion: async (params: { regionName: string; source?: string | null; limit?: number; offset?: number; visitedOnly?: boolean; sortBy?: string; userLat?: number | null; userLng?: number | null }) => {
+    const response = await apiClient.rpc<{ place_id: string; place_data: Place; published_at: string; src: string; distance_meters?: number }>("v3_get_places_by_region", {
       p_region_name: params.regionName,
       p_source: params.source || null,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },

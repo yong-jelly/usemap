@@ -20,6 +20,8 @@ import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 import { Loader2, Bell, MapPin, Info, LayoutGrid, ChevronRight } from "lucide-react";
+import { SortToggle } from "@/shared/ui";
+import { usePlaceSort } from "@/shared/hooks/usePlaceSort";
 
 import { SourceContent } from "@/features/home/ui/SourceContent";
 import { MainHeader } from "@/widgets";
@@ -273,29 +275,18 @@ function FollowingContent({
   onPlaceClick: (id: string) => void;
 }) {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useUserStore();
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
-  
-  // URL params
-  const sortParam = searchParams.get('sort');
-  const sortBy: 'recent' | 'distance' = (sortParam === 'distance' ? 'distance' : 'recent');
 
-  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; id: string } | null>(null);
-
-  // User Locations for distance sort
-  const { data: userLocations } = useUserLocations({ limit: 1 }, { enabled: isAuthenticated });
-
-  useEffect(() => {
-    if (userLocations && userLocations.length > 0 && !selectedLocation) {
-      setSelectedLocation({
-        lat: userLocations[0].latitude,
-        lng: userLocations[0].longitude,
-        id: userLocations[0].id
-      });
-    }
-  }, [userLocations, selectedLocation]);
+  const {
+    sortBy,
+    selectedLocation,
+    isLocationSheetOpen,
+    setIsLocationSheetOpen,
+    handleSortByRecent,
+    handleSortByDistance,
+    handleLocationSelect,
+  } = usePlaceSort({ useUrlSync: true });
 
   const MAX_DISTANCE_KM = 5;
 
@@ -315,7 +306,6 @@ function FollowingContent({
   const observerTarget = useRef<HTMLDivElement>(null);
   const feedItems = data?.pages.flatMap(page => page) || [];
 
-  // Infinite Scroll
   useEffect(() => {
     if (!isAuthenticated || !hasNextPage || isFetchingNextPage) return;
 
@@ -337,28 +327,6 @@ function FollowingContent({
       observer.disconnect();
     };
   }, [isAuthenticated, hasNextPage, isFetchingNextPage, fetchNextPage, sortBy, feedItems.length]);
-
-  const handleSortByDistance = () => {
-    trackEvent("feed_sort_click", { type: "distance" });
-    if (!selectedLocation) {
-      setIsLocationSheetOpen(true);
-      return;
-    }
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev);
-      newParams.set('sort', 'distance');
-      return newParams;
-    });
-  };
-
-  const handleSortByRecent = () => {
-    trackEvent("feed_sort_click", { type: "recent" });
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev);
-      newParams.set('sort', 'recent');
-      return newParams;
-    });
-  };
 
   const handleLayoutToggle = () => {
     const newLayout = layout === 'feed' ? 'grid' : 'feed';
@@ -483,55 +451,24 @@ function FollowingContent({
     <div className="pb-10">
       {/* Controls */}
       <div className="px-4 mb-4 flex items-center justify-between">
-         <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
-            <button 
-              onClick={handleSortByRecent}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                sortBy === 'recent' 
-                  ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                  : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-              )}
-            >
-              최신순
-            </button>
-            <button 
-              onClick={handleSortByDistance}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                sortBy === 'distance' 
-                  ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                  : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-              )}
-            >
-              거리순
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-             <button 
-                onClick={() => setIsLocationSheetOpen(true)}
-                className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  selectedLocation 
-                    ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
-                    : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
-                )}
-              >
-                <MapPin className="size-5" />
-              </button>
-              <button 
-                onClick={handleLayoutToggle}
-                className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  layout === 'grid' 
-                    ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
-                    : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
-                )}
-              >
-                <LayoutGrid className="size-4" />
-              </button>
-          </div>
+          <SortToggle
+            sortBy={sortBy}
+            onSortByRecent={handleSortByRecent}
+            onSortByDistance={handleSortByDistance}
+            onLocationClick={() => setIsLocationSheetOpen(true)}
+            hasLocation={!!selectedLocation}
+          />
+          <button 
+            onClick={handleLayoutToggle}
+            className={cn(
+              "p-2 rounded-xl transition-colors",
+              layout === 'grid' 
+                ? "bg-surface-900 text-white dark:bg-white dark:text-surface-900" 
+                : "text-surface-300 dark:text-surface-600 hover:text-surface-500"
+            )}
+          >
+            <LayoutGrid className="size-4" />
+          </button>
       </div>
 
       {/* Content */}
@@ -584,17 +521,7 @@ function FollowingContent({
       <LocationSettingSheet 
         isOpen={isLocationSheetOpen}
         onClose={() => setIsLocationSheetOpen(false)}
-        onSelect={(lat, lng, id) => {
-          setSelectedLocation({ lat, lng, id });
-          setIsLocationSheetOpen(false);
-          if (sortBy !== 'distance') {
-             setSearchParams(prev => {
-                const newParams = new URLSearchParams(prev);
-                newParams.set('sort', 'distance');
-                return newParams;
-              });
-          }
-        }}
+        onSelect={handleLocationSelect}
         selectedId={selectedLocation?.id}
       />
     </div>

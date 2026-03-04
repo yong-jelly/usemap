@@ -329,11 +329,23 @@ export function useEnsureDefaultFolder() {
 /**
  * 폴더 내 장소 목록 무한 스크롤 조회
  */
-export function useFolderPlaces(folderId: string, visitedOnly?: boolean) {
+export function useFolderPlaces(
+  folderId: string,
+  visitedOnly?: boolean,
+  sortOptions?: { sortBy?: string; userLat?: number | null; userLng?: number | null }
+) {
   return useInfiniteQuery({
-    queryKey: folderKeys.places(folderId, visitedOnly),
+    queryKey: [...folderKeys.places(folderId, visitedOnly), sortOptions?.sortBy, sortOptions?.userLat, sortOptions?.userLng],
     queryFn: ({ pageParam = 0 }) => 
-      folderApi.getFolderPlaces({ folderId, limit: 20, offset: pageParam, visitedOnly }),
+      folderApi.getFolderPlaces({
+        folderId,
+        limit: 20,
+        offset: pageParam,
+        visitedOnly,
+        sortBy: sortOptions?.sortBy,
+        userLat: sortOptions?.userLat,
+        userLng: sortOptions?.userLng,
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < 20) return undefined;

@@ -149,12 +149,18 @@ export const folderApi = {
     limit?: number;
     offset?: number;
     visitedOnly?: boolean;
+    sortBy?: string;
+    userLat?: number | null;
+    userLng?: number | null;
   }) => {
     const response = await apiClient.rpc<FolderPlace>("v1_get_folder_places", {
       p_folder_id: params.folderId,
       p_limit: params.limit || 20,
       p_offset: params.offset || 0,
       p_visited_only: params.visitedOnly || false,
+      p_sort_by: params.sortBy || 'recent',
+      p_user_lat: params.userLat || null,
+      p_user_lng: params.userLng || null,
     });
     return response.data;
   },

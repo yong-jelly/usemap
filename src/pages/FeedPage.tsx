@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useInView } from "react-intersection-observer";
 import { useMyFeed, usePublicFeed } from "@/entities/folder/queries";
 import { usePlacePopup } from "@/shared/lib/place-popup";
@@ -9,7 +9,7 @@ import {
   Bell, 
   ChevronRight, 
   LogIn, 
-  MapPin, 
+  MapPin,
   Info,
   LayoutGrid
 } from "lucide-react";
@@ -21,62 +21,31 @@ import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 import type { ReactNode } from "react";
 import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
-import { useUserLocations } from "@/entities/location";
+import { SortToggle } from "@/shared/ui";
+import { usePlaceSort } from "@/shared/hooks/usePlaceSort";
 import { MainHeader } from "@/widgets";
 
 export function FeedPage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useUserStore();
   const { openLogin } = useAuthModalStore();
   const { show: showPlaceModal } = usePlacePopup();
   
   const [layout, setLayout] = useState<'feed' | 'grid'>('feed');
 
-  // 위치 및 정렬 상태 - URL 쿼리 파라미터와 동기화
-  const sortParam = searchParams.get('sort');
-  const sortBy: 'recent' | 'distance' = (sortParam === 'distance' ? 'distance' : 'recent');
-  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; id: string } | null>(null);
+  const {
+    sortBy,
+    selectedLocation,
+    isLocationSheetOpen,
+    setIsLocationSheetOpen,
+    handleSortByRecent,
+    handleSortByDistance,
+    handleLocationSelect,
+  } = usePlaceSort({ useUrlSync: true });
 
-  // URL 쿼리 파라미터 초기화 (없으면 기본값 'recent' 설정)
-  useEffect(() => {
-    if (!sortParam) {
-      setSearchParams({ sort: 'recent' }, { replace: true });
-    }
-  }, [sortParam, setSearchParams]);
-
-  // sortBy 변경 시 스크롤 초기화
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [sortBy]);
-
-  const { data: userLocations } = useUserLocations({ limit: 1 }, { enabled: isAuthenticated });
-  
-  // 최근 위치 정보가 있으면 초기값으로 설정
-  useEffect(() => {
-    if (userLocations && userLocations.length > 0 && !selectedLocation) {
-      setSelectedLocation({
-        lat: userLocations[0].latitude,
-        lng: userLocations[0].longitude,
-        id: userLocations[0].id
-      });
-    }
-  }, [userLocations, selectedLocation]);
-
-  const handleSortByDistance = () => {
-    trackEvent("feed_sort_click", { type: "distance" });
-    if (!selectedLocation) {
-      setIsLocationSheetOpen(true);
-      return;
-    }
-    setSearchParams({ sort: 'distance' }, { replace: true });
-  };
-
-  const handleSortByRecent = () => {
-    trackEvent("feed_sort_click", { type: "recent" });
-    setSearchParams({ sort: 'recent' }, { replace: true });
-  };
 
   const handleLayoutToggle = () => {
     const newLayout = layout === 'feed' ? 'grid' : 'feed';
@@ -295,42 +264,14 @@ export function FeedPage() {
           <>
             {/* 필터 컨트롤 - 콘텐츠 영역 상단 */}
             <div className="px-4 py-3 flex items-center justify-between border-b border-surface-100 dark:border-surface-800 mb-2">
-              <div className="flex bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
-                <button 
-                  onClick={handleSortByRecent}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'recent' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-                  )}
-                >
-                  최신순
-                </button>
-                <button 
-                  onClick={handleSortByDistance}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                    sortBy === 'distance' 
-                      ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm" 
-                      : "text-surface-500 hover:text-surface-700 dark:text-surface-400"
-                  )}
-                >
-                  거리순
-                </button>
-              </div>
+              <SortToggle
+                sortBy={sortBy}
+                onSortByRecent={handleSortByRecent}
+                onSortByDistance={handleSortByDistance}
+                onLocationClick={() => setIsLocationSheetOpen(true)}
+                hasLocation={!!selectedLocation}
+              />
               <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setIsLocationSheetOpen(true)}
-                  className={cn(
-                    "p-2 rounded-xl transition-colors",
-                    selectedLocation 
-                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400" 
-                      : "bg-surface-100 text-surface-400 dark:bg-surface-800 hover:text-surface-600"
-                  )}
-                >
-                  <MapPin className="size-5" />
-                </button>
                 <button 
                   onClick={handleLayoutToggle}
                   className={cn(
@@ -455,17 +396,10 @@ export function FeedPage() {
         )}
       </main>
       
-      {/* 위치 설정 바텀 시트 */}
       <LocationSettingSheet 
         isOpen={isLocationSheetOpen}
         onClose={() => setIsLocationSheetOpen(false)}
-        onSelect={(lat, lng, id) => {
-          setSelectedLocation({ lat, lng, id });
-          setIsLocationSheetOpen(false);
-          if (sortBy !== 'distance') {
-            setSearchParams({ sort: 'distance' }, { replace: true });
-          }
-        }}
+        onSelect={handleLocationSelect}
         selectedId={selectedLocation?.id}
       />
     </div>

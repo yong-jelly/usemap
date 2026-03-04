@@ -11,7 +11,9 @@ import { cn } from "@/shared/lib/utils";
 import { DetailHeader } from "@/widgets/DetailHeader/DetailHeader";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton, VisitedFilterTab } from "@/shared/ui";
+import { Dialog, DialogContent, DialogTitle, Button, FloatingViewToggleButton, VisitedFilterTab, SortToggle } from "@/shared/ui";
+import { LocationSettingSheet } from "@/features/location/ui/LocationSettingSheet";
+import { usePlaceSort } from "@/shared/hooks/usePlaceSort";
 import naverIcon from "@/assets/images/naver-map-logo.png";
 
 import { MAPBOX_TOKEN } from "@/shared/config/mapbox";
@@ -44,7 +46,17 @@ export function FeatureDetailPage() {
   const [showResetButton, setShowResetButton] = useState(false);
   const initialZoom = useRef<number | null>(null);
   const initialCenter = useRef<[number, number] | null>(null);
-  
+
+  const {
+    sortBy,
+    selectedLocation,
+    isLocationSheetOpen,
+    setIsLocationSheetOpen,
+    handleSortByRecent,
+    handleSortByDistance,
+    handleLocationSelect,
+  } = usePlaceSort();
+
   // URL type을 subscription_type으로 변환
   const subscriptionType = useMemo(() => {
     if (type === 'folder') return 'naver_folder';
@@ -66,7 +78,10 @@ export function FeatureDetailPage() {
     id: id || "", 
     domain,
     source,
-    visitedOnly: showVisitedOnly
+    visitedOnly: showVisitedOnly,
+    sortBy,
+    userLat: sortBy === 'distance' ? selectedLocation?.lat : null,
+    userLng: sortBy === 'distance' ? selectedLocation?.lng : null,
   });
 
   const { data: visitedCountData } = useFeatureVisitedCount({
@@ -639,6 +654,19 @@ export function FeatureDetailPage() {
                 </div>
               </div>
 
+              {/* 정렬 컨트롤 (로그인 유저만) */}
+              {filteredPlaces.length > 0 && isAuthenticated && (
+                <div className="px-4 py-3 flex items-center justify-between border-b border-surface-100 dark:border-surface-800">
+                  <SortToggle
+                    sortBy={sortBy}
+                    onSortByRecent={handleSortByRecent}
+                    onSortByDistance={handleSortByDistance}
+                    onLocationClick={() => setIsLocationSheetOpen(true)}
+                    hasLocation={!!selectedLocation}
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col">
                 {filteredPlaces.length === 0 && showVisitedOnly ? (
                   <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white dark:bg-surface-950">
@@ -659,6 +687,7 @@ export function FeatureDetailPage() {
                       place={item.place_data} 
                       showPrice={true}
                       addedAt={item.published_at ? item.published_at : undefined}
+                      distance={item.distance_meters}
                     />
                   ))
                 )}
@@ -716,6 +745,13 @@ export function FeatureDetailPage() {
           )}
         </div>
       )}
+
+      <LocationSettingSheet
+        isOpen={isLocationSheetOpen}
+        onClose={() => setIsLocationSheetOpen(false)}
+        onSelect={handleLocationSelect}
+        selectedId={selectedLocation?.id}
+      />
 
       <style>{`
         .cluster-label-marker,

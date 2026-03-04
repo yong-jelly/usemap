@@ -112,19 +112,11 @@ export function PlaceCard({
         onSuccess: () => {
           if (newStatus && openSheetAfter) {
             setIsCollectionSheetOpen(true);
-          } else if (newStatus && !openSheetAfter) {
-            toast("저장됨", {
-              action: {
-                label: "컬렉션에 저장",
-                onClick: () => setIsCollectionSheetOpen(true),
-              },
-              duration: 3000,
-            });
           }
         },
         onError: () => {
           setIsSaved(!newStatus);
-          toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+          toast.error("저장에 실패했습니다. 다시 시도해주세요.", { duration: 2000 });
         },
       }
     );

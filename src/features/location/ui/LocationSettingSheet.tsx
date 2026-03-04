@@ -52,12 +52,12 @@ export function LocationSettingSheet({
             }
           },
           onError: () => {
-            toast.error("위치 저장 중 오류가 발생했습니다.", { duration: 1000 });
+            toast.error("위치 저장 중 오류가 발생했습니다.", { duration: 2000 });
           }
         }
       );
     } catch (error: any) {
-      toast.error(error.message || "위치 정보를 가져올 수 없습니다.", { duration: 1000 });
+      toast.error(error.message || "위치 정보를 가져올 수 없습니다.", { duration: 2000 });
     }
   };
 

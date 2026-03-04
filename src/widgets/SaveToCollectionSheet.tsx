@@ -99,7 +99,7 @@ export function SaveToCollectionSheet({
         {
           onError: () => {
             setOptimisticSelected((prev) => ({ ...prev, [folderId]: true }));
-            toast.error("저장 해제에 실패했습니다. 다시 시도해주세요.");
+            toast.error("저장 해제에 실패했습니다. 다시 시도해주세요.", { duration: 2000 });
           },
         }
       );
@@ -107,12 +107,9 @@ export function SaveToCollectionSheet({
       addPlaceMutation.mutate(
         { folderId, placeId },
         {
-          onSuccess: () => {
-            toast.success(`${folderTitle}에 저장됨`);
-          },
           onError: () => {
             setOptimisticSelected((prev) => ({ ...prev, [folderId]: false }));
-            toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+            toast.error("저장에 실패했습니다. 다시 시도해주세요.", { duration: 2000 });
           },
         }
       );
@@ -137,18 +134,15 @@ export function SaveToCollectionSheet({
             addPlaceMutation.mutate(
               { folderId: data.id, placeId },
               {
-                onSuccess: () => {
-                  toast.success(`${title}에 저장됨`);
-                },
                 onError: () => {
-                  toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+                  toast.error("저장에 실패했습니다. 다시 시도해주세요.", { duration: 2000 });
                 },
               }
             );
           }
         },
         onError: () => {
-          toast.error("컬렉션 생성에 실패했습니다. 다시 시도해주세요.");
+          toast.error("컬렉션 생성에 실패했습니다. 다시 시도해주세요.", { duration: 2000 });
         },
       }
     );

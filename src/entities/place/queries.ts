@@ -539,23 +539,26 @@ export function useFeaturePlaces(params: {
   domain?: string | null;
   source?: string | null;
   visitedOnly?: boolean;
+  sortBy?: string;
+  userLat?: number | null;
+  userLng?: number | null;
 }) {
   return useInfiniteQuery({
-    queryKey: placeKeys.featurePlaces(params.type, params.id, params.domain || params.source, params.visitedOnly),
+    queryKey: [...placeKeys.featurePlaces(params.type, params.id, params.domain || params.source, params.visitedOnly), params.sortBy, params.userLat, params.userLng],
     queryFn: ({ pageParam = 0 }) => {
       const limit = 20;
-      const visitedOnly = params.visitedOnly;
+      const { visitedOnly, sortBy, userLat, userLng } = params;
       switch (params.type) {
         case 'folder':
-          return placeApi.getPlacesByNaverFolder({ folderId: params.id, limit, offset: pageParam, visitedOnly });
+          return placeApi.getPlacesByNaverFolder({ folderId: params.id, limit, offset: pageParam, visitedOnly, sortBy, userLat, userLng });
         case 'youtube':
-          return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam, visitedOnly });
+          return placeApi.getPlacesByYoutubeChannel({ channelId: params.id, limit, offset: pageParam, visitedOnly, sortBy, userLat, userLng });
         case 'community':
-          return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam, visitedOnly });
+          return placeApi.getPlacesByCommunityRegion({ regionName: params.id, domain: params.domain, limit, offset: pageParam, visitedOnly, sortBy, userLat, userLng });
         case 'social':
-          return placeApi.getPlacesBySocialRegion({ regionName: params.id, service: params.domain, limit, offset: pageParam, visitedOnly });
+          return placeApi.getPlacesBySocialRegion({ regionName: params.id, service: params.domain, limit, offset: pageParam, visitedOnly, sortBy, userLat, userLng });
         case 'region':
-          return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam, visitedOnly });
+          return placeApi.getPlacesByRegion({ regionName: params.id, source: params.source, limit, offset: pageParam, visitedOnly, sortBy, userLat, userLng });
       }
     },
     initialPageParam: 0,

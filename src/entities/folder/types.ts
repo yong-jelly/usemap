@@ -36,6 +36,7 @@ export interface FolderPlace {
   added_at: string;
   updated_at?: string;
   comment?: string;
+  distance_meters?: number;
 }
 
 export interface FolderAccess {
