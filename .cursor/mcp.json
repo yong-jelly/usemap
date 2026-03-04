@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "obsidian-local-rest-api-mcp"],
+      "env": {
+        "OBSIDIAN_API_KEY": "7fb799b25416d6a2961be700012b539e6a7c8ed95f20fa342381bb2a800c7ca5",
+        "OBSIDIAN_API_URL": "http://127.0.0.1:27123"
+      }
+    }
+  }
+}
