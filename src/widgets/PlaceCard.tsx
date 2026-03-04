@@ -5,26 +5,13 @@ import { HorizontalScroll } from "@/shared/ui/HorizontalScroll";
 import { 
   MapPin, 
   Star, 
-  CheckCircle, 
-  TvMinimalPlay, 
   Heart, 
   MessageCircle, 
   Bookmark, 
-  ChevronRight,
   Sparkles,
   CookingPot,
   Users,
-  Navigation,
-  ThumbsUp,
-  Utensils,
-  Smile,
-  Clock,
-  Car,
-  Map,
-  Sparkle,
-  UserStar,
-  UserRoundPen
-} from "lucide-react";
+  Navigation} from "lucide-react";
 import { convertToNaverResizeImageUrl, formatWithCommas } from "@/shared/lib";
 import { cn } from "@/shared/lib/utils";
 import { useToggleLike, useToggleSave } from "@/entities/place/queries";
@@ -43,6 +30,8 @@ interface PlaceCardProps {
   sourceLabel?: string;
   sourceTitle?: string;
   sourceImage?: string;
+  /** 유저 콜렉션일 때 표시할 소유자 이름 (맛탐정 폴더 전용) */
+  sourceOwnerName?: string;
   sourcePath?: string;
   addedAt?: string;
   comment?: string;
@@ -62,6 +51,7 @@ export function PlaceCard({
   sourceLabel,
   sourceTitle,
   sourceImage,
+  sourceOwnerName,
   sourcePath,
   addedAt,
   comment,
@@ -213,8 +203,17 @@ export function PlaceCard({
               )}
             </div>
             <div className="flex flex-col">
-              {sourceLabel && <span className="text-[10px] font-medium text-primary-500 uppercase">{sourceLabel}</span>}
-              {sourceTitle && <span className="text-[13px] font-medium text-surface-700">{sourceTitle}</span>}
+              {sourceOwnerName ? (
+                <>
+                  <span className="text-[14px] font-medium text-surface-900 dark:text-white leading-tight">{sourceTitle}</span>
+                  <span className="text-[10px] font-medium text-surface-500 dark:text-surface-500 mt-0.5">@{sourceOwnerName}</span>
+                </>
+              ) : (
+                <>
+                  {sourceLabel && <span className="text-[10px] font-medium text-primary-500 uppercase">{sourceLabel}</span>}
+                  {sourceTitle && <span className="text-[13px] font-medium text-surface-700">{sourceTitle}</span>}
+                </>
+              )}
             </div>
           </div>
           {addedAt && <span className="text-[11px] text-surface-400">{addedAt}</span>}

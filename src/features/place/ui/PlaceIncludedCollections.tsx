@@ -79,7 +79,7 @@ export function PlaceIncludedCollections({
       map.set(key, {
         key,
         name,
-        thumbnail_url: thumbUrl || (f.platform_type !== "youtube" ? fallbackThumb : null),
+        thumbnail_url: thumbUrl || fallbackThumb,
         platform_type: f.platform_type,
         representative: f,
       });

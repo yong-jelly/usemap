@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { cn, formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatRelativeTime, getAvatarUrl } from "@/shared/lib/utils";
 import { PlaceThumbnail } from "@/shared/ui/place/PlaceThumbnail";
 import { trackEvent } from "@/shared/lib/gtm";
 import naverIcon from "@/assets/images/naver-map-logo.png";
@@ -119,7 +119,8 @@ export function FeedPage() {
                        item.source_type === 'naver_folder' ? '플레이스 폴더' :
                        item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
     let sourceTitle = item.source_title;
-    let sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
+    let sourceImage = item.source_type === 'naver_folder' ? naverIcon : 
+                       item.source_type === 'folder' ? getAvatarUrl(item.source_image) ?? item.source_image : item.source_image;
 
     if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
       const [domain, region] = sourceTitle.split('|');
@@ -160,6 +161,7 @@ export function FeedPage() {
         sourceLabel={sourceLabel}
         sourceTitle={sourceTitle}
         sourceImage={sourceImage}
+        sourceOwnerName={item.source_type === 'folder' ? item.source_owner_nickname : undefined}
         sourcePath={sourcePath || undefined}
         addedAt={formatRelativeTime(item.added_at)}
         showPrice={true}

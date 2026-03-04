@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/Drawer';
 import { X, Heart, MessageCircle } from 'lucide-react';
 import {
@@ -10,7 +11,8 @@ import {
 import { useUserProfile } from '@/entities/user/queries';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { cn } from '@/shared/lib/utils';
+import { cn, getAvatarUrl } from '@/shared/lib/utils';
+import { usePlacePopup } from '@/shared/lib/place-popup';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/shared/ui/Dialog';
 import { Button } from '@/shared/ui/Button';
 
@@ -46,6 +48,8 @@ interface PlaceCommentSheetProps {
 }
 
 export function PlaceCommentSheet({ isOpen, onClose, placeId, placeName: _placeName }: PlaceCommentSheetProps) {
+  const navigate = useNavigate();
+  const { closeOnly: closePlacePopup } = usePlacePopup();
   const { data: comments = [], isLoading } = usePlaceComments(placeId, { enabled: isOpen });
   const { data: profile } = useUserProfile();
   const createComment = useCreatePlaceComment(placeId);
@@ -142,38 +146,65 @@ export function PlaceCommentSheet({ isOpen, onClose, placeId, placeName: _placeN
     const isReply = depth > 0;
     const canReply = depth < 2;
 
+    const canNavigateToProfile = !item.is_tombstoned && !isDeactivated && item.user_id;
+    const profileLink = canNavigateToProfile ? `/p/user/${item.user_id}` : null;
+
+    const handleProfileClick = () => {
+      if (!profileLink) return;
+      onClose();
+      closePlacePopup();
+      navigate(profileLink);
+    };
+
+    const AvatarWrapper = profileLink
+      ? ({ children }: { children: React.ReactNode }) => (
+          <button type="button" onClick={handleProfileClick} className="block flex-shrink-0 text-left bg-transparent border-none p-0 cursor-pointer">
+            {children}
+          </button>
+        )
+      : ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+    const NicknameWrapper = profileLink
+      ? ({ children }: { children: React.ReactNode }) => (
+          <button type="button" onClick={handleProfileClick} className={cn('font-semibold mr-1.5 hover:underline text-left bg-transparent border-none p-0 cursor-pointer text-inherit', (item.is_tombstoned || isDeactivated) && 'text-surface-400')}>
+            {children}
+          </button>
+        )
+      : ({ children }: { children: React.ReactNode }) => (
+          <span className={cn('font-semibold mr-1.5', (item.is_tombstoned || isDeactivated) && 'text-surface-400')}>
+            {children}
+          </span>
+        );
+
     return (
       <div key={item.id} className={cn('flex gap-3 w-full', isReply ? 'mt-3' : 'mt-5')}>
-        <div
-          className={cn(
-            'rounded-full bg-surface-200 dark:bg-surface-800 overflow-hidden flex-shrink-0',
-            isReply ? 'size-6' : 'size-9'
-          )}
-        >
-          {item.user_profile?.profile_image_url && !item.is_tombstoned && !isDeactivated ? (
-            <img
-              src={item.user_profile.profile_image_url}
-              alt="profile"
-              className="w-full h-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-[10px] text-surface-500">
-              {item.is_tombstoned || isDeactivated ? '?' : (item.user_profile?.nickname?.slice(0, 1) || '?')}
-            </div>
-          )}
-        </div>
+        <AvatarWrapper>
+          <div
+            className={cn(
+              'rounded-full bg-surface-200 dark:bg-surface-800 overflow-hidden flex-shrink-0',
+              isReply ? 'size-6' : 'size-9'
+            )}
+          >
+            {item.user_profile?.profile_image_url && !item.is_tombstoned && !isDeactivated ? (
+              <img
+                src={getAvatarUrl(item.user_profile.profile_image_url)}
+                alt="profile"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-surface-500">
+                {item.is_tombstoned || isDeactivated ? '?' : (item.user_profile?.nickname?.slice(0, 1) || '?')}
+              </div>
+            )}
+          </div>
+        </AvatarWrapper>
         <div className="flex-1 flex flex-col min-w-0">
           <div className="text-[13px] leading-[1.4] text-surface-900 dark:text-white break-words">
-            <span
-              className={cn(
-                'font-semibold mr-1.5',
-                (item.is_tombstoned || isDeactivated) && 'text-surface-400'
-              )}
-            >
+            <NicknameWrapper>
               {item.is_tombstoned ? '사용자' : (item.user_profile?.nickname || '익명')}
-            </span>
+            </NicknameWrapper>
             <span className={cn(item.is_tombstoned && 'text-surface-400 italic')}>{item.content}</span>
           </div>
 
@@ -309,7 +340,7 @@ export function PlaceCommentSheet({ isOpen, onClose, placeId, placeName: _placeN
                   <div className="size-8 rounded-full bg-surface-200 dark:bg-surface-800 overflow-hidden flex-shrink-0">
                     {profile?.profile_image_url ? (
                       <img
-                        src={profile.profile_image_url}
+                        src={getAvatarUrl(profile.profile_image_url)}
                         alt="내 프로필"
                         className="w-full h-full object-cover"
                         loading="lazy"

@@ -44,6 +44,7 @@ RETURNS TABLE (
     source_id VARCHAR,
     source_title VARCHAR,
     source_image VARCHAR,
+    source_owner_nickname VARCHAR,
     place_id VARCHAR,
     place_data JSONB,
     added_at TIMESTAMPTZ,
@@ -95,7 +96,7 @@ BEGIN
         WITH 
         -- 1단계: 사용자의 모든 소스 (MATERIALIZED)
         all_sources AS MATERIALIZED (
-            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image
+            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image, up.nickname::VARCHAR as s_owner_nickname
             FROM public.tbl_folder_subscribed fs
             JOIN public.tbl_folder f ON fs.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -103,14 +104,14 @@ BEGIN
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder f
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
             WHERE f.owner_id = v_user_id AND f.is_hidden = FALSE
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder_place fp
             JOIN public.tbl_folder f ON fp.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -118,7 +119,7 @@ BEGIN
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             LEFT JOIN public.tbl_naver_folder nf ON nf.folder_id::varchar = fts.feature_id
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'naver_folder'
@@ -127,13 +128,14 @@ BEGIN
             
             SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR,
                    (SELECT pf.metadata->>'channelTitle' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
-                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR
+                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
+                   NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'youtube_channel'
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type IN ('community_region', 'region_recommend')
         ),
@@ -182,7 +184,7 @@ BEGIN
         -- 4단계: 20개에 대해서만 place 조인 + avg_price 계산 + 거리 계산
         target_feed AS MATERIALIZED (
             SELECT 
-                s.s_type, s.s_id, s.s_title, s.s_image,
+                s.s_type, s.s_id, s.s_title, s.s_image, s.s_owner_nickname,
                 el.type, el.sid, el.pid, el.added_time, el.fi_comment,
                 p.id, p.name, p.group1, p.group2, p.group3, p.road, p.category,
                 p.road_address, p.address, p.phone, p.visitor_reviews_total, p.visitor_reviews_score,
@@ -323,6 +325,7 @@ BEGIN
             tf.s_id::VARCHAR as source_id,
             tf.s_title::VARCHAR as source_title,
             tf.s_image::VARCHAR as source_image,
+            tf.s_owner_nickname::VARCHAR as source_owner_nickname,
             tf.pid::VARCHAR as place_id,
             jsonb_build_object(
                 'id', tf.id,
@@ -387,7 +390,7 @@ BEGIN
         RETURN QUERY
         WITH 
         all_sources AS MATERIALIZED (
-            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image
+            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image, up.nickname::VARCHAR as s_owner_nickname
             FROM public.tbl_folder_subscribed fs
             JOIN public.tbl_folder f ON fs.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -395,14 +398,14 @@ BEGIN
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder f
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
             WHERE f.owner_id = v_user_id AND f.is_hidden = FALSE
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder_place fp
             JOIN public.tbl_folder f ON fp.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -410,7 +413,7 @@ BEGIN
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             LEFT JOIN public.tbl_naver_folder nf ON nf.folder_id::varchar = fts.feature_id
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'naver_folder'
@@ -419,13 +422,14 @@ BEGIN
             
             SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR,
                    (SELECT pf.metadata->>'channelTitle' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
-                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR
+                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
+                   NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'youtube_channel'
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type IN ('community_region', 'region_recommend')
         ),
@@ -511,7 +515,7 @@ BEGIN
         
         target_feed AS MATERIALIZED (
             SELECT 
-                s.s_type, s.s_id, s.s_title, s.s_image,
+                s.s_type, s.s_id, s.s_title, s.s_image, s.s_owner_nickname,
                 df.*
             FROM deduplicated_feed df
             JOIN all_sources s ON s.s_type = df.type AND s.s_id = df.sid
@@ -633,6 +637,7 @@ BEGIN
             tf.s_id::VARCHAR as source_id,
             tf.s_title::VARCHAR as source_title,
             tf.s_image::VARCHAR as source_image,
+            tf.s_owner_nickname::VARCHAR as source_owner_nickname,
             tf.pid::VARCHAR as place_id,
             jsonb_build_object(
                 'id', tf.id,
@@ -697,7 +702,7 @@ BEGIN
         RETURN QUERY
         WITH 
         all_sources AS MATERIALIZED (
-            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image
+            SELECT 'folder'::VARCHAR as s_type, f.id::VARCHAR as s_id, f.title::VARCHAR as s_title, up.profile_image_url::VARCHAR as s_image, up.nickname::VARCHAR as s_owner_nickname
             FROM public.tbl_folder_subscribed fs
             JOIN public.tbl_folder f ON fs.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -705,14 +710,14 @@ BEGIN
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder f
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
             WHERE f.owner_id = v_user_id AND f.is_hidden = FALSE
             
             UNION
             
-            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR
+            SELECT 'folder'::VARCHAR, f.id::VARCHAR, f.title::VARCHAR, up.profile_image_url::VARCHAR, up.nickname::VARCHAR
             FROM public.tbl_folder_place fp
             JOIN public.tbl_folder f ON fp.folder_id = f.id AND f.is_hidden = FALSE
             LEFT JOIN public.tbl_user_profile up ON f.owner_id = up.auth_user_id
@@ -720,7 +725,7 @@ BEGIN
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, nf.name::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             LEFT JOIN public.tbl_naver_folder nf ON nf.folder_id::varchar = fts.feature_id
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'naver_folder'
@@ -729,13 +734,14 @@ BEGIN
             
             SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR,
                    (SELECT pf.metadata->>'channelTitle' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
-                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR
+                   (SELECT pf.metadata->'thumbnails'->'default'->>'url' FROM public.tbl_place_features pf WHERE pf.metadata->>'channelId' = fts.feature_id LIMIT 1)::VARCHAR,
+                   NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type = 'youtube_channel'
             
             UNION
             
-            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR
+            SELECT fts.feature_type::VARCHAR, fts.feature_id::VARCHAR, fts.feature_id::VARCHAR, NULL::VARCHAR, NULL::VARCHAR
             FROM public.tbl_feature_subscription fts
             WHERE fts.user_id = v_user_id AND fts.deleted_at IS NULL AND fts.feature_type IN ('community_region', 'region_recommend')
         ),
@@ -810,7 +816,7 @@ BEGIN
         
         target_feed AS MATERIALIZED (
             SELECT 
-                s.s_type, s.s_id, s.s_title, s.s_image,
+                s.s_type, s.s_id, s.s_title, s.s_image, s.s_owner_nickname,
                 df.*
             FROM deduplicated_feed df
             JOIN all_sources s ON s.s_type = df.type AND s.s_id = df.sid
@@ -932,6 +938,7 @@ BEGIN
             tf.s_id::VARCHAR as source_id,
             tf.s_title::VARCHAR as source_title,
             tf.s_image::VARCHAR as source_image,
+            tf.s_owner_nickname::VARCHAR as source_owner_nickname,
             tf.pid::VARCHAR as place_id,
             jsonb_build_object(
                 'id', tf.id,

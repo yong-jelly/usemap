@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useMySubscriptions, usePublicFolders, useMyFeed } from "@/entities/folder/queries";
 import { useHomeDiscover } from "@/entities/home/queries";
-import { cn, formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatRelativeTime, getAvatarUrl } from "@/shared/lib/utils";
 import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { usePlacePopup } from "@/shared/lib/place-popup";
@@ -359,7 +359,8 @@ function FollowingContent({
                        item.source_type === 'naver_folder' ? '플레이스 폴더' :
                        item.source_type === 'youtube_channel' ? '유튜브' : '커뮤니티';
     let sourceTitle = item.source_title;
-    let sourceImage = item.source_type === 'naver_folder' ? naverIcon : item.source_image;
+    let sourceImage = item.source_type === 'naver_folder' ? naverIcon : 
+                       item.source_type === 'folder' ? getAvatarUrl(item.source_image) ?? item.source_image : item.source_image;
 
     if (item.source_type === 'community_region' && sourceTitle?.includes('|')) {
       const [domain, region] = sourceTitle.split('|');
@@ -398,6 +399,7 @@ function FollowingContent({
         sourceLabel={sourceLabel}
         sourceTitle={sourceTitle}
         sourceImage={sourceImage}
+        sourceOwnerName={item.source_type === 'folder' ? item.source_owner_nickname : undefined}
         sourcePath={sourcePath || undefined}
         addedAt={formatRelativeTime(item.added_at)}
         showPrice={true}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { usePlacePopup } from "@/shared/lib/place-popup";
 import { useFeaturePageStore } from "@/shared/lib/feature-page-store";
 import { useNaverFolders, useYoutubeChannels, useCommunityContents, useRegionContents, useSocialContents } from "@/entities/place/queries";
@@ -227,13 +227,22 @@ function NaverFolderList() {
   );
 }
 
+/** URL tab → API source 매핑 (지역) */
+const REGION_TAB_TO_SOURCE: Record<string, string> = {
+  community: "community",
+  user: "detective",
+  place: "folder",
+  youtube: "youtube",
+};
 /**
  * 지역별 통합 목록 렌더링 컴포넌트
  */
 function RegionList() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { show: showPlaceModal } = usePlacePopup();
-  const { regionSource: selectedSource, setRegionSource: setSelectedSource } = useFeaturePageStore();
+  const tabFromUrl = searchParams.get("tab");
+  const selectedSource = tabFromUrl && REGION_TAB_TO_SOURCE[tabFromUrl] ? REGION_TAB_TO_SOURCE[tabFromUrl] : null;
   
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useRegionContents({ 
     source: selectedSource,
@@ -265,12 +274,19 @@ function RegionList() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const sources = [
-    { id: null, label: "전체" },
-    { id: "community", label: "커뮤니티" },
-    { id: "detective", label: "맛탐정" },
-    { id: "folder", label: "플레이스" },
-    { id: "youtube", label: "유튜브" },
+    { tab: null as string | null, label: "전체" },
+    { tab: "community", label: "커뮤니티" },
+    { tab: "user", label: "맛탐정" },
+    { tab: "place", label: "플레이스" },
+    { tab: "youtube", label: "유튜브" },
   ];
+
+  const handleSourceChange = (tab: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab) next.set("tab", tab);
+    else next.delete("tab");
+    setSearchParams(next, { replace: true });
+  };
 
   const regions = data?.pages.flatMap((page) => page) || [];
 
@@ -287,22 +303,27 @@ function RegionList() {
         scrollAmount={150}
         fadeEdges={false}
       >
-        {sources.map((source) => (
-          <button
-            key={source.id || 'all'}
-            onClick={() => setSelectedSource(source.id)}
-            disabled={isLoading}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
-              selectedSource === source.id
-                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
-                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
-              isLoading && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {source.label}
-          </button>
-        ))}
+        {sources.map((source) => {
+          const isSelected = source.tab === null
+            ? !tabFromUrl || !REGION_TAB_TO_SOURCE[tabFromUrl ?? ""]
+            : tabFromUrl === source.tab;
+          return (
+            <button
+              key={source.tab || 'all'}
+              onClick={() => handleSourceChange(source.tab)}
+              disabled={isLoading}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
+                isSelected
+                  ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white"
+                  : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {source.label}
+            </button>
+          );
+        })}
       </HorizontalScroll>
 
       {isLoading ? (
@@ -422,13 +443,21 @@ function YoutubeChannelList() {
   );
 }
 
+/** URL id → API domain 매핑 (커뮤니티) */
+const COMMUNITY_ID_TO_DOMAIN: Record<string, string> = {
+  damoang: "damoang.net",
+  clien: "clien.net",
+  bobaedream: "bobaedream.co.kr",
+};
 /**
  * 커뮤니티 목록 렌더링 컴포넌트
  */
 function CommunityList() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { show: showPlaceModal } = usePlacePopup();
-  const { communityDomain: selectedDomain, setCommunityDomain: setSelectedDomain } = useFeaturePageStore();
+  const idFromUrl = searchParams.get("id");
+  const selectedDomain = idFromUrl ? COMMUNITY_ID_TO_DOMAIN[idFromUrl] ?? null : null;
   
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useCommunityContents({ 
     domain: selectedDomain,
@@ -460,11 +489,18 @@ function CommunityList() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const domains = [
-    { id: null, label: "전체" },
-    { id: "damoang.net", label: "다모앙" },
-    { id: "clien.net", label: "클리앙" },
-    { id: "bobaedream.co.kr", label: "보배드림" },
+    { id: null as string | null, label: "전체" },
+    { id: "damoang", label: "다모앙" },
+    { id: "clien", label: "클리앙" },
+    { id: "bobaedream", label: "보배드림" },
   ];
+
+  const handleDomainChange = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("id", id);
+    else next.delete("id");
+    setSearchParams(next, { replace: true });
+  };
 
   const regions = data?.pages.flatMap((page) => page) || [];
 
@@ -481,22 +517,27 @@ function CommunityList() {
         scrollAmount={150}
         fadeEdges={false}
       >
-        {domains.map((domain) => (
-          <button
-            key={domain.id || 'all'}
-            onClick={() => setSelectedDomain(domain.id)}
-            disabled={isLoading}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
-              selectedDomain === domain.id 
-                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
-                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
-              isLoading && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {domain.label}
-          </button>
-        ))}
+        {domains.map((domain) => {
+          const isSelected = domain.id === null
+            ? !idFromUrl || !COMMUNITY_ID_TO_DOMAIN[idFromUrl]
+            : idFromUrl === domain.id;
+          return (
+            <button
+              key={domain.id || 'all'}
+              onClick={() => handleDomainChange(domain.id)}
+              disabled={isLoading}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
+                isSelected
+                  ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
+                  : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {domain.label}
+            </button>
+          );
+        })}
       </HorizontalScroll>
 
       {isLoading ? (
@@ -509,7 +550,7 @@ function CommunityList() {
               <FeatureRowHeader 
                 title={`${region.region_name}지역`}
                 count={region.place_count}
-                onTitleClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ''}`)}
+                onTitleClick={() => navigate(`/feature/detail/community/${region.region_name}${selectedDomain ? `?domain=${selectedDomain}` : ""}`)}
                 subscribeType="community_region"
                 subscribeId={region.region_name}
               />
@@ -543,8 +584,10 @@ function CommunityList() {
  */
 function SocialList() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { show: showPlaceModal } = usePlacePopup();
-  const { socialService: selectedService, setSocialService: setSelectedService } = useFeaturePageStore();
+  const idFromUrl = searchParams.get("id");
+  const selectedService = idFromUrl === "instagram" || idFromUrl === "threads" ? idFromUrl : null;
   
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useSocialContents({ 
     service: selectedService,
@@ -576,10 +619,17 @@ function SocialList() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const services = [
-    { id: null, label: "전체" },
+    { id: null as string | null, label: "전체" },
     { id: "instagram", label: "Instagram" },
     { id: "threads", label: "Threads" },
   ];
+
+  const handleServiceChange = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("id", id);
+    else next.delete("id");
+    setSearchParams(next, { replace: true });
+  };
 
   const regions = data?.pages.flatMap((page) => page) || [];
 
@@ -596,22 +646,27 @@ function SocialList() {
         scrollAmount={150}
         fadeEdges={false}
       >
-        {services.map((service) => (
-          <button
-            key={service.id || 'all'}
-            onClick={() => setSelectedService(service.id)}
-            disabled={isLoading}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
-              selectedService === service.id 
-                ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
-                : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
-              isLoading && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {service.label}
-          </button>
-        ))}
+        {services.map((service) => {
+          const isSelected = service.id === null
+            ? !idFromUrl || (idFromUrl !== "instagram" && idFromUrl !== "threads")
+            : idFromUrl === service.id;
+          return (
+            <button
+              key={service.id || 'all'}
+              onClick={() => handleServiceChange(service.id)}
+              disabled={isLoading}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors border shrink-0",
+                isSelected
+                  ? "bg-surface-900 text-white border-surface-900 dark:bg-white dark:text-black dark:border-white" 
+                  : "bg-white text-surface-500 border-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:border-surface-800",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {service.label}
+            </button>
+          );
+        })}
       </HorizontalScroll>
 
       {isLoading ? (

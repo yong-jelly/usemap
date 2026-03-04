@@ -17,7 +17,7 @@ import {
 import { useUIStore } from "@/shared/model/ui-store";
 import { useUserStore, isAdmin } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 import { Logo } from "@/shared/ui/Logo";
 import { useMySubscriptions } from "@/entities/folder/queries";
 import naverIcon from "@/assets/images/naver-map-logo.png";
@@ -162,7 +162,9 @@ export function Sidebar() {
                   
                   <div className="flex flex-col gap-1">
                     {displaySubscriptions.map((sub: any) => {
-                      const displayThumbnail = sub.subscription_type === 'naver_folder' ? naverIcon : sub.thumbnail;
+                      const displayThumbnail = sub.subscription_type === 'naver_folder' 
+                        ? naverIcon 
+                        : getAvatarUrl(sub.thumbnail) ?? sub.thumbnail;
                       const linkTo = sub.subscription_type === 'folder' 
                         ? `/folder/${sub.feature_id}`
                         : `/feature/detail/${sub.subscription_type === 'naver_folder' ? 'folder' : sub.subscription_type === 'youtube_channel' ? 'youtube' : 'community'}/${sub.feature_id}`;

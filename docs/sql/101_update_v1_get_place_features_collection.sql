@@ -54,7 +54,7 @@ BEGIN
     WITH all_features AS (
         -- =============================================
         -- 1. 유튜브: collection.key=channelId, collection.name=channelTitle
-        --    collection.places=같은 채널의 최신 영상 3개 (썸네일+장소명)
+        --    collection.places=같은 채널의 최신 장소 3개 (장소이미지+장소명)
         -- =============================================
         SELECT
             pf.id::text AS id,
@@ -82,12 +82,14 @@ BEGIN
                      FROM (
                          SELECT
                              jsonb_build_object(
-                                 'url', pf2.metadata->'thumbnails'->'medium'->>'url',
+                                 'url', p2.images[1],
                                  'place_name', p2.name
                              ) AS place,
                              ROW_NUMBER() OVER (ORDER BY pf2.published_at DESC NULLS LAST) AS rn
                          FROM tbl_place_features pf2
                          JOIN tbl_place p2 ON p2.id = pf2.place_id
+                             AND p2.images IS NOT NULL
+                             AND array_length(p2.images, 1) > 0
                          WHERE pf2.status = 'active'
                            AND pf2.platform_type = 'youtube'
                            AND pf2.metadata->>'channelId' = pf.metadata->>'channelId'

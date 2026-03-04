@@ -10,8 +10,10 @@ interface PlacePopupState {
   placeId: string | null;
   /** 팝업을 표시합니다. (URL도 함께 변경하여 공유/북마크 지원) */
   show: (id: string) => void;
-  /** 팝업을 닫습니다. */
+  /** 팝업을 닫습니다. (history.back 호출) */
   hide: () => void;
+  /** 팝업만 닫습니다. (history 변경 없이 내부 링크 이동 시 사용) */
+  closeOnly: () => void;
 }
 
 /**
@@ -32,6 +34,9 @@ export const usePlacePopup = create<PlacePopupState>((set, get) => ({
     // 상태 닫고 URL도 뒤로가기로 복원
     set({ isOpen: false, placeId: null });
     window.history.back();
+  },
+  closeOnly: () => {
+    set({ isOpen: false, placeId: null });
   },
 }));
 

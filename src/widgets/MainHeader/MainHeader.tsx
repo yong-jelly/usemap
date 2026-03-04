@@ -4,7 +4,7 @@ import { useUserStore } from "@/entities/user";
 import { useAuthModalStore } from "@/features/auth/model/useAuthModalStore";
 import { PageHeader, TabItem } from "@/shared/ui/PageHeader";
 import { ReactNode } from "react";
-import { cn } from "@/shared/lib/utils";
+import { cn, getAvatarUrl } from "@/shared/lib/utils";
 
 interface MainHeaderProps {
   tabs: TabItem[];
@@ -57,7 +57,7 @@ export function MainHeader({
       {isAuthenticated && profile?.profile_image_url ? (
         <div className="size-8 rounded-full ring-2 ring-surface-200 dark:ring-surface-700 overflow-hidden">
           <img 
-            src={profile.profile_image_url} 
+            src={getAvatarUrl(profile.profile_image_url)} 
             alt="프로필" 
             className="w-full h-full object-cover"
           />

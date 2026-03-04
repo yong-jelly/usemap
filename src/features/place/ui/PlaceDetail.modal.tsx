@@ -990,18 +990,36 @@ export function PlaceDetailModal({ placeIdFromStore }: PlaceDetailModalProps) {
                 features={allFeatures}
                 placeImages={details?.images || details?.image_urls || []}
                 onFeatureClick={(feature) => {
+                  if (placeIdFromStore) {
+                    usePlacePopup.setState({ isOpen: false, placeId: null });
+                  }
                   if (feature.platform_type === 'folder') {
-                    if (placeIdFromStore) {
-                      usePlacePopup.setState({ isOpen: false, placeId: null });
-                    }
                     navigate(`/feature/detail/folder/${feature.id}`, { replace: true });
+                  } else if (feature.platform_type === 'youtube') {
+                    const channelId = feature.collection?.key || feature.metadata?.channelId;
+                    if (channelId) navigate(`/feature/detail/youtube/${channelId}`);
                   } else if (feature.platform_type === 'public_user') {
-                    if (placeIdFromStore) {
-                      usePlacePopup.setState({ isOpen: false, placeId: null });
-                    }
                     navigate(`/folder/${feature.id}`);
-                  } else if (feature.content_url) {
-                    window.open(feature.content_url, '_blank');
+                  } else if (feature.platform_type === 'community') {
+                    const domain = feature.collection?.key || feature.metadata?.domain;
+                    const communityMap: Record<string, string> = {
+                      'damoang.net': 'damoang',
+                      'clien.net': 'clien',
+                      'bobaedream.co.kr': 'bobaedream'
+                    };
+                    const id = domain ? communityMap[domain] : null;
+                    if (id) {
+                      navigate(`/feature/community?id=${id}`);
+                    } else {
+                      navigate(`/feature/community`);
+                    }
+                  } else if (feature.platform_type === 'social') {
+                    const service = feature.metadata?.service?.toLowerCase();
+                    if (service === 'instagram' || service === 'threads') {
+                      navigate(`/feature/social?id=${service}`);
+                    } else {
+                      navigate(`/feature/social`);
+                    }
                   }
                 }}
               />

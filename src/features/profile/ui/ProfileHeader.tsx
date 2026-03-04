@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { useUserProfile } from "@/entities/user/queries";
 import { ChevronRight } from "lucide-react";
 import { trackEvent } from "@/shared/lib/gtm";
+import { getAvatarUrl } from "@/shared/lib/utils";
 
 export function ProfileHeader() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export function ProfileHeader() {
           <div className="relative h-16 w-16 flex-shrink-0">
             {profile.profile_image_url ? (
               <img
-                src={profile.profile_image_url}
+                src={getAvatarUrl(profile.profile_image_url)}
                 alt={profile.nickname}
                 loading="lazy"
                 decoding="async"
