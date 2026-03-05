@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "2351bc5f5a447fc5",
+        "id": "c955ed6870df4bd3",
         "type": "tabs",
         "children": [
           {
-            "id": "206a0857e7c5d9a2",
+            "id": "e9f96a2fae5aa1e5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "유지보수.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "유지보수"
+              "title": "새 탭"
             }
           }
         ]
@@ -94,7 +90,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "유지보수.md",
+                "file": "맛탐정/작업/2026-03-04.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +100,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "유지보수 의 백링크"
+              "title": "2026-03-04 의 백링크"
             }
           },
           {
@@ -113,12 +109,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "유지보수.md",
+                "file": "맛탐정/작업/2026-03-04.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "유지보수 의 나가는 링크"
+              "title": "2026-03-04 의 나가는 링크"
             }
           },
           {
@@ -156,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "유지보수.md",
+                "file": "맛탐정/작업/2026-03-04.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "유지보수 의 개요"
+              "title": "2026-03-04 의 개요"
             }
           }
         ]
@@ -183,15 +179,18 @@
       "bases:새 베이스 생성하기": false
     }
   },
-  "active": "206a0857e7c5d9a2",
+  "active": "e9f96a2fae5aa1e5",
   "lastOpenFiles": [
-    "맛탐정/유지보수.md",
-    "맛탐정/작업/2026-03-04.md",
-    "유지보수.md",
-    "맛탐정/유지보수",
     "맛탐정/탐색/장소 정렬 (등록일,거리순).md",
-    "맛탐정/탐색",
+    "아이디어/관련 콘텐츠 바로 등록.md",
+    "아이디어",
+    "유지보수.md",
+    "맛탐정/탐색/탐색.md",
     "맛탐정/도구/CLI.md",
+    "맛탐정/탐색",
+    "맛탐정/작업/2026-03-04.md",
+    "맛탐정/도구/tools-cli.md",
+    "tools-cli.md",
     "맛탐정/도구",
     "맛탐정/UI/설계/디자인시스템/13-presentation.md",
     "맛탐정/작업",
@@ -212,9 +211,6 @@
     "00-function-summary.md",
     "맛탐정/UI/설계/디자인시스템/README.md",
     "맛탐정/UI/설계/디자인시스템/05-documentation.md",
-    "맛탐정/UI/설계/디자인시스템/04-tokens.md",
-    "맛탐정/UI/설계/디자인시스템/03-patterns.md",
-    "맛탐정/UI/설계/디자인시스템/02-components.md",
     "맛탐정/마케팅",
     "맛탐정/UI/설계/디자인시스템",
     "맛탐정/UI/설계",

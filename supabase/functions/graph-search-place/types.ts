@@ -1,5 +1,7 @@
 export interface SearchRequest {
   query: string;
+  /** place_id가 주어지면 네이버 검색 대신 DB에서 직접 조회 */
+  place_id?: string;
   start?: number;
   display?: number;
 }

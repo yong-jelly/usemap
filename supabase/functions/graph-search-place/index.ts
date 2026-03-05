@@ -15,7 +15,8 @@
  *   - 네이버 플레이스 검색 API
  * 
  * 요청(Request Body):
- *   - query: string (검색 키워드)
+ *   - query: string (검색 키워드. #62552651 또는 @1178182642 형식이면 place_id로 DB 직접 조회)
+ *   - place_id?: string (place_id가 주어지면 네이버 검색 대신 DB에서 직접 조회)
  *   - start?: number (결과 시작 번호, 기본 1)
  *   - display?: number (한 번에 가져올 개수, 기본 100)
  * 
@@ -29,8 +30,41 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import { SearchRequest } from "./types.ts";
+import { NaverRestaurantItem } from "./types.ts";
 import { fetchFromNaver } from "./naver.ts";
 import { handleQueueAndHistory, saveSearchHistoryOnly } from "./queue.ts";
+
+/** # 또는 @ 접두사 뒤의 place_id 추출. 접두사 없으면 null (키워드 검색 유지) */
+function extractPlaceIdFromQuery(query: string): string | null {
+  const s = (query ?? "").trim();
+  if (!s) return null;
+  const match = s.match(/^[#@](.+)$/);
+  if (!match) return null;
+  const rest = match[1].trim();
+  if (!rest) return null;
+  // 숫자만 또는 20~32자 hex
+  return /^\d+$/.test(rest) || /^[a-f0-9]{20,32}$/i.test(rest) ? rest : null;
+}
+
+/** tbl_place 행을 NaverRestaurantItem 형식으로 변환 */
+function placeRowToNaverItem(row: Record<string, unknown>): NaverRestaurantItem {
+  const id = String(row.id ?? "");
+  const name = String(row.name ?? "");
+  const category = String(row.category ?? "");
+  const address = String(row.address ?? "");
+  const group1 = String(row.group1 ?? "");
+  const group2 = String(row.group2 ?? "");
+  const commonAddress = [group1, group2].filter(Boolean).join(" ") || address;
+  return {
+    id,
+    name,
+    category,
+    businessCategory: "restaurant",
+    commonAddress,
+    address,
+    __typename: "BusinessSummary"
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -41,9 +75,9 @@ serve(async (req) => {
 
   try {
     const searchParams: SearchRequest = await req.json();
-    const { query, start = 1, display = 100 } = searchParams;
+    const { query, place_id: explicitPlaceId, start = 1, display = 100 } = searchParams;
 
-    if (!query) {
+    if (!query && !explicitPlaceId) {
       return new Response(JSON.stringify({
         code: 400,
         count: 0,
@@ -77,6 +111,56 @@ serve(async (req) => {
       } catch (error) {
         console.log("사용자 인증 실패:", error);
       }
+    }
+
+    // place_id로 DB 직접 조회 (# 또는 @ 접두사 있을 때만, 예: #62552651 @1178182642)
+    const placeIdToLookup = explicitPlaceId ?? extractPlaceIdFromQuery(query ?? "");
+    if (placeIdToLookup) {
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      const { data: placeRow, error } = await supabaseAdmin
+        .from("tbl_place")
+        .select("id, name, category, address, group1, group2")
+        .eq("id", placeIdToLookup)
+        .single();
+
+      if (!error && placeRow) {
+        const item = placeRowToNaverItem(placeRow);
+        await saveSearchHistoryOnly(supabase, query || placeIdToLookup, userId, 1);
+        return new Response(JSON.stringify({
+          code: 200,
+          count: 1,
+          queued_count: 0,
+          crawl_result: null,
+          rows: [item],
+          param: { query: query || placeIdToLookup, start, display }
+        }), {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        });
+      }
+      // DB에 없으면 place_id 전용 요청이었을 때만 빈 결과 반환 (네이버 검색 스킵)
+      if (explicitPlaceId) {
+        await saveSearchHistoryOnly(supabase, placeIdToLookup, userId, 0);
+        return new Response(JSON.stringify({
+          code: 200,
+          count: 0,
+          rows: [],
+          param: { query: placeIdToLookup, start, display }
+        }), {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        });
+      }
+      // query가 place_id 형식이었지만 DB에 없음 → 네이버 검색으로 폴백
     }
 
     const response = await fetchFromNaver(searchParams);
